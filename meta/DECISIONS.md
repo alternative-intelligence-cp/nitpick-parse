@@ -604,3 +604,70 @@ fifty thousand `[`, a 100 MB string, a `\u` escape at every boundary.
 *Anything the fuzzer finds becomes a permanent case*, with the fault it produced
 recorded in the marker. A fuzzer finding that is fixed and not kept is a fuzzer
 finding that comes back.
+
+---
+
+# The second batch — ratified 2026-09-03
+
+The four questions this plan put to the project's author, answered as
+recommended, with one amendment on where a consumer lives.
+
+### PA-100 — the YAML subset is the line `FORMATS.md` §4 draws, and it is confirmed by measurement
+**2026-09-03, settling Q-1.** In: block and flow collections, all four scalar
+styles, comments, the core schema, single documents. Out: anchors, aliases,
+tags, directives, merge keys — the first four because they are the security
+hazards, the last because its semantics are undefined across implementations.
+
+**The line is confirmed at cycle 0.8 against the yaml-test-suite's actual tag
+distribution.** If the excluded constructs turn out to be a third of real-world
+YAML, the line moves and this decision is amended — it is not quietly
+stretched. That is the difference between a scoped subset and a subset that
+grows by accident.
+
+Full YAML is post-1.0 cycle 1.1, where anchors get an **expansion budget** as a
+first-class part of the design rather than a patch. Every exclusion reports
+`Fault(Unsupported)` naming the construct, so a user learns what is missing
+rather than getting a wrong parse.
+
+### PA-101 — XML is post-1.0, as cycle 1.2, after full YAML
+**2026-09-03, settling Q-2.** Out at 1.0 (PA-052) because its data model needs
+`Attribute` and mixed content, which is a major version of the event vocabulary
+*however* it is scheduled — so doing it badly now to avoid a break is the worst
+of both.
+
+**After** YAML, not before, and the reason is evidence: cycle 0.8 and cycle 1.1
+each produce a format's worth of experience with the event vocabulary under
+strain, and the XML batch's first item is the vocabulary extension. Deciding
+that extension now would be deciding it without the two formats that would
+inform it.
+
+### PA-102 — the arbitrary-precision accessors ship at 1.0
+**2026-09-03, settling Q-3.** `doc_int256` lands in cycle 0.4 with the rest of
+the accessors. A `frac64` accessor lands only if the exact-decimal case turns
+out to have a consumer.
+
+*The reason it costs almost nothing:* the literal's text is already retained
+under `ND_BIG` (PA-033), so **the information is kept either way**. What is at
+stake is one function, not the representation — which is exactly the situation
+in which shipping is cheap and deferring buys nothing. A caller parsing a
+financial document or a scientific dataset gets an exact answer instead of a
+`flt64` that quietly is not one.
+
+### PA-103 — the dogfood consumer is a configuration linter, and it lives in `nitpick-apps`
+**2026-09-03, settling Q-4, with the author's amendment on location.** A
+configuration-file linter is the right shape because it uses every layer: it
+reads TOML and JSON and YAML, it needs `Document`, it needs **recovery and
+multi-fault rendering** — which nothing else in the plan exercises hard — and
+it wants the path language.
+
+A transcoder would exercise the event path instead, and is already
+`WRITER_MODEL.md` W-15's worked example, so the linter is the better single
+choice.
+
+It does **not** live in this repository's `examples/`. Consumers are real
+programs with their own lifetimes and live in
+[`nitpick-apps`](https://github.com/alternative-intelligence-cp/nitpick-apps).
+A config linter is not a POSIX utility, so it takes a repository of its own —
+**created at cycle 0.12, when it is needed, and not before**, which is the
+compiler's own rule about not creating directories in anticipation. It is
+registered in that workbench's `APPS.md` now so the name is claimed.

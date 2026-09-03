@@ -22,56 +22,28 @@ that are the compiler's rather than ours.
 
 ## Q — for the user
 
-### Q-1 — the YAML subset boundary
-`FORMATS.md` §4 draws the line where the security hazards are (anchors, aliases,
-tags, directives) and where the semantics are undefined (merge keys), leaving
-block and flow collections, all four scalar styles, comments, the core schema
-and single documents.
+### ~~Q-1 — the YAML subset boundary~~ — **SETTLED, PA-100**
+The line `FORMATS.md` §4 draws, confirmed at cycle 0.8 against the
+yaml-test-suite's actual tag distribution — if the exclusions turn out to be a
+third of real YAML the line moves by amendment, not by quiet stretching. Full
+YAML is post-1.0 cycle 1.1, with an expansion budget designed in.
 
-**Recommendation: as stated**, with full YAML as post-1.0 cycle 1.1 where
-anchors get an expansion budget as a first-class part of the design. Confirmed
-at cycle 0.8 against the yaml-test-suite's actual tag distribution — if the
-excluded constructs turn out to be a third of real-world YAML, the line moves
-and the decision is amended rather than quietly stretched.
+### ~~Q-2 — XML~~ — **SETTLED, PA-101**
+Post-1.0 as cycle 1.2, *after* full YAML, opening with a batch whose first item
+is the event-vocabulary extension — deciding that now would mean deciding it
+without the two formats' worth of evidence that 0.8 and 1.1 produce.
 
-### Q-2 — XML, post-1.0
-Out at 1.0 (PA-052) because its data model needs `Attribute` and mixed content,
-which is a major version of the event vocabulary however it is scheduled.
+### ~~Q-3 — the arbitrary-precision accessors at 1.0~~ — **SETTLED, PA-102: yes**
+`doc_int256` in cycle 0.4; a `frac64` accessor only if the exact-decimal case
+finds a consumer. The literal's text is retained either way (PA-033), so what
+is at stake is one function, not the representation.
 
-**Recommendation: post-1.0 as cycle 1.2**, after full YAML, opening with its own
-decision batch whose first item is the event-vocabulary extension. Deciding it
-now would be deciding it without the two formats' worth of evidence that 0.8 and
-1.1 produce.
-
-### Q-3 — the arbitrary-precision accessors at 1.0
-`doc_int256` and a `frac`-valued accessor cost little (the literal's text is
-already retained under `ND_BIG`, PA-033) and serve the caller who parses a
-financial document or a scientific dataset.
-
-**Recommendation: yes, at 1.0** — `doc_int256` in cycle 0.4 with the rest of the
-accessors, and a `frac64` accessor only if the exact-decimal case turns out to
-have a consumer. The information is kept either way; what is at stake is one
-function, not the representation.
-
-### Q-4 — the dogfood consumer
-The library's own examples are its first consumer and they are weak evidence: an
-example is written by the person who wrote the API. A real program exercises it
-honestly.
-
-**Recommendation: a configuration-file linter**, at cycle 0.12, in `examples/`
-in this repository so it moves with the API. It is the right shape because it
-uses every layer — it reads TOML and JSON and YAML, it needs `Document`, it
-needs *recovery* and multi-fault rendering (which nothing else in the plan
-exercises hard), and it wants the path language. A transcoder would exercise the
-event path instead; the linter is the better single choice and the transcoder is
-already the `WRITER_MODEL.md` W-15 example.
-
----
-
-## O-N — the compiler's
-
-Each is a request to be raised in the compiler repository, not something this
-project can fix. None blocks planning; one blocks a claim.
+### ~~Q-4 — the dogfood consumer~~ — **SETTLED, PA-103**
+A configuration linter — it needs every layer, and it is the only thing in the
+plan that exercises recovery and multi-fault rendering hard. It lives in
+[`nitpick-apps`](https://github.com/alternative-intelligence-cp/nitpick-apps)
+rather than this repository's `examples/`, in a repository of its own created
+at cycle 0.12 when it is needed.
 
 ### O-N1 — `npkg` cannot build a library, and `[dependencies]` resolves to nothing
 Measured at the compiler's 1.5.0 and recorded in `specs/BUILD.md` §1.

@@ -1,5 +1,12 @@
 # Cycle 0.12 — The dogfood consumer
 
+> **Where the consumer lives (PA-103):** a configuration linter, in its own repository under [`nitpick-apps`](https://github.com/alternative-intelligence-cp/nitpick-apps), created at this cycle — **not** in this repository's
+> `examples/`. A consumer is a real program with its own lifetime, and
+> `examples/` would make one that outgrows this library move, and one that
+> consumes several pick a parent. The import is by relative path until the
+> compiler's dependency resolution lands, and the repository's GitHub
+> description and topics are set in the same pass that creates it.
+
 **A configuration linter in `examples/`, written against the library as a
 user.**
 
