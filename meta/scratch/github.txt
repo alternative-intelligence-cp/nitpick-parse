@@ -1,0 +1,44 @@
+Proposed GitHub metadata for alternative-intelligence-cp/nitpick-parse
+(written by the planning session; NOT applied — the parent applies it.)
+
+--- DESCRIPTION (349 char limit; this is 236) ---
+Multi-format parsing for Nitpick — one event stream, one document model, one set
+of scanning primitives, formats as plugins. JSON, TOML, CSV and YAML. A syntax
+error is a value, not an error: no input can stop your program.
+
+--- TOPICS (20 max; 20 proposed, all lowercase/alphanumeric/hyphen) ---
+parser
+parsing
+parser-library
+json
+toml
+yaml
+csv
+serialization
+deserialization
+data-formats
+streaming-parser
+pull-parser
+zero-copy
+config-parser
+plugin-architecture
+nitpick
+nitpick-lang
+safety-critical
+zero-dependency
+formal-verification
+
+--- NOTES FOR THE APPLIER ---
+* `json`, `toml`, `yaml`, `csv` are the highest-value search terms and are
+  worth four of the twenty slots: they are how somebody looking for a TOML
+  parser for this language finds it.
+* `pull-parser` and `streaming-parser` are the architectural terms (PA-020);
+  `zero-copy` is the TextRef property (PA-014/PA-021).
+* `plugin-architecture` covers the Format trait (PA-070).
+* `nitpick`, `nitpick-lang`, `safety-critical`, `zero-dependency` and
+  `formal-verification` match the ecosystem set used on nitpick-tui, so the
+  family is discoverable together.
+* Deliberately NOT used: `xml` (out at 1.0 by PA-052 — claiming it would be
+  false), `regex` (PA-005 declines the dependency), `ast` and `cst` (PA-007:
+  this is not a compiler front end, and the terms would attract the wrong
+  users).

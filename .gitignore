@@ -1,0 +1,56 @@
+# Build output. Never committed — the artifact of record is produced by a clean
+# build, not carried in the tree (BUILD_REFERENCE.md §4.2 in the compiler repo,
+# which this library follows).
+build/
+*.o
+*.a
+
+# Emitted IR. `npkc` writes `.ll` text and the harness assembles it; the text is
+# output, not source.
+*.ll
+
+# Linked programs the harness leaves behind with --keep.
+a.out
+*.bin
+debug_dump.*
+
+# The harness is Python until `npkg` grows generic-project support (the
+# bootstrap/harness -> npkg precedent in the compiler repo). Its bytecode is
+# output.
+__pycache__/
+*.pyc
+*.pyo
+
+# Harness logs and verdict files. A run's transcript is evidence for that run
+# and nothing else; anything worth keeping is written into a roadmap file.
+*.log
+verdicts*.txt
+
+# Fuzzer working state. The corpus entries that FOUND something are promoted
+# into tests/fixtures/ and committed; the churn is not.
+tools/fuzz-work/
+
+# Gitignored scratch. Never commit anything from here.
+.internal
+
+# Editor and OS residue.
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Claude Code local settings (machine-specific; the shared config is committed).
+.claude/settings.local.json
+
+# NOT ignored, deliberately:
+#   tests/corpus/       — the VENDORED conformance corpora (JSONTestSuite,
+#                         toml-test, the yaml-test-suite subset). They are the
+#                         gates every format cycle is judged by (PA-053), a
+#                         build must never fetch them, and a corpus that
+#                         changed underneath us would silently change what
+#                         "conformant" means. Vendored with their upstream
+#                         commit recorded in tests/corpus/PROVENANCE.md.
+#   tests/fixtures/     — inputs that once found a defect, kept permanently.
+#   nitpick.lock        — read by every build, written only by `npkg update`.
