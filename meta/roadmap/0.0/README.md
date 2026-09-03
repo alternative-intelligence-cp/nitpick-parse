@@ -46,18 +46,18 @@ PA-001 … PA-009, PA-012, PA-021, PA-022, PA-030. All settled.
 ## Checklist
 
 ### 0.0.0 — the probes
-- [ ] `probe/01_no_trap_accumulate.npk` — **the flagship**: the naive `acc * 10 + d` traps on a 23-digit literal (recorded), and `scan_mul_add`'s shape does not
-- [ ] `probe/02_pod_event.npk` — a 24-byte POD struct in a `Vec`: fill 100 000, read, copy, compare, clear; `#size_of` asserted at 24
-- [ ] `probe/03_payload_enum.npk` — a tagged enum with a struct payload (`Step`'s shape), destructured in a `pick`, stored in a `Vec`, `#size_of` recorded
-- [ ] `probe/04_arena_pod.npk` — an `arena<Node>` of 56-byte POD nodes: `alloc`, `put`, `get` (**the copy**), `free`, a stale handle answering `StaleHandle`, `destroy`
-- [ ] `probe/05_arena_owning.npk` — an arena whose element holds a `string`; **expected refused**, with the code recorded — this is what forces PA-030
-- [ ] `probe/06_trait_bound.npk` — a trait with a `Self->` receiver, two impls, called through a generic bound
-- [ ] `probe/07_trait_dyn.npk` — the same trait through `dyn`, proving `Format` is object-safe (PA-071)
-- [ ] `probe/08_slice_edges.npk` — a `uint8[]` borrow at the four escape-analysis edges: passed down (legal), returned (refused), stored past the call (refused), held in a struct that outlives it (refused)
-- [ ] `probe/09_generic_move.npk` — `move T:v` into `Vec<T>` with `T` scalar and `T` owning, including the container's drop
-- [ ] `probe/10_explicit_stack.npk` — a 50 000-deep nested structure built and freed with an explicit stack, exiting 0; and the recursive version's failure recorded
-- [ ] `probe/11_bytes_growth.npk` — a million single-byte appends with the reallocation count bounded (the compiler's quadratic-capture defect is why)
-- [ ] `probe/12_module_fixed.npk` — a `fixed` module-level table read from ordinary code, and a **plain** module binding refused (D-211), with the code recorded
+- [ ] `probe/probe01_no_trap_accumulate.npk` — **the flagship**: the naive `acc * 10 + d` traps on a 23-digit literal (recorded), and `scan_mul_add`'s shape does not
+- [ ] `probe/probe02_pod_event.npk` — a 24-byte POD struct in a `Vec`: fill 100 000, read, copy, compare, clear; `#size_of` asserted at 24
+- [ ] `probe/probe03_payload_enum.npk` — a tagged enum with a struct payload (`Step`'s shape), destructured in a `pick`, stored in a `Vec`, `#size_of` recorded
+- [ ] `probe/probe04_arena_pod.npk` — an `arena<Node>` of 56-byte POD nodes: `alloc`, `put`, `get` (**the copy**), `free`, a stale handle answering `StaleHandle`, `destroy`
+- [ ] `probe/probe05_arena_owning.npk` — an arena whose element holds a `string`; **expected refused**, with the code recorded — this is what forces PA-030
+- [ ] `probe/probe06_trait_bound.npk` — a trait with a `Self->` receiver, two impls, called through a generic bound
+- [ ] `probe/probe07_trait_dyn.npk` — the same trait through `dyn`, proving `Format` is object-safe (PA-071)
+- [ ] `probe/probe08_slice_edges.npk` — a `uint8[]` borrow at the four escape-analysis edges: passed down (legal), returned (refused), stored past the call (refused), held in a struct that outlives it (refused)
+- [ ] `probe/probe09_generic_move.npk` — `move T:v` into `Vec<T>` with `T` scalar and `T` owning, including the container's drop
+- [ ] `probe/probe10_explicit_stack.npk` — a 50 000-deep nested structure built and freed with an explicit stack, exiting 0; and the recursive version's failure recorded
+- [ ] `probe/probe11_bytes_growth.npk` — a million single-byte appends with the reallocation count bounded (the compiler's quadratic-capture defect is why)
+- [ ] `probe/probe12_module_fixed.npk` — a `fixed` module-level table read from ordinary code, and a **plain** module binding refused (D-211), with the code recorded
 - [ ] a verdict line per probe recorded in `0.0.0.md`, with the exact diagnostic where one was refused
 - [ ] every design consequence written into `meta/specs/` **and** `meta/DECISIONS.md` before 0.0.1 starts
 
@@ -78,7 +78,7 @@ PA-001 … PA-009, PA-012, PA-021, PA-022, PA-030. All settled.
 - [ ] the `program` stage at -O0 and again under `opt -O2`, same exit required (B-3)
 - [ ] `// expect-exit:` and `// stress: N` honoured
 - [ ] the `repro` check: two builds from different working directories, byte-identical IR — and **seen to fail** once, by hand, against a deliberately non-deterministic edit
-- [ ] `tests/probe/02_pod_event.npk` green as the first real `program` case
+- [ ] `tests/probe/probe02_pod_event.npk` green as the first real `program` case
 
 ### 0.0.3 — the harness, part 2
 - [ ] the `parse` stage over every `.npk` in the tree, each file once
