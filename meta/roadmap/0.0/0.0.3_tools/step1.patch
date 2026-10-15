@@ -1,0 +1,1002 @@
+diff --git a/harness/README.md b/harness/README.md
+index 0134b94..3ed1150 100644
+--- a/harness/README.md
++++ b/harness/README.md
+@@ -10,9 +10,12 @@ Built in cycles 0.0.2 and 0.0.3.
+ and says so; CI runs it so that the workflow's last step exists before the runner does.
+ *(2026-10-15, cycle 0.0.2: the stub is replaced by the runner below; cycle 0.0.3 adds the
+ refusal and parse stages, the self-check and the tree checks.)*
++*(2026-10-15, cycle 0.0.3: added. A run is now the toolchain, the floor program, the self-check, the other two build
++steps, the suites, the tree checks and the reviewed list's other direction, in that order; `--only SUBSTR` runs the
++matching `program` and `check` units alone and concludes nothing.)*
+ 
+ ```
+-NPKC=<pinned npkc> NPKRT=<pinned npkrt.o> python3 -B harness/run.py [--verdicts PATH]
++NPKC=<pinned npkc> NPKRT=<pinned npkrt.o> python3 -B harness/run.py [--verdicts PATH] [--only SUBSTR]
+ ```
+ 
+ `$NPKC` and `$NPKRT` are the pinned toolchain the board names (`../../BOARD.md`), and
+@@ -31,12 +34,16 @@ prints is its verdict — `harness: GREEN -- …` or `harness: RED -- …` — a
+ | `build.py` | one root to one module, both legs, the undefined-symbol scan (B-2), and `npkc`'s exit alphabet |
+ | `irscan.py` | the call-edge scan and its deny list (B-2a) |
+ | `elf.py` | an ELF64 symbol table, read with `struct` |
+-| `stages.py` | the `program` stage and `compile`/`positive`: both legs, `stress`, the cap, and the pending units (B-5b) |
++| `stages.py` | the `program` stage and `compile`/`positive`: both legs, `stress`, the cap, and the pending units (B-5b); the `check` stage, a refusal judged as the set of its codes at their sites (B-7); and the `parse` sweep |
++| `selfcheck.py` | the harness fed wrong expectations and required to fail, before any judgment (B-8, `TESTING.md` V-19, V-20) |
++| `treecheck.py` | the tree checks, each reading its authority document (`TESTING.md` §3) |
++| `lexical.py` | the one reading of `.npk` text the checks share: bytes, comments and strings blanked |
+ | `baseline/` | the floor program and the syscaller (build step 1, and the cap's control), and `PENDING.txt`, the reviewed list of pending units |
+ 
+ ## What a green run asserts
+ 
+ - the manifest names no entry this runner cannot judge, and the toolchain is the pin's;
++- every live case of the self-check was red, and its pending ones were printed as pending;
+ - the two scans see a syscall — the floor and the syscaller differ by `npk_sys6` alone, and the
+   syscaller's `main` is flagged — on this run, at this compiler;
+ - every module under `src/` compiles as a root with no diagnostic, and none needs a symbol the
+@@ -47,4 +54,6 @@ prints is its verdict — `harness: GREEN -- …` or `harness: RED -- …` — a
+   manifest's target rows, scanned, linked with `npkrt.o` alone, run `stress` times on each leg —
+   under its cap after the floor program under the same cap — and exited as it expects; and every
+   pending unit showed the one failure its marker names, on every leg, and is a line of
+-  `baseline/PENDING.txt`, which names no unit that is not pending.
++  `baseline/PENDING.txt`, which names no unit that is not pending;
++- every refusal was refused with exactly its set of codes at its sites, every `.npk` in the tree compiled as a root
++  with no LEX- or PARSE- code, and every live tree check agreed with the document it reads.
+diff --git a/harness/expect.py b/harness/expect.py
+index 8e23986..7eb19a9 100644
+--- a/harness/expect.py
++++ b/harness/expect.py
+@@ -25,9 +25,10 @@ THE RUNNER'S OWN TWO (B-5b, @@PD-139@@), which `npkg` does not have:
+   defect DEF-<n> is in the pinned compiler. The label is the compiler seat's registration,
+   a label nothing resolves; the OBSERVATION is the one failure the marker excuses, and the
+   only one, on every leg (`nitpick-regex`'s RX-154 lesson: a marker that excuses any failure
+-  excuses a different one). At this subcycle the one observation is
+-  `undefined-value <symbol>`: `npkc` accepts the program and LLVM refuses the module,
+-  naming that undefined value -- `llc` at -O0, `opt` on the optimised leg.
++  excuses a different one). Two observations: `undefined-value <symbol>` -- `npkc` accepts the
++  program and LLVM refuses the module, naming that undefined value, `llc` at -O0 and `opt` on the
++  optimised leg (cycle 0.0.2); and `accepted` -- a file whose right answer is a refusal is
++  accepted by `npkc`, exit 0, with no diagnostic (cycle 0.0.3, @@PD-140@@).
+ """
+ import re
+ 
+@@ -40,7 +41,7 @@ _CODE = re.compile(r"^NITPICK-[A-Z]+-[0-9]{3}$")
+ _AT = re.compile(r"^([0-9]+)(?::([0-9]+))?$")
+ _INT = re.compile(r"^-?[0-9]+$")
+ _LABEL = re.compile(r"^DEF-[0-9]+$")
+-OBSERVATIONS = ("undefined-value",)
++OBSERVATIONS = {"undefined-value": 1, "accepted": 0}     # each with the count of words after it
+ 
+ 
+ class Expect:
+@@ -115,16 +116,15 @@ def read_text(text, path):
+             e.mem_cap_mib = int(value)
+         elif name == "pending-until:":
+             parts = value.split(None, 2)
+-            if (len(parts) != 3 or not _LABEL.match(parts[0])
+-                    or parts[1] not in OBSERVATIONS):
+-                _bad(e, n, f"`pending-until: {value}` is not `pending-until: DEF-<n> "
+-                           f"<observation> <argument>`, the observation one of "
+-                           f"{', '.join(OBSERVATIONS)}")
++            if (len(parts) < 2 or not _LABEL.match(parts[0]) or parts[1] not in OBSERVATIONS
++                    or len(parts) - 2 != OBSERVATIONS[parts[1]]):
++                _bad(e, n, f"`pending-until: {value}` is not `pending-until: DEF-<n> undefined-value "
++                           "<symbol>` or `pending-until: DEF-<n> accepted`")
+                 continue
+             if e.pending is not None:
+                 _bad(e, n, "a second `pending-until:` -- a unit waits on one defect")
+                 continue
+-            e.pending = (parts[0], parts[1], parts[2])
++            e.pending = (parts[0], parts[1], parts[2] if len(parts) == 3 else "")
+     return e
+ 
+ 
+diff --git a/harness/lexical.py b/harness/lexical.py
+new file mode 100644
+index 0000000..0409e88
+--- /dev/null
++++ b/harness/lexical.py
+@@ -0,0 +1,36 @@
++#!/usr/bin/env python3
++"""The harness's one reading of `.npk` source text (@@PD-142@@): a file read as BYTES, `\\n` the only line end as in
++the compiler's lexer, and `blank()` replacing comments and string and character literals by spaces, line
++structure kept -- so a check reading code is not fooled by a word in a comment, and every line number it reports is
++the file's. The tree checks (`treecheck.py`) and the parse sweep's reader use it.
++"""
++import re
++
++
++def read(path):
++    with open(path, "rb") as fh:
++        return fh.read().decode("utf-8", errors="replace")
++
++
++def blank(src):
++    """Comments and string/char literals replaced by spaces, line structure kept."""
++    out, i, n = [], 0, len(src)
++    while i < n:
++        c = src[i]
++        if src.startswith("//", i):
++            j = src.find("\n", i)
++            j = n if j < 0 else j
++            out.append(" " * (j - i)); i = j
++        elif src.startswith("/*", i):
++            j = src.find("*/", i + 2)
++            j = n if j < 0 else j + 2
++            out.append(re.sub(r"[^\n]", " ", src[i:j])); i = j
++        elif c == '"' or c == "'":
++            j = i + 1
++            while j < n and src[j] != c and src[j] != "\n":
++                j += 2 if src[j] == "\\" else 1
++            j = min(j + 1, n)
++            out.append(c + " " * max(0, j - i - 2) + (c if j - i >= 2 else "")); i = j
++        else:
++            out.append(c); i += 1
++    return "".join(out)
+diff --git a/harness/run.py b/harness/run.py
+index 5b7002d..66479ec 100644
+--- a/harness/run.py
++++ b/harness/run.py
+@@ -1,14 +1,14 @@
+ #!/usr/bin/env python3
+ """nparse's build and test runner, until `npkg` can build a library (PA-003).
+ 
+-    NPKC=<pinned npkc> NPKRT=<pinned npkrt.o> python3 -B harness/run.py [--verdicts PATH]
++    NPKC=<pinned npkc> NPKRT=<pinned npkrt.o> python3 -B harness/run.py [--verdicts PATH] [--only SUBSTR]
+ 
+ WHAT A RUN DOES, IN ORDER, and every step can fail it:
+ 
+ 1. reads `nitpick.toml` (`manifest.py`) and REFUSES BY NAME, before anything runs, an entry
+-   this runner cannot honour -- at cycle 0.0.2 it judges `program` and `compile`/`positive`
+-   entries, and `[build] opt-level = 0` -- exit 2, never a skip (the compiler's
+-   `BUILD_REFERENCE.md` §7.1 rule);
++   this runner cannot honour -- it judges `program`, `compile`/`positive`, `check` (the
++   refusals, cycle 0.0.3) and `parse` (the sweep, cycle 0.0.3) entries, and `[build] opt-level
++   = 0` -- exit 2, never a skip (the compiler's `BUILD_REFERENCE.md` §7.1 rule);
+ 2. holds the toolchain to the manifest (`toolchain.py`): `llc`, `opt` and `ld.lld` at its
+    LLVM exactly, its datalayout the one the pinned `opt` derives from its triple, `$NPKC`
+    and `$NPKRT` set -- exit 2 otherwise;
+@@ -20,11 +20,20 @@ WHAT A RUN DOES, IN ORDER, and every step can fail it:
+    entry's artefacts left at `[build] output`; and REPRO -- `[build] entry` and every
+    conformance root built from two copies of the tree, each carrying its manifest, their IR
+    compared byte for byte;
++   -- and between the first build step and the second, THE SELF-CHECK (`selfcheck.py`,
++   @@PD-141@@), which needs the floor program the first builds: if any live case is not red,
++   the run stops there, RED;
+ 4. the suites, in manifest order (`stages.py`), every unit's -O0 IR scanned for call edges
+    the floor program lacks to a symbol `irscan.py` denies;
+-5. holds `harness/baseline/PENDING.txt` to the pending units, the other direction: a line
++5. the tree checks (`treecheck.py`, @@PD-142@@), each printing what it read;
++6. holds `harness/baseline/PENDING.txt` to the pending units, the other direction: a line
+    no pending unit matched is a failure.
+ 
++`--only SUBSTR` runs the `program` and `check` units whose path holds SUBSTR and nothing else
++-- no self-check, no build step past the first, no sweep, no tree check -- and says TWICE, first
++and last, that a filtered run concludes nothing; its last line is `harness: FILTERED -- …`,
++never the green summary (@@PD-141@@).
++
+ It prints one line per step and unit, and LAST, the summary -- `harness: GREEN -- …` when
+ nothing failed, `harness: RED -- …` otherwise -- and exits 0 on GREEN, 1 on RED and 2 when it
+ could not proceed. Its scratch is `build/harness/`, cleared at the start of each run and left
+@@ -40,12 +49,14 @@ sys.path.insert(0, HERE)
+ import build      # noqa: E402
+ import irscan     # noqa: E402
+ import manifest   # noqa: E402
++import selfcheck  # noqa: E402
+ import stages     # noqa: E402
+ import toolchain  # noqa: E402
++import treecheck  # noqa: E402
+ from elf import Obj  # noqa: E402
+ 
+ ROOT = os.path.dirname(HERE)
+-JUDGED = {("program", None), ("compile", "positive")}
++JUDGED = {("program", None), ("compile", "positive"), ("check", None), ("parse", None)}
+ 
+ 
+ def out(line):
+@@ -63,7 +74,10 @@ def honour(man):
+         if (t["stage"], t.get("kind")) not in JUDGED:
+             stop(f"[[test]] `{t['name']}` is stage `{t['stage']}`"
+                  f"{', kind `' + t['kind'] + '`' if 'kind' in t else ''}, which this runner does "
+-                 "not judge at cycle 0.0.2 -- refused by name, never skipped")
++                 "not judge at cycle 0.0.3 -- refused by name, never skipped")
++    if not any(t["stage"] == "parse" and manifest.paths_of(t) == ["."] for t in man.tests):
++        stop("no [[test]] entry of stage `parse` over `.` -- the sweep every `.npk` in the tree gets (BUILD.md §3); "
++             "a run without it would be green over files nothing compiled")
+     if man.need("build", "opt-level") != 0:
+         stop("[build] opt-level is not 0 -- raising it is its own decision, and this runner "
+              "honours 0 only")
+@@ -162,11 +176,15 @@ def repro(ctx, man, failures):
+ 
+ 
+ def main(argv):
+-    verdicts_path = None
+-    if argv[1:2] == ["--verdicts"] and len(argv) == 3:
+-        verdicts_path = argv[2]
+-    elif len(argv) != 1:
+-        stop("usage: run.py [--verdicts PATH]")
++    verdicts_path, only, args = None, None, argv[1:]
++    while args:
++        if args[0] in ("--verdicts", "--only") and len(args) >= 2:
++            verdicts_path, only = (args[1], only) if args[0] == "--verdicts" else (verdicts_path, args[1])
++            args = args[2:]
++        else:
++            stop("usage: run.py [--verdicts PATH] [--only SUBSTR]")
++    if only is not None:
++        out(f"harness: --only {only} -- A FILTERED RUN CONCLUDES NOTHING: no self-check, no sweep, no tree check")
+     try:
+         man = manifest.read(os.path.join(ROOT, "nitpick.toml"))
+     except manifest.ManifestError as e:
+@@ -193,18 +211,37 @@ def main(argv):
+     if floor_edges is None:
+         out("harness: RED -- " + "; ".join(failures))
+         return 1
+-    library(ctx, man, floor_edges, failures)
+-    repro(ctx, man, failures)
++    if only is None:
++        ok, said = selfcheck.run(ctx, ROOT, floor_bin, floor_edges, out)
++        out(f"{'ok  ' if ok else 'FAIL'}  {said}")
++        if not ok:
++            out(f"harness: RED -- {said}: the harness cannot be shown to fail, so nothing after it is judged")
++            return 1
++        library(ctx, man, floor_edges, failures)
++        repro(ctx, man, failures)
+     try:
+         pending_list = stages.read_pending_list(ROOT)
+     except (OSError, ValueError) as e:
+         stop(str(e))
+-    st = stages.Stage(ROOT, ctx, floor_bin, pending_list, floor_edges)
++    st = stages.Stage(ROOT, ctx, floor_bin, pending_list, floor_edges, only)
+     for t in man.tests:
+-        st.program_suite(t)
+-    for key in sorted(set(pending_list) - st.pending_seen):
+-        failures.append(f"harness/baseline/PENDING.txt names {key[0]} ({key[1]} {key[2]}), and no "
+-                        "pending unit matched it")
++        if t["stage"] == "check":
++            stages.check_suite(st, t)
++        elif t["stage"] == "parse":
++            if only is None:
++                stages.parse_sweep(st, t)
++        else:
++            st.program_suite(t)
++    if only is None:
++        for check in treecheck.ALL:
++            line, bad = check(ROOT)
++            for b in bad:
++                out(f"FAIL  {check.__name__}: {b}")
++            out(f"{'ok  ' if not bad else '    '}  {line}")
++            failures += [f"{check.__name__}: {b}" for b in bad]
++        for name, when in treecheck.LATER:
++            out(f"later {name}: from {when}")
++        failures += stages.orphans(pending_list, st.pending_seen)
+     n = {v: sum(1 for x in st.verdicts if x[0] == v) for v in ("PASS", "FAIL", "PEND")}
+     failures += [f"{s}/{os.path.basename(r)}" for v, s, r, _ in st.verdicts if v == "FAIL"]
+     if verdicts_path:
+@@ -215,12 +252,18 @@ def main(argv):
+     judged = n["PASS"] + n["FAIL"]
+     tail = (f"{n['PASS']} of {judged} units passed, {n['PEND']} pending"
+             f"{' (' + ', '.join(labels) + ')' if labels else ''}")
++    if only is not None:
++        for f in failures:
++            out(f"  failed: {f}")
++        out(f"harness: --only {only} -- A FILTERED RUN CONCLUDES NOTHING; nothing here is committed on its strength")
++        out(f"harness: FILTERED -- {len(failures)} failure(s); {tail}")
++        return 1 if failures else 0
+     if failures:
+         for f in failures:
+             out(f"  failed: {f}")
+         out(f"harness: RED -- {len(failures)} failure(s); {tail}")
+         return 1
+-    out(f"harness: GREEN -- 3 build steps; {tail}")
++    out(f"harness: GREEN -- the self-check, 3 build steps, {len(treecheck.ALL)} tree checks; {tail}")
+     return 0
+ 
+ 
+diff --git a/harness/selfcheck.py b/harness/selfcheck.py
+new file mode 100644
+index 0000000..37670e3
+--- /dev/null
++++ b/harness/selfcheck.py
+@@ -0,0 +1,147 @@
++#!/usr/bin/env python3
++"""The self-check -- the harness fed wrong expectations and required to FAIL (`meta/specs/BUILD.md` B-8,
++`TESTING.md` §7; @@PD-141@@). It runs FIRST in every full run, and if any live case is not red the run stops
++RED there: a suite that only ever agrees with what it is handed reports green while checking nothing.
++
++Every case builds its fixture in `build/harness/selfcheck/<case>/` and hands it to the SAME functions the run
++uses -- `stages.Stage`, `stages.check_suite`, `stages.parse_sweep`, `treecheck.*` -- never a copy of their logic.
++A LIVE case passes when its function reports the failure it names; a PENDING case is printed as pending, with the
++cycle that makes it live, and is never counted as passing. The fixtures' codes are measured at the pin by cycle
++0.0.3's plan (`0.0.3.md` §1).
++"""
++import os
++import shutil
++
++import stages
++import treecheck
++
++FLOOR = '''func:failsafe = int32(Error:e) {
++    pick (e) {
++        (HeapBadRequest)    { exit 91i32; },
++        (HeapOom)           { exit 92i32; },
++        (Unreachable)       { exit 95i32; },
++        (WildLeak)          { exit 96i32; },
++        (StackExhausted)    { exit 106i32; },
++        (MachineFault)      { exit 107i32; },
++        (*)                 { exit 99i32; }
++    }
++    exit 9i32;
++};
++'''
++MAIN0 = "func:main = int32(cstring[]:_~argv) {\n    exit 0i32;\n};\n"
++TWO_CODES = ("int64:COUNTER = 0i64;\n\nfunc:main = int32(cstring[]:_~argv) {\n    string:s = string_concat(\"ab\", \"c\");\n"
++             "    uint8[]:p = string_bytes(s);\n    exit 0i32;\n};\n")
++PENDING = [("roundtrip-second-parse-differs", "cycle 0.5, which builds the roundtrip stage"),
++           ("roundtrip-trees-match-print-differs", "cycle 0.5 (TESTING.md V-7)"),
++           ("corpus-count-off-by-one-both-ways", "cycle 0.3, which builds the corpus stage"),
++           ("check_no_owning_fields-planted", "cycle 0.2, when the types it reads exist")]
++
++
++def _program(d, name, header, body):
++    os.makedirs(d, exist_ok=True)
++    p = os.path.join(d, name + ".npk")
++    with open(p, "w", encoding="utf-8") as fh:
++        fh.write(header + f"mod:{name};\n\n" + body + "\n" + FLOOR)
++    return p
++
++
++class _Quiet(stages.Stage):
++    def _say(self, verdict, suite, rel, detail):
++        self.verdicts.append((verdict, suite, rel, detail))
++
++
++def _stage(ctx, root, floor_bin, floor_edges, pending=None):
++    return _Quiet(root, ctx, floor_bin, pending or {}, floor_edges)
++
++
++def _red(st, want):
++    v = [x for x in st.verdicts if x[0] == "FAIL"]
++    return (bool(v) and want in v[-1][3]), (v[-1][3] if v else "no FAIL verdict")
++
++
++def _tree(root, base, files):
++    """A scratch tree: the specifications the tree checks read, and the planted `src/` files."""
++    os.makedirs(os.path.join(base, "meta", "specs"), exist_ok=True)
++    for f in ("BUILD.md", "SAFETY.md"):
++        shutil.copy2(os.path.join(root, "meta", "specs", f), os.path.join(base, "meta", "specs", f))
++    os.makedirs(os.path.join(base, "harness"), exist_ok=True)
++    for rel, text in files.items():
++        os.makedirs(os.path.dirname(os.path.join(base, rel)), exist_ok=True)
++        with open(os.path.join(base, rel), "w", encoding="utf-8") as fh:
++            fh.write(text)
++    return base
++
++
++def cases(ctx, root, floor_bin, floor_edges):
++    w = os.path.join(ctx.work, "selfcheck")
++    shutil.rmtree(w, ignore_errors=True)
++    hdr = "// MAY IMPORT: nothing\n"
++
++    def prog(case, header, body, pending=None, want="expected exit"):
++        d = os.path.join(w, case)
++        p = _program(d, case.replace("-", "_"), header, body)
++        st = _stage(ctx, d, floor_bin, floor_edges, pending)
++        st._unit("selfcheck", p, os.path.relpath(p, d))
++        return _red(st, want)
++
++    def chk(case, header, body, pending=None, want=""):
++        d = os.path.join(w, case)
++        _program(d, case.replace("-", "_"), header, body)
++        st = _stage(ctx, d, floor_bin, floor_edges, pending)
++        stages.check_suite(st, {"name": "selfcheck", "path": "."})
++        return _red(st, want)
++
++    def tree(case, check, files, want):
++        base = _tree(root, os.path.join(w, case), files)
++        _, bad = check(base)
++        return (bool(bad) and want in bad[0]), (bad[0] if bad else "no finding")
++
++    out = []
++    add = lambda name, r: out.append((name, r[0], r[1]))
++    add("program-exit-off-by-one", prog("program-exit-off-by-one", "// expect-exit: 1\n", MAIN0))
++    add("check-code-not-reported", chk("check-code-not-reported", "// expect-error: NITPICK-TYPE-007\n",
++                                       "int64:COUNTER = 0i64;\n\n" + MAIN0, want="expected and not reported: NITPICK-TYPE-007"))
++    add("check-code-unasserted", chk("check-code-unasserted", "// expect-error: NITPICK-TYPE-055\n", TWO_CODES,
++                                     want="reported and not expected: NITPICK-TYPE-007"))
++    add("check-site-wrong", chk("check-site-wrong", "// expect-error: NITPICK-TYPE-055\n// expect-error-at: 4:1\n",
++                                "int64:COUNTER = 0i64;\n\n" + MAIN0, want="expected at 4:1"))
++    add("check-accepted", chk("check-accepted", "// expect-error: NITPICK-TYPE-007\n", MAIN0, want="ACCEPTED"))
++    d = os.path.join(w, "parse-not-parsing")
++    _program(d, "parse_not_parsing", "", "func:main = int32(cstring[]:_~argv) {\n    exit 0i32\n};\n")
++    st = _stage(ctx, d, floor_bin, floor_edges)
++    stages.parse_sweep(st, {"name": "selfcheck", "path": "."})
++    add("parse-not-parsing", _red(st, "NITPICK-PARSE-"))
++    add("layering-core-imports-scan", tree("layering-core-imports-scan", treecheck.check_layering, {
++        "src/core/a.npk": "mod:a;\n\n// MAY IMPORT: nothing (B-17)\nuse \"../scan/b.npk\".*;\n",
++        "src/scan/b.npk": "mod:b;\n\n// MAY IMPORT: `core` (B-17)\n"}, "does not allow"))
++    add("error-budget-private-identity", tree("error-budget-private-identity", treecheck.check_error_budget, {
++        "src/core/a.npk": "mod:a;\n\nerror:EPrivate;\n\nfunc:f = NIL() {\n    fail EPrivate;\n};\n"}, "`a.EPrivate`"))
++    add("constants-bound-literal", tree("constants-bound-literal", treecheck.check_constants_named, {
++        "src/scan/a.npk": "mod:a;\n\nfunc:f = int64() never fails {\n    pass 4096i64;\n};\n"}, "the literal 4096"))
++    add("raw-accumulate", tree("raw-accumulate", treecheck.check_no_raw_accumulate, {
++        "src/scan/a.npk": "mod:a;\n\nfunc:f = int64(int64:acc, int64:d) never fails {\n    pass acc * 10i64 + d;\n};\n"}, "a `*`"))
++    add("recursion-self-call", tree("recursion-self-call", treecheck.check_no_recursion, {
++        "src/scan/a.npk": "mod:a;\n\nfunc:f = int64(int64:n) {\n    int64:m = relay f(n);\n    pass m;\n};\n"}, "a call cycle: f -> f"))
++    marker = "// expect-exit: 0\n// pending-until: DEF-1 undefined-value @x\n"
++    add("pending-not-listed", prog("pending-not-listed", marker, MAIN0, want="NOT ON THE REVIEWED PENDING LIST"))
++    listed = {("pending_stale.npk", "DEF-1", "undefined-value @x"): "a self-check case"}
++    add("pending-stale", prog("pending-stale", marker, MAIN0, listed, want="STALE"))
++    other = {("pending_other_failure.npk", "DEF-1", "undefined-value @x"): "a self-check case"}
++    add("pending-other-failure", prog("pending-other-failure", marker.replace("expect-exit: 0", "expect-exit: 3"),
++                                      MAIN0, other, want="PENDING ON A DIFFERENT FAILURE"))
++    acc = {("check_pending_stale.npk", "DEF-1", "accepted"): "a self-check case"}
++    add("check-pending-stale", chk("check-pending-stale", "// expect-error: NITPICK-TYPE-055\n// pending-until: DEF-1 accepted\n",
++                                   "int64:COUNTER = 0i64;\n\n" + MAIN0, acc, want="STALE"))
++    orphan = stages.orphans({("nowhere.npk", "DEF-1", "accepted"): "x"}, set())
++    out.append(("pending-list-orphan-line", bool(orphan), orphan[0] if orphan else "no finding"))
++    return out
++
++
++def run(ctx, root, floor_bin, floor_edges, say):
++    got = cases(ctx, root, floor_bin, floor_edges)
++    for name, red, line in got:
++        say(f"{'ok  ' if red else 'FAIL'}  selfcheck {name}: {'red' if red else 'NOT RED'} -- {line[:150]}")
++    for name, when in PENDING:
++        say(f"PEND  selfcheck {name}: pending until {when}")
++    live_red = sum(1 for _, r, _ in got if r)
++    return live_red == len(got), f"the self-check: {live_red} of {len(got)} live cases red, {len(PENDING)} pending"
+diff --git a/harness/stages.py b/harness/stages.py
+index c84862b..93973d3 100644
+--- a/harness/stages.py
++++ b/harness/stages.py
+@@ -34,7 +34,7 @@ import irscan
+ RUN_TIMEOUT = 600
+ 
+ 
+-def _units(root, entry):
++def _units(root, entry, only=None):
+     out = []
+     for rel in (entry["paths"] if "paths" in entry else [entry["path"]]):
+         top = os.path.join(root, rel)
+@@ -46,7 +46,13 @@ def _units(root, entry):
+         else:
+             out += [os.path.join(top, f) for f in sorted(os.listdir(top))
+                     if f.endswith(".npk") and os.path.isfile(os.path.join(top, f))]
+-    return out
++    return [f for f in out if only is None or only in os.path.relpath(f, root)]
++
++
++def orphans(pending_list, seen):
++    """The reviewed list's other direction: a line no pending unit matched."""
++    return [f"harness/baseline/PENDING.txt names {k[0]} ({k[1]} {k[2]}), and no pending unit matched it"
++            for k in sorted(set(pending_list) - seen)]
+ 
+ 
+ def _cap(mib):
+@@ -80,8 +86,8 @@ def read_pending_list(root):
+ 
+ 
+ class Stage:
+-    def __init__(self, root, ctx, floor_binary, pending_list, floor_edges):
+-        self.root, self.ctx, self.floor, self.floor_edges = root, ctx, floor_binary, floor_edges
++    def __init__(self, root, ctx, floor_binary, pending_list, floor_edges, only=None):
++        self.root, self.ctx, self.floor, self.floor_edges, self.only = root, ctx, floor_binary, floor_edges, only
+         self.pending_list, self.pending_seen, self.floor_under = pending_list, set(), {}
+         self.verdicts = []          # (PASS|FAIL|PEND, suite, relpath, detail)
+ 
+@@ -91,7 +97,7 @@ class Stage:
+         print(f"{verdict} {suite}/{os.path.basename(rel)}: {detail}", flush=True)
+ 
+     def program_suite(self, entry):
+-        for src in _units(self.root, entry):
++        for src in _units(self.root, entry, self.only):
+             rel = os.path.relpath(src, self.root)
+             self._unit(entry["name"], src, rel)
+ 
+@@ -133,8 +139,8 @@ class Stage:
+ 
+     def _pending(self, suite, rel, e, b, exits, why):
+         label, observation, arg = e.pending
+-        key = (rel, label, f"{observation} {arg}")
+-        marker = f"`pending-until: {label} {observation} {arg}`"
++        key = (rel, label, f"{observation} {arg}".strip())
++        marker = f"`pending-until: {label} {observation} {arg}`".replace(" `", "`")
+         if key not in self.pending_list:
+             return self._say("FAIL", suite, rel, f"{marker} is NOT ON THE REVIEWED PENDING LIST "
+                                                  "(harness/baseline/PENDING.txt)")
+@@ -161,3 +167,86 @@ class Stage:
+     def _show(v):
+         v = ["hang" if x is None else str(x) for x in v]
+         return v[0] if len(v) == 1 else (f"{v[0]} x{len(v)}" if len(set(v)) == 1 else "/".join(v))
++
++
++# ---- cycle 0.0.3: the refusal stage and the parse sweep (@@PD-140@@) ------------------------------------------
++
++def _codes_judged(b_codes, e):
++    """B-7: the SET of codes reported equals the set expected; each `expect-error-at` names a site of its code."""
++    got = {c for c, _, _ in b_codes}
++    want = {c for c, _, _ in e.errors}
++    why = []
++    if got != want:
++        if want - got:
++            why.append("expected and not reported: " + " ".join(sorted(want - got)))
++        if got - want:
++            why.append("reported and not expected: " + " ".join(sorted(got - want)))
++    for c, ln, col in e.errors:
++        if ln is not None and not any(c == g and ln == gl and (col is None or col == gc) for g, gl, gc in b_codes):
++            why.append(f"{c} expected at {ln}:{col if col is not None else '*'}, reported at "
++                       + (" ".join(f"{gl}:{gc}" for g, gl, gc in b_codes if g == c) or "no site"))
++    return why
++
++
++def _check_unit(stage, suite, src, rel):
++    e = expect.read(src)
++    if not e.readable:
++        return stage._say("FAIL", suite, rel, "UNREADABLE -- " + "; ".join(e.problems))
++    if not e.errors:
++        return stage._say("FAIL", suite, rel, "a `check` unit names no `expect-error:` -- nothing it could fail")
++    out = os.path.join(stage.ctx.work, suite, os.path.splitext(os.path.basename(src))[0] + ".ll")
++    os.makedirs(os.path.dirname(out), exist_ok=True)
++    rc, codes, text = build.npkc(stage.ctx, src, out)
++    shown = " ".join(f"{c} {l}:{k}" for c, l, k in codes)
++    if e.pending:
++        label, observation, arg = e.pending
++        key = (rel, label, observation)
++        marker = f"`pending-until: {label} {observation}`"
++        if observation != "accepted" or key not in stage.pending_list:
++            return stage._say("FAIL", suite, rel, f"{marker} is NOT ON THE REVIEWED PENDING LIST (harness/baseline/PENDING.txt)"
++                              if observation == "accepted" else f"{marker} names an observation a `check` unit cannot show")
++        stage.pending_seen.add(key)
++        if rc == 0 and not text.strip():
++            return stage._say("PEND", suite, rel, f"{label} -- accepted by npkc, exit 0, no diagnostic, as its marker says")
++        if rc == 1 and not _codes_judged(codes, e):
++            return stage._say("FAIL", suite, rel, f"STALE {marker}: it is now refused with exactly its codes ({shown}) -- "
++                                                  f"{label} is fixed in this compiler; the marker and its PENDING.txt line go")
++        return stage._say("FAIL", suite, rel, f"PENDING ON A DIFFERENT FAILURE -- {marker}; npkc exit {rc}: {shown or 'no code'}")
++    if rc == 0:
++        return stage._say("FAIL", suite, rel, "ACCEPTED by npkc -- its expectations name a refusal")
++    if rc != 1:
++        return stage._say("FAIL", suite, rel, f"npkc exit {rc} -- " + ("the driver could not proceed and judged nothing"
++                                               if rc == 2 else "the compiler's own failsafe trapped" if rc == 3 else "not a verdict"))
++    why = _codes_judged(codes, e)
++    return stage._say("FAIL" if why else "PASS", suite, rel, "; ".join(why) if why else f"refused: {shown}")
++
++
++def check_suite(stage, entry):
++    for src in _units(stage.root, entry, stage.only):
++        _check_unit(stage, entry["name"], src, os.path.relpath(src, stage.root))
++
++
++SWEEP_SKIP = {".git", "build", ".internal"}
++
++
++def parse_sweep(stage, entry):
++    """Every `.npk` under the entry's path, each compiled as a root by `npkc` and judged by its diagnostics' FAMILY:
++    it parses unless a `NITPICK-LEX-` or `NITPICK-PARSE-` code is reported, or `npkc` could not proceed (exit 2 or
++    3). A file refused for its types, its borrows or its reach parses -- `refused/` holds such files on purpose."""
++    files = []
++    for rel in (entry["paths"] if "paths" in entry else [entry["path"]]):
++        for d, dirs, fs in os.walk(os.path.join(stage.root, rel)):
++            dirs[:] = sorted(x for x in dirs if x not in SWEEP_SKIP)
++            files += [os.path.join(d, f) for f in sorted(fs) if f.endswith(".npk")]
++    bad = []
++    for src in files:
++        out = os.path.join(stage.ctx.work, "sweep", os.path.relpath(src, stage.root)[:-4].replace(os.sep, "_") + ".ll")
++        os.makedirs(os.path.dirname(out), exist_ok=True)
++        rc, codes, _ = build.npkc(stage.ctx, src, out)
++        fam = sorted({c for c, _, _ in codes if c.startswith(("NITPICK-LEX-", "NITPICK-PARSE-"))})
++        if rc not in (0, 1) or fam:
++            bad.append(f"{os.path.relpath(src, stage.root)}: " + (" ".join(fam) if fam else f"npkc exit {rc}"))
++    rel = entry["paths"][0] if "paths" in entry else entry["path"]
++    stage._say("FAIL" if bad else "PASS", entry["name"], rel,
++               (f"{len(files)} file(s) swept; " + "; ".join(bad)) if bad else
++               f"{len(files)} file(s) swept, each compiled as a root, none with a LEX- or PARSE- code")
+diff --git a/harness/treecheck.py b/harness/treecheck.py
+new file mode 100644
+index 0000000..792105f
+--- /dev/null
++++ b/harness/treecheck.py
+@@ -0,0 +1,233 @@
++#!/usr/bin/env python3
++"""The tree checks -- the library diffed against the documents that describe it (`meta/specs/TESTING.md` §5,
++@@PD-142@@). Each reads its AUTHORITY from the specification, not from a copy of it here, and prints what it
++examined, so a check that had nothing to read says so rather than passing in silence. Every one but
++`check_specs_current` fails the run. Source is read as `shapes.py` reads it: bytes, comments and strings blanked.
++
++  check_layering           every `use` edge between `src/` layers, and every module header's `MAY IMPORT:` line,
++                           against `BUILD.md` B-17's table
++  check_error_budget       the identities the tree's `fail` sites raise, keyed by (module, name), private ones
++                           included, against `SAFETY.md` §3's table and S-6's layers (the ecosystem audit's EC3)
++  check_constants_named    no integer literal under `src/` outside `src/core/limits.npk` equal to a bound of
++                           `SAFETY.md` §7's table, in any spelling; and limits.npk's values the table's
++  check_no_raw_accumulate  no `*`, and no `x = x + <a non-literal>`, under `src/scan/` and `src/format/` outside
++                           `arith.npk` (PA-012)
++  check_no_recursion       no cycle in the call graph of the functions under `src/` (PA-022); the exceptions
++                           table is empty and stays empty at 1.0
++  check_specs_current      REPORTS, never fails: a rule id a `src/` or `harness/` comment cites that no
++                           specification defines
++"""
++import os
++import re
++
++from lexical import blank as _blank
++
++
++def _src_files(root):
++    out = []
++    for d, dirs, fs in os.walk(os.path.join(root, "src")):
++        dirs.sort()
++        out += [os.path.join(d, f) for f in sorted(fs) if f.endswith(".npk")]
++    return out
++
++
++def _read(path):
++    with open(path, "rb") as fh:
++        return fh.read().decode("utf-8", errors="replace")
++
++
++def _layer(root, path):
++    rel = os.path.relpath(path, os.path.join(root, "src")).split(os.sep)
++    return rel[0] if len(rel) > 1 else "lib"
++
++
++def check_layering(root):
++    spec = _read(os.path.join(root, "meta", "specs", "BUILD.md"))
++    sec = spec[spec.index("**Rule B-17"):spec.index("**Rule B-18")]
++    table = {}
++    for m in re.finditer(r"^\| `(\w+)` \| (.+?) \|$", sec, re.M):
++        table[m.group(1)] = set(re.findall(r"`(\w+)`", m.group(2)))
++    bad, edges, files = [], 0, _src_files(root)
++    for f in files:
++        layer, raw = _layer(root, f), _read(f)
++        if layer == "lib":
++            continue
++        head = re.search(r"^// MAY IMPORT: (.+)$", raw, re.M)
++        want = table.get(layer)
++        if want is None:
++            bad.append(f"{os.path.relpath(f, root)}: layer `{layer}` has no row in B-17's table")
++            continue
++        if head is None:
++            bad.append(f"{os.path.relpath(f, root)}: no `// MAY IMPORT:` header line")
++        elif set(re.findall(r"`(\w+)`", head.group(1).split("(")[0])) != want:
++            bad.append(f"{os.path.relpath(f, root)}: its header names {head.group(1).split('(')[0].strip()!r}, B-17's row {sorted(want) or 'nothing'}")
++        for m in re.finditer(r'\buse\s+"([^"]+)"', raw):
++            target = os.path.normpath(os.path.join(os.path.dirname(f), m.group(1)))
++            if not target.startswith(os.path.join(root, "src") + os.sep):
++                continue
++            edges += 1
++            to = _layer(root, target)
++            if to != layer and to not in want:
++                bad.append(f"{os.path.relpath(f, root)}: imports `{to}` ({m.group(1)}), which B-17's row for `{layer}` does not allow")
++    return f"check_layering: {len(files)} module(s), {edges} import edge(s) between src/ files, {len(table)} table row(s)", bad
++
++
++def check_error_budget(root):
++    spec = _read(os.path.join(root, "meta", "specs", "SAFETY.md"))
++    sec = spec[spec.index("## 3."):spec.index("## 4.")]
++    names = set(re.findall(r"^\| `(E\w+)` \|", sec, re.M))
++    s6 = sec[sec.index("**Rule S-6"):]
++    nxt = s6.find("**Rule S-", 4)
++    s6 = s6[:nxt] if nxt > 0 else s6
++    allowed, prev = {}, set()
++    for bullet in re.findall(r"^- (.+?)(?=^- |\Z)", s6, re.M | re.S):
++        layers = re.findall(r"`nparse/(\w+)(?:/\*)?\.npk`", bullet)
++        declared = set(re.findall(r"\*\*`(E\w+)`\*\*", bullet))
++        if "additionally" in bullet:
++            declared |= prev
++        for lay in layers:
++            allowed.setdefault(lay, set()).update(declared)
++        prev = declared
++    decl, sites, bad, files = {}, 0, [], _src_files(root)
++    texts = {f: _blank(_read(f)) for f in files}
++    for f, t in texts.items():
++        mod = re.search(r"\bmod:(\w+)", t)
++        for m in re.finditer(r"\berror:(\w+)", t):
++            decl.setdefault(m.group(1), []).append((mod.group(1) if mod else "?", _layer(root, f), f))
++    raised = set()
++    for f, t in texts.items():
++        mod = re.search(r"\bmod:(\w+)", t)
++        for m in re.finditer(r"\bfail\s+([A-Za-z_]\w*)\s*;", t):
++            sites += 1
++            nm = m.group(1)
++            here = [d for d in decl.get(nm, []) if d[2] == f]
++            src = here[0] if here else (decl[nm][0] if nm in decl else ("prelude", "prelude", None))
++            raised.add((src[0], nm, src[1]))
++    for (mod, nm, lay) in sorted(raised):
++        if nm not in names or nm not in allowed.get(lay, set()):
++            bad.append(f"`{mod}.{nm}` is raised by a `fail` site, and SAFETY.md §3's table and S-6 allow "
++                       f"{sorted(allowed.get(lay, set())) or 'no identity'} in the `{lay}` layer")
++    keys = ", ".join(f"{m}.{n}" for m, n, _ in sorted(raised)) or "none"
++    return (f"check_error_budget: {len(files)} module(s), {sum(len(v) for v in decl.values())} `error:` declaration(s), "
++            f"{sites} `fail` site(s) naming one; identities raised, keyed by (module, name): {keys}"), bad
++
++
++def _ints(text):
++    for m in re.finditer(r"(?<![\w.])(0x[0-9a-fA-F_]+|0b[01_]+|[0-9][0-9_]*)(?:[iu](?:8|16|32|64))?(?![\w.])", text):
++        s = m.group(1).replace("_", "")
++        yield m.start(), int(s, 16) if s.startswith("0x") else int(s, 2) if s.startswith("0b") else int(s)
++
++
++def check_constants_named(root):
++    spec = _read(os.path.join(root, "meta", "specs", "SAFETY.md"))
++    sec = spec[spec.index("## 7."):spec.index("## 8.")]
++    unit = {"KiB": 1 << 10, "MiB": 1 << 20}
++    bounds = {}
++    for m in re.finditer(r"^\| `(NPARSE_\w+)` \| ([^|]+) \|", sec, re.M):
++        v = m.group(2).strip()
++        k = re.fullmatch(r"(\d+) (KiB|MiB)", v)
++        p = re.fullmatch(r"2\^(\d+)(?:−1|-1)?", v)
++        bounds[m.group(1)] = (int(k.group(1)) * unit[k.group(2)] if k else
++                              (1 << int(p.group(1))) - (1 if v.endswith("1") and ("−" in v or "-" in v) else 0)
++                              if p else int(v))
++    values = set(bounds.values())
++    bad, files, lits = [], _src_files(root), 0
++    limits = os.path.join(root, "src", "core", "limits.npk")
++    for f in files:
++        t = _blank(_read(f))
++        if f == limits:
++            got = dict((n, int(v.replace("_", ""))) for n, v in
++                       re.findall(r"\bfixed\s+int64:(NPARSE_\w+)\s*=\s*([0-9_]+)i64", t))
++            for n, v in bounds.items():
++                if got.get(n) != v:
++                    bad.append(f"src/core/limits.npk: `{n}` is {got.get(n)}, SAFETY.md §7's table says {v}")
++            for n in sorted(set(got) - set(bounds)):
++                bad.append(f"src/core/limits.npk: `{n}` has no row in SAFETY.md §7's table")
++            continue
++        for pos, v in _ints(t):
++            lits += 1
++            if v in values:
++                n = t[:pos].count("\n") + 1
++                bad.append(f"{os.path.relpath(f, root)}:{n}: the literal {v} is a bound of SAFETY.md §7 -- name it from src/core/limits.npk")
++    have = "present" if os.path.isfile(limits) else "absent until cycle 0.0.4"
++    return (f"check_constants_named: {len(bounds)} bound(s) in SAFETY.md §7's table; {len(files)} module(s), {lits} integer "
++            f"literal(s) outside limits.npk read; src/core/limits.npk {have}"), bad
++
++
++def check_no_raw_accumulate(root):
++    bad, files, read = [], _src_files(root), 0
++    for f in files:
++        rel = os.path.relpath(f, root)
++        if not (rel.startswith(os.path.join("src", "scan") + os.sep) or rel.startswith(os.path.join("src", "format") + os.sep)):
++            continue
++        if os.path.basename(f) == "arith.npk":
++            continue
++        read += 1
++        t = _blank(_read(f))
++        for n, line in enumerate(t.split("\n"), 1):
++            if re.search(r"(?<![-*/])\*(?![*/=])", line.replace("->", "  ")) and not re.match(r"\s*(//|/\*)", line):
++                bad.append(f"{rel}:{n}: a `*` outside arith.npk -- an accumulation is range-checked first (PA-012)")
++            m = re.search(r"\b(\w+)\s*=\s*\1\s*\+\s*([^;]+);", line)
++            if m and not re.fullmatch(r"\s*\d+[iu]\d+\s*", m.group(2)):
++                bad.append(f"{rel}:{n}: `{m.group(1)} = {m.group(1)} + ...` outside arith.npk (PA-012)")
++    return f"check_no_raw_accumulate: {read} module(s) under src/scan/ and src/format/ outside arith.npk", bad
++
++
++EXCEPTIONS = {}   # @@PD-142@@: empty, and empty at 1.0 -- "the grammar bounds the depth" is not a reason
++
++
++def check_no_recursion(root):
++    files = _src_files(root)
++    body = {}
++    for f in files:
++        t = _blank(_read(f))
++        for m in re.finditer(r"\bfunc:(\w+)(?:<[^>]*>)?\s*=[^{;]*\{", t):
++            depth, k = 1, m.end()
++            while k < len(t) and depth:
++                depth += {"{": 1, "}": -1}.get(t[k], 0)
++                k += 1
++            body[m.group(1)] = t[m.end():k]
++    calls = {fn: {c for c in re.findall(r"\b(\w+)\s*(?:::<[^>]*>)?\s*\(", b) if c in body} for fn, b in body.items()}
++    bad, seen, state = [], set(), {}
++
++    def walk(fn, path):
++        state[fn] = 1
++        for c in sorted(calls[fn]):
++            if state.get(c) == 1:
++                cyc = path[path.index(c):] + [c]
++                key = frozenset(cyc)
++                if key not in seen and not EXCEPTIONS.get(" -> ".join(cyc)):
++                    seen.add(key)
++                    bad.append("a call cycle: " + " -> ".join(cyc))
++            elif not state.get(c):
++                walk(c, path + [c])
++        state[fn] = 2
++    for fn in sorted(calls):
++        if not state.get(fn):
++            walk(fn, [fn])
++    return (f"check_no_recursion: {len(files)} module(s), {len(body)} function(s), "
++            f"{sum(len(v) for v in calls.values())} call edge(s) between them; exceptions: {len(EXCEPTIONS)}"), bad
++
++
++def check_specs_current(root):
++    defined = set()
++    for f in sorted(os.listdir(os.path.join(root, "meta", "specs"))):
++        if f.endswith(".md"):
++            defined |= set(re.findall(r"\*\*Rule ([A-Z]-\d+[a-z]?)\b", _read(os.path.join(root, "meta", "specs", f))))
++    cited, gone = set(), set()
++    paths = _src_files(root) + sorted(os.path.join(root, "harness", f) for f in os.listdir(os.path.join(root, "harness"))
++                                      if f.endswith(".py"))
++    for f in paths:
++        for c in re.findall(r"`?[A-Z]+\.md`? ([A-Z]-\d+[a-z]?)\b", _read(f)):
++            cited.add(c)
++            if c not in defined:
++                gone.add(c)
++    return (f"check_specs_current (reports only): {len(paths)} file(s), {len(cited)} rule id(s) cited beside a "
++            f"specification's name, {len(gone)} that no specification defines{': ' + ' '.join(sorted(gone)) if gone else ''}"), []
++
++
++ALL = [check_layering, check_error_budget, check_constants_named, check_no_raw_accumulate, check_no_recursion,
++       check_specs_current]
++LATER = [("check_no_owning_fields", "cycle 0.2, when `Event`, `Node`, `ParseError` and `Frame` exist"),
++         ("check_codes_documented", "cycle 0.2"), ("check_failsafe_arms", "cycle 0.2"),
++         ("check_corpus_provenance", "cycle 0.3")]
+diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
+index f90b997..df5617f 100644
+--- a/meta/DECISIONS.md
++++ b/meta/DECISIONS.md
+@@ -1019,3 +1019,59 @@ the name both sides use.
+ *Reversal, for the author:* none for the mechanism; each pending unit's marker and list line go
+ when its fix is pinned, and a new observation form joins B-5b by a decision when a defect shows
+ a failure this one cannot name.
++
++### @@PD-140@@ — the refusals and the sweep are judged by `npkc`; `accept` is struck; a refusal is a set of codes at their sites; the reseat's defect is a pending refusal
++**2026-10-15, cycle 0.0.3.** `specs/BUILD.md` §3, B-5b and B-7. The `check` stage compiles each file with the pinned
++`npkc` and requires exit 1 with exactly the set of codes the file names, each `expect-error-at` a site its code was
++reported at; exit 0 is ACCEPTED and fails, and 2 or 3 is a broken run, printed with its code. The `parse` stage — the
++sweep — compiles every `.npk` in the tree as a root and passes it unless a `NITPICK-LEX-` or `NITPICK-PARSE-` code is
++reported or `npkc` could not proceed: a file refused for its types or its borrows parses. `accept` is struck, since
++`tests/conformance/` is built, linked and run. And the second pending observation, `accepted`: a `check` unit whose
++right answer is a refusal and which `npkc` accepts at the pin — probe 08h on DEF-252, whose right answer is
++`NITPICK-BORROW-002`, the code of the same reseat done directly (probe 08g), and which flips at a pin of 116 or later.
++
++*Alternatives declined:* **the compiler's `tools/parse_check` and `tools/check`** — `.npk` sources a run would build
++from the compiler's tree, which nothing here builds (`nitpick-regex` and `nitpick-time` struck them the same way); **a
++count of reports per code** — the compiler's DEF-245 reports one failing header two or three times, so a count would
++judge the report; **the reseat's probe run as a program** — its exit, the free poison or a reused byte, is a rate and
++not a verdict, and its right answer is a refusal, which only `npkc` gives.
++
++*Reversal, for the author:* none for the stages; when the compiler's checker is a tool a library may run without a
++build, `parse` and `check` can move to it by a decision, judged the same way.
++
++### @@PD-141@@ — the self-check is its own printed list, live and pending, it runs before any judgment, and a filtered run concludes nothing
++**2026-10-15, cycle 0.0.3.** `specs/TESTING.md` V-19 and V-20, `BUILD.md` B-8. `harness/selfcheck.py` hands the
++harness's own functions — the stages and the tree checks, never a copy of their logic — fixtures that must fail: a
++wrong exit; a refusal expecting a code not reported, reporting one not expected, at the wrong site, and accepted; a file
++that does not parse; each tree check planted; and each way a pending marker can be wrong. Every live case must be red;
++one that is not stops the run there, RED. The cases whose stage does not exist yet are printed as PENDING with the
++cycle that builds it. It runs after the toolchain check and the floor program it builds on, and before every step
++that judges the library. `--only SUBSTR` runs the matching `program` and `check` units alone, says twice that a
++filtered run concludes nothing, and ends `harness: FILTERED -- …`, which CI's assertion refuses.
++
++*Alternatives declined:* **fixtures committed as failing files** — the parse sweep would then sweep files that must
++not parse; built at run time, they are the harness's own; **the self-check last** — a run whose harness cannot fail has
++judged nothing before it; **V-19's eight cases and no more** — the pending marker shipped elsewhere with no case at all,
++and an audit measured what that let through (`nitpick-regex`'s BL-6).
++
++*Reversal, for the author:* none; each pending case goes live, by a line of `selfcheck.py`, in the cycle that builds
++its stage.
++
++### @@PD-142@@ — the tree checks read their authorities; the error budget is keyed by module and name, private identities included
++**2026-10-15, cycle 0.0.3.** `specs/TESTING.md` §3. Six checks run on every full run and print what each read:
++`check_layering` (B-17's table, every import edge and every module header's `MAY IMPORT:` line), `check_error_budget`,
++`check_constants_named` (`SAFETY.md` §7's values, in any spelling, and `limits.npk`'s), `check_no_raw_accumulate`
++(PA-012), `check_no_recursion` (PA-022, its exceptions table empty and empty at 1.0) and `check_specs_current`, which
++reports and never fails. **The error budget is the identities the tree's `fail` sites raise, keyed by (module,
++name), private ones included** — measured at the pin, a root importing a module whose reachable `fail` raises a
++PRIVATE error owes it as `<module>.<name>`, and a public error never raised costs nothing — against `SAFETY.md` §3's
++two names and S-6's layers. The sentences that counted "public `error:` declarations" say so (the early ecosystem
++audit's EC3). `check_no_owning_fields`, `check_codes_documented` and `check_failsafe_arms` go live at cycle 0.2, and
++`check_corpus_provenance` at 0.3, each named by the run until then.
++
++*Alternatives declined:* **the count of public declarations** — it passes a planted private identity in silence, the
++shape EC3 named; **the authorities copied into the checks** — a table in two places is two tables; **the four later
++checks written now** — their inputs do not exist, and a check over nothing is printed as such, not passed.
++
++*Reversal, for the author:* none for the key; a layer S-6 does not list, or a third name, is a change to `SAFETY.md` §3
++by a decision, which the check then reads.
+diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md
+index f31ed99..2eea6a9 100644
+--- a/meta/specs/BUILD.md
++++ b/meta/specs/BUILD.md
+@@ -128,13 +128,17 @@ runner and not a change of suite, and adds two of its own.
+ 
+ | Stage | Directory | Passes when |
+ |---|---|---|
+-| `parse` | every `.npk` in the tree | accepted by `tools/parse_check` with no diagnostic |
+-| `accept` | `tests/conformance/` | accepted by `tools/check` in silence |
+-| `check` | `tests/rejection/` | refused by the frontend with **exactly** the expected codes |
++| `parse` | every `.npk` in the tree | compiled by `npkc` as a root, with no `NITPICK-LEX-` or `NITPICK-PARSE-` code reported |
++| ~~`accept`~~ | — | struck: `tests/conformance/` is a `compile`/`positive` suite, built, linked and run |
++| `check` | `tests/rejection/`, `tests/probe/refused/` | refused by `npkc` with **exactly** the expected codes, each `expect-error-at` a site its code was reported at |
+ | `program` | `tests/unit/`, `tests/probe/`, `tests/fixtures/` | emitted, scanned, assembled, linked, run at -O0 and again under `opt -O2`, the same exit both times |
+ | `roundtrip` | `tests/roundtrip/` | **ours** — parse, print, parse again, and the second parse's event stream equals the first's (`WRITER_MODEL.md` §4) |
+ | `corpus` | `tests/corpus/<name>/` | **ours** — every case in a vendored conformance corpus is judged as the corpus says, with a per-corpus expected-pass count that must match exactly |
+ 
++*(2026-10-15, cycle 0.0.3 — @@PD-140@@: the `parse` and `check` stages are judged by `npkc`, not by the compiler's
++`tools/parse_check` and `tools/check`, which are `.npk` sources a run would have to build from the compiler's tree, and
++nothing here builds the compiler; and `accept` is struck, since `tests/conformance/` is run.)*
++
+ **Rule B-5 — expectations live in the test file.** The marker grammar is the
+ compiler's, marker for marker, plus two of ours:
+ 
+@@ -165,12 +169,18 @@ grammar that this runner does not judge yet — `argv:`, `expect-note:`,
+ `expect-obligation:`, `explore:`, `npkc-flags:` and their kin — and this library's
+ `expect-roundtrip:` and `expect-fault:` until their stages exist, make their file
+ fail by name: an expectation nobody checks is the failure this rule exists to stop.
++*(2026-10-15, cycle 0.0.3 — @@PD-140@@: a second observation, `// pending-until: DEF-<n> accepted`, for a `check`
++unit whose right answer is a refusal and which `npkc` accepts at the pin, exit 0 with no diagnostic — probe 08h, on
++DEF-252.)*
+ 
+ **Rule B-6 — assert on codes and exit codes, never on message text.**
+ 
+ **Rule B-7 — unexpected diagnostics fail a test as surely as missing ones**
+ (D-237). The set of codes a rejection test reports must **equal** the set its
+ expectations name.
++*(Re-read 2026-10-15, cycle 0.0.3 — @@PD-140@@: a SET, as written: the compiler's DEF-245 reports one failing
++header two or three times, so a count of reports would judge the report and not the refusal; and each
++`expect-error-at` names a site its code was reported at.)*
+ 
+ **Rule B-8 — the harness is itself tested** (`TESTING.md` §7). A self-check
+ feeds it wrong expectations and requires it to report every one as a failure,
+diff --git a/meta/specs/TESTING.md b/meta/specs/TESTING.md
+index 19e0ac7..49f78a2 100644
+--- a/meta/specs/TESTING.md
++++ b/meta/specs/TESTING.md
+@@ -51,16 +51,21 @@ them found something on its first run.
+ 
+ | Check | Diffs |
+ |---|---|
+-| `check_no_raw_accumulate` | `src/scan/` and `src/format/` for a `*` or `+` on an accumulator outside `arith.npk` — **the no-trap rule, enforced** (`SCAN_MODEL.md` C-15) |
++| `check_no_raw_accumulate` | `src/scan/` and `src/format/` outside `arith.npk` for any `*`, and any `x = x + …` whose added term is not a literal — **the no-trap rule, enforced** (`SCAN_MODEL.md` C-15) |
+ | `check_no_recursion` | every function in `src/` against a call-graph cycle — **the depth rule, enforced** (`SAFETY.md` §5). A cycle is a finding, and the exceptions table must name a reason |
+ | `check_no_owning_fields` | `Event`, `Node`, `ParseError`, `Frame` and every value stored in a `Vec` or an arena declare no owning field |
+-| `check_error_budget` | the count and names of public `error:` declarations against `SAFETY.md` §3's table — **two, and the check is what keeps it two** |
++| `check_error_budget` | the identities the tree's `fail` sites raise, keyed by (module, name), private ones included, against `SAFETY.md` §3's table and S-6's layers — **two names, and the check is what keeps it two** |
+ | `check_failsafe_arms` | the generated per-module arm list against a program that imports each module and compiles its `failsafe` |
+-| `check_layering` | every `use` edge against `BUILD.md` §6's diagram, including the `format` ↛ `doc` arrow specifically |
+-| `check_constants_named` | no bound outside `src/core/limits.npk` |
++| `check_layering` | every `use` edge between `src/` layers, and every module header's `MAY IMPORT:` line, against `BUILD.md` B-17's table — the `format` ↛ `doc` arrow (B-18) a cell of it |
++| `check_constants_named` | no integer literal under `src/` outside `src/core/limits.npk` equal to a bound of `SAFETY.md` §7's table, in any spelling; and `limits.npk`'s values the table's |
+ | `check_codes_documented` | every `FaultCode` variant appears in `DIAGNOSTIC_MODEL.md` §3's table and has at least one test that produces it |
+ | `check_corpus_provenance` | every corpus directory has a `PROVENANCE.md` naming its upstream commit, and the vendored tree's hash matches what it records |
+-| `check_specs_current` | reports, does not fail: spec sections whose cited symbols no longer resolve |
++| `check_specs_current` | reports, does not fail: a rule id a `src/` or `harness/` comment cites beside a specification's name that no specification defines |
++
++*(2026-10-15, cycle 0.0.3 — @@PD-142@@: the rows for `check_error_budget` (the ecosystem audit's EC3: it said "the count
++and names of public `error:` declarations"), `check_layering` (B-17's table since cycle 0.0.1), `check_constants_named`,
++`check_no_raw_accumulate` and `check_specs_current` say what each live check reads; `check_no_owning_fields`,
++`check_codes_documented` and `check_failsafe_arms` go live at cycle 0.2 and `check_corpus_provenance` at 0.3.)*
+ 
+ **Rule V-3 — `check_no_raw_accumulate` and `check_no_recursion` are the two
+ that matter most**, because they enforce the two rules that keep hostile input
+@@ -210,5 +215,12 @@ expectations and requires it to report every one as a failure:
+ - a `check_no_raw_accumulate` violation planted in a scratch file;
+ - a `parse` case that does not parse.
+ 
++*(2026-10-15, cycle 0.0.3 — @@PD-141@@: the cases are `harness/selfcheck.py`'s list, which every run prints case by
++case: the five of these whose stage exists, and more — a refusal at the wrong site, a refusal case `npkc` accepts,
++each tree check planted, and each way a pending marker can be wrong — and the three whose stage does not exist yet
++printed as pending with the cycle that builds it, beside `check_no_owning_fields`'s.)*
++
+ **Rule V-20 — the self-check runs first in every full invocation.** A harness
+ that has not proven it can fail has not proven anything.
++*(2026-10-15, cycle 0.0.3 — @@PD-141@@: first after the toolchain check and the floor program its cases are built on,
++and before every step that judges the library; a live case not red stops the run.)*
+diff --git a/nitpick.toml b/nitpick.toml
+index 7dd3932..40c5495 100644
+--- a/nitpick.toml
++++ b/nitpick.toml
+@@ -102,3 +102,13 @@ path  = "tests/probe"
+ name  = "defect-bound"
+ stage = "program"
+ path  = "tests/probe/defect/bound_pointer_receiver"
++
++# The parse sweep (cycle 0.0.3, @@PD-140@@): every `.npk` in the tree compiled as
++# a root, none with a LEX- or PARSE- code. It comes last, so a file a suite
++# judges is judged there first, by its own rule. The runner refuses a manifest
++# without it: a run that swept nothing would be green over files nothing compiled.
++[[test]]
++name      = "sweep"
++stage     = "parse"
++path      = "."
++recursive = true

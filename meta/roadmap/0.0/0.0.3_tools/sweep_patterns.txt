@@ -1,0 +1,9 @@
+# 0.0.3's stale-claim sweep: one subject per claim the steps changed, `<subject> | <regex>`, matched case-insensitively
+# over joined text (`../tools/sweep.py`). A candidate is not a finding: 0.0.3.md §6 gives each one's class.
+the public error count | every public .?error|public error identit|count and names of public|two public error|exactly two identities|two .?error:?.? identit|two identities|two the library declares
+the compiler's tools as judges | tools/parse_check|tools/check\b
+the accept stage | accepted by .?tools/check|\baccept\b[^.]{0,30}\bstage
+the layering's diagram | §6.s diagram|against .?BUILD\.md.? §6
+probe 08h's old header | npkc: 0|run: 170 at
+the specs check's old reach | cited symbols no longer resolve
+the self-check's eight | the eight cases|five live and three pending|eight cases

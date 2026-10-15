@@ -1,0 +1,201 @@
+diff --git a/CLAUDE.md b/CLAUDE.md
+index 8585379..eb288f5 100644
+--- a/CLAUDE.md
++++ b/CLAUDE.md
+@@ -42,7 +42,9 @@ The shared house rules for every library in this ecosystem are
+   commit — never by editing the text and moving on, and never by a comment.
+ - **A settled decision's text is never rewritten.** Supersede it with a new
+   numbered decision that says why. This is the compiler's D-085/D-202 pattern.
+-- **Two public error identities, and no input can produce either** (PA-008).
++- **Two error names, and no input can produce either** (PA-008); an identity is a
++  module and a name, so a consumer owes an arm for each one a reachable `fail`
++  raises, a private one too (`meta/specs/SAFETY.md` §3, @@PD-142@@).
+   `EParseState` and `EParseEncode` fire only on programmer misuse. Every
+   condition an input can cause is a `Fault` value the caller must handle by
+   `pick` exhaustiveness. **Adding a third is a major version and needs a
+@@ -115,7 +117,9 @@ compiler's own bootstrap ladder, and `[dependencies]` resolves to nothing.
+ `NPKC=… NPKRT=… python3 -B harness/run.py` builds and scans every module under
+ `src/`, runs every suite `nitpick.toml` declares at −O0 and through `opt -O2`,
+ and prints its verdict last (`harness/README.md`). *(Until cycle 0.0.2 the probes
+-were run by hand, by `meta/roadmap/0.0/0.0.0.md` §2's command.)*
++were run by hand, by `meta/roadmap/0.0/0.0.0.md` §2's command.)* Since cycle 0.0.3 it
++runs its self-check before it judges anything, judges the refusals by their codes,
++sweeps every `.npk` in the tree, and runs the tree checks; `--only` concludes nothing.
+ 
+ The compiler binary is the **pinned toolchain** the board names
+ (`../BOARD.md`, W-18): `$NPKC` and `$NPKRT` are supplied to every session by the
+diff --git a/CONTRIBUTING.md b/CONTRIBUTING.md
+index 21ade9f..af9907c 100644
+--- a/CONTRIBUTING.md
++++ b/CONTRIBUTING.md
+@@ -32,7 +32,7 @@ never for concluding; nothing is committed on the strength of a filtered run.
+ 
+ 1. **A syntax error is not an error.** It is a `Fault` value in the success
+    channel, and `pick` exhaustiveness is what forces the caller to handle it.
+-   The library declares two `error:` identities and **neither can be produced
++   The library declares two `error:` names and **neither can be produced
+    by any input**. If you find yourself adding a third, and the trigger is
+    something a byte stream can cause, you have found a design mistake rather
+    than a missing error.
+diff --git a/README.md b/README.md
+index 787ca4a..5bedfed 100644
+--- a/README.md
++++ b/README.md
+@@ -35,14 +35,14 @@ share it".
+ ## What makes it different
+ 
+ **A syntax error is a value, not an error.** This is the headline. In Nitpick
+-every public `error:` a library declares becomes a mandatory `pick` arm in
+-every consuming program's `failsafe`, and an unhandled one stops the process.
++every error identity a library's reachable `fail` raises — public or private, named
++by its module — becomes a mandatory `pick` arm in every consuming program's `failsafe`, and an unhandled one stops the process.
+ For a library whose entire job is reading input somebody else controls, routing
+ malformed input through that channel would mean a bad byte can stop a program.
+ So it does not: `parse_next` returns a `Step` — `Ev`, `Fault(ParseError)` or
+ `Done` — and `pick` exhaustiveness makes the caller handle the fault. **No
+-input, however hostile, can produce an error identity.** The two the library
+-declares can only fire on programmer misuse.
++input, however hostile, can produce an error identity.** The two error names the
++library declares can only fire on programmer misuse.
+ 
+ **Parsing a number cannot stop your program.** Plain integer overflow *traps*
+ in Nitpick (D-210), so the ordinary `acc = acc * 10 + d` accumulator crashes the
+diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
+index df5617f..1c105e5 100644
+--- a/meta/DECISIONS.md
++++ b/meta/DECISIONS.md
+@@ -149,6 +149,9 @@ cycle 0.12's application; semantic versioning thereafter.
+ 
+ - **adding a public `error:` identity** — REACH-002 makes it a new mandatory
+   `failsafe` arm in every consumer, a compiler-enforced source break;
++  *(2026-10-15, cycle 0.0.3 — @@PD-142@@: measured at the pin, the arm is owed for every identity a reachable
++  `fail` raises, a PRIVATE one included, named by its module — so this reads "adding an identity a reachable `fail`
++  raises".)*
+ - **adding an `EventKind`, a `ScalarKind`, a `NodeKind` or a `FaultCode`
+   variant** — a consumer's exhaustive `pick` stops compiling;
+ - removing or renaming any public name, as usual.
+diff --git a/meta/roadmap/0.2/README.md b/meta/roadmap/0.2/README.md
+index 8df38c5..6fddb15 100644
+--- a/meta/roadmap/0.2/README.md
++++ b/meta/roadmap/0.2/README.md
+@@ -60,7 +60,7 @@ cycle freezes**.
+ - [ ] `Options` with every field and `options_default()` (G-12: struct literals must be complete, so the constructor is the compatible path)
+ - [ ] **an incoherent option is `EParseState` at construction**, not a surprise at step 4000 (E-21) — asserted for `max_depth == 0` and `max_scalar == 0`
+ - [ ] `step` idempotent after `Done` and after `Fault` (PA-024), asserted by calling three more times
+-- [ ] `check_error_budget` confirming exactly two identities exist
++- [ ] `check_error_budget` confirming the identities the tree's `fail` sites raise, keyed by (module, name), are the ones `SAFETY.md` §3 and S-6 allow (cycle 0.0.3's check)
+ 
+ ### 0.2.3 — the depth stack
+ - [ ] `Frame { kind, count, span }`, `Vec<Frame>`, **preallocated to the bound** (E-16)
+diff --git a/meta/roadmap/0.5/README.md b/meta/roadmap/0.5/README.md
+index 07b13e3..8d4a7f7 100644
+--- a/meta/roadmap/0.5/README.md
++++ b/meta/roadmap/0.5/README.md
+@@ -38,7 +38,7 @@ PA-060, PA-061, PA-062, PA-080. All settled.
+ - [ ] `ND_BIG` written verbatim from its retained text (W-8)
+ - [ ] `-0` written as `-0`, asserted through a full round trip (E-9)
+ - [ ] **an explicit stack**, not recursion (W-4) — a 50 000-deep document printed and freed, exiting 0
+-- [ ] `EParseEncode` for what JSON cannot represent: a `Date` scalar, a NaN, a non-string map key — the second of the library's two error identities, and a **caller** mistake
++- [ ] `EParseEncode` for what JSON cannot represent: a `Date` scalar, a NaN, a non-string map key — the second of the library's two error names, and a **caller** mistake
+ - [ ] the writer is deterministic: the same document printed twice is byte-identical, asserted
+ 
+ ### 0.5.1 — the `EventSink` trait
+diff --git a/meta/roadmap/1.0/README.md b/meta/roadmap/1.0/README.md
+index 186c83d..94a2869 100644
+--- a/meta/roadmap/1.0/README.md
++++ b/meta/roadmap/1.0/README.md
+@@ -32,7 +32,7 @@ decide it.
+ - [ ] the per-import arm list generated (`specs/SAFETY.md` S-7) and published in `docs/`
+ - [ ] `check_failsafe_arms` proving the published list is what a program actually owes
+ - [ ] **the headline stated once, prominently**: `nparse` declares two error
+-      identities, `EParseState` and `EParseEncode`, and **no input can produce
++      names, `EParseState` and `EParseEncode`, and **no input can produce
+       either** — every condition a byte stream can cause is a `Fault` value the
+       compiler makes you handle
+ - [ ] the modules that declare **no** errors named explicitly (`scan`, `event`,
+@@ -67,7 +67,7 @@ decide it.
+ - [ ] **the three major-version triggers stated prominently**: a new `error:`
+       identity, a new variant in any closed enum, and any removal — the first
+       two being rules no other language's library has to have
+-- [ ] the current counts published beside them (two identities; nine
++- [ ] the current counts published beside them (two error names; nine
+       `EventKind`s; nine `ScalarKind`s), so a consumer can see the budget rather
+       than infer it
+ 
+diff --git a/meta/roadmap/ROADMAP.md b/meta/roadmap/ROADMAP.md
+index 4d6a5f8..006b31b 100644
+--- a/meta/roadmap/ROADMAP.md
++++ b/meta/roadmap/ROADMAP.md
+@@ -47,7 +47,8 @@ whether it kept them.**
+ 
+ The second constraint is what shapes the *interface*:
+ 
+-> **Every public `error:` costs every consumer a `failsafe` arm** (REACH-002),
++> **Every error identity a reachable `fail` raises costs every consumer a `failsafe` arm** (REACH-002 —
++> public or private, named by its module),
+ > and **there are no closures** (D-018).
+ 
+ The first made a syntax error a **value** rather than an error (PA-008), which
+diff --git a/meta/specs/GLOSSARY.md b/meta/specs/GLOSSARY.md
+index 00d4032..62bd398 100644
+--- a/meta/specs/GLOSSARY.md
++++ b/meta/specs/GLOSSARY.md
+@@ -11,7 +11,7 @@ two ways, this table says which one `nparse` means.
+ | **event** | one item of the pull stream: a container boundary, a key, or a scalar. 32 bytes, no owning field (@@PD-129@@). |
+ | **step** | one call's answer: `Ev`, `Fault` or `Done`. |
+ | **fault** | a `ParseError` **value** — what a malformed input produces. **Never** an `error:` identity. |
+-| **error** | one of the two `error:` identities, `EParseState` and `EParseEncode`. Only a *caller* can cause one. |
++| **error** | one of the two `error:` names, `EParseState` and `EParseEncode` — an identity is a module and a name (`SAFETY.md` §3). Only a *caller* can cause one. |
+ | **scalar** | a leaf value: null, bool, number, string, or a format's date/time. |
+ | **text ref** | where a scalar's bytes are — in the input, or in the parser's scratch. Valid until the next step. |
+ | **scratch** | the parser's own byte buffer, holding only scalars an escape forced it to rewrite. |
+diff --git a/meta/specs/README.md b/meta/specs/README.md
+index a8c1155..c7bb139 100644
+--- a/meta/specs/README.md
++++ b/meta/specs/README.md
+@@ -66,5 +66,5 @@ implementation reads bytes the caller owns and answers `Ev`, `Fault` or `Done`;
+ a small tree builder over that stream produces a `Document` for callers who want
+ one. Scalar text is a reference into the input, so nothing proportional to the
+ input is copied. A syntax error is a value the caller must handle, never an
+-error identity — **no input can produce one of the two identities this library
++error identity — **no input can produce one of the two error names this library
+ declares**.
+diff --git a/meta/specs/SAFETY.md b/meta/specs/SAFETY.md
+index a85ab40..7712438 100644
+--- a/meta/specs/SAFETY.md
++++ b/meta/specs/SAFETY.md
+@@ -15,7 +15,7 @@ costs a library that reads bytes somebody else controls.
+ 
+ | Language rule | Where | Consequence for `nparse` |
+ |---|---|---|
+-| `failsafe`'s `pick` must **name** every error that can reach it | REACH-002 | Every public `error:` we declare is an arm every consuming program owes. §3. |
++| `failsafe`'s `pick` must **name** every error that can reach it | REACH-002 | Every identity a reachable `fail` raises — public or private, named by its module (`m.E`) — is an arm every consuming program owes, and a declaration never raised costs nothing (measured at the pin, @@PD-142@@). §3. |
+ | Reachability is **import-scoped** | 1.4.8's `nsys` note | Module decomposition decides what a consumer's `failsafe` owes. §3. |
+ | Plain integer `+ - *` **traps** on overflow | D-210 | `acc = acc * 10 + d` is a **remote crash**. §4 — this is the biggest one. |
+ | `/` and `%` by zero trap | D-007, D-142 | A divisor from input is checked before use. §4. |
+@@ -67,7 +67,11 @@ stops the process. For a library whose entire job is reading bytes somebody
+ else controls, **routing malformed input through that channel would mean a bad
+ byte can stop a program.** So it does not.
+ 
+-`nparse` declares exactly two public error identities:
++`nparse` declares exactly two error names, each raised only in the layers S-6 lists:
++*(Corrected 2026-10-15, cycle 0.0.3 — @@PD-142@@, the ecosystem audit's EC3: this said "exactly two public error
++identities". An identity is a module and a name — measured at the pin, a root importing a module whose reachable
++`fail` raises a PRIVATE error owes it as `<module>.<name>`, and a public error never raised costs nothing — so the two
++are names, and `check_error_budget` holds the identities the tree raises to this table and S-6.)*
+ 
+ | Error | Raised when | Can an input cause it? |
+ |---|---|---|
+diff --git a/meta/specs/WRITER_MODEL.md b/meta/specs/WRITER_MODEL.md
+index 2ba9e2f..d643f68 100644
+--- a/meta/specs/WRITER_MODEL.md
++++ b/meta/specs/WRITER_MODEL.md
+@@ -156,7 +156,7 @@ only one.
+ **Rule W-16 — a sink refuses what its format cannot represent** with
+ `EParseEncode`: a NaN in JSON, a top-level scalar in TOML, a map key that is not
+ a string, a `Date` scalar in JSON. This is the second of the library's two error
+-identities (`SAFETY.md` §3) and it is a **caller** mistake — the caller chose
++names (`SAFETY.md` §3) and it is a **caller** mistake — the caller chose
+ the target format — which is why it is an identity rather than a `Fault`.
+ 
+ ---

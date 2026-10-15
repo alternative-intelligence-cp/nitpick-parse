@@ -1,0 +1,14 @@
+# 0.0.3's mutants of the harness's second half -- each one facet of one check broken alone, by the edits of one
+# name; `mutants.py` makes each edit exactly once in a copy of the tree's HEAD and runs the harness there.
+# TAB-separated: name, file, the text replaced, its replacement; `\n` is a newline and `\t` a tab.
+refusal-code	tests/probe/refused/probe05_arena_owning.npk	// expect-error: NITPICK-TYPE-007	// expect-error: NITPICK-TYPE-008
+refusal-site	tests/probe/refused/probe08b_view_of_local_returned.npk	// expect-error-at: 13:22	// expect-error-at: 13:23
+sweep-parse-error	tests/probe/probe12_module_fixed.npk	mod:probe12_module_fixed;	mod:probe12_module_fixed
+sweep-entry-dropped	nitpick.toml	[[test]]\nname      = "sweep"\nstage     = "parse"\npath      = "."\nrecursive = true\n	
+pending-refusal-unlisted	harness/baseline/PENDING.txt	tests/probe/defect/view_reseat/probe08h_view_reseated.npk\tDEF-252\taccepted\tthe compiler registered it DEF-252 (2026-10-15); green when npkc refuses a callee's reseat of a view into a place its caller owns, NITPICK-BORROW-002 -- landing 116's fix, so it flips at the re-pin at 118 and stays pending at a pin below 116\n	
+selfcheck-blind	harness/stages.py	            why.append("reported and not expected: " + " ".join(sorted(got - want)))\n	            pass\n
+layering-header	src/core/core.npk	// MAY IMPORT: nothing (	// MAY IMPORT: `scan` (
+error-budget-core	src/core/core.npk	mod:core;\n	mod:core;\n\nerror:ECore;\n\npub func:core_fail = NIL() {\n    fail ECore;\n};\n
+constant-unnamed	src/scan/scan.npk	mod:scan;\n	mod:scan;\n\npub func:scan_digits = int64() never fails {\n    pass 4096i64;\n};\n
+raw-accumulate	src/scan/scan.npk	mod:scan;\n	mod:scan;\n\npub func:scan_acc = int64(int64:acc, int64:d) {\n    pass acc * 10i64 + d;\n};\n
+recursion	src/scan/scan.npk	mod:scan;\n	mod:scan;\n\npub func:scan_depth = int64(int64:n) {\n    int64:m = relay scan_depth(n);\n    pass m;\n};\n

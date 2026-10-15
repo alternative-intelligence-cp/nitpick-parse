@@ -15,7 +15,7 @@ in the owed-items table below.
 | [0.0.0](0.0.0.md) | **yes** — probes measured, five patches, blocks with filled Expects |
 | [0.0.1](0.0.1.md) | **yes** — six patches over 0.0.0's record, blocks with filled Expects; CI's run is its worker's |
 | [0.0.2](0.0.2.md) | **yes** — three patches over 0.0.1's record, blocks with filled Expects, the mutants' table; CI's run is its worker's |
-| [0.0.3](0.0.3.md) | not yet |
+| [0.0.3](0.0.3.md) | **yes** — three patches over 0.0.2's record, blocks with filled Expects, the mutants' table; CI's run is its worker's |
 | [0.0.4](0.0.4.md) | not yet |
 | [0.0.5](0.0.5.md) | not yet |
 
@@ -60,7 +60,10 @@ author.**
 | PD-137 | 0.0.1 | one currency table; the library is security-sensitive, and its three research items gate cycle 0.1 |
 | PD-138 | 0.0.2 | the build is one module per root, held to the target rows, scanned two ways on both legs, and reproducible from two directories |
 | PD-139 | 0.0.2 | a unit red on a compiler defect is pending: its right answer, the one failure it is excused, and a reviewed list |
-| PD-140 onward | 0.0.3 … 0.0.5 | proposed by those files as they reach the pin |
+| PD-140 | 0.0.3 | the refusals and the sweep are judged by `npkc`; `accept` struck; a refusal a set of codes at their sites; the reseat's defect a pending refusal |
+| PD-141 | 0.0.3 | the self-check is its own printed list, live and pending, run before any judgment; a filtered run concludes nothing |
+| PD-142 | 0.0.3 | the tree checks read their authorities; the error budget keyed by module and name, private identities included |
+| PD-143 onward | 0.0.4, 0.0.5 | proposed by those files as they reach the pin |
 
 ## The pin, and what each later landing would move
 
@@ -89,7 +92,7 @@ started finishes at the pin it started at.
 | 114 (DEF-250; F56) | the D-211 check hoisted out of the initialiser's branch: a module-level binding with no initialiser — `int64:counter;`, and the bare struct, `stack`, `wild`, `wildx`, `pub`, `atomic<int64>` and channel forms — is `NITPICK-TYPE-055` at its declaration | **nothing**: every module-level binding the cycle writes is a `fixed` one with an initialiser, but probe 12b's, a plain one with an initialiser, refused on purpose and `TYPE-055` at the pin already (`tools/rulings.py`) |
 | 115 (DEF-251; F57) | every emitted `define` carries LLVM's `null_pointer_is_valid` | **every program's emitted IR moves, by design**: CI's `npkc.ll` row — the compiler's own emission, `b79f89c5…` at `7e91730` — moves with the re-pin as with any; the cycle records no digest or byte count of its own programs' IR, and no comparison of IR across two pins; and
 0.0.0's §1.5 recursion edges, which measure the emitted frames at each leg, are re-measured by its block 0b. D-355, `NULL` legal only for `wild` pointers, is a later landing of its own: the cycle writes no `NULL` (`tools/rulings.py`) |
-| 116 (DEF-252, the use-after-free) | a callee's store of a view into a place its caller owns asks DEF-42's holder-scope question at the call: `NITPICK-BORROW-002` | **probe 08h's verdict** (`tests/probe/defect/view_reseat/`): refused, its right answer — it flips at the adoption of a pin of 116 or later |
+| 116 (DEF-252, the use-after-free) | a callee's store of a view into a place its caller owns asks DEF-42's holder-scope question at the call: `NITPICK-BORROW-002` | **probe 08h's verdict** (`tests/probe/defect/view_reseat/`): refused, `NITPICK-BORROW-002`, its right answer — 0.0.3's PENDING refusal on DEF-252, which flips at the adoption of a pin of 116 or later and stays pending below it |
 | 117 (D-353, with D-354) | a generic value parameter is a RESERVED form, refused by a code of its own, and D-336's corpus admits that verdict | **nothing**: none written; a capacity is a `fixed` constant (the libraries' S-135 answer) |
 | 118 (DEF-253, with DEF-254) | a synchronous `Self->` method called through a generic bound links; and a trait's default method calling a sibling on `self`, which never linked, links | **probe 06's verdict** (`tests/probe/defect/bound_pointer_receiver/`): it links and runs, exit 0 — 0.0.2's PENDING unit on DEF-253, which flips at the adoption of a pin of 118, and not at a pin below it (the run then reddens to say its marker is stale, and the marker and its line in `harness/baseline/PENDING.txt` go); and nothing for DEF-254: no trait default calls a sibling on `self` (`tools/shapes.py`) |
 
@@ -160,7 +163,7 @@ no literal outside the envelope; `#size_of` measured, never summed; a container'
 | E2-13, no `CURRENCY.md` | 0.0.1 | `meta/research/CURRENCY.md` created; the library counted security-sensitive and its three research items named |
 | E2-15, `CLAUDE.md`'s empty heading | 0.0.1 step 5 | the paragraph moved under "What this is" |
 | EC2, what an index does | 0.0.0 step 4; 0.0.4 | `SAFETY.md`'s row and `VERIFICATION.md` §2 with probe 11's measurement; the accessors guard every pointer index |
-| EC3, "every public `error:`" | 0.0.3 | `check_error_budget` keyed by module and name, private identities included, and the sentences and their twins |
+| EC3, "every public `error:`" | 0.0.3 | `check_error_budget` keyed by module and name, private identities included (measured: a private identity a reachable `fail` raises is owed as `<module>.<name>`); EC3's sentences and twins, and six more found by the claim's subject (PD-142) |
 | ED2, local `O-N` ids | 0.0.0 steps 2 and 4 | O-N2, O-N3 and O-N4 each say their id is this repository's own; nothing takes a registry id |
 | ES1, "nothing exists today" | 0.0.0 step 4 | O-N2 struck as answered |
 | EK1, `VERIFICATION.md` P-1 | 0.0.4 | P-1 replaced: an obligation is a comment unless a decision accepts the arm its live clause costs |
@@ -180,7 +183,7 @@ no literal outside the envelope; `#size_of` measured, never summed; a container'
 | 8 | whether `nitpick-regex`'s answer on live contracts (A′, its `VERIFICATION.md` P-1b) binds this library | handed to 0.0.4, which writes the obligations (EK1) |
 | 9 | the `repro` check | settled by 0.0.2: each copy carries its manifest, since without it the consumer's two modules differ — the check's mutant (PD-138, `BUILD.md` B-4) |
 | 10 | the undefined-symbol scan | settled by 0.0.2: the call-edge scan stands behind PA-006, over every module under `src/` and every program, and the floor and the syscaller are its controls on every run (PD-138, B-2a) |
-| 11 | `tools/parse_check` and `tools/check` | handed to 0.0.3: `npkc` and the code family; `accept` struck |
+| 11 | `tools/parse_check` and `tools/check` | settled by 0.0.3: both are compiler sources at the pin, so `npkc` judges the sweep by the code family and the refusals by their codes; `accept` struck (PD-140) |
 | 12 | which harness runs the dogfood consumer | handed to 0.0.5 (E2-6) |
 | 13 | the currency file's name | handed to 0.0.1 (E2-13) |
 | 14 | sweeps | settled: every sweep runs inside this repository and prints its denominator (`tools/sweep.py`) |
@@ -243,11 +246,12 @@ file states its own acceptance when it reaches the pin, and where the two differ
 - [ ] CI's harness step asserting the runner's unqualified green summary
 
 ### 0.0.3 — the harness, part 2
-- [ ] the parse sweep (`npkc` over every `.npk`, judged by the diagnostic's code family) and the refusal stage with the **exact-code** rule (B-7); `accept` struck
-- [ ] 0.0.0's `refused/` judged by its codes, and `defect/`'s verdicts re-derived on every run
-- [ ] `--only`, and output that says twice that a filtered run concludes nothing
-- [ ] `harness/selfcheck.py`, its live cases each **seen red** and its pending ones printed as pending; it runs **first**
-- [ ] `check_layering`, `check_error_budget` (keyed by module and name), `check_constants_named`, `check_no_raw_accumulate`, `check_no_recursion` live; `check_no_owning_fields` from 0.2
+- [ ] the parse sweep (`npkc` over every `.npk`, judged by the diagnostic's code family) and the refusal stage with the **exact-code** rule (B-7, a set at its sites); `accept` struck
+- [ ] 0.0.0's `refused/` judged by its codes; probe 08h PENDING on DEF-252, listed; the runner refusing a manifest with no sweep
+- [ ] `--only`, and output that says twice that a filtered run concludes nothing and never the green summary
+- [ ] `harness/selfcheck.py`, its sixteen live cases each **seen red** and its four pending printed as pending; it runs before any judgment, and a live case not red stops the run
+- [ ] `check_layering`, `check_error_budget` (keyed by module and name), `check_constants_named`, `check_no_raw_accumulate`, `check_no_recursion` and `check_specs_current` live, each saying what it read; `check_no_owning_fields` from 0.2
+- [ ] EC3's sentences corrected; each mutant red by the check it breaks
 
 ### 0.0.4 — `src/core/`
 - [ ] `src/core/limits.npk` — every constant from `specs/SAFETY.md` §7, each with the rule that set it
