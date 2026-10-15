@@ -62,9 +62,13 @@ author.**
 
 ## The pin, and what each later landing would move
 
-**Plan at `7e91730`** — the workbench's pin, landings 83 … 103 — and **re-pin once, after landing 115**, by the
-author's word, so that one adoption carries 104 … 115. The table names each place in this cycle's plan a landing
-would move, so that **the adoption is this list, not a search**. A re-pin is taken **between subcycles**, never inside
+**Plan at `7e91730`** — the workbench's pin, landings 83 … 103 — and **re-pin once, at landing 118**, by the
+author's word on the workbench's question 32 (2026-10-15 12:04), so that one adoption carries 104 … 118: the
+use-after-free fix (116), the refusal of generic value parameters (117) and the two link fixes (118). If 118 has not
+landed when the adoption round starts, the pin is the newest landing on the compiler's `main` then, never before 115,
+and **a pin below 118 flips only what it carries**. *(Corrected 2026-10-15 by the pass's continuation: this said
+"after landing 115", the author's word of 07:42, which question 32 superseded.)* The table names each place in this
+cycle's plan a landing would move, so that **the adoption is this list, not a search**. A re-pin is taken **between subcycles**, never inside
 one (the early ecosystem audit's EC9: the `7e91730` pin itself was taken mid-cycle elsewhere); a subcycle that has
 started finishes at the pin it started at.
 
@@ -78,15 +82,29 @@ started finishes at the pin it started at.
 | 109 (DEF-224, D-352) | `failsafe`'s `pick` is found through bare blocks | **newly allowed**, not used: every `failsafe` opens with its `pick` |
 | 110 (DEF-226) | `pick (r.is_error)` carries the check out | **nothing**: the cycle tests a `Result` with `if (r.is_error)` |
 | 111 (DEF-233, DEF-238) | a `give` or `fall` outside its arm is `NITPICK-TYPE-094`; a `frac` member written is `NITPICK-TYPE-024` | **nothing**: none written. At `7e91730` a stray `give`/`fall` ends `npkc` at exit 3 with no message, which a refusal fixture would misread; none is planned |
-| 112 (DEF-232) | the board names it for DEF-232: a struct's `NIL` field, accepted at the pin and emitted as `{ i32, void }`, which `llc` refuses | **nothing**: no `NIL` field |
-| 113 (DEF-235, DEF-236 (c)(d)(e), DEF-237, DEF-234 (c)) | the board names it for these defects, each open at the pin: `acquire`, `any`, `trit`, `nit` accepted as a module function's name and `buffer` as a pointer local's, then unusable; a non-constant `joins` deadline, an unknown attribute name and a module-level `opaque struct` accepted; `??`'s advice naming the retired `?`; `RESOLVE-006` not naming a constant cycle | **the attribute names** — every one is `derive`, `Eq`, `Debug` or `Copy`, so a refusal of unknown names moves none; nothing named `acquire`, `any`, `trit`, `nit` or a local `buffer` (`specs/BUILD.md` §7 lists `any` and `buffer`); no `joins`, no `opaque`, no `??` on a `Result`. What its notice will say is not yet known |
-| 114, 115 | **not announced — nothing is known** | read each notice against this table's columns; and re-derive the two defect directories first (`tests/probe/defect/`), since a landing that fixes either turns its verdict |
+| 112 (DEF-232; its notice F54; on the compiler's `main` as `958890a`) | a `NIL` member is the zero-sized `{}`, as D-084 says; the checker unchanged | **nothing**: no `NIL` field (`tools/shapes.py`, in each subcycle's facts) |
+| 113 (its notice F55: DEF-235, DEF-236 (c)(d)(e), DEF-237, DEF-234 (c)) | `NITPICK-PARSE-001` at a keyword declared as a name of ANY kind; `NITPICK-TYPE-045` at a `joins` deadline that is not a constant; `NITPICK-DERIVE-007` at an attribute not named `derive`, and at any attribute on a local binding (`DERIVE-004` at `#[derive]` on an impl); `NITPICK-RESOLVE-014` at an `opaque struct` outside an `extern` block; two texts | **nothing, checked against F55's text and the pin's keyword table**: every declared name of every kind the rule lists, in every `.npk` the cycle's patches add, read against `src/frontend/keywords.npk` at the pin — 170 words, the same set in landing 113's work — by `tools/names.py`, proved on a planted control holding each kind: none is a keyword. Every attribute is `derive`, on a struct or an enum; no `joins`, no `opaque`; and the two `??` the cycle writes, in probe 01b, are on an `Optional`, not a `Result`. *(Corrected 2026-10-15: this row named five words and a local `buffer`, the defects' first reading; F55's rule is every keyword, every kind of name.)* |
+| 114 (DEF-250; F56) | the D-211 check hoisted out of the initialiser's branch: a module-level binding with no initialiser — `int64:counter;`, and the bare struct, `stack`, `wild`, `wildx`, `pub`, `atomic<int64>` and channel forms — is `NITPICK-TYPE-055` at its declaration | **nothing**: every module-level binding the cycle writes is a `fixed` one with an initialiser, but probe 12b's, a plain one with an initialiser, refused on purpose and `TYPE-055` at the pin already (`tools/rulings.py`) |
+| 115 (DEF-251; F57) | every emitted `define` carries LLVM's `null_pointer_is_valid` | **every program's emitted IR moves, by design**: CI's `npkc.ll` row — the compiler's own emission, `b79f89c5…` at `7e91730` — moves with the re-pin as with any; the cycle records no digest or byte count of its own programs' IR, and no comparison of IR across two pins; and
+0.0.0's §1.5 recursion edges, which measure the emitted frames at each leg, are re-measured by its block 0b. D-355, `NULL` legal only for `wild` pointers, is a later landing of its own: the cycle writes no `NULL` (`tools/rulings.py`) |
+| 116 (DEF-252, the use-after-free) | a callee's store of a view into a place its caller owns asks DEF-42's holder-scope question at the call: `NITPICK-BORROW-002` | **probe 08h's verdict** (`tests/probe/defect/view_reseat/`): refused, its right answer — it flips at the adoption of a pin of 116 or later |
+| 117 (D-353, with D-354) | a generic value parameter is a RESERVED form, refused by a code of its own, and D-336's corpus admits that verdict | **nothing**: none written; a capacity is a `fixed` constant (the libraries' S-135 answer) |
+| 118 (DEF-253, with DEF-254) | a synchronous `Self->` method called through a generic bound links; and a trait's default method calling a sibling on `self`, which never linked, links | **probe 06's verdict** (`tests/probe/defect/bound_pointer_receiver/`): it links and runs, exit 0 — it flips at the adoption of a pin of 118, and not at a pin below it; and nothing for DEF-254: no trait default calls a sibling on `self` (`tools/shapes.py`) |
+
+**Also ruled in landing 112's commit** (D-353 … D-359, the board's notice F54), each held to what the cycle writes:
+generic value parameters out until designed — 117 above; `NULL` legal only for `wild` pointers (D-355) — none written; a
+payload-less enum variant as a constant outside the evaluator — no `fixed` initialiser names a variant; a `comptime func:`
+compile-time only — no `comptime` written; the floor through `opt -O2` as its own measured landing — it moves the
+runtime object, whose symbols 0.0.2's build step 1 re-measures on every run; and the orphan rule (S-37) — every `impl`
+the cycle writes sits in the file that declares its type and its trait (`tools/rulings.py`). *(Corrected 2026-10-15:
+this table said "nothing is known" of 114 and 115, and stopped there; the record's entries of 08:06, 08:08, 09:22 and
+12:03 say what each is.)*
 
 **Unbuilt and watched:** the compiler's D-341 (a `buffer` indexed and ranged, a view frozen like any other) is settled
 and in no landing above; the day one carries it, 0.0.4's `Bytes` may offer a frozen view (its decision's reversal).
 
 **At the re-pin, the adoption is:** 0.0.0's blocks 1 … 4 at the new pin (every verdict in its §6), the defect
-directories' verdicts, each subcycle's facts block, CI's pinned rows (the commit and the compiler's `npkc.ll` digest,
+directories' verdicts (re-derived first: the pin flips each fix it carries), each subcycle's facts block, CI's pinned rows (the commit and the compiler's `npkc.ll` digest,
 `b79f89c5…` at `7e91730`), and this table's "what it would move" column, row by row.
 
 ## The shapes this cycle does not write

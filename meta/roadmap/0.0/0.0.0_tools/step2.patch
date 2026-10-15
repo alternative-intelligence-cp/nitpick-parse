@@ -601,7 +601,7 @@ index 0000000..66c22e7
 +mod:probe02_pod_event;
 +
 +// The shapes as `meta/specs/` declares them -- copied, since a probe imports nothing from `src/`
-+// (P-1) and `src/` holds none yet.
++// (`0.0.0.md` §3) and `src/` holds none yet.
 +#[derive(Eq, Debug, Copy)]
 +enum:EventKind = { StartMap; EndMap; StartSeq; EndSeq; Key; Scalar; Comment; DocStart; DocEnd; };
 +#[derive(Eq, Debug, Copy)]
@@ -728,7 +728,7 @@ index 0000000..53cf575
 +mod:probe03_payload_enum;
 +
 +// The shapes as `meta/specs/` declares them -- copied, since a probe imports nothing from `src/`
-+// (P-1) and `src/` holds none yet.
++// (`0.0.0.md` §3) and `src/` holds none yet.
 +#[derive(Eq, Debug, Copy)]
 +enum:EventKind = { StartMap; EndMap; StartSeq; EndSeq; Key; Scalar; Comment; DocStart; DocEnd; };
 +#[derive(Eq, Debug, Copy)]

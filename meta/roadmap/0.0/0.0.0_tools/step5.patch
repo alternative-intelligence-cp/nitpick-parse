@@ -14,7 +14,7 @@ index 04c170c..3d9f951 100644
 -most — **an accumulate-with-check that provably does not trap where the naive
 -one does.** A probe that fails changes the design.
 +The **language probes** first — the programs in `tests/probe/`, every verdict in
-+`0.0/0.0.0.md` §7 — asking the compiler whether the shapes the design depends on are
++`0.0/0.0.0.md` §6 — asking the compiler whether the shapes the design depends on are
 +spellable: the specification's own `Event`, `Step` and `Node` with their sizes
 +measured, an arena whose `get` copies and which refuses an owning element, a
 +trait with a `Self->` receiver through a bound **and** through `dyn`, the
@@ -36,13 +36,13 @@ index 0000000..3a22f33
 +
 +Small programs that ask the compiler whether a shape `meta/specs/` depends on is
 +spellable, compilable and correct — written and measured by cycle 0.0.0
-+([`meta/roadmap/0.0/0.0.0.md`](../../meta/roadmap/0.0/0.0.0.md), whose §7 holds every
++([`meta/roadmap/0.0/0.0.0.md`](../../meta/roadmap/0.0/0.0.0.md), whose §6 holds every
 +verdict), and kept as a regression suite for the language this library is built
 +on. **A probe is never deleted.** A compiler change that breaks one of these
 +shapes is caught here, not by a format failing mysteriously in a later cycle.
 +
 +Every probe is a program: its own `main` and `failsafe`, importing nothing from
-+`src/` (P-1). Its `failsafe` names exactly the identities the compiler says can
++`src/`. Its `failsafe` names exactly the identities the compiler says can
 +reach it (`NITPICK-REACH-003`), with the arm codes of `PLAYBOOK.md` §3 item 8 and
 +the three the library adds — 97 `DivByZero`, 98 `DivOverflow`, 110 `StaleHandle`
 +(`meta/DECISIONS.md`, @@PD-134@@) — and every assertion's own code is below 91.
@@ -55,7 +55,7 @@ index 0000000..3a22f33
 +| [`refused/`](refused/) | a program the compiler must refuse with exactly the codes it names | `// expect-error: CODE` and `// expect-error-at: L:C` |
 +| [`defect/`](defect/) | the reproduction of a compiler defect, with its controls and a README saying what it blocks | the verdict it was written against, as a comment |
 +
-+A probe's header is a hypothesis; the verdict is the table in `0.0.0.md` §7. A
++A probe's header is a hypothesis; the verdict is the table in `0.0.0.md` §6. A
 +size probe's exit code IS the `#size_of` it measures, so the number cannot be
 +transcribed wrongly.
 +

@@ -1,0 +1,19 @@
+mod:trit;
+// Every facet of landing 113's rule, one keyword-named declaration each, IN CODE. A lexical fixture: never compiled.
+fixed int64:stack = 1i64;
+error:fd = 70i32;
+unit:pid = 1i32;
+rule:gid = 1i32;
+macro:uid = 1i32;
+trait:old = { func:val = int32(Self:self) never fails; };
+struct:range = { int32:result; fixed uint8[]:cfg; };
+enum:limit = { A(int32); with; };
+func:any<then: Copy> = int32(int32:in, Cursor->:raw) {
+    int64:end = 0i64;
+    for (int64:tid = 0i64; tid < 1i64; tid = tid + 1i64) { }
+    pick (k) {
+        (limit.A(drop)) { pass 1i32; },
+        (*) { pass 0i32; }
+    }
+    pass 0i32;
+};

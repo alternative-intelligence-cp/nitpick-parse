@@ -12,7 +12,7 @@ index 827610d..5e65247 100644
  version string and the date it was read. "TOML" without a version is three
  incompatible languages.
 @@ -926,3 +928,29 @@ number, and the harness asserts the tools against it.
- *Reversal, for the author:* none for the rows; the re-pin after landing 115 moves
+ *Reversal, for the author:* none for the rows; the one re-pin, at landing 118, moves
  `NITPICK_COMMIT` and the emission's digest in CI, and the LLVM row only if a landing
  moves the compiler's D-349.
 +

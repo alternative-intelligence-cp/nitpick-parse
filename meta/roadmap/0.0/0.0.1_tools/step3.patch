@@ -56,7 +56,7 @@ index 78721e9..827610d 100644
 +lays it out by; **say "the compiler's pin" and no number** — a manifest row is a
 +number, and the harness asserts the tools against it.
 +
-+*Reversal, for the author:* none for the rows; the re-pin after landing 115 moves
++*Reversal, for the author:* none for the rows; the one re-pin, at landing 118, moves
 +`NITPICK_COMMIT` and the emission's digest in CI, and the LLVM row only if a landing
 +moves the compiler's D-349.
 diff --git a/nitpick.toml b/nitpick.toml

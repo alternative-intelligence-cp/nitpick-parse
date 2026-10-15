@@ -1,0 +1,16 @@
+mod:names_clean;
+// The same keywords ONLY in comments and strings, around an ordinary program:
+// mod:trit; fixed int64:stack; error:fd; struct:range = { int32:result; }; enum:limit = { with; };
+/* func:any<then: Copy> = int32(int32:in, Cursor->:raw) { int64:end = 0i64; (limit.A(drop)) } */
+struct:Span = { int64:lo; int64:hi; };
+enum:Kind = { Word(int32); Gap; };
+func:pick_first<T: Copy> = int32(int32:count, Span->:sp) {
+    string:s = string_concat("stack end any raw old pid", "");
+    Span:sp2 = Span{ lo: move(count), hi: raw lo };
+    for (int64:k = 0i64; k < 1i64; k = k + 1i64) { }
+    pick (kd) {
+        (Kind.Word(w)) { pass w; },
+        (*) { pass 0i32; }
+    }
+    pass 0i32;
+};

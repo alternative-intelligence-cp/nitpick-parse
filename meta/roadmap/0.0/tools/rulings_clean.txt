@@ -1,0 +1,11 @@
+mod:rulings_clean;
+// The same shapes ONLY in comments and strings, around an ordinary program:
+// int64:counter; int64:plain = 0i64; wild int8->:p = NULL; comptime func:twice; impl:Elsewhere:Other
+fixed int64:KEEP = 1i64;
+struct:Count = { int32:n; };
+trait:Src = { func:val = int32(Self:self) never fails; };
+impl:Count:Src = { func:val = int32(Count:self) never fails { pass self.n; }; };
+func:main = int32(cstring[]:_~argv) {
+    string:s = string_concat("NULL comptime int64:counter;", "");
+    exit 0i32;
+};

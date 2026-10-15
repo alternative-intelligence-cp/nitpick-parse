@@ -21,6 +21,8 @@ The shapes, each with the landing or the row that moves it:
   `stack` as a name              `PLAYBOOK.md` §10 (a memory qualifier: PARSE-002 far from the cause)
   `.is_error ||` and its mirror  `PLAYBOOK.md` §2 (`if (a.is_error || b.is_error)` clears neither taint)
   a `failsafe` whose first statement is not its `pick`   109 (DEF-224 finds a nested pick; the pin does not)
+  a trait default calling a sibling on `self`   118 (DEF-254: it never links before) -- added by cycle 0.0.2's
+                                 plan, with its own planted control, `shapes_planted_later.txt`
 """
 import re
 import sys
@@ -110,7 +112,26 @@ def scan(path):
     for m in re.finditer(r"func:failsafe\s*=\s*int32\(Error:\w+\)\s*\{\s*(\S+)", text):
         if m.group(1) != "pick":
             hit("a `failsafe` not opening with its `pick`", text[:m.start()].count("\n") + 1)
+    for m in re.finditer(r"\btrait:\w+[^=]*=\s*\{", text):
+        body = _braced(text, m.end() - 1)
+        for f in re.finditer(r"\bfunc:\w+", body):
+            k = f.end()
+            while k < len(body) and body[k] not in "{;":
+                k += 1
+            if k < len(body) and body[k] == "{" and re.search(r"\bself\.\w+\s*\(", _braced(body, k)):
+                hit("a trait default calling a sibling on `self`", text[:m.end() + f.start()].count("\n") + 1)
     return found
+
+
+def _braced(text, at):
+    """The text inside the brace at `at` and its match."""
+    depth, k = 0, at
+    while k < len(text):
+        depth += {"{": 1, "}": -1}.get(text[k], 0)
+        if depth == 0:
+            return text[at + 1:k]
+        k += 1
+    return text[at + 1:]
 
 
 def main(argv):

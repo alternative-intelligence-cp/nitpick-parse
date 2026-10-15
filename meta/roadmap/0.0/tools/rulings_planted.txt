@@ -1,0 +1,11 @@
+mod:rulings_planted;
+// Every shape `rulings.py` counts, once each, IN CODE. A lexical fixture: never compiled.
+fixed int64:KEEP = 1i64;
+int64:counter;
+int64:plain = 0i64;
+comptime func:twice = int32(int32:x) { pass x; };
+impl:Elsewhere:Other = { };
+func:f = NIL() {
+    wild int8->:p = NULL;
+    pass NIL;
+};

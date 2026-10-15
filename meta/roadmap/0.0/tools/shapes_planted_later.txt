@@ -1,0 +1,8 @@
+mod:shapes_planted_later;
+// The shapes `shapes.py` gained after cycle 0.0.1, once each, IN CODE. Never compiled: a lexical fixture.
+trait:Src = {
+    func:step = int32(Self->:self);
+    func:twice = int32(Self->:self) {
+        pass (relay self.step()) + (relay self.step());
+    };
+};
