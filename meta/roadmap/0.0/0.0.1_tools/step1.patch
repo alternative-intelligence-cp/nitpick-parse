@@ -1,0 +1,185 @@
+diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
+index 4a7b62c..78721e9 100644
+--- a/meta/DECISIONS.md
++++ b/meta/DECISIONS.md
+@@ -891,3 +891,19 @@ budget.
+ *Reversal, for the author:* none for the measurement. The three codes are offered
+ to the workbench for `PLAYBOOK.md` §3 item 8; if it assigns others, the probes and
+ units change their arm lines to match, and nothing else moves.
++
++### @@PD-135@@ — the layering is a table of what each module imports
++**2026-10-15, cycle 0.0.1.** `BUILD.md` B-17 states the layering as a table, one row
++per module, and the drawing goes. The drawing put `format ──► doc` on its main line,
++the one arrow B-18 forbids, and its sentence said a module "may not import one to its
++right" when every arrow pointed right at what a module imports — so the rule, read
++literally, forbade every import it drew. `src/README.md` had the direction right. The
++seven placeholder modules each state their row in their header (cycle 0.0.1's plan),
++and the harness's `check_layering` (cycle 0.0.3) reads the table.
++
++*Alternatives declined:* **correct the sentence and keep the drawing** — the drawing
++would still show the forbidden arrow, and a drawing is what a reader copies; **draw it
++again** — a table is the form a check can read without a second, hand-written copy.
++
++*Reversal, for the author:* none needed; it changes no import, only how the rule is
++written.
+diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md
+index 841e8c7..4ec37ed 100644
+--- a/meta/specs/BUILD.md
++++ b/meta/specs/BUILD.md
+@@ -203,24 +203,32 @@ carries a comment naming O-N1 so the day it lands the change is greppable.
+ > deliberately, which is a feature — the public surface is a list in one file
+ > that a reviewer can read.
+ 
+-**Rule B-17 — the layering, and the direction of every arrow.**
++**Rule B-17 (@@PD-135@@) — the layering, as a table.** A module imports only the modules its
++row names:
+ 
+-```
+-   emit ──────────────┐
+-     │                ▼
+-  format ──►  doc ──► event ──► diag ──► scan ──► core
+-     │                 │                   ▲        ▲
+-     └─────────────────┴───────────────────┘        │
+-                                                    │
+-                       (core depends on nothing) ───┘
+-```
++| Module | May import |
++|---|---|
++| `core` | nothing |
++| `scan` | `core` |
++| `diag` | `scan`, `core` |
++| `event` | `diag`, `scan`, `core` |
++| `doc` | `event`, `diag`, `scan`, `core` |
++| `format` | `event`, `diag`, `scan`, `core` — **never `doc`** (B-18) |
++| `emit` | `doc`, `event`, `diag`, `scan`, `core` |
+ 
+ `core` depends on nothing. `scan` depends on `core`. `diag` depends on `scan`
+ (for `Span`) and `core`. `event` depends on `diag`, `scan`, `core`. `doc`
+ depends on `event` and below. `format` depends on `event` and below — **never
+ on `doc`**, because a streaming consumer must be able to import a format
+ without pulling in the tree. `emit` depends on `doc` (it prints a tree) and on
+-`event` (it can also print a stream). A module may not import one to its right.
++`event` (it can also print a stream).
++
++*(2026-10-15, cycle 0.0.1, @@PD-135@@: until this subcycle the rule was a drawing —
++`format ──► doc ──► event ──► …` on one line, the first arrow the one B-18 forbids —
++and the sentence "a module may not import one to its right", where every arrow in
++the drawing pointed right, at what the module imports: the reverse of what it meant,
++and of `src/README.md`'s "to its left". A table states each module's imports once,
++and it is what the harness's `check_layering` reads.)*
+ 
+ **Rule B-18 — `format` may not import `doc`.** Stated separately because it is
+ the arrow most likely to be drawn by accident, and drawing it would make every
+diff --git a/src/core/core.npk b/src/core/core.npk
+new file mode 100644
+index 0000000..597c9cc
+--- /dev/null
++++ b/src/core/core.npk
+@@ -0,0 +1,8 @@
++mod:core;
++
++// `src/core/` — the storage primitives — `Vec<T>`, `Bytes`, `SmallMap<K,V>` — and `limits.npk`, every named bound.
++// Specified by `meta/specs/BUILD.md` §5 and `SAFETY.md` §7; built from cycle 0.0.4. A placeholder until then, by cycle 0.0.1's plan:
++// it compiles, so the parse sweep has this directory to sweep, and it is replaced, not deleted.
++//
++// MAY IMPORT: nothing (`meta/specs/BUILD.md` B-17's table). Every import is a relative path
++// (B-16) until the workbench's dependency roots exist (`meta/OPEN_QUESTIONS.md` O-N1).
+diff --git a/src/diag/diag.npk b/src/diag/diag.npk
+new file mode 100644
+index 0000000..fd28e82
+--- /dev/null
++++ b/src/diag/diag.npk
+@@ -0,0 +1,8 @@
++mod:diag;
++
++// `src/diag/` — `ParseError`, the closed `FaultCode` enum, and rendering.
++// Specified by `meta/specs/DIAGNOSTIC_MODEL.md`; built from cycle 0.2. A placeholder until then, by cycle 0.0.1's plan:
++// it compiles, so the parse sweep has this directory to sweep, and it is replaced, not deleted.
++//
++// MAY IMPORT: `scan` and `core` (`meta/specs/BUILD.md` B-17's table). Every import is a relative path
++// (B-16) until the workbench's dependency roots exist (`meta/OPEN_QUESTIONS.md` O-N1).
+diff --git a/src/doc/doc.npk b/src/doc/doc.npk
+new file mode 100644
+index 0000000..1af498f
+--- /dev/null
++++ b/src/doc/doc.npk
+@@ -0,0 +1,8 @@
++mod:doc;
++
++// `src/doc/` — `Document` — the arena of POD nodes, the pool, the accessors, the path language.
++// Specified by `meta/specs/VALUE_MODEL.md`; built from cycle 0.4. A placeholder until then, by cycle 0.0.1's plan:
++// it compiles, so the parse sweep has this directory to sweep, and it is replaced, not deleted.
++//
++// MAY IMPORT: `event`, `diag`, `scan` and `core` (`meta/specs/BUILD.md` B-17's table). Every import is a relative path
++// (B-16) until the workbench's dependency roots exist (`meta/OPEN_QUESTIONS.md` O-N1).
+diff --git a/src/emit/emit.npk b/src/emit/emit.npk
+new file mode 100644
+index 0000000..7c1002f
+--- /dev/null
++++ b/src/emit/emit.npk
+@@ -0,0 +1,8 @@
++mod:emit;
++
++// `src/emit/` — the writers, from a `Document` or from a stream.
++// Specified by `meta/specs/WRITER_MODEL.md`; built from cycle 0.5, 0.7. A placeholder until then, by cycle 0.0.1's plan:
++// it compiles, so the parse sweep has this directory to sweep, and it is replaced, not deleted.
++//
++// MAY IMPORT: `doc`, `event`, `diag`, `scan` and `core` (`meta/specs/BUILD.md` B-17's table). Every import is a relative path
++// (B-16) until the workbench's dependency roots exist (`meta/OPEN_QUESTIONS.md` O-N1).
+diff --git a/src/event/event.npk b/src/event/event.npk
+new file mode 100644
+index 0000000..84ef2ba
+--- /dev/null
++++ b/src/event/event.npk
+@@ -0,0 +1,8 @@
++mod:event;
++
++// `src/event/` — `Event`, `Step`, `TextRef`, `Options`, the `Format` trait, the depth stack, `event_validate`.
++// Specified by `meta/specs/EVENT_MODEL.md` and `PLUGIN_MODEL.md`; built from cycle 0.2. A placeholder until then, by cycle 0.0.1's plan:
++// it compiles, so the parse sweep has this directory to sweep, and it is replaced, not deleted.
++//
++// MAY IMPORT: `diag`, `scan` and `core` (`meta/specs/BUILD.md` B-17's table). Every import is a relative path
++// (B-16) until the workbench's dependency roots exist (`meta/OPEN_QUESTIONS.md` O-N1).
+diff --git a/src/format/format.npk b/src/format/format.npk
+new file mode 100644
+index 0000000..b17cc0d
+--- /dev/null
++++ b/src/format/format.npk
+@@ -0,0 +1,8 @@
++mod:format;
++
++// `src/format/` — the four readers — JSON, TOML, CSV, the YAML subset — each a `Format`.
++// Specified by `meta/specs/FORMATS.md` and `PLUGIN_MODEL.md`; built from cycle 0.3, 0.6, 0.7, 0.8. A placeholder until then, by cycle 0.0.1's plan:
++// it compiles, so the parse sweep has this directory to sweep, and it is replaced, not deleted.
++//
++// MAY IMPORT: `event`, `diag`, `scan` and `core` — **never `doc`** (B-18) (`meta/specs/BUILD.md` B-17's table). Every import is a relative path
++// (B-16) until the workbench's dependency roots exist (`meta/OPEN_QUESTIONS.md` O-N1).
+diff --git a/src/lib.npk b/src/lib.npk
+new file mode 100644
+index 0000000..6b1787a
+--- /dev/null
++++ b/src/lib.npk
+@@ -0,0 +1,9 @@
++mod:lib;
++
++// `nparse` — the umbrella. A consumer imports this file by a relative path (`meta/specs/BUILD.md`
++// B-16) and reaches the public surface through it.
++//
++// IT RE-EXPORTS NOTHING YET, AND THAT IS DELIBERATE (cycle 0.0.1's plan). `use` is not transitive
++// (the compiler's `MODULE_REFERENCE.md` §2.3), so the public surface is a list in this one file, one
++// `pub use` per name, written by the cycle that makes the name public — cycle 0.1's cursor first.
++// A list a reviewer reads in one place is the reason the library has an umbrella at all.
+diff --git a/src/scan/scan.npk b/src/scan/scan.npk
+new file mode 100644
+index 0000000..b582151
+--- /dev/null
++++ b/src/scan/scan.npk
+@@ -0,0 +1,8 @@
++mod:scan;
++
++// `src/scan/` — the cursor, spans, the class table, UTF-8, escapes, and the checked arithmetic (`arith.npk`).
++// Specified by `meta/specs/SCAN_MODEL.md`; built from cycle 0.1. A placeholder until then, by cycle 0.0.1's plan:
++// it compiles, so the parse sweep has this directory to sweep, and it is replaced, not deleted.
++//
++// MAY IMPORT: `core` (`meta/specs/BUILD.md` B-17's table). Every import is a relative path
++// (B-16) until the workbench's dependency roots exist (`meta/OPEN_QUESTIONS.md` O-N1).

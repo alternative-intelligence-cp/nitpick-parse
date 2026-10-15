@@ -1,0 +1,146 @@
+diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
+index 827610d..5e65247 100644
+--- a/meta/DECISIONS.md
++++ b/meta/DECISIONS.md
+@@ -493,6 +493,8 @@ specification, and that is stated rather than hidden; its hand-built corpus is
+ correspondingly larger.
+ 
+ ### PA-054 — the specification version is pinned and recorded
++> **SUPERSEDED IN PART by @@PD-137@@ (2026-10-15)** — where the version is recorded; the rule stands.
++
+ **2026-09-03.** In `meta/research/format-versions.md`, with the document's own
+ version string and the date it was read. "TOML" without a version is three
+ incompatible languages.
+@@ -926,3 +928,29 @@ number, and the harness asserts the tools against it.
+ *Reversal, for the author:* none for the rows; the re-pin after landing 115 moves
+ `NITPICK_COMMIT` and the emission's digest in CI, and the LLVM row only if a landing
+ moves the compiler's D-349.
++
++### @@PD-137@@ — one currency table; the library is security-sensitive, and its three research items gate cycle 0.1
++**2026-10-15, cycle 0.0.1.** Every outside fact the plan rests on is a row of
++`meta/research/CURRENCY.md` (the workbench research skill's §7, and `PLAYBOOK.md`
++§12), the formats' versions included: it supersedes in part PA-054, whose
++`meta/research/format-versions.md` held only the versions; a research digest is filed
++beside the table and cited by its row. **`nparse` is security-sensitive** — its input
++is hostile by design, and PA-008, PA-012 and PA-022 exist for that reason — so the
++three research items the workbench plan skill requires for such a library are owed:
++known defects in the prior art and the reference implementations, the standards bodies'
++current guidance, and the current test vectors (`CURRENCY.md` states each). They gate
++cycle 0.1, through cycle 0.0.5's close: a finding that asks the language a question
++becomes a cycle-0.0 probe first. TOML's row records that v1.1.0 is published and that
++the version is cycle 0.6.0's to decide. The early ecosystem audit's E2-13.
++
++*Alternatives declined:* **keep `format-versions.md` beside `CURRENCY.md`** — two
++tables of outside facts, and the workbench's checks read one; **name the file
++`format-versions.md` and put every row in it** — the workbench's rule, its audit and
++its research skill name `CURRENCY.md`; **count the library routine** — its threat is
++the input, and the research would be skipped where it matters most; **run the
++research before cycle 0.0's probes** — none of it bears on a language shape the probes
++ask, and holding the probes for it holds the cycle.
++
++*Reversal, for the author:* to run the research before 0.0.0, move the gate from cycle
++0.0.5 to 0.0.0's step 0; to count the library routine, strike `CURRENCY.md`'s research
++section and the gate, and nothing else moves.
+diff --git a/meta/research/CURRENCY.md b/meta/research/CURRENCY.md
+new file mode 100644
+index 0000000..2104817
+--- /dev/null
++++ b/meta/research/CURRENCY.md
+@@ -0,0 +1,50 @@
++# Currency — the facts from outside the compiler tree this plan rests on
++
++One row per standard, data release, corpus, reference implementation and outside tool the plan
++names, with the version pinned, the day it was checked, the primary source, and the decision that
++pins it (the workbench research skill's §7). **A row unchecked for six months is stale, and a
++cycle whose rows are unchecked is not ready to start.** Facts about the language are never rows
++here: they are read in the compiler's tree at the pinned commit. Created by cycle 0.0.1
++(@@PD-137@@); a format's rows are CHECKED by the cycle that first depends on it, and the table
++says which.
++
++| Depends on | Pinned | Checked | Source | Decision |
++|---|---|---|---|---|
++| GitHub Actions' runner image — CI's `runs-on` | `ubuntu-24.04` | by cycle 0.0.1's first CI run, whose log the record quotes | github.com/actions/runner-images | @@PD-136@@ |
++| GitHub's `actions/checkout` and `actions/cache` | `@v4` each, as `nitpick-regex`'s and `nitpick-time`'s workflows | by the same run; the early ecosystem audit's EK2 recorded their Node 20 runtime as deprecated, and the run's log says whether GitHub still warns | github.com/actions/checkout, github.com/actions/cache | @@PD-136@@ |
++| LLVM's release asset — what CI installs | `LLVM-20.1.8-Linux-X64.tar.xz` at `llvmorg-20.1.8` (the version is the compiler's D-349, read in its tree) | by the same run's install step, which downloads it | github.com/llvm/llvm-project/releases | @@PD-136@@ |
++| Python — the harness's interpreter | 3.12.3, the version on the workbench and on `ubuntu-24.04` | by cycle 0.0.2, which writes the harness | python.org | @@PD-137@@ |
++| UTF-8 — what a JSON, TOML or YAML input must be (`SCAN_MODEL.md` §3) | RFC 3629 (STD 63) and the Unicode Standard's Table 3-7, the edition to be named | **not yet** — cycle 0.1, whose decoder reads it, checks it before it starts | rfc-editor.org/rfc/rfc3629; unicode.org | PA-013 |
++| JSON | RFC 8259 | not yet — cycle 0.3 | rfc-editor.org/rfc/rfc8259 | PA-050 |
++| TOML | v1.0.0, as `FORMATS.md` names it. **v1.1.0 is published** (the workbench's currency audit of 2026-10-09, a lead to verify at the source), and nobody has compared the two | not yet — cycle 0.6.0 decides the version (PA-054 as @@PD-137@@ amends it) | toml.io; github.com/toml-lang/toml/releases | PA-054 |
++| CSV | RFC 4180, and the dialects `FORMATS.md` §6 names | not yet — cycle 0.7 | rfc-editor.org/rfc/rfc4180 | PA-050 |
++| YAML | 1.2's core schema; which revision of 1.2 is not yet stated | not yet — cycle 0.8 | yaml.org/spec | PA-051 |
++| RFC 3339 — the shape of TOML's date-times | RFC 3339 | not yet — cycle 0.6 | rfc-editor.org/rfc/rfc3339 | PA-054 |
++| IEEE 754 binary64 — what `num_flt64` rounds to | IEEE 754-2019 | not yet — cycle 0.4 | ieee.org | PA-033 |
++| The corpora: JSONTestSuite, toml-test, the yaml-test-suite, the W3C CSVW tests | a commit each, recorded in each corpus's `PROVENANCE.md` | not yet — each with its format's cycle | each project's repository | PA-053, PA-081 |
++
++## The research this library owes, because it is security-sensitive
++
++**`nparse` is security-sensitive** (@@PD-137@@): its input is, by design, bytes somebody else
++controls (`README.md`'s "What makes it different"), and three of its decisions exist only because
++an input can be hostile — PA-008 (no input reaches an error identity), PA-012 (no arithmetic on
++input traps) and PA-022 (no input-controlled recursion). So the workbench research skill's §8
++applies, and these three requests are owed, each in its §3 shape, each `sensitivity: security`
++(two independent primaries, stale after ninety days), each filed here as a digest when it returns:
++
++1. **Known defects in the prior art and the reference implementations** the formats' cycles will
++   read — parsers of JSON, TOML, YAML and CSV: their published vulnerabilities and the classes they
++   fall in (nesting depth, numeric overflow, duplicate keys, alias expansion, quadratic scans,
++   invalid UTF-8 accepted). *Would change the plan if* a class is one no rule here guards.
++2. **The standards bodies' current guidance** for each format's security considerations — RFC
++   8259's, RFC 7493 (I-JSON)'s, TOML's current specification's, YAML 1.2's, RFC 4180's — and
++   which TOML version is current. *Would change the plan if* a body now requires what a rule here
++   permits.
++3. **The current versions of the test vectors** — JSONTestSuite, toml-test (and which TOML version
++   its sets encode), the yaml-test-suite, the CSVW tests. *Would change the plan if* a corpus's
++   current version judges a case differently from the version a cycle planned against.
++
++**They gate cycle 0.1** (cycle 0.0.5's close holds them): a finding that is a question about the
++language becomes a cycle-0.0 probe before it is anything else (the workbench plan skill), and cycle
++0.1's scanner is the first code an input reaches. The orchestrator dispatches them: by the workbench's
++rule on research, more than one fetch is a request to the researcher, who never writes into a repository.
+diff --git a/meta/research/README.md b/meta/research/README.md
+index 17d2d93..6f5d659 100644
+--- a/meta/research/README.md
++++ b/meta/research/README.md
+@@ -2,3 +2,7 @@
+ 
+ Format specification notes, corpus provenance, and any measurement a decision
+ cites. A decision that cites a measurement keeps the measurement here.
++
++[`CURRENCY.md`](CURRENCY.md) is the table of every outside fact the plan rests on, with the day each
++was checked (@@PD-137@@); a research digest is filed beside it as `<topic>.md` and cited by the row
++it checks.
+diff --git a/meta/roadmap/0.6/README.md b/meta/roadmap/0.6/README.md
+index b77b380..dc7cef2 100644
+--- a/meta/roadmap/0.6/README.md
++++ b/meta/roadmap/0.6/README.md
+@@ -39,7 +39,7 @@ it.
+ - [ ] toml-test vendored with `PROVENANCE.md`, both `valid/` and `invalid/`
+ - [ ] the `corpus` stage judging `valid/` as accepted and `invalid/` as faulted, with an **exact** pass count
+ - [ ] **the expected-JSON second oracle** (R-12): every `valid/` case's tree printed as JSON and compared to the corpus's own expected encoding — **the only check in the suite that does not go through our own reader**
+-- [ ] the specification version pinned in `meta/research/format-versions.md` (PA-054) — "TOML" without a version is three incompatible languages
++- [ ] the specification version pinned as `meta/research/CURRENCY.md`'s TOML row (PA-054, @@PD-137@@) — "TOML" without a version is three incompatible languages; **v1.1.0 is published** and this cycle decides between it and v1.0.0, with the two compared and R-8 re-read against the one chosen
+ 
+ ### 0.6.1 — scalars
+ - [ ] integers in base 10, 16, 8 and 2, with underscores, through `arith.npk` (PA-012)
+diff --git a/meta/specs/FORMATS.md b/meta/specs/FORMATS.md
+index d8d1bc8..829ce77 100644
+--- a/meta/specs/FORMATS.md
++++ b/meta/specs/FORMATS.md
+@@ -16,9 +16,14 @@ behind it rather than a claim.
+ | **CSV** | RFC 4180 + dialects | **complete**, plus the dialects §6 names | hand-built + the W3C CSVW cases | 0.7 |
+ | **YAML** | 1.2 core schema | **a stated subset**, §4 | yaml-test-suite, filtered to the subset | 0.8 |
+ 
+-**Rule R-1 (PA-054) — the specification version is pinned and recorded**, in
+-`meta/research/format-versions.md`, with the document's own version string and
+-the date it was read. "TOML" without a version is three incompatible languages.
++**Rule R-1 (PA-054, @@PD-137@@) — the specification version is pinned and recorded**,
++as a row of `meta/research/CURRENCY.md`, with the document's own version string and
++the date it was read, and the digest that read it beside it. "TOML" without a
++version is three incompatible languages.
++
++*(2026-10-15, cycle 0.0.1, @@PD-137@@: this rule named `meta/research/format-versions.md`,
++and the workbench's rule names `CURRENCY.md` for every outside fact; one table holds
++them all.)*
+ 
+ **Rule R-2 (PA-050) — four formats at 1.0, and the set is closed for that
+ release.** Each is a cycle, each has a corpus gate, and adding a fifth before

@@ -12,7 +12,7 @@ yet marked still holds its first writing, and the items it owes are in §4's map
 | File | At `7e91730` |
 |---|---|
 | [0.0.0](0.0.0.md) | **yes** — probes measured, five patches, blocks with filled Expects |
-| [0.0.1](0.0.1.md) | not yet |
+| [0.0.1](0.0.1.md) | **yes** — six patches over 0.0.0's record, blocks with filled Expects; CI's run is its worker's |
 | [0.0.2](0.0.2.md) | not yet |
 | [0.0.3](0.0.3.md) | not yet |
 | [0.0.4](0.0.4.md) | not yet |
@@ -54,7 +54,10 @@ author.**
 | PD-132 | 0.0.0 | every slot a reader's bytes reach is the read-only view; a view travels only as far as its bytes |
 | PD-133 | 0.0.0 | native recursion traps; PA-022 stands, its reason a whole-program stop |
 | PD-134 | 0.0.0 | what a consumer owes, measured; the tests' arm codes |
-| PD-135 … PD-145 | 0.0.1 … 0.0.5 | proposed by those files as they reach the pin |
+| PD-135 | 0.0.1 | the layering is a table of what each module imports |
+| PD-136 | 0.0.1 | the toolchain is LLVM 20.1.8 with the compiler's target rows, in the manifest and in CI |
+| PD-137 | 0.0.1 | one currency table; the library is security-sensitive, and its three research items gate cycle 0.1 |
+| PD-138 onward | 0.0.2 … 0.0.5 | proposed by those files as they reach the pin |
 
 ## The pin, and what each later landing would move
 

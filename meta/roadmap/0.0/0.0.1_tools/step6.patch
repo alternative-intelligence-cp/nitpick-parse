@@ -1,0 +1,117 @@
+diff --git a/CLAUDE.md b/CLAUDE.md
+index 316a4a1..7733ba7 100644
+--- a/CLAUDE.md
++++ b/CLAUDE.md
+@@ -4,6 +4,11 @@ Guidance for Claude Code sessions working in this repository.
+ 
+ ## What this is
+ 
++`nparse` — a multi-format parsing library for **Nitpick**, the safety-critical
++systems language at `../../nitpick`. **Status: cycle 0.0** — the language probes
++are in `tests/probe/`, and the skeleton in `src/`; the specifications and the
++plan are in `meta/`.
++
+ ## Before starting a session here
+ 
+ Check **[`../BOARD.md`](../BOARD.md)** — it says whether this repository
+@@ -12,10 +17,6 @@ is claimed by a stream, and by which. **One writer per repository, always.**
+ stream partition: what gates this repository, what this repository gates, and
+ what to do when a cross-stream gate is not ready yet.
+ 
+-`nparse` — a multi-format parsing library for **Nitpick**, the safety-critical
+-systems language at `../../nitpick`. **Status: planning.** No library code
+-exists yet. The specifications and the plan do.
+-
+ The shared house rules for every library in this ecosystem are
+ `../PLAYBOOK.md`; this file is what is specific to `nparse`.
+ 
+@@ -93,12 +94,14 @@ that bite hardest here:
+ `end` (every range wants it), `in` (every byte source wants it), `error`,
+ `limit`, `any`, `buffer`, `raw`, `move`, `pick`, `fall`, `give`, `pass`,
+ `fail`, `relay`, `is`, `is_err`, `where`, `with`, `as`, `on`, `never`, `fails`,
+-`mod`, `unit`, `Self`, `Result`, `Optional`.
++`mod`, `unit`, `Self`, `Result`, `Optional` — and **`stack`**, a memory qualifier,
++which cost cycle 0.0.0 a build: `Vec<Frame>:stack` is `NITPICK-PARSE-002` at the
++declaration and a claim that a brace is never closed, far from the cause.
+ 
+ The substitutes this library uses, so they are used consistently: `hi` for an
+ upper bound, `src` for a byte origin, `sink` for a byte destination, `kind` for
+ a discriminant, `fault` for a parse failure value, `bound` for a limit, `depth`
+-for nesting, `tok` for a token.
++for nesting, `tok` for a token, `frames` for an explicit stack.
+ 
+ Three shapes that surprise a C or Rust habit: adjacent string literals do not
+ concatenate; `discard(x);` takes parentheses and `defer { … }` takes no
+diff --git a/CONTRIBUTING.md b/CONTRIBUTING.md
+index b9b9a0b..21ade9f 100644
+--- a/CONTRIBUTING.md
++++ b/CONTRIBUTING.md
+@@ -28,7 +28,7 @@ A settled decision's text is never rewritten — supersede it with a new one.
+ **Every change is green under the full harness.** `--only` is for iterating and
+ never for concluding; nothing is committed on the strength of a filtered run.
+ 
+-## The four things that will surprise you
++## The things that will surprise you
+ 
+ 1. **A syntax error is not an error.** It is a `Fault` value in the success
+    channel, and `pick` exhaustiveness is what forces the caller to handle it.
+@@ -52,6 +52,17 @@ never for concluding; nothing is committed on the strength of a filtered run.
+    would be a trait object plus hand-carried context at every call, and
+    streaming would not compose.
+ 
++And two that cycle 0.0.0's probes taught, which every later cycle meets:
++
++5. **A size is measured, never summed.** A payload-free enum is a four-byte tag,
++   so `Event` is 32 bytes where its fields once added up to 24. Every type whose
++   size a rule asserts has a test whose exit code is that size.
++6. **Two compiler defects are open, and the library does not route around
++   them.** A synchronous `Self->` method called through a generic bound does not
++   link, and a view re-seated by a callee can outlive its bytes —
++   `tests/probe/defect/` holds each reproduction. Write neither shape; the
++   bound path waits for the compiler's fix.
++
+ ## Tests
+ 
+ - **Expectations live in the test file**, as markers, and assert on codes and
+diff --git a/README.md b/README.md
+index 2251249..787ca4a 100644
+--- a/README.md
++++ b/README.md
+@@ -6,10 +6,12 @@ set of scanning primitives, and formats as plugins over them. No dependencies,
+ no libc, and **no syscall of any kind**: it is pure computation over bytes the
+ caller hands it.
+ 
+-> **Status: planning.** No code yet. The specification set is being written in
+-> [`meta/specs/`](meta/specs/) and the plan in [`meta/roadmap/`](meta/roadmap/),
+-> in the same order and by the same discipline the compiler used — specs first,
+-> then a cycle map, then execution-grade subcycles, then code. The compiler
++> **Status: cycle 0.0, the foundations.** The language probes are in
++> [`tests/probe/`](tests/probe/) and the module skeleton in [`src/`](src/); no
++> parsing code yet. The specification set is in [`meta/specs/`](meta/specs/)
++> and the plan in [`meta/roadmap/`](meta/roadmap/), written in the order and by
++> the discipline the compiler used — specs first, then a cycle map, then
++> execution-grade subcycles, then code. The compiler
+ > is past its cycle 1.5 (verification), and this library is built against the
+ > commit the workbench pins.
+ 
+diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md
+index 4ec37ed..1603419 100644
+--- a/meta/specs/BUILD.md
++++ b/meta/specs/BUILD.md
+@@ -262,13 +262,15 @@ these reads like an ordinary local name and is not:
+ | `on` | a keyword — `Node?:on = …` does not parse |
+ | `Self`, `Result`, `Optional`, `Handle`, `arena` | type keywords |
+ | `trit`, `nit`, `oflags`, `prot`, `mflags`, `fmode` | type keywords |
++| `stack` | a memory qualifier — and every explicit-stack parser wants it; refused at the declaration with a misleading brace error after it (measured by cycle 0.0.0) |
++| `fixed`, `sealed`, `hidden`, `decreases`, `unbounded`, `shared_arena`, `acquire` | keywords (`PLAYBOOK.md` §10's list at the compiler's 1.5 re-pin) |
+ 
+ The names this library therefore uses instead, fixed here so they are used
+ consistently: **`hi`** for a range's upper bound (never `end`), **`src`** for a
+ byte origin (never `in`), **`sink`** for a byte destination, **`fault`** for a
+ parse failure value (never `error`), **`bound`** for a limit, **`kind`** for a
+ discriminant, **`depth`** for nesting, **`tok`** for a token, **`lit`** for a
+-literal's text.
++literal's text, **`frames`** for an explicit stack (never `stack`).
+ 
+ ---
+ 

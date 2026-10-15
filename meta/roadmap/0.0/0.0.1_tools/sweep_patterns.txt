@@ -1,0 +1,12 @@
+# cycle 0.0.1's stale-claim sweep: one subject per claim the steps change, `<subject> | <regex>`, case-insensitive,
+# over joined text (tools/sweep.py). The control reads every removed hunk.
+LLVM 20.1.2 | 20\.1\.2
+llvm-config as the version check | llvm-config
+the manifest's four tables | four tables
+the layering's backwards sentence | import one to its right|imports? (a module )?to its right
+the drawing's forbidden arrow | format\s*──►\s*doc
+format-versions.md | format-versions
+the four surprises | four things
+a library tied to no platform | not tied to linux|linux-specific or x86-64-specific|nothing in this library is linux-specific
+the planning status | status: planning|no library code exists yet
+the empty heading | ## what this is ## before starting

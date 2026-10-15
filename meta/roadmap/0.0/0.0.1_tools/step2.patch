@@ -1,0 +1,37 @@
+diff --git a/tests/conformance/import.npk b/tests/conformance/import.npk
+new file mode 100644
+index 0000000..e4eff12
+--- /dev/null
++++ b/tests/conformance/import.npk
+@@ -0,0 +1,31 @@
++// expect-exit: 0
++//
++// THE CONSUMER, AND IT IS THE LIBRARY'S FIRST TEST OF ITS OWN SURFACE (cycle 0.0.1).
++// It imports `src/lib.npk` exactly as a program outside this repository will — by a relative
++// path, because the workbench's dependency roots do not exist yet (`meta/specs/BUILD.md` B-16;
++// `meta/OPEN_QUESTIONS.md` O-N1: the day they do, this `use` is what changes) — and it compiles,
++// links, runs and exits 0. Against an empty surface that is the point: it keeps compiling as the
++// surface grows, and the day it does not, the surface changed incompatibly.
++//
++// Its `failsafe` names the six identities every program owes (`PLAYBOOK.md` §3 item 7) and no
++// more: `NITPICK-REACH-003` names exactly these six for this root at compiler `7e91730`.
++mod:import;
++
++use "../../src/lib.npk".*;
++
++func:main = int32(cstring[]:_~argv) {
++    exit 0i32;
++};
++
++func:failsafe = int32(Error:e) {
++    pick (e) {
++        (HeapBadRequest)    { exit 91i32; },
++        (HeapOom)           { exit 92i32; },
++        (Unreachable)       { exit 95i32; },
++        (WildLeak)          { exit 96i32; },
++        (StackExhausted)    { exit 106i32; },
++        (MachineFault)      { exit 107i32; },
++        (*)                 { exit 99i32; }
++    }
++    exit 9i32;
++};
