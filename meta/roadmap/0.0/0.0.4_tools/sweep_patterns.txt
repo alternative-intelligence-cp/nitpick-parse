@@ -1,0 +1,6 @@
+# 0.0.4's stale-claim sweep: one subject per claim the steps changed, `<subject> | <regex>`, matched case-insensitively
+# over joined text (`../tools/sweep.py`). A candidate is not a finding: 0.0.4.md §5 gives each one's class.
+the rungs refusing contracts | rungs refuse the constructs|premature .?ensures.? is a build failure
+SmallMap's overflow | EParseState on overflow|SmallMap[^.]{0,80}EParseState
+a view of Bytes | view\(\)[^.]{0,30}borrowed|Bytes view|hands a borrowed .?uint8
+the ninth limit | DUP_SCAN

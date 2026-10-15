@@ -1,0 +1,62 @@
+diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
+index 973ec63..c07cacb 100644
+--- a/meta/DECISIONS.md
++++ b/meta/DECISIONS.md
+@@ -1118,3 +1118,20 @@ eight) — every format's consumer owes `DivByZero` and `DivOverflow` already, t
+ 
+ *Reversal, for the author:* when D-341 lands, `Bytes` may offer a frozen view by a decision; when a decision accepts
+ the contracts' arms, the comments become clauses, a marker deleted per site.
++
++### @@PD-145@@ — `SmallMap` waits for its first consumer
++**2026-10-15, cycle 0.0.4.** `BUILD.md` B-12 names `SmallMap<K, V>`, a fixed-capacity ordered association list, and no
++specification or roadmap names a use for it: the `Document` scans its own nodes for a key (`VALUE_MODEL.md` D-10) and
++builds a `MapIndex` for a large map (D-13). Its first writing's answer to an overflow, `EParseState`, is declared by
++`doc` and the formats (`SAFETY.md` S-6), which `core` may not import (B-17). Built now, it would choose a key
++comparison and a capacity no consumer has asked for. It is declared by the cycle whose specification first uses it;
++cycle 0.0's gate asks a suite of `Vec` and of `Bytes`.
++
++*Alternatives declined:* **build it now, keyed through a bound** — a by-value comparison through a bound links and a
++`Self->` one does not (DEF-253, PD-131), so the shape would be chosen by a defect; **an `int64` key** — a guess at a
++consumer; **its overflow as `EParseState`** — not reachable from `core`, and an overflow an input can drive must be a
++value the caller turns into a `Fault`.
++
++*Reversal, for the author:* to have the primitive set whole at cycle 0.0, a step of 0.0.4 builds
++`SmallMap<K: Copy, V: Copy>` over a by-value key comparison, its insert answering `false` when full; that step's suite
++joins the gate, and the checklist and the cycle README move with it.
+diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md
+index 66757e7..c52c987 100644
+--- a/meta/specs/BUILD.md
++++ b/meta/specs/BUILD.md
+@@ -256,6 +256,10 @@ accessors, because an index through a `wild` block does not trap, and a misuse t
+ compiler's D-341, unbuilt) — and its `take` is an owned copy, after which it is empty; it is freed when it leaves
+ scope, so it has no `free`, and `bytes_capacity` reads the capacity its hidden buffer holds.)*
+ 
++*(2026-10-15, cycle 0.0.4 — @@PD-145@@:
++`SmallMap` waits for its first consumer: no specification or roadmap names one — the `Document` scans and indexes
++its own nodes (`VALUE_MODEL.md` D-10, D-13) — and it is declared by the cycle whose specification first uses it.)*
++
+ **Rule B-13.** `nparse` declares no other container. The `Document` tree is an
+ `arena<Node>` with `Handle<Node>`, which is what the language provides for
+ graph-shaped data.
+diff --git a/src/core/core.npk b/src/core/core.npk
+index 597c9cc..8a7d664 100644
+--- a/src/core/core.npk
++++ b/src/core/core.npk
+@@ -1,8 +1,14 @@
+ mod:core;
+ 
+-// `src/core/` — the storage primitives — `Vec<T>`, `Bytes`, `SmallMap<K,V>` — and `limits.npk`, every named bound.
+-// Specified by `meta/specs/BUILD.md` §5 and `SAFETY.md` §7; built from cycle 0.0.4. A placeholder until then, by cycle 0.0.1's plan:
+-// it compiles, so the parse sweep has this directory to sweep, and it is replaced, not deleted.
++// `src/core/` — the storage primitives, the layer's entry. Since cycle 0.0.4 the layer holds three
++// modules: `limits.npk`, every named bound (`meta/specs/SAFETY.md` §7's table, one constant per row);
++// `vec.npk`, `Vec<T: Copy>`, the growable array over a `wild` block; and `bytes.npk`, `Bytes`, the
++// byte sink over a `buffer`. `SmallMap<K,V>` (`meta/specs/BUILD.md` B-12) is not built yet.
++// Specified by `meta/specs/BUILD.md` §5 and `SAFETY.md` §7.
++//
++// THIS FILE IMPORTS NOTHING AND EXPORTS NOTHING YET: a module above `core` imports `limits.npk`,
++// `vec.npk` or `bytes.npk` by its own path, and REACH is import-scoped, so a consumer owes only what
++// the files it names can reach. Nor does any of the three import another: each stands alone.
+ //
+ // MAY IMPORT: nothing (`meta/specs/BUILD.md` B-17's table). Every import is a relative path
+ // (B-16) until the workbench's dependency roots exist (`meta/OPEN_QUESTIONS.md` O-N1).

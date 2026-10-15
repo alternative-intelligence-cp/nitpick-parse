@@ -34,8 +34,14 @@ _MASKS = [
 ]
 
 
+def plan_dir(root):
+    """The cycle's folder, or its archive once cycle 0.0.5's last block has moved it to `done/0.0/`."""
+    d = os.path.join(root, "meta", "roadmap", "0.0")
+    return d if os.path.isdir(d) else os.path.join(root, "meta", "roadmap", "done", "0.0")
+
+
 def blocks(root, sub):
-    with open(os.path.join(root, "meta", "roadmap", "0.0", sub + ".md"), encoding="utf-8") as fh:
+    with open(os.path.join(plan_dir(root), sub + ".md"), encoding="utf-8") as fh:
         text = fh.read()
     runs, expects, order = {}, {}, []
     for m in FENCE.finditer(text):

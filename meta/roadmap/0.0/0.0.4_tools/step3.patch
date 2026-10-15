@@ -1,0 +1,729 @@
+diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md
+index 9d55994..66757e7 100644
+--- a/meta/specs/BUILD.md
++++ b/meta/specs/BUILD.md
+@@ -251,6 +251,11 @@ fourth field, a hidden zero-length `string[0]`, which costs no byte and makes a
+ header — a second handle on its block — is `NITPICK-TYPE-046`; every index and count is checked by its own
+ accessors, because an index through a `wild` block does not trap, and a misuse traps the language's `OutOfBounds`.)*
+ 
++*(2026-10-15, cycle 0.0.4 — @@PD-144@@:
++`Bytes` has no `view` at the pin — a `buffer` cannot be ranged, and a view through `.ptr` is tied to nothing (the
++compiler's D-341, unbuilt) — and its `take` is an owned copy, after which it is empty; it is freed when it leaves
++scope, so it has no `free`, and `bytes_capacity` reads the capacity its hidden buffer holds.)*
++
+ **Rule B-13.** `nparse` declares no other container. The `Document` tree is an
+ `arena<Node>` with `Handle<Node>`, which is what the language provides for
+ graph-shaped data.
+diff --git a/src/core/bytes.npk b/src/core/bytes.npk
+new file mode 100644
+index 0000000..e37ee74
+--- /dev/null
++++ b/src/core/bytes.npk
+@@ -0,0 +1,246 @@
++mod:bytes;
++
++// MAY IMPORT: nothing (`meta/specs/BUILD.md` B-17's table); `core` is the bottom layer.
++
++// `src/core/bytes.npk` -- `Bytes`, `nparse`'s byte sink (`meta/specs/BUILD.md` B-12, PA-004).
++//
++// The parser's scratch and every writer's output, and the ONLY allocating byte builder in the
++// library (the cycle plan's P-23): `string_concat` allocates per call, and output built that
++// way piece by piece is the shape the compiler measured as quadratic in `npkg`'s first full
++// run. A `Bytes` grows by doubling, so a million single-byte pushes are twenty reallocations
++// (`tests/probe/probe11_bytes_growth.npk` measured the shape; `tests/unit/bytes_growth.npk`
++// keeps it).
++//
++// ---- A `buffer` IS NOT BOUNDS-CHECKED, SO THIS FILE CHECKS ------------------------------
++//
++// The body is a managed `buffer` (P-24): it drops at scope exit, so a `Bytes` needs no free
++// and there is no free here to forget. A `buffer` cannot be indexed or ranged at the pin
++// (NITPICK-TYPE-007; the compiler's D-341 plans it, unbuilt), so its bytes are reached through
++// `.ptr`, a bare pointer, whose index is NOT checked (`VERIFICATION.md` §2). So every index
++// is checked in the function that uses it, before `.ptr` is touched: a read against `len`, a
++// write against the capacity, and `buf` is `hidden`, so no other module reaches `.ptr` at all
++// (NITPICK-TYPE-080). A misuse -- an index out of range, a negative capacity, a request whose
++// size no `int64` holds -- stops through `bytes_oob`, the language's own `OutOfBounds`, as
++// `vec.npk`'s stops do; this file has its own copy of that stop so that it imports nothing.
++//
++// ---- NO VIEW OF THE BYTES LEAVES THIS FILE ----------------------------------------------
++//
++// There is no `bytes_view`: a view of the body is invalidated by the next growth, which frees
++// the body under it (`nitpick-time`'s TM-139 measured the use-after-free), and a `buffer`
++// cannot be ranged anyway. The bytes leave one at a time (`bytes_at`) or all at once as an
++// OWNED copy (`bytes_take`). Every slice this file takes is a `fixed uint8[]`, read-only.
++//
++// ---- GROWTH DOUBLES, AND NO MULTIPLY CAN OVERFLOW ---------------------------------------
++//
++// `bytes_reserve` doubles the capacity, taking the request itself when doubling would pass
++// `int64`'s maximum, with the guard computed before every multiply; a request whose
++// `len + need` would overflow is refused before it is added. Every loop is a `for` over a
++// range, so none charges a consumer `DecreasesViolated`.
++//
++// `len` is `sealed` -- read anywhere, written only here (NITPICK-TYPE-079) -- and carries no
++// `limit<...>`, which would charge every consumer `LimitViolated`. A `Bytes` is move-only,
++// because a `buffer` owns: a copy is NITPICK-TYPE-046, a by-value parameter is a read-only
++// loan, and everything that changes one takes `Bytes->`.
++//
++// The obligations are comments in the syntax each would take (`VERIFICATION.md` P-1), each of
++// which compiles as a live clause at the pin (measured), and they stay comments for
++// `vec.npk`'s reason: live, each adds `RequiresViolated` or `EnsuresViolated` to every
++// consumer's bill.
++//
++// LAYERING (`BUILD.md` B-17): `core` imports nothing, and this file has no `use` line.
++
++// ---- the type ---------------------------------------------------------------------------
++
++pub struct:Bytes = {
++    hidden buffer:buf;      // MANAGED, owning, dropped at scope exit. `buf.len` is the CAPACITY.
++    sealed int64:len;       // bytes in use -- never `buf.len`
++};
++
++// `int64`'s maximum, the bound the growth guards are computed against.
++fixed int64:I64_MAX = 9223372036854775807i64;
++
++// ---- the stop ---------------------------------------------------------------------------
++
++// obligation: never fails ensures false
++//
++// `vec.npk`'s `vec_oob`, this file's copy: a one-element fixed array indexed at -1 or -2,
++// out of range at every `i`, so it never returns.
++func:bytes_oob = NIL(int64:i) never fails {
++    int64[1]:guard = [0i64];
++    int64:below = 0i64 - 1i64 - (i & 1i64);
++    discard(guard[below]);
++    pass NIL;
++};
++
++// ---- construction and reading -----------------------------------------------------------
++
++// obligation: never fails requires cap >= 0i64
++//             ensures result.len == 0i64 && result.buf.len >= 1i64
++//
++// A NEGATIVE CAPACITY IS A MISUSE AND STOPS; ZERO IS FLOORED TO ONE, as `vec_init` floors it.
++// `buffer_new(n)` is `n` zeroed bytes.
++pub func:bytes_init = Bytes(int64:cap) never fails {
++    if (cap < 0i64) { drop bytes_oob(cap); }
++    int64:n = cap;
++    if (n < 1i64) { n = 1i64; }
++    pass Bytes{ buf: buffer_new(n), len: 0i64 };
++};
++
++// obligation: never fails ensures result == b.len
++//
++// By value -- a loan, read-only -- as every reader here takes its `Bytes`.
++pub func:bytes_len = int64(Bytes:b) never fails {
++    pass b.len;
++};
++
++// obligation: never fails ensures result == b.buf.len
++//
++// THE CAPACITY, which only this file can read (`buf` is `hidden`): what a test asserts growth
++// with, and what `bytes_clear` keeps.
++pub func:bytes_capacity = int64(Bytes:b) never fails {
++    pass b.buf.len;
++};
++
++// obligation: never fails requires i >= 0i64 && i < b.len
++pub func:bytes_at = uint8(Bytes:b, int64:i) never fails {
++    if (i < 0i64) { drop bytes_oob(i); }
++    if (i >= b.len) { drop bytes_oob(i); }
++    pass b.buf.ptr[i];
++};
++
++// obligation: never fails ensures b.len == 0i64 && b.buf.len == old(b.buf.len)
++//
++// THE CAPACITY IS KEPT -- a sink reused across documents clears rather than reallocates --
++// and the old bytes are not zeroed: past `len` nothing here reads them.
++pub func:bytes_clear = NIL(Bytes->:b) never fails {
++    b.len = 0i64;
++    pass NIL;
++};
++
++// ---- growth -----------------------------------------------------------------------------
++
++// obligation: never fails requires need >= 0i64 ensures b.buf.len >= b.len + need
++//
++// ROOM FOR `need` MORE bytes, by doubling: a fresh `buffer_new`, the live bytes copied, and
++// the field overwritten, which drops the old body (there is no `buffer_resize`). Private: the
++// appends below are the surface.
++func:bytes_reserve = NIL(Bytes->:b, int64:need) never fails {
++    if (need < 0i64) { drop bytes_oob(need); }
++    if (need > I64_MAX - b.len) { drop bytes_oob(need); }
++    int64:want = b.len + need;
++    if (want <= b.buf.len) { pass NIL; }
++    int64:nc = b.buf.len;
++    if (nc < 1i64) { nc = 1i64; }
++    // The guard runs before every `nc * 2i64`; from 1, at most sixty-two doublings bring `nc`
++    // to 2^62 or past it, where it fires, so the sixty-third turn at the latest ends the loop
++    // in a `break` -- sixty-three, the value bits of an `int64`, as in `vec.npk`.
++    for (int64:k in 0i64...63i64) {
++        if (nc >= want) { break; }
++        if (nc > I64_MAX - nc) {
++            nc = want;
++            break;
++        }
++        nc = nc * 2i64;
++    }
++    if (nc < want) { nc = want; }
++    buffer:bigger = buffer_new(nc);
++    if (b.len > 0i64) {
++        discard(mcpy(bigger.ptr, b.buf.ptr, b.len));
++    }
++    b.buf = move(bigger);
++    pass NIL;
++};
++
++// ---- appending --------------------------------------------------------------------------
++
++// obligation: never fails ensures b.len == old(b.len) + 1i64
++pub func:bytes_push = NIL(Bytes->:b, uint8:x) never fails {
++    if (b.len >= b.buf.len) {
++        drop bytes_reserve(b, 1i64);
++        // `bytes_reserve`'s postcondition, checked where the write below relies on it.
++        if (b.len >= b.buf.len) { drop bytes_oob(b.len); }
++    }
++    b.buf.ptr[b.len] = x;
++    b.len = b.len + 1i64;
++    pass NIL;
++};
++
++// obligation: never fails ensures b.len == old(b.len) + src.len
++//
++// ONE COPY, not `src.len` pushes. The slice is a parameter, read-only, and only read.
++pub func:bytes_extend = NIL(Bytes->:b, fixed uint8[]:src) never fails {
++    if (src.len <= 0i64) { pass NIL; }
++    drop bytes_reserve(b, src.len);
++    if (src.len > b.buf.len - b.len) { drop bytes_oob(src.len); }
++    discard(mcpy(#ptr_add<uint8>(b.buf.ptr, b.len), src.ptr, src.len));
++    b.len = b.len + src.len;
++    pass NIL;
++};
++
++// obligation: never fails ensures b.len == old(b.len) + string_byte_length(s)
++//
++// `string_bytes` is a read-only view of `s` and allocates nothing.
++pub func:bytes_extend_str = NIL(Bytes->:b, string:s) never fails {
++    drop bytes_extend(b, string_bytes(s));
++    pass NIL;
++};
++
++// obligation: never fails ensures b.len > old(b.len)
++//
++// `v` IN DECIMAL, ALLOCATION-FREE: no `int_to_string`, no `string` at all. The digits are
++// written least-significant first into a local fixed array, then appended in reverse.
++// Twenty is the length of `uint64`'s maximum, 18446744073709551615 -- arithmetic, not
++// policy -- and every index into the array is the language's checked fixed-array index.
++// The loop always runs at least once, so zero writes the one digit "0" with no special
++// case; it stops when no digits remain, which twenty turns always reach. Measured with the
++// runtime's `NPK_HEAP_STATS`: a thousand renderings into a sink with room allocate nothing
++// (one allocation in the run, the sink's own; the same loop through `int_to_string`, 1001).
++//
++// WHAT IT COSTS A CONSUMER: its `%` and `/` arm `DivByZero` and `DivOverflow` in every
++// program that imports this file, whether or not it calls this function -- REACH is
++// import-scoped, and a literal divisor is no exemption (measured: this file's bill is ten
++// identities; the same file with the digits found by subtraction against descending powers
++// of ten, most significant first, is eight).
++pub func:bytes_put_uint = NIL(Bytes->:b, uint64:v) never fails {
++    uint8[20]:digits = [0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
++                        0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8];
++    int64:n = 0i64;
++    uint64:x = v;
++    for (int64:k in 0i64...digits.len) {
++        // `x % 10u64` is 0 ... 9, so the narrowing is exact and `48u8 + d` is '0' ... '9'.
++        uint8:d = (x % 10u64) =>! uint8;
++        digits[k] = 48u8 + d;
++        x = x / 10u64;
++        n = k + 1i64;
++        if (x == 0u64) { break; }
++    }
++    drop bytes_reserve(b, n);
++    if (n > b.buf.len - b.len) { drop bytes_oob(n); }
++    for (int64:k in 0i64...n) {
++        b.buf.ptr[b.len + k] = digits[n - 1i64 - k];
++    }
++    b.len = b.len + n;
++    pass NIL;
++};
++
++// ---- handing the bytes over -------------------------------------------------------------
++
++// obligation: never fails ensures string_byte_length(result) == old(b.len) && b.len == 0i64
++//
++// THE BYTES, OUT, AS AN OWNED `string`, AND THE SINK EMPTIED. `string_from_bytes` is only a
++// VIEW of the body (cap 0, the compiler's own `Views` column), so the answer is that view
++// concatenated onto "" -- `string_concat` allocates and copies, and is `never fails` -- and it
++// is the caller's to keep: the sink's later growth frees the old body, never the answer.
++// Then `len` goes to 0 with the capacity kept: "take" leaves nothing behind, so a sink reused
++// for the next piece of output starts empty, and taking twice cannot hand the same bytes out
++// twice. It allocates by design, once per finished output -- never per piece.
++//
++// THE VIEW-RETURNING SHAPE IS REFUSED AT THE PIN, MEASURED: with the answer `string_from_bytes`
++// alone, `tests/unit/bytes_take.npk` is NITPICK-BORROW-015 at each write to the sink while the
++// taken string lives -- the compiler reads the answer as a possible view of `b.buf.ptr` and
++// freezes its root (D-325). The copy is what makes the answer free of the sink.
++pub func:bytes_take = string(Bytes->:b) never fails {
++    string:owned = string_concat("", string_from_bytes(b.buf.ptr, b.len));
++    b.len = 0i64;
++    pass owned;
++};
+diff --git a/tests/unit/bytes_at_empty_traps.npk b/tests/unit/bytes_at_empty_traps.npk
+new file mode 100644
+index 0000000..90432cf
+--- /dev/null
++++ b/tests/unit/bytes_at_empty_traps.npk
+@@ -0,0 +1,37 @@
++// expect-exit: 94
++//
++// `bytes_at` AT 0 OF AN EMPTY `Bytes` STOPS `OutOfBounds`.
++//
++// `i == len == 0`, the index every guard of an empty container passes (`nitpick-regex`'s
++// RX-143).
++//
++// 94 is the failsafe's `OutOfBounds` arm, the language's own identity, which
++// `bytes_oob` raises: reaching it IS the assertion. Were the call to return, `main` would
++// end 50 -- never 94 -- so "the check fired" and "the check is gone" cannot look alike.
++// One case per file, because nothing runs after a trap.
++mod:bytes_at_empty_traps;
++
++use "../../src/core/bytes.npk".*;
++
++func:main = int32(cstring[]:_~argv) {
++    Bytes:b = raw bytes_init(4i64);
++    discard(raw bytes_at(b, 0i64));
++    exit 50i32;
++};
++
++func:failsafe = int32(Error:e) {
++    pick (e) {
++        (HeapBadRequest)    { exit 91i32; },
++        (HeapOom)           { exit 92i32; },
++        (IntOverflow)       { exit 93i32; },
++        (OutOfBounds)       { exit 94i32; },
++        (Unreachable)       { exit 95i32; },
++        (WildLeak)          { exit 96i32; },
++        (DivByZero)         { exit 97i32; },
++        (DivOverflow)       { exit 98i32; },
++        (StackExhausted)    { exit 106i32; },
++        (MachineFault)      { exit 107i32; },
++        (*)                 { exit 99i32; }
++    }
++    exit 9i32;
++};
+diff --git a/tests/unit/bytes_at_len_traps.npk b/tests/unit/bytes_at_len_traps.npk
+new file mode 100644
+index 0000000..6456ac0
+--- /dev/null
++++ b/tests/unit/bytes_at_len_traps.npk
+@@ -0,0 +1,38 @@
++// expect-exit: 94
++//
++// `bytes_at` AT `i == len` STOPS `OutOfBounds`.
++//
++// Three bytes in a capacity of four, read at 3: through `.ptr`, an unchecked index would answer
++// the zeroed spare byte.
++//
++// 94 is the failsafe's `OutOfBounds` arm, the language's own identity, which
++// `bytes_oob` raises: reaching it IS the assertion. Were the call to return, `main` would
++// end 50 -- never 94 -- so "the check fired" and "the check is gone" cannot look alike.
++// One case per file, because nothing runs after a trap.
++mod:bytes_at_len_traps;
++
++use "../../src/core/bytes.npk".*;
++
++func:main = int32(cstring[]:_~argv) {
++    Bytes:b = raw bytes_init(4i64);
++    drop bytes_extend_str(@b, "abc");
++    discard(raw bytes_at(b, b.len));
++    exit 50i32;
++};
++
++func:failsafe = int32(Error:e) {
++    pick (e) {
++        (HeapBadRequest)    { exit 91i32; },
++        (HeapOom)           { exit 92i32; },
++        (IntOverflow)       { exit 93i32; },
++        (OutOfBounds)       { exit 94i32; },
++        (Unreachable)       { exit 95i32; },
++        (WildLeak)          { exit 96i32; },
++        (DivByZero)         { exit 97i32; },
++        (DivOverflow)       { exit 98i32; },
++        (StackExhausted)    { exit 106i32; },
++        (MachineFault)      { exit 107i32; },
++        (*)                 { exit 99i32; }
++    }
++    exit 9i32;
++};
+diff --git a/tests/unit/bytes_at_negative_traps.npk b/tests/unit/bytes_at_negative_traps.npk
+new file mode 100644
+index 0000000..2f6a09b
+--- /dev/null
++++ b/tests/unit/bytes_at_negative_traps.npk
+@@ -0,0 +1,37 @@
++// expect-exit: 94
++//
++// `bytes_at` AT -1 STOPS `OutOfBounds` -- THE SIGN IS HALF OF EVERY CHECK.
++//
++// Through `.ptr`, a negative index reads before the body.
++//
++// 94 is the failsafe's `OutOfBounds` arm, the language's own identity, which
++// `bytes_oob` raises: reaching it IS the assertion. Were the call to return, `main` would
++// end 50 -- never 94 -- so "the check fired" and "the check is gone" cannot look alike.
++// One case per file, because nothing runs after a trap.
++mod:bytes_at_negative_traps;
++
++use "../../src/core/bytes.npk".*;
++
++func:main = int32(cstring[]:_~argv) {
++    Bytes:b = raw bytes_init(4i64);
++    drop bytes_extend_str(@b, "abc");
++    discard(raw bytes_at(b, 0i64 - 1i64));
++    exit 50i32;
++};
++
++func:failsafe = int32(Error:e) {
++    pick (e) {
++        (HeapBadRequest)    { exit 91i32; },
++        (HeapOom)           { exit 92i32; },
++        (IntOverflow)       { exit 93i32; },
++        (OutOfBounds)       { exit 94i32; },
++        (Unreachable)       { exit 95i32; },
++        (WildLeak)          { exit 96i32; },
++        (DivByZero)         { exit 97i32; },
++        (DivOverflow)       { exit 98i32; },
++        (StackExhausted)    { exit 106i32; },
++        (MachineFault)      { exit 107i32; },
++        (*)                 { exit 99i32; }
++    }
++    exit 9i32;
++};
+diff --git a/tests/unit/bytes_extend.npk b/tests/unit/bytes_extend.npk
+new file mode 100644
+index 0000000..e41fb99
+--- /dev/null
++++ b/tests/unit/bytes_extend.npk
+@@ -0,0 +1,74 @@
++// expect-exit: 0
++//
++// `Bytes` -- `bytes_extend`, `bytes_extend_str` and `bytes_clear` (`src/core/bytes.npk`).
++//
++// Asserts: an empty slice and an empty string append nothing and do not grow it (10-12); a
++// string that fills the capacity exactly does not grow it (13, 14), and its bytes are there
++// (15, 16); a slice past the capacity grows it by doubling, 2 -> 4 -> 8 (17, 18), appends
++// after the old bytes (19, 20) and keeps them (21); a push fills the last spare byte without
++// growing (22); a 64-byte string grows 8 to 128 and lands whole (23-25);
++// `bytes_take` hands back every byte in order (26); `bytes_clear` empties and keeps the
++// capacity (27, 28), and the next append starts at 0 (29, 30). The slice `bytes_extend` takes
++// is `fixed uint8[]` -- here `string_bytes`'s read-only view -- and only read.
++mod:bytes_extend;
++
++use "../../src/core/bytes.npk".*;
++
++func:main = int32(cstring[]:_~argv) {
++    Bytes:b = raw bytes_init(2i64);
++    drop bytes_extend(@b, string_bytes(""));
++    if (b.len != 0i64)                                      { exit 10i32; }
++    if ((raw bytes_capacity(b)) != 2i64)                    { exit 11i32; }
++    drop bytes_extend_str(@b, "");
++    if (b.len != 0i64)                                      { exit 12i32; }
++
++    drop bytes_extend_str(@b, "ab");
++    if (b.len != 2i64)                                      { exit 13i32; }
++    if ((raw bytes_capacity(b)) != 2i64)                    { exit 14i32; }
++    if ((raw bytes_at(b, 0i64)) != 97u8)                    { exit 15i32; }
++    if ((raw bytes_at(b, 1i64)) != 98u8)                    { exit 16i32; }
++
++    drop bytes_extend(@b, string_bytes("cdefg"));
++    if (b.len != 7i64)                                      { exit 17i32; }
++    if ((raw bytes_capacity(b)) != 8i64)                    { exit 18i32; }
++    if ((raw bytes_at(b, 2i64)) != 99u8)                    { exit 19i32; }
++    if ((raw bytes_at(b, 6i64)) != 103u8)                   { exit 20i32; }
++    if ((raw bytes_at(b, 0i64)) != 97u8)                    { exit 21i32; }
++
++    drop bytes_push(@b, 104u8);
++    if ((raw bytes_capacity(b)) != 8i64)                    { exit 22i32; }
++
++    drop bytes_extend_str(@b, "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef");
++    if (b.len != 72i64)                                     { exit 23i32; }
++    if ((raw bytes_capacity(b)) != 128i64)                  { exit 24i32; }
++    if ((raw bytes_at(b, 71i64)) != 102u8)                  { exit 25i32; }
++
++    string:all = raw bytes_take(@b);
++    if (!(string_equals(all, "abcdefgh0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"))) { exit 26i32; }
++
++    drop bytes_extend_str(@b, "xyz");
++    drop bytes_clear(@b);
++    if (b.len != 0i64)                                      { exit 27i32; }
++    if ((raw bytes_capacity(b)) != 128i64)                  { exit 28i32; }
++    drop bytes_extend_str(@b, "Q");
++    if (b.len != 1i64)                                      { exit 29i32; }
++    if ((raw bytes_at(b, 0i64)) != 81u8)                    { exit 30i32; }
++    exit 0i32;
++};
++
++func:failsafe = int32(Error:e) {
++    pick (e) {
++        (HeapBadRequest)    { exit 91i32; },
++        (HeapOom)           { exit 92i32; },
++        (IntOverflow)       { exit 93i32; },
++        (OutOfBounds)       { exit 94i32; },
++        (Unreachable)       { exit 95i32; },
++        (WildLeak)          { exit 96i32; },
++        (DivByZero)         { exit 97i32; },
++        (DivOverflow)       { exit 98i32; },
++        (StackExhausted)    { exit 106i32; },
++        (MachineFault)      { exit 107i32; },
++        (*)                 { exit 99i32; }
++    }
++    exit 9i32;
++};
+diff --git a/tests/unit/bytes_growth.npk b/tests/unit/bytes_growth.npk
+new file mode 100644
+index 0000000..20ee19d
+--- /dev/null
++++ b/tests/unit/bytes_growth.npk
+@@ -0,0 +1,61 @@
++// expect-exit: 0
++//
++// `Bytes` -- A MILLION SINGLE-BYTE PUSHES FROM CAPACITY 1, AND EXACTLY TWENTY REALLOCATIONS
++// (probe 11's shape, made a unit of `src/core/bytes.npk`).
++//
++// Asserts: a `Bytes` made at capacity 1 is empty (10) with capacity 1 (11); the capacity, read
++// after every push through `bytes_capacity`, changes only by exactly doubling (12) and only at
++// the push that found the body full (13) -- so each change IS one reallocation, and counting
++// changes counts them; the length is the push count (14); twenty reallocations, 1 -> 2 -> ...
++// -> 2^20, the first power of two past a million, inside `log2(10^6) + 2` (15, 16); and every
++// byte survived every reallocation, read back by `bytes_at`, the first and last named apart
++// (17-19). The body is managed and drops at scope exit, so `exit 0` here asserts no `wild`
++// block and says nothing about it (`SAFETY.md` S-18); the reallocation count is what bounds
++// the growth.
++mod:bytes_growth;
++
++use "../../src/core/bytes.npk".*;
++
++func:main = int32(cstring[]:_~argv) {
++    Bytes:b = raw bytes_init(1i64);
++    if ((raw bytes_len(b)) != 0i64)                         { exit 10i32; }
++    if ((raw bytes_capacity(b)) != 1i64)                    { exit 11i32; }
++    int64:reallocs = 0i64;
++    int64:seen_cap = 1i64;
++    for (int64:i in 0i64...1000000i64) {
++        drop bytes_push(@b, ((i % 251i64) =>! uint8));
++        int64:now_cap = raw bytes_capacity(b);
++        if (now_cap != seen_cap) {
++            if (now_cap != seen_cap * 2i64)                 { exit 12i32; }
++            if (i != seen_cap)                              { exit 13i32; }
++            reallocs = reallocs + 1i64;
++            seen_cap = now_cap;
++        }
++    }
++    if (b.len != 1000000i64)                                { exit 14i32; }
++    if (reallocs != 20i64)                                  { exit 15i32; }
++    if ((raw bytes_capacity(b)) != 1048576i64)              { exit 16i32; }
++    if ((raw bytes_at(b, 0i64)) != 0u8)                     { exit 17i32; }
++    if ((raw bytes_at(b, 999999i64)) != ((999999i64 % 251i64) =>! uint8)) { exit 18i32; }
++    for (int64:j in 0i64...1000000i64) {
++        if ((raw bytes_at(b, j)) != ((j % 251i64) =>! uint8)) { exit 19i32; }
++    }
++    exit 0i32;
++};
++
++func:failsafe = int32(Error:e) {
++    pick (e) {
++        (HeapBadRequest)    { exit 91i32; },
++        (HeapOom)           { exit 92i32; },
++        (IntOverflow)       { exit 93i32; },
++        (OutOfBounds)       { exit 94i32; },
++        (Unreachable)       { exit 95i32; },
++        (WildLeak)          { exit 96i32; },
++        (DivByZero)         { exit 97i32; },
++        (DivOverflow)       { exit 98i32; },
++        (StackExhausted)    { exit 106i32; },
++        (MachineFault)      { exit 107i32; },
++        (*)                 { exit 99i32; }
++    }
++    exit 9i32;
++};
+diff --git a/tests/unit/bytes_init_negative_traps.npk b/tests/unit/bytes_init_negative_traps.npk
+new file mode 100644
+index 0000000..214d56e
+--- /dev/null
++++ b/tests/unit/bytes_init_negative_traps.npk
+@@ -0,0 +1,35 @@
++// expect-exit: 94
++//
++// `bytes_init` OF A NEGATIVE CAPACITY STOPS `OutOfBounds` (ZERO IS FLOORED TO ONE).
++//
++// As `vec_init`: a negative capacity is a misuse, not a hint.
++//
++// 94 is the failsafe's `OutOfBounds` arm, the language's own identity, which
++// `bytes_oob` raises: reaching it IS the assertion. Were the call to return, `main` would
++// end 50 -- never 94 -- so "the check fired" and "the check is gone" cannot look alike.
++// One case per file, because nothing runs after a trap.
++mod:bytes_init_negative_traps;
++
++use "../../src/core/bytes.npk".*;
++
++func:main = int32(cstring[]:_~argv) {
++    Bytes:b = raw bytes_init(0i64 - 1i64);
++    exit 50i32;
++};
++
++func:failsafe = int32(Error:e) {
++    pick (e) {
++        (HeapBadRequest)    { exit 91i32; },
++        (HeapOom)           { exit 92i32; },
++        (IntOverflow)       { exit 93i32; },
++        (OutOfBounds)       { exit 94i32; },
++        (Unreachable)       { exit 95i32; },
++        (WildLeak)          { exit 96i32; },
++        (DivByZero)         { exit 97i32; },
++        (DivOverflow)       { exit 98i32; },
++        (StackExhausted)    { exit 106i32; },
++        (MachineFault)      { exit 107i32; },
++        (*)                 { exit 99i32; }
++    }
++    exit 9i32;
++};
+diff --git a/tests/unit/bytes_put_uint.npk b/tests/unit/bytes_put_uint.npk
+new file mode 100644
+index 0000000..c368af7
+--- /dev/null
++++ b/tests/unit/bytes_put_uint.npk
+@@ -0,0 +1,69 @@
++// expect-exit: 0
++//
++// `bytes_put_uint` -- `uint64` IN DECIMAL, AT EVERY BOUNDARY A DIGIT LOOP GETS WRONG
++// (`src/core/bytes.npk`).
++//
++// Each value is rendered into a fresh `Bytes` of capacity 1 -- so every rendering of two or
++// more digits also grows it -- and the text `bytes_take` hands back is compared with the
++// expected text, and its length with the expected length: 0, the value whose loop writes one
++// digit without a special case (10); 1 and 9, the one-digit ends (11, 12); 10 and 99, 100 and
++// 1000, where the digit count changes (13-16); `int64`'s maximum (17); and `uint64`'s maximum,
++// twenty digits, the array's whole length (18). A `uint64` literal above `int64`'s maximum is NITPICK-LEX-004 at the pin -- the
++// literal envelope is signed -- so `uint64`'s maximum is built from `I64_MAX`, one multiply and
++// one add that cannot overflow. Then three renderings APPEND to one sink between other bytes,
++// each starting where the last ended (19, 20). The function allocates nothing of its own: its
++// digits go into a local `uint8[20]`, never through `int_to_string`.
++mod:bytes_put_uint;
++
++use "../../src/core/bytes.npk".*;
++
++fixed uint64:I64_MAX = 9223372036854775807u64;
++
++func:renders = bool(uint64:v, string:want) never fails {
++    Bytes:b = raw bytes_init(1i64);
++    drop bytes_put_uint(@b, v);
++    if (b.len != string_byte_length(want)) { pass false; }
++    string:got = raw bytes_take(@b);
++    pass string_equals(got, want);
++};
++
++func:main = int32(cstring[]:_~argv) {
++    uint64:umax = I64_MAX * 2u64 + 1u64;
++    if (!(raw renders(0u64, "0")))                          { exit 10i32; }
++    if (!(raw renders(1u64, "1")))                          { exit 11i32; }
++    if (!(raw renders(9u64, "9")))                          { exit 12i32; }
++    if (!(raw renders(10u64, "10")))                        { exit 13i32; }
++    if (!(raw renders(99u64, "99")))                        { exit 14i32; }
++    if (!(raw renders(100u64, "100")))                      { exit 15i32; }
++    if (!(raw renders(1000u64, "1000")))                    { exit 16i32; }
++    if (!(raw renders(I64_MAX, "9223372036854775807")))     { exit 17i32; }
++    if (!(raw renders(umax, "18446744073709551615")))       { exit 18i32; }
++
++    Bytes:s = raw bytes_init(1i64);
++    drop bytes_put_uint(@s, 12u64);
++    drop bytes_push(@s, 44u8);
++    drop bytes_put_uint(@s, 0u64);
++    drop bytes_push(@s, 44u8);
++    drop bytes_put_uint(@s, umax);
++    if (s.len != 25i64)                                     { exit 19i32; }
++    string:joined = raw bytes_take(@s);
++    if (!(string_equals(joined, "12,0,18446744073709551615"))) { exit 20i32; }
++    exit 0i32;
++};
++
++func:failsafe = int32(Error:e) {
++    pick (e) {
++        (HeapBadRequest)    { exit 91i32; },
++        (HeapOom)           { exit 92i32; },
++        (IntOverflow)       { exit 93i32; },
++        (OutOfBounds)       { exit 94i32; },
++        (Unreachable)       { exit 95i32; },
++        (WildLeak)          { exit 96i32; },
++        (DivByZero)         { exit 97i32; },
++        (DivOverflow)       { exit 98i32; },
++        (StackExhausted)    { exit 106i32; },
++        (MachineFault)      { exit 107i32; },
++        (*)                 { exit 99i32; }
++    }
++    exit 9i32;
++};
+diff --git a/tests/unit/bytes_take.npk b/tests/unit/bytes_take.npk
+new file mode 100644
+index 0000000..d9d8001
+--- /dev/null
++++ b/tests/unit/bytes_take.npk
+@@ -0,0 +1,62 @@
++// expect-exit: 0
++//
++// `bytes_take` -- AN OWNED COPY OF THE BYTES, AND THE SINK LEFT EMPTY (`src/core/bytes.npk`).
++//
++// Asserts: the string taken is the text appended (10); the sink is empty after it (11) with its
++// capacity kept (12). THE STRING IS A COPY, NOT A VIEW: the sink then grows past its old
++// capacity -- which frees the body a view would point into, and the runtime poisons every
++// freed byte (0xAA) -- and the string still reads its text (13, 14); the sink is cleared and
++// refilled over the same bytes and the string is unchanged (15). A second take hands out only
++// what was appended since (16), and a take of an empty sink is the empty string (17, 18). A
++// push after a take starts at 0 (19, 20). `nitpick-regex` (RX-138) and `nitpick-time` (TM-188)
++// each shipped a take that returned the view. At the pin that shape does not reach a run: with
++// `bytes_take` answering `string_from_bytes` alone, this file is NITPICK-BORROW-015 at each
++// write to `b` while `first` lives (measured); 14 and 15 are the run-time half, for a view the
++// borrow check would not see.
++mod:bytes_take;
++
++use "../../src/core/bytes.npk".*;
++
++func:main = int32(cstring[]:_~argv) {
++    Bytes:b = raw bytes_init(4i64);
++    drop bytes_extend_str(@b, "abcd");
++    string:first = raw bytes_take(@b);
++    if (!(string_equals(first, "abcd")))                    { exit 10i32; }
++    if (b.len != 0i64)                                      { exit 11i32; }
++    if ((raw bytes_capacity(b)) != 4i64)                    { exit 12i32; }
++
++    drop bytes_extend_str(@b, "0123456789");
++    if ((raw bytes_capacity(b)) != 16i64)                   { exit 13i32; }
++    if (!(string_equals(first, "abcd")))                    { exit 14i32; }
++    drop bytes_clear(@b);
++    drop bytes_extend_str(@b, "WXYZ");
++    if (!(string_equals(first, "abcd")))                    { exit 15i32; }
++
++    string:second = raw bytes_take(@b);
++    if (!(string_equals(second, "WXYZ")))                   { exit 16i32; }
++    string:none = raw bytes_take(@b);
++    if (string_byte_length(none) != 0i64)                   { exit 17i32; }
++    if (!(string_equals(none, "")))                         { exit 18i32; }
++
++    drop bytes_push(@b, 113u8);
++    if (b.len != 1i64)                                      { exit 19i32; }
++    if ((raw bytes_at(b, 0i64)) != 113u8)                   { exit 20i32; }
++    exit 0i32;
++};
++
++func:failsafe = int32(Error:e) {
++    pick (e) {
++        (HeapBadRequest)    { exit 91i32; },
++        (HeapOom)           { exit 92i32; },
++        (IntOverflow)       { exit 93i32; },
++        (OutOfBounds)       { exit 94i32; },
++        (Unreachable)       { exit 95i32; },
++        (WildLeak)          { exit 96i32; },
++        (DivByZero)         { exit 97i32; },
++        (DivOverflow)       { exit 98i32; },
++        (StackExhausted)    { exit 106i32; },
++        (MachineFault)      { exit 107i32; },
++        (*)                 { exit 99i32; }
++    }
++    exit 9i32;
++};

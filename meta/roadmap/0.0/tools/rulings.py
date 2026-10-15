@@ -21,7 +21,7 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from shapes import blank  # noqa: E402
 
-_DECL = re.compile(r"\s*(func|struct|enum|trait|impl|mod|error|use|extern|macro|unit|rule)\b")
+_DECL = re.compile(r"\s*(pub\s+)?(func|struct|enum|trait|impl|mod|error|use|extern|macro|unit|rule)\b")
 _BINDING = re.compile(r"\s*(pub\s+)?(fixed\s+|const\s+)?([\w<>\[\]\-?]+(?:->)?)\s*:\s*\w+\s*(=|;)")
 
 

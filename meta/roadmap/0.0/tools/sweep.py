@@ -30,7 +30,9 @@ EMPH = re.compile(r"[*_`]")
 
 def patterns(root, sub):
     out = []
-    with open(os.path.join(root, "meta", "roadmap", "0.0", sub + "_tools", "sweep_patterns.txt"), encoding="utf-8") as fh:
+    d = os.path.join(root, "meta", "roadmap", "0.0")
+    d = d if os.path.isdir(d) else os.path.join(root, "meta", "roadmap", "done", "0.0")
+    with open(os.path.join(d, sub + "_tools", "sweep_patterns.txt"), encoding="utf-8") as fh:
         for line in fh:
             if not line.strip() or line.startswith("#"):
                 continue
@@ -84,6 +86,8 @@ def run(root, sub):
 def control(root, sub):
     pats = patterns(root, sub)
     tools = os.path.join(root, "meta", "roadmap", "0.0", sub + "_tools")
+    if not os.path.isdir(tools):
+        tools = os.path.join(root, "meta", "roadmap", "done", "0.0", sub + "_tools")
     total = matched = 0
     misses = []
     for p in sorted(glob.glob(os.path.join(tools, "step*.patch"))):

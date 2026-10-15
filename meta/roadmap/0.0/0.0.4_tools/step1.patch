@@ -1,0 +1,169 @@
+diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
+index 1c105e5..90888cc 100644
+--- a/meta/DECISIONS.md
++++ b/meta/DECISIONS.md
+@@ -1078,3 +1078,15 @@ checks written now** — their inputs do not exist, and a check over nothing is
+ 
+ *Reversal, for the author:* none for the key; a layer S-6 does not list, or a third name, is a change to `SAFETY.md` §3
+ by a decision, which the check then reads.
++
++### @@PD-143@@ — `limits.npk` holds `SAFETY.md` §7's eight bounds, and no ninth
++**2026-10-15, cycle 0.0.4.** `src/core/limits.npk` declares each bound of `SAFETY.md` §7's table as a `pub fixed int64`
++with its row — `NPARSE_MAX_DEPTH`, `_SCALAR`, `_KEY`, `_MEMBERS`, `_DIGITS`, `_EXPONENT`, `_ERRORS` and `_INPUT` — and
++nothing else; `check_constants_named` (cycle 0.0.3) holds the file's values to the table and every other module under
++`src/` to naming them. The first writing listed a ninth, `NPARSE_DUP_SCAN_MAX`, which no specification defines.
++
++*Alternatives declined:* **the ninth** — a bound no rule sets is a number nobody can audit; it comes with the rule
++that sets it; **a capacity as a generic value parameter** — the compiler reserves the form (its D-353, landing 117),
++and a `fixed` constant covers each capacity (the libraries' answer on its S-135).
++
++*Reversal, for the author:* none; a new bound is a row of §7 and a line here, by a decision.
+diff --git a/meta/specs/SAFETY.md b/meta/specs/SAFETY.md
+index 7712438..39c5b3d 100644
+--- a/meta/specs/SAFETY.md
++++ b/meta/specs/SAFETY.md
+@@ -300,6 +300,9 @@ is a loop over attacker-controlled length without one.
+ | `NPARSE_MAX_ERRORS` | 64 | faults collected in recovery mode before parsing stops | parsing stops; the collected set is returned |
+ | `NPARSE_MAX_INPUT` | 2^47 | the input length the cursor's arithmetic is proven over | `EParseState` (a caller mistake, not an input) |
+ 
++*(2026-10-15, cycle 0.0.4 — @@PD-143@@: `src/core/limits.npk` holds these eight, each a `pub fixed int64` with its
++row, and `check_constants_named` holds the file to this table and every other module to naming them.)*
++
+ **Rule S-20.** Every one of these is a per-parse option except `NPARSE_MAX_INPUT`,
+ which is a property of the cursor's arithmetic proof and is not adjustable.
+ 
+diff --git a/nitpick.toml b/nitpick.toml
+index a2bbd9b..1358862 100644
+--- a/nitpick.toml
++++ b/nitpick.toml
+@@ -118,6 +118,14 @@ name  = "defect-reseat"
+ stage = "check"
+ path  = "tests/probe/defect/view_reseat"
+ 
++# Cycle 0.0.4's unit suite (@@PD-143@@, @@PD-144@@): `src/core/`'s programs, each
++# judged by its exit at -O0 and through `opt -O2`; a misuse traps `OutOfBounds`
++# (94) by design, and a forgotten free `WildLeak` (96).
++[[test]]
++name  = "unit"
++stage = "program"
++path  = "tests/unit"
++
+ # The parse sweep (cycle 0.0.3, @@PD-140@@): every `.npk` in the tree compiled as
+ # a root, none with a LEX- or PARSE- code. It comes last, so a file a suite
+ # judges is judged there first, by its own rule. The runner refuses a manifest
+diff --git a/src/core/limits.npk b/src/core/limits.npk
+new file mode 100644
+index 0000000..a883bd0
+--- /dev/null
++++ b/src/core/limits.npk
+@@ -0,0 +1,65 @@
++mod:limits;
++
++// MAY IMPORT: nothing (`meta/specs/BUILD.md` B-17's table); `core` is the bottom layer.
++
++// `src/core/limits.npk` -- EVERY NAMED BOUND IN `nparse`, AND NOWHERE ELSE.
++//
++// `meta/specs/SAFETY.md` §7's table, one constant per row, in the table's order; PA-004 puts
++// them here and S-19 says why there are bounds at all: nothing grows without a bound somebody
++// can name. Each constant carries its row -- what it bounds, and what exceeding it does -- and
++// the rule that sets it, because the number is in the table and the reason is what a later
++// cycle, a consumer's options, or a review will look for.
++//
++// S-20, ONCE FOR ALL EIGHT: every one of these is the DEFAULT of a per-parse option, except
++// `NPARSE_MAX_INPUT`, which is a property of the cursor's arithmetic proof and is not
++// adjustable. So a parser reads its bound from its options and starts them from these; only
++// `NPARSE_MAX_INPUT` is read here directly, everywhere it is needed.
++//
++// `fixed` -- a module-level binding is `fixed` with an initialiser or it is refused (the
++// compiler's D-211). `int64`, every one, because every quantity they bound is an `int64`
++// count or length (a slice's `.len`, a `Vec`'s `count`). Each value is the table's number
++// spelled out, never an expression, so the number a reviewer reads is the number compared.
++//
++// LAYERING (`BUILD.md` B-17): `core` imports nothing, and this file has no `use` line.
++// Nothing here is a function, so importing it costs a consumer no `failsafe` arm beyond the
++// floor every program owes.
++
++// Row `NPARSE_MAX_DEPTH`: container nesting, in the parser, the builder, the writer and the
++// walk; exceeding it is `Fault(DepthExceeded)`. Rule S-14: the default is 128 -- above
++// anything a human writes, below anything that costs memory -- and it is a per-parse option
++// (S-20). It is the explicit stack's bound (S-13, PA-022): nesting is a `Vec<Frame>` this deep.
++pub fixed int64:NPARSE_MAX_DEPTH = 128i64;
++
++// Row `NPARSE_MAX_SCALAR`: one scalar's decoded length, a single JSON string; exceeding it is
++// `Fault(ScalarTooLong)`. 16 MiB, 16 * 1024 * 1024 bytes. Rule S-19: it is the bound on the
++// parser's scratch `Bytes`. A per-parse option (S-20). O-P2: 16 MiB is a guess until cycle
++// 0.3 measures it.
++pub fixed int64:NPARSE_MAX_SCALAR = 16777216i64;
++
++// Row `NPARSE_MAX_KEY`: one map key's decoded length; exceeding it is `Fault(KeyTooLong)`.
++// 64 KiB, 64 * 1024 bytes. A per-parse option (S-20).
++pub fixed int64:NPARSE_MAX_KEY = 65536i64;
++
++// Row `NPARSE_MAX_MEMBERS`: members in one container; exceeding it is
++// `Fault(TooManyMembers)`. 2^31 - 1. A per-parse option (S-20).
++pub fixed int64:NPARSE_MAX_MEMBERS = 2147483647i64;
++
++// Row `NPARSE_MAX_DIGITS`: digits in one numeric literal before scanning stops; exceeding it
++// is `Fault(NumberOutOfRange)`. A per-parse option (S-20).
++pub fixed int64:NPARSE_MAX_DIGITS = 4096i64;
++
++// Row `NPARSE_MAX_EXPONENT`: the magnitude of a decimal exponent; exceeding it is
++// `Fault(NumberOutOfRange)`. A per-parse option (S-20); every exponent accumulation is
++// checked before it multiplies (S-8, S-9).
++pub fixed int64:NPARSE_MAX_EXPONENT = 9999i64;
++
++// Row `NPARSE_MAX_ERRORS`: faults collected in recovery mode before parsing stops; reaching
++// it stops the parse and the collected set is returned. A per-parse option (S-20).
++pub fixed int64:NPARSE_MAX_ERRORS = 64i64;
++
++// Row `NPARSE_MAX_INPUT`: the input length the cursor's arithmetic is proven over; exceeding
++// it is `EParseState` -- a caller mistake, not an input. 2^47, the x86-64 user address space,
++// the same ceiling the prelude's `ListLen` and `string_from_bytes` hold a length to. Rule
++// S-20: NOT a per-parse option -- it is a property of the cursor's arithmetic proof and is not
++// adjustable.
++pub fixed int64:NPARSE_MAX_INPUT = 140737488355328i64;
+diff --git a/tests/unit/limits_values.npk b/tests/unit/limits_values.npk
+new file mode 100644
+index 0000000..f814b4d
+--- /dev/null
++++ b/tests/unit/limits_values.npk
+@@ -0,0 +1,39 @@
++// expect-exit: 0
++//
++// `src/core/limits.npk` -- EACH OF THE EIGHT CONSTANTS HAS `meta/specs/SAFETY.md` §7's VALUE.
++//
++// One assertion per row, in the table's order, each its own exit: 10 `NPARSE_MAX_DEPTH` is 128
++// (S-14's default), 11 `NPARSE_MAX_SCALAR` is 16 MiB, 12 `NPARSE_MAX_KEY` is 64 KiB, 13
++// `NPARSE_MAX_MEMBERS` is 2^31 - 1, 14 `NPARSE_MAX_DIGITS` is 4096, 15 `NPARSE_MAX_EXPONENT` is
++// 9999, 16 `NPARSE_MAX_ERRORS` is 64, 17 `NPARSE_MAX_INPUT` is 2^47. The expected values are the
++// table's numbers spelled out here, independently of the file under test, so a constant edited
++// there and not in the table is a red run. Importing the file costs only the floor's six arms:
++// it declares no function.
++mod:limits_values;
++
++use "../../src/core/limits.npk".*;
++
++func:main = int32(cstring[]:_~argv) {
++    if (NPARSE_MAX_DEPTH != 128i64)                 { exit 10i32; }
++    if (NPARSE_MAX_SCALAR != 16777216i64)           { exit 11i32; }
++    if (NPARSE_MAX_KEY != 65536i64)                 { exit 12i32; }
++    if (NPARSE_MAX_MEMBERS != 2147483647i64)        { exit 13i32; }
++    if (NPARSE_MAX_DIGITS != 4096i64)               { exit 14i32; }
++    if (NPARSE_MAX_EXPONENT != 9999i64)             { exit 15i32; }
++    if (NPARSE_MAX_ERRORS != 64i64)                 { exit 16i32; }
++    if (NPARSE_MAX_INPUT != 140737488355328i64)     { exit 17i32; }
++    exit 0i32;
++};
++
++func:failsafe = int32(Error:e) {
++    pick (e) {
++        (HeapBadRequest)    { exit 91i32; },
++        (HeapOom)           { exit 92i32; },
++        (Unreachable)       { exit 95i32; },
++        (WildLeak)          { exit 96i32; },
++        (StackExhausted)    { exit 106i32; },
++        (MachineFault)      { exit 107i32; },
++        (*)                 { exit 99i32; }
++    }
++    exit 9i32;
++};

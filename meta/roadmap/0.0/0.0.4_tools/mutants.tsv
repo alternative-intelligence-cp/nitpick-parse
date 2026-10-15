@@ -1,0 +1,14 @@
+# 0.0.4's mutants of `src/core/` -- each one guard or one value broken alone; `mutants.py` makes each edit exactly
+# once in a copy of the tree's HEAD and runs the harness there. TAB-separated: name, file, the text replaced, its
+# replacement; `\n` is a newline and `\t` a tab.
+vec-at-upper	src/core/vec.npk	pub func:vec_at<T: Copy> = T(Vec<T>:v, int64:i) never fails {\n    if (v.cap <= 0i64) { drop vec_oob(v.cap); }\n    if (i < 0i64) { drop vec_oob(i); }\n    if (i >= v.count) { drop vec_oob(i); }\n	pub func:vec_at<T: Copy> = T(Vec<T>:v, int64:i) never fails {\n    if (v.cap <= 0i64) { drop vec_oob(v.cap); }\n    if (i < 0i64) { drop vec_oob(i); }\n
+vec-at-negative	src/core/vec.npk	pub func:vec_at<T: Copy> = T(Vec<T>:v, int64:i) never fails {\n    if (v.cap <= 0i64) { drop vec_oob(v.cap); }\n    if (i < 0i64) { drop vec_oob(i); }\n    if (i >= v.count) { drop vec_oob(i); }\n	pub func:vec_at<T: Copy> = T(Vec<T>:v, int64:i) never fails {\n    if (v.cap <= 0i64) { drop vec_oob(v.cap); }\n    if (i >= v.count) { drop vec_oob(i); }\n
+vec-pop-empty	src/core/vec.npk	pub func:vec_pop<T: Copy> = T(Vec<T>->:v) never fails {\n    if (v.cap <= 0i64) { drop vec_oob(v.cap); }\n    if (v.count <= 0i64) { drop vec_oob(v.count); }\n	pub func:vec_pop<T: Copy> = T(Vec<T>->:v) never fails {\n    if (v.cap <= 0i64) { drop vec_oob(v.cap); }\n
+vec-insert-past	src/core/vec.npk	pub func:vec_insert<T: Copy> = NIL(Vec<T>->:v, int64:i, T:x) never fails {\n    if (v.cap <= 0i64) { drop vec_oob(v.cap); }\n    if (i < 0i64) { drop vec_oob(i); }\n    if (i > v.count) { drop vec_oob(i); }\n	pub func:vec_insert<T: Copy> = NIL(Vec<T>->:v, int64:i, T:x) never fails {\n    if (v.cap <= 0i64) { drop vec_oob(v.cap); }\n    if (i < 0i64) { drop vec_oob(i); }\n
+vec-free-twice	src/core/vec.npk	pub func:vec_free<T: Copy> = NIL(Vec<T>->:v) never fails {\n    if (v.cap <= 0i64) { drop vec_oob(v.cap); }\n	pub func:vec_free<T: Copy> = NIL(Vec<T>->:v) never fails {\n
+vec-reserve-overflow	src/core/vec.npk	    if (need > I64_MAX - v.count) { drop vec_oob(need); }\n	
+vec-init-negative	src/core/vec.npk	    if (cap < 0i64) { drop vec_oob(cap); }\n	
+leak-free-forgotten	tests/unit/vec_leak_freed.npk	    drop vec_free(@a);\n	
+bytes-at-upper	src/core/bytes.npk	    if (i >= b.len) { drop bytes_oob(i); }\n	
+put-uint-digit	src/core/bytes.npk	        uint8:d = (x % 10u64) =>! uint8;\n	        uint8:d = (x % 9u64) =>! uint8;\n
+limit-value	src/core/limits.npk	= 128i64;	= 129i64;

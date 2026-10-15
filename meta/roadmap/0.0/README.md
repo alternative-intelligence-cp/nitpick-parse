@@ -16,7 +16,7 @@ in the owed-items table below.
 | [0.0.1](0.0.1.md) | **yes** — six patches over 0.0.0's record, blocks with filled Expects; CI's run is its worker's |
 | [0.0.2](0.0.2.md) | **yes** — three patches over 0.0.1's record, blocks with filled Expects, the mutants' table; CI's run is its worker's |
 | [0.0.3](0.0.3.md) | **yes** — three patches over 0.0.2's record, blocks with filled Expects, the mutants' table; CI's run is its worker's |
-| [0.0.4](0.0.4.md) | not yet |
+| [0.0.4](0.0.4.md) | **yes** — four patches over 0.0.3's record, blocks with filled Expects, the mutants' table; CI's run is its worker's |
 | [0.0.5](0.0.5.md) | not yet |
 
 ## Why this shape
@@ -63,7 +63,10 @@ author.**
 | PD-140 | 0.0.3 | the refusals and the sweep are judged by `npkc`; `accept` struck; a refusal a set of codes at their sites; the reseat's defect a pending refusal |
 | PD-141 | 0.0.3 | the self-check is its own printed list, live and pending, run before any judgment; a filtered run concludes nothing |
 | PD-142 | 0.0.3 | the tree checks read their authorities; the error budget keyed by module and name, private identities included |
-| PD-143 onward | 0.0.4, 0.0.5 | proposed by those files as they reach the pin |
+| PD-143 | 0.0.4 | `limits.npk` holds `SAFETY.md` §7's eight bounds, and no ninth |
+| PD-144 | 0.0.4 | the containers check their own indexes and trap `OutOfBounds` on misuse; an obligation a comment unless a decision accepts its arm; `Bytes` has no view at the pin |
+| PD-145 | 0.0.4 | `SmallMap` waits for its first consumer |
+| PD-146 … PD-148 | — | unused: 0.0.5 proposes none |
 
 ## The pin, and what each later landing would move
 
@@ -153,7 +156,7 @@ no literal outside the envelope; `#size_of` measured, never summed; a container'
 | Item | Carried by | How |
 |---|---|---|
 | PL-1, the read-only view (E2-2) | 0.0.0 step 4 | every reader, cursor, text and document slot `fixed uint8[]`, measured by probe 08's family; PD-132 |
-| PL-2, the writer's sink and `Bytes.view()` | 0.0.0 step 4; 0.0.4 | `put`'s `text` is `fixed` (PD-132); `Bytes` has no returned view at the pin |
+| PL-2, the writer's sink and `Bytes.view()` | 0.0.0 step 4; 0.0.4 | `put`'s `text` is `fixed` (PD-132); `Bytes` has no view at the pin and its `take` is an owned copy (PD-144) |
 | PL-3, the probes the view needs | 0.0.0 steps 2 … 4 | probes 08 … 08h, 12's range, 08f's `TYPE-014` |
 | PL-4 and E2-4, LLVM 20.1.8 and the manifest's rows | 0.0.1 | `[toolchain]` with `llvm`, `triple` and `datalayout` as the compiler's `BUILD_REFERENCE.md` §1 gives them, worded as `nitpick-regex`'s manifest; `CLAUDE.md` and `README.md`; CI |
 | PL-5, the compiler's state | 0.0.0 step 4 | `BUILD.md` §1 re-read and dated, `README.md`'s status, O-N2 answered, PA-022's note |
@@ -162,11 +165,11 @@ no literal outside the envelope; `#size_of` measured, never summed; a container'
 | E2-10, counts against sets | 0.0.5 | `ROADMAP.md`'s decision and question counts derived from their sets; the workbench's `LIBRARIES.md` is the orchestrator's |
 | E2-13, no `CURRENCY.md` | 0.0.1 | `meta/research/CURRENCY.md` created; the library counted security-sensitive and its three research items named |
 | E2-15, `CLAUDE.md`'s empty heading | 0.0.1 step 5 | the paragraph moved under "What this is" |
-| EC2, what an index does | 0.0.0 step 4; 0.0.4 | `SAFETY.md`'s row and `VERIFICATION.md` §2 with probe 11's measurement; the accessors guard every pointer index |
+| EC2, what an index does | 0.0.0 step 4; 0.0.4 | `SAFETY.md`'s row and `VERIFICATION.md` §2 with probe 11's measurement; every accessor of `Vec` and `Bytes` checks its own index, measured not to trap through a pointer (PD-144) |
 | EC3, "every public `error:`" | 0.0.3 | `check_error_budget` keyed by module and name, private identities included (measured: a private identity a reachable `fail` raises is owed as `<module>.<name>`); EC3's sentences and twins, and six more found by the claim's subject (PD-142) |
 | ED2, local `O-N` ids | 0.0.0 steps 2 and 4 | O-N2, O-N3 and O-N4 each say their id is this repository's own; nothing takes a registry id |
 | ES1, "nothing exists today" | 0.0.0 step 4 | O-N2 struck as answered |
-| EK1, `VERIFICATION.md` P-1 | 0.0.4 | P-1 replaced: an obligation is a comment unless a decision accepts the arm its live clause costs |
+| EK1, `VERIFICATION.md` P-1 | 0.0.4 | P-1 superseded in part by P-1a: an obligation is a comment unless a decision accepts the arm its live clause costs — measured: each of `requires`, `ensures` and `limit` charges every consumer one (PD-144) |
 | EC9, a re-pin mid-cycle | this README | a re-pin is taken between subcycles; the landing table is the adoption |
 
 ## The planning brief's open points, and each one's answer
@@ -176,11 +179,11 @@ no literal outside the envelope; `#size_of` measured, never summed; a container'
 | 1 | which compiler the plan targets | `7e91730`; the landing table above |
 | 2 | probe 05's meaning | settled by 0.0.0: refused at `arena_make`, `NITPICK-TYPE-007` (PD-130) |
 | 3 | returned reader structs | settled by 0.0.0: a constructor returns its cursor over the bytes it was handed; over its own, `BORROW-001` (PD-132) |
-| 4 | `Bytes` and D-341 | settled by 0.0.0's probe 11 — a `buffer` can be neither indexed nor ranged at the pin — and handed to 0.0.4 |
+| 4 | `Bytes` and D-341 | settled: a `buffer` can be neither indexed nor ranged at the pin (0.0.0's probe 11), so `Bytes` offers no view and its `take` copies; D-341's landing reopens it (PD-144) |
 | 5 | `#size_of<Event>()` and an enum's width | settled by 0.0.0: four bytes; `Event` 32 (PD-129) |
 | 6 | probe 10 against the 8 MiB stack | settled by 0.0.0: 50 000 levels complete; the traps are at 65 535 and 131 063 (PD-133) |
 | 7 | the bill, and `IntOverflow` | settled by 0.0.0's oracle measurements (PD-134) |
-| 8 | whether `nitpick-regex`'s answer on live contracts (A′, its `VERIFICATION.md` P-1b) binds this library | handed to 0.0.4, which writes the obligations (EK1) |
+| 8 | whether `nitpick-regex`'s answer on live contracts (A′, its `VERIFICATION.md` P-1b) binds this library | settled by 0.0.4: it does, as `VERIFICATION.md` P-1a (PD-144) |
 | 9 | the `repro` check | settled by 0.0.2: each copy carries its manifest, since without it the consumer's two modules differ — the check's mutant (PD-138, `BUILD.md` B-4) |
 | 10 | the undefined-symbol scan | settled by 0.0.2: the call-edge scan stands behind PA-006, over every module under `src/` and every program, and the floor and the syscaller are its controls on every run (PD-138, B-2a) |
 | 11 | `tools/parse_check` and `tools/check` | settled by 0.0.3: both are compiler sources at the pin, so `npkc` judges the sweep by the code family and the refusals by their codes; `accept` struck (PD-140) |
@@ -254,12 +257,12 @@ file states its own acceptance when it reaches the pin, and where the two differ
 - [ ] EC3's sentences corrected; each mutant red by the check it breaks
 
 ### 0.0.4 — `src/core/`
-- [ ] `src/core/limits.npk` — every constant from `specs/SAFETY.md` §7, each with the rule that set it
-- [ ] `src/core/vec.npk` — `Vec<T: Copy>`, every accessor boundary-tested at `0`, `count-1` and `count`
-- [ ] `src/core/bytes.npk` — `Bytes` over `buffer`, `put_uint` allocation-free, growth amortised linear and measured
-- [ ] `src/core/smallmap.npk` — fixed-capacity, ordered, `EParseState` on overflow
-- [ ] every accessor's obligation written as a comment in the syntax it will take, with a test standing in
-- [ ] every suite program exits 0, so a leak of a `wild` block is a trap, and the managed half gated by a capped pair
+- [ ] `src/core/limits.npk` — the eight bounds of `specs/SAFETY.md` §7, each with its row; no ninth
+- [ ] `src/core/vec.npk` — `Vec<T: Copy>`, every accessor boundary-tested at `0`, `count-1` and `count`, a misuse trapping `OutOfBounds`
+- [ ] `src/core/bytes.npk` — `Bytes` over `buffer` through `.ptr`, `put_uint` allocation-free, growth doubling and counted, no view
+- [ ] `SmallMap` deferred to its first consumer (PD-145)
+- [ ] every obligation written as a comment in the syntax it would take, with a unit standing in (`VERIFICATION.md` P-1a)
+- [ ] every unit exits as it expects at both legs; the forgotten free traps `WildLeak`; each mutant red by a unit
 
 ### 0.0.5 — close
 - [ ] every probe verdict reconciled against the specifications by **reading them**, not by remembering
@@ -272,7 +275,7 @@ file states its own acceptance when it reaches the pin, and where the two differ
 
 **The cycle is complete when**: probe 01 has demonstrated the trap and its absence; a full `harness/run.py` is green;
 the self-check proves the harness fails in every live way it names and reports the pending ones as pending;
-`src/core/`'s three containers each have a suite; and every probe has a recorded verdict with its consequences
+`src/core/`'s containers, `Vec` and `Bytes`, each have a suite (`SmallMap` waits for its consumer, PD-145); and every probe has a recorded verdict with its consequences
 written into the specifications.
 
 ## Watch for
