@@ -1,0 +1,1428 @@
+diff --git a/harness/README.md b/harness/README.md
+index 182809a..6f2f6a0 100644
+--- a/harness/README.md
++++ b/harness/README.md
+@@ -8,3 +8,43 @@ Built in cycles 0.0.2 and 0.0.3.
+ 
+ *(2026-10-15, cycle 0.0.1:)* until cycle 0.0.2, `run.py` is a stub that builds and judges nothing
+ and says so; CI runs it so that the workflow's last step exists before the runner does.
++*(2026-10-15, cycle 0.0.2: the stub is replaced by the runner below; cycle 0.0.3 adds the
++refusal and parse stages, the self-check and the tree checks.)*
++
++```
++NPKC=<pinned npkc> NPKRT=<pinned npkrt.o> python3 -B harness/run.py [--verdicts PATH]
++```
++
++`$NPKC` and `$NPKRT` are the pinned toolchain the board names (`../../BOARD.md`), and
++`llc`, `opt` and `ld.lld` are on `PATH` at the manifest's LLVM exactly. The last line a run
++prints is its verdict — `harness: GREEN -- …` or `harness: RED -- …` — and it exits 0, 1, or
++2 when it could not proceed. Its scratch is `build/harness/`, cleared when a run starts.
++
++## The modules
++
++| File | What |
++|---|---|
++| `run.py` | the driver: the manifest and the entries it can honour, the toolchain, three build steps, the suites in manifest order, the reviewed list's other direction, the summary |
++| `manifest.py` | `nitpick.toml` in the compiler's subset, held to the compiler's schema at the pin |
++| `toolchain.py` | `llc`, `opt`, `ld.lld` at the manifest's LLVM; its `datalayout` the one the pinned `opt` derives (`BUILD.md` B-1a) |
++| `expect.py` | the markers a test file carries (B-5, B-5b) |
++| `build.py` | one root to one module, both legs, the undefined-symbol scan (B-2), and `npkc`'s exit alphabet |
++| `irscan.py` | the call-edge scan and its deny list (B-2a) |
++| `elf.py` | an ELF64 symbol table, read with `struct` |
++| `stages.py` | the `program` stage and `compile`/`positive`: both legs, `stress`, the cap, and the pending units (B-5b) |
++| `baseline/` | the floor program and the syscaller (build step 1, and the cap's control), and `PENDING.txt`, the reviewed list of pending units |
++
++## What a green run asserts
++
++- the manifest names no entry this runner cannot judge, and the toolchain is the pin's;
++- the two scans see a syscall — the floor and the syscaller differ by `npk_sys6` alone, and the
++  syscaller's `main` is flagged — on this run, at this compiler;
++- every module under `src/` compiles as a root with no diagnostic, and none needs a symbol the
++  runtime does not define or calls a denied one;
++- `[build] entry` and every conformance root emit byte-identical IR from two copies of the tree,
++  each with its manifest (B-4);
++- every unit of every suite was built at -O0 and through `opt -O2`, its modules stating the
++  manifest's target rows, scanned, linked with `npkrt.o` alone, run `stress` times on each leg —
++  under its cap after the floor program under the same cap — and exited as it expects; and every
++  pending unit showed the one failure its marker names, on every leg, and is a line of
++  `baseline/PENDING.txt`, which names no unit that is not pending.
+diff --git a/harness/baseline/PENDING.txt b/harness/baseline/PENDING.txt
+new file mode 100644
+index 0000000..0345d8d
+--- /dev/null
++++ b/harness/baseline/PENDING.txt
+@@ -0,0 +1,13 @@
++# THE REVIEWED LIST OF PENDING UNITS -- meta/specs/BUILD.md B-5b, @@PD-139@@.
++#
++# One line per unit that is CORRECT AND RED because the compiler defect it waits on is in the
++# pinned compiler, four fields separated by one TAB each:
++#
++#     path<TAB>label<TAB>observation argument<TAB>reason
++#
++# `path` is the unit's path from the repository root; `label` and `observation argument` are its
++# `// pending-until: <label> <observation> <argument>` marker, exactly; `reason` says what turns it
++# green. The runner checks the list BOTH WAYS: a marker it does not name is a failure, and a line
++# no pending unit matched is a failure -- so taking a unit out of the count is two edits in two
++# files, this one reviewed. A unit that MEETS its expectation reddens the run to say its marker is
++# stale, and the marker and its line here go together, by the adoption that carries the fix.
+diff --git a/harness/baseline/floor.npk b/harness/baseline/floor.npk
+new file mode 100644
+index 0000000..7c25b11
+--- /dev/null
++++ b/harness/baseline/floor.npk
+@@ -0,0 +1,25 @@
++// expect-exit: 0
++//
++// THE FLOOR PROGRAM -- `harness/run.py`'s build step 1, and the control under every memory cap.
++// It allocates nothing and calls nothing: its object's undefined symbols and its IR's call edges
++// to the runtime are what the compiler emits into every program, so a program's edge the floor
++// does not have was written by that program (`irscan.py`). Its `failsafe` is the six-arm floor
++// every root owes (`NITPICK-REACH-003` at the pin) and a catch-all.
++mod:floor;
++
++func:main = int32(cstring[]:_~argv) {
++    exit 0i32;
++};
++
++func:failsafe = int32(Error:e) {
++    pick (e) {
++        (HeapBadRequest)    { exit 91i32; },
++        (HeapOom)           { exit 92i32; },
++        (Unreachable)       { exit 95i32; },
++        (WildLeak)          { exit 96i32; },
++        (StackExhausted)    { exit 106i32; },
++        (MachineFault)      { exit 107i32; },
++        (*)                 { exit 99i32; }
++    }
++    exit 9i32;
++};
+diff --git a/harness/baseline/syscaller.npk b/harness/baseline/syscaller.npk
+new file mode 100644
+index 0000000..301ff5f
+--- /dev/null
++++ b/harness/baseline/syscaller.npk
+@@ -0,0 +1,26 @@
++// expect-exit: 0
++//
++// THE SYSCALLER -- the floor program and one syscall, getpid(2): `harness/run.py`'s build step 1
++// requires its object to differ from the floor's by `npk_sys6` alone, and the call-edge scan to
++// flag `main` calling it, on every full run, so a scan gone blind reddens the run instead of
++// passing everything (`PLAYBOOK.md`: measure the instrument before adopting it).
++mod:syscaller;
++
++func:main = int32(cstring[]:_~argv) {
++    Result<int64>:r = sys(39i64);
++    if (r.is_error) { exit 70i32; }
++    exit 0i32;
++};
++
++func:failsafe = int32(Error:e) {
++    pick (e) {
++        (HeapBadRequest)    { exit 91i32; },
++        (HeapOom)           { exit 92i32; },
++        (Unreachable)       { exit 95i32; },
++        (WildLeak)          { exit 96i32; },
++        (StackExhausted)    { exit 106i32; },
++        (MachineFault)      { exit 107i32; },
++        (*)                 { exit 99i32; }
++    }
++    exit 9i32;
++};
+diff --git a/harness/build.py b/harness/build.py
+new file mode 100644
+index 0000000..0f53c4d
+--- /dev/null
++++ b/harness/build.py
+@@ -0,0 +1,141 @@
++#!/usr/bin/env python3
++"""The build, one root at a time -- `meta/specs/BUILD.md` §2 and B-1 … B-3 (@@PD-138@@).
++
++ONE MODULE PER ROOT. `npkc` compiles a root and everything it imports into ONE module, so a
++program is one object linked with the runtime, `npkrt.o`, and nothing else: there is no
++library object to link, and the library root `src/lib.npk` is compiled on its own only to be
++scanned and compared (`run.py`'s build steps). Every argv is built from the manifest's
++`[toolchain]` lists (B-1); nothing runs at its own defaults.
++
++THE TWO LEGS (B-3): -O0 is `npkc`, `llc` with `llc-flags`, `ld.lld` with `lld-flags`; the
++optimised leg re-runs the SAME emission through `opt` with `opt-flags` and `llc` with
++`llc-opt-flags`. Each object is scanned (B-2: every undefined symbol defined by the runtime,
++since `opt` may mint a libcall); each module's `target triple` and `target datalayout` lines
++are held to the manifest's rows (B-1a).
++
++`npkc`'S EXIT ALPHABET, which nothing documents (`PLAYBOOK.md` §6): 0 accepted; 1 REFUSED,
++with diagnostics; 2 could not proceed and judged nothing, with an empty stderr; 3 the
++compiler's own `failsafe` trap. Only 0 and 1 are verdicts; 2, 3 and anything else are a
++broken run, printed with the code itself.
++"""
++import os
++import re
++import subprocess
++
++from elf import Obj
++
++_DIAG = re.compile(r"^(NITPICK-[A-Z]+-[0-9]+) [^ ]+:([0-9]+):([0-9]+)", re.M)
++_UNDEF_VALUE = re.compile(r"use of undefined value '([^']+)'")
++_TARGET = re.compile(r'^target (triple|datalayout) = "([^"]*)"$', re.M)
++
++
++class Leg:
++    """One leg of one program: where it stopped, and the binary if it got there."""
++
++    def __init__(self, name):
++        self.name, self.stop, self.undefined_value, self.binary = name, None, None, None
++
++    def fail(self, why, undefined_value=None):
++        self.stop, self.undefined_value = why, undefined_value
++        return self
++
++
++class Ctx:
++    def __init__(self, man, npkc, npkrt, runtime_defined, work):
++        tc = man.tables["toolchain"]
++        self.npkc, self.npkrt, self.work = npkc, npkrt, work
++        self.triple, self.layout = tc["triple"], tc["datalayout"]
++        self.llc_flags, self.llc_opt_flags = tc["llc-flags"], tc["llc-opt-flags"]
++        self.opt_flags, self.lld_flags = tc["opt-flags"], tc["lld-flags"]
++        self.runtime_defined = set(runtime_defined)
++
++
++def _run(argv, cwd=None, timeout=600):
++    try:
++        r = subprocess.run(argv, cwd=cwd, capture_output=True, text=True, timeout=timeout)
++        return r.returncode, r.stdout + r.stderr
++    except subprocess.TimeoutExpired:
++        return None, f"`{os.path.basename(argv[0])}` did not finish in {timeout} s"
++
++
++def npkc(ctx, src, out_ll):
++    """(exit, [(code, line, col)], text): `npkc` from the root's own directory, as by hand."""
++    rc, text = _run([ctx.npkc, os.path.basename(src), "-o", out_ll], cwd=os.path.dirname(src))
++    return rc, [(m.group(1), int(m.group(2)), int(m.group(3))) for m in _DIAG.finditer(text)], text
++
++
++def target_problems(ctx, ll_path, what):
++    with open(ll_path, encoding="utf-8", errors="replace") as fh:
++        got = dict(_TARGET.findall(fh.read(1 << 16)))
++    out = []
++    for key, want in (("triple", ctx.triple), ("datalayout", ctx.layout)):
++        if got.get(key) != want:
++            out.append(f"{what}: `target {key}` is {got.get(key)!r}; nitpick.toml pins {want!r}")
++    return out
++
++
++def undefined_problems(ctx, obj_path, what):
++    """B-2: every undefined symbol of the object is one the runtime defines."""
++    extra = sorted(set(Obj(obj_path).undefined()) - ctx.runtime_defined)
++    return [f"{what}: undefined {', '.join(extra)}, which the runtime does not define "
++            "(no C, ever -- B-2)"] if extra else []
++
++
++def _leg(ctx, name, ll, stem, optimised):
++    leg = Leg(name)
++    obj, binary = f"{stem}{'.2' if optimised else ''}.o", f"{stem}{'.2' if optimised else ''}"
++    if optimised:
++        rc, text = _run(["opt", *ctx.opt_flags, ll, "-o", f"{stem}.2.ll"])
++        if rc != 0:
++            m = _UNDEF_VALUE.search(text)
++            return leg.fail(f"opt refused: {text.strip().splitlines()[0][:200] if text.strip() else rc}",
++                            m.group(1) if m else None)
++        ll = f"{stem}.2.ll"
++        bad = target_problems(ctx, ll, "the optimised module")
++        if bad:
++            return leg.fail("; ".join(bad))
++    rc, text = _run(["llc", *(ctx.llc_opt_flags if optimised else ctx.llc_flags), ll, "-o", obj])
++    if rc != 0:
++        m = _UNDEF_VALUE.search(text)
++        return leg.fail(f"llc refused: {text.strip().splitlines()[0][:200] if text.strip() else rc}",
++                        m.group(1) if m else None)
++    bad = undefined_problems(ctx, obj, f"the {name} object")
++    if bad:
++        return leg.fail("; ".join(bad))
++    rc, text = _run(["ld.lld", *ctx.lld_flags, obj, ctx.npkrt, "-o", binary])
++    if rc != 0:
++        return leg.fail(f"ld.lld refused: {text.strip()[:200]}")
++    leg.binary = binary
++    return leg
++
++
++class Build:
++    def __init__(self):
++        self.npkc_exit, self.codes, self.text, self.ll, self.legs = None, [], "", None, []
++
++
++def program(ctx, src, stem):
++    """Compile, then both legs. `stem` is the scratch path every artefact is named from."""
++    b = Build()
++    os.makedirs(os.path.dirname(stem), exist_ok=True)
++    b.ll = f"{stem}.ll"
++    b.npkc_exit, b.codes, b.text = npkc(ctx, src, b.ll)
++    if b.npkc_exit != 0:
++        return b
++    bad = target_problems(ctx, b.ll, "the emission")
++    if bad:
++        b.legs = [Leg("-O0").fail("; ".join(bad))]
++        return b
++    b.legs = [_leg(ctx, "-O0", b.ll, stem, False), _leg(ctx, "-O2", b.ll, stem, True)]
++    return b
++
++
++def npkc_failure(b):
++    """The sentence for an `npkc` exit that is not 0."""
++    if b.npkc_exit == 1:
++        return "npkc REFUSED it: " + (" ".join(f"{c} {l}:{k}" for c, l, k in b.codes) or "no code read")
++    if b.npkc_exit == 2:
++        return "npkc exit 2 -- the driver could not proceed and judged nothing"
++    if b.npkc_exit == 3:
++        return "npkc exit 3 -- the compiler's own failsafe trapped"
++    return f"npkc exit {b.npkc_exit}"
+diff --git a/harness/elf.py b/harness/elf.py
+new file mode 100644
+index 0000000..313808d
+--- /dev/null
++++ b/harness/elf.py
+@@ -0,0 +1,67 @@
++#!/usr/bin/env python3
++"""An ELF64 relocatable object's symbol table, read with `struct`.
++
++The undefined-symbol scan is a BUILD STEP (`BUILD.md` B-2), and law here; resting law on a
++fourth tool outside the manifest's pin, parsed out of text nothing checks, is the weaker
++design, and the format is a few dozen lines of `struct`. It refuses anything that is not a
++little-endian ELF64 object for x86-64 rather than guessing, because a mis-parsed symbol
++table is a scan that reports clean. After `nitpick-regex`'s `harness/elf.py`.
++"""
++import struct
++
++SHT_SYMTAB = 2
++SHN_UNDEF = 0
++STB_LOCAL = 0
++STT_SECTION = 3
++STT_FILE = 4
++
++
++class ElfError(Exception):
++    pass
++
++
++class Obj:
++    def __init__(self, path):
++        self.path = path
++        with open(path, "rb") as fh:
++            self.b = fh.read()
++        b = self.b
++        if len(b) < 64 or b[:4] != b"\x7fELF":
++            raise ElfError(f"{path}: not an ELF file")
++        if b[4] != 2 or b[5] != 1:
++            raise ElfError(f"{path}: not little-endian ELF64")
++        e_type, e_machine = struct.unpack_from("<HH", b, 16)
++        if e_type != 1 or e_machine != 62:
++            raise ElfError(f"{path}: e_type={e_type}, e_machine={e_machine}; not an x86-64 "
++                           "relocatable object")
++        (shoff,) = struct.unpack_from("<Q", b, 40)
++        shentsize, shnum = struct.unpack_from("<HH", b, 58)
++        if shentsize != 64:
++            raise ElfError(f"{path}: e_shentsize={shentsize}, not 64")
++        self.sections = []
++        for i in range(shnum):
++            (_, typ, _, _, soff, size, link, _, _, entsize) = struct.unpack_from(
++                "<IIQQQQIIQQ", b, shoff + i * 64)
++            self.sections.append((typ, soff, size, link, entsize))
++        self.syms = []
++        for typ, soff, size, link, entsize in self.sections:
++            if typ != SHT_SYMTAB:
++                continue
++            if entsize != 24:
++                raise ElfError(f"{path}: a symbol table entry of {entsize} bytes, not 24")
++            for k in range(size // 24):
++                nm, info, _, shndx, _, _ = struct.unpack_from("<IBBHQQ", b, soff + k * 24)
++                self.syms.append((self._str(link, nm) if nm else "", info >> 4, info & 0xF, shndx))
++
++    def _str(self, idx, off):
++        base = self.sections[idx][1] + off
++        return self.b[base:self.b.index(b"\0", base)].decode("utf-8", "replace")
++
++    def undefined(self):
++        """What `llvm-nm --undefined-only` prints: named, SHN_UNDEF, not local."""
++        return sorted({n for n, bind, _, shndx in self.syms
++                       if n and shndx == SHN_UNDEF and bind != STB_LOCAL})
++
++    def defined(self):
++        return sorted({n for n, _, typ, shndx in self.syms
++                       if n and shndx != SHN_UNDEF and typ not in (STT_FILE, STT_SECTION)})
+diff --git a/harness/expect.py b/harness/expect.py
+new file mode 100644
+index 0000000..8e23986
+--- /dev/null
++++ b/harness/expect.py
+@@ -0,0 +1,134 @@
++#!/usr/bin/env python3
++"""A test's expectations, read from the test file -- `meta/specs/BUILD.md` B-5 and B-5b.
++
++THE COMPILER'S GRAMMAR, as `npkg/expect.npk` reads it at the pin `7e91730`: a line whose
++stripped form starts with `//` is a comment; its body, stripped, is a MARKER when it starts
++with a marker's name -- `// see expect-exit: 94` is prose -- and the marker's value is the
++WHOLE rest of the line, so `// expect-exit: 94 -- the OutOfBounds arm` cannot be read, and a
++test whose expectations cannot be read is a FAILING test, never a silently defaulted one.
++`expect-exit:` -- the last one wins, 0 when absent; `stress:` -- 1 when absent;
++`expect-error-at: L[:C]` moves the LAST `expect-error:`. (After `nitpick-regex`'s
++`harness/expect.py`, which holds the same grammar to the same reader.)
++
++THE MARKERS THE COMPILER'S READER HAS AND THIS RUNNER DOES NOT JUDGE -- `argv:`,
++`expect-note:`, `expect-note-at:`, `expect-obligation:`, `explore:`, `explore-seed:`,
++`npkc-flags:` -- and this library's two whose stages do not exist yet -- `expect-roundtrip:`
++(cycle 0.5) and `expect-fault:` (cycle 0.1 on) -- each make a file UNREADABLE, by name: a
++marker a runner ignores is an expectation nobody checks.
++
++THE RUNNER'S OWN TWO (B-5b, @@PD-139@@), which `npkg` does not have:
++
++* `mem-cap-mib: N` -- run the program under an N MiB address-space cap, after the floor
++  program under the same cap (`stages.py`), because a managed body a free fails to drop is
++  invisible to `exit 0` (cycle 0.0.0's probes 09b and 09c);
++* `pending-until: DEF-<n> <observation>` -- a unit CORRECT AND RED because the compiler
++  defect DEF-<n> is in the pinned compiler. The label is the compiler seat's registration,
++  a label nothing resolves; the OBSERVATION is the one failure the marker excuses, and the
++  only one, on every leg (`nitpick-regex`'s RX-154 lesson: a marker that excuses any failure
++  excuses a different one). At this subcycle the one observation is
++  `undefined-value <symbol>`: `npkc` accepts the program and LLVM refuses the module,
++  naming that undefined value -- `llc` at -O0, `opt` on the optimised leg.
++"""
++import re
++
++MARKERS_JUDGED = ("expect-exit:", "expect-error:", "expect-error-at:", "stress:",
++                  "mem-cap-mib:", "pending-until:")
++MARKERS_REFUSED = ("argv:", "expect-note:", "expect-note-at:", "expect-obligation:",
++                   "explore:", "explore-seed:", "npkc-flags:", "expect-roundtrip:",
++                   "expect-fault:")
++_CODE = re.compile(r"^NITPICK-[A-Z]+-[0-9]{3}$")
++_AT = re.compile(r"^([0-9]+)(?::([0-9]+))?$")
++_INT = re.compile(r"^-?[0-9]+$")
++_LABEL = re.compile(r"^DEF-[0-9]+$")
++OBSERVATIONS = ("undefined-value",)
++
++
++class Expect:
++    def __init__(self, path):
++        self.path = path
++        self.exit = 0
++        self.errors = []          # [[code, line or None, col or None]]
++        self.stress = 1
++        self.mem_cap_mib = None
++        self.pending = None       # (label, observation, argument)
++        self.problems = []        # each makes the file UNREADABLE
++
++    @property
++    def readable(self):
++        return not self.problems
++
++
++def _bad(e, n, why):
++    e.problems.append(f"{e.path}:{n}: {why}")
++    return e
++
++
++def read_text(text, path):
++    e = Expect(path)
++    for n, raw in enumerate(text.split("\n"), 1):
++        line = raw.strip()
++        if not line.startswith("//"):
++            continue
++        body = line[2:].strip()
++        name = next((m for m in MARKERS_JUDGED + MARKERS_REFUSED if body.startswith(m)), None)
++        if name is None:
++            continue
++        value = body[len(name):].strip()
++        if name in MARKERS_REFUSED:
++            _bad(e, n, f"`{name}` is a marker this runner does not judge at cycle 0.0.2, "
++                       "so the expectation would go unchecked")
++        elif name == "expect-exit:":
++            if not _INT.match(value):
++                _bad(e, n, f"`expect-exit: {value}` is not an integer (the value is the "
++                           "whole rest of the line)")
++                continue
++            v = int(value)
++            # An exit status is one byte: 321 is reported as 65. A negative value is
++            # `npkg`'s "killed by that signal"; Linux has none below -64.
++            if v > 255 or v < -64:
++                _bad(e, n, f"`expect-exit: {v}` can never be observed: an exit status is "
++                           "one byte, and a signal is -1 ... -64")
++                continue
++            e.exit = v
++        elif name == "expect-error:":
++            if not _CODE.match(value):
++                _bad(e, n, f"`expect-error: {value}` is not a diagnostic code")
++                continue
++            e.errors.append([value, None, None])
++        elif name == "expect-error-at:":
++            m = _AT.match(value)
++            if not m or not e.errors:
++                _bad(e, n, f"`expect-error-at: {value}` -- not `L[:C]`, or no "
++                           "`expect-error:` before it")
++                continue
++            e.errors[-1][1] = int(m.group(1))
++            e.errors[-1][2] = int(m.group(2)) if m.group(2) else None
++        elif name == "stress:":
++            if not _INT.match(value) or int(value) < 1:
++                _bad(e, n, f"`stress: {value}` is not a positive integer")
++                continue
++            e.stress = int(value)
++        elif name == "mem-cap-mib:":
++            if not _INT.match(value) or int(value) < 1:
++                _bad(e, n, f"`mem-cap-mib: {value}` is not a positive integer")
++                continue
++            e.mem_cap_mib = int(value)
++        elif name == "pending-until:":
++            parts = value.split(None, 2)
++            if (len(parts) != 3 or not _LABEL.match(parts[0])
++                    or parts[1] not in OBSERVATIONS):
++                _bad(e, n, f"`pending-until: {value}` is not `pending-until: DEF-<n> "
++                           f"<observation> <argument>`, the observation one of "
++                           f"{', '.join(OBSERVATIONS)}")
++                continue
++            if e.pending is not None:
++                _bad(e, n, "a second `pending-until:` -- a unit waits on one defect")
++                continue
++            e.pending = (parts[0], parts[1], parts[2])
++    return e
++
++
++def read(path):
++    with open(path, "rb") as fh:
++        text = fh.read().decode("utf-8", errors="replace")
++    return read_text(text, path)
+diff --git a/harness/irscan.py b/harness/irscan.py
+new file mode 100644
+index 0000000..37b2e47
+--- /dev/null
++++ b/harness/irscan.py
+@@ -0,0 +1,92 @@
++#!/usr/bin/env python3
++"""The emitted IR's CALL EDGES to the floor -- `BUILD.md` B-2a (@@PD-138@@), the instrument
++behind PA-006's "no syscall" and `SAFETY.md` §2's "no concurrency".
++
++WHY CALL EDGES. An undefined-symbol scan reports THAT an object needs a runtime symbol and
++never WHERE it is called from; and at an earlier compiler every syscall went through one
++symbol the empty program already carried, so a program that made one had the same symbol set
++as one that did not (`PLAYBOOK.md`: "the undefined-symbol scan ... CANNOT SEE A SYSCALL"). At
++the pin `7e91730` the floor program's object has 5 undefined symbols and a syscaller's 6, the
++difference exactly `npk_sys6` (cycle 0.0.2's §1.3) -- and `run.py` re-measures that pair on
++every full run, so the day a prelude starts emitting the symbol again the run says so.
++
++WHAT IT SCANS. Every `(enclosing function, callee)` edge in the -O0 IR whose callee is
++DECLARED and not DEFINED in the module, `llvm.*` excluded (an intrinsic is an instruction,
++never a symbol), the trailing `.<digits>` of compiler-generated glue normalised away (the
++counter moves with program content). An edge the floor program does not have, to a DENIED
++symbol, is a finding that names the calling function. After `nitpick-regex`'s
++`harness/irscan.py`, whose three measured lessons (the intrinsics, the glue's numbering, a
++deny list rather than a permit list) this keeps.
++
++THE DENY LIST is four families of the runtime's own defines at the pin, each a thing this
++library never does: the kernel, a descriptor, the clock, a task. `run.py` holds every name
++here to the runtime object's defined symbols, so a name that stops existing reddens the run
++instead of scanning for what can never appear.
++"""
++import re
++
++DENIED = {
++    # every syscall in the language
++    "npk_sys6",
++    # descriptors and files
++    "npk_open", "npk_close", "npk_read", "npk_read_file", "npk_read_stdin", "npk_write",
++    "npk_write_file", "npk_ofd_close", "npk_io_register", "npk_io_unwatch", "npk_std_fds",
++    # the clock
++    "npk_mono_now",
++    # tasks, threads, channels and their waits
++    "npk_exec", "npk_exec_pool", "npk_main_exec", "npk_clone_exec", "npk_frame_exec_new",
++    "npk_frame_exec_destroy", "npk_run_until", "npk_join_deadline", "npk_thread_start",
++    "npk_thread_entry", "npk_thread_exit", "npk_thread_join", "npk_thread_reg",
++    "npk_thread_stack_bytes", "npk_park_forever", "npk_park_sleep", "npk_park_take",
++    "npk_park_until", "npk_windup_all", "npk_windup_grace", "npk_windup_note", "npk_ch_open",
++    "npk_ch_open_lock", "npk_ch_close", "npk_ch_closed", "npk_rw_read_wait",
++    "npk_rw_write_wait", "npk_rw_release_read",
++}
++
++_SYM = r'@(?:"([^"]*)"|([\w.$\-]+))'
++_DEFINE = re.compile(r'^\s*define\b.*?' + _SYM + r'\s*\(')
++_DECLARE = re.compile(r'^\s*declare\b.*?' + _SYM + r'\s*\(')
++_CALL = re.compile(r'\b(?:call|invoke)\b.*?' + _SYM + r'\s*\(')
++_GENERATED = re.compile(r'\.\d+$')
++
++
++def _name(m):
++    return m.group(1) if m.group(1) is not None else m.group(2)
++
++
++def edges(ir_text):
++    """{(normalised function, callee)} for every call to a floor symbol."""
++    lines = ir_text.split("\n")
++    defined, declared = set(), set()
++    for line in lines:
++        m = _DEFINE.match(line)
++        if m:
++            defined.add(_name(m))
++            continue
++        m = _DECLARE.match(line)
++        if m:
++            declared.add(_name(m))
++    floor = {s for s in declared - defined if not s.startswith("llvm.")}
++    out, cur = set(), None
++    for line in lines:
++        m = _DEFINE.match(line)
++        if m:
++            cur = _name(m)
++            continue
++        if line.startswith("}"):
++            cur = None
++            continue
++        if cur is None:
++            continue
++        m = _CALL.search(line)
++        if m and _name(m) in floor:
++            out.add((_GENERATED.sub(".N", cur), _name(m)))
++    return out
++
++
++def findings(ir_text, baseline, name):
++    """One line per denied edge the floor program does not have, naming the function."""
++    return [f"{name}: `{fn}` calls `{callee}`, and the floor program does not -- this library "
++            "makes no syscall, touches no descriptor, reads no clock and starts no task "
++            "(PA-006, SAFETY.md §2); a legitimate call is a decision, not an edit here"
++            for fn, callee in sorted(edges(ir_text) - baseline) if callee in DENIED]
+diff --git a/harness/manifest.py b/harness/manifest.py
+new file mode 100644
+index 0000000..2a8686b
+--- /dev/null
++++ b/harness/manifest.py
+@@ -0,0 +1,158 @@
++#!/usr/bin/env python3
++"""`nitpick.toml`, read the way `npkg` reads it -- `meta/specs/BUILD.md` B-1.
++
++WHY A READER AND NOT `tomllib`. Python's `tomllib` accepts what `npkg`'s reader refuses, so a
++manifest that worked here could be refused by the tool this harness retires into (PA-003).
++The subset is the compiler's -- tables, `[[test]]` headers, strings, integers, booleans and
++single-line arrays -- and a key the schema lacks is refused by name: a key nothing reads is
++the next stale document (the compiler's D-204). After `nitpick-regex`'s `harness/manifest.py`.
++
++THE SCHEMA IS THE COMPILER'S AT THE PIN: `npkg/manifest.npk`'s `schema_allows` at `7e91730`,
++table for table and key for key, `[dependencies]` taking any key. Cycle 0.0.2's facts script
++re-derives it from that function and compares (`0.0.2.md` §1.2).
++
++THE STAGES are the compiler's vocabulary (`BUILD_REFERENCE.md` §7.1 at the pin) and this
++library's two (`roundtrip`, `corpus`; `BUILD.md` §3). The compiler's rule is this runner's:
++an entry it cannot honour is REFUSED BY NAME before anything runs, never skipped (`run.py`).
++"""
++import re
++
++
++class ManifestError(Exception):
++    pass
++
++
++SCHEMA = {
++    "project":      {"name", "version", "description", "authors", "target"},
++    "build":        {"entry", "output", "opt-level"},
++    "toolchain":    {"llvm", "triple", "datalayout",
++                     "llc-flags", "llc-opt-flags", "opt-flags", "lld-flags"},
++    "limits":       {"nofile"},
++    "test":         {"name", "stage", "kind", "path", "paths", "recursive"},
++    "verify":       {"z3", "z3-version", "z3-sha256", "z3-options"},
++    "verify.nikos": {"domain"},
++}
++ANY_KEY = {"dependencies"}
++KNOWN_STAGES = {"compile", "parse", "resolve", "check", "accept", "fixture", "program",
++                "runtime", "verify", "cost", "explore", "roundtrip", "corpus"}
++KNOWN_KINDS = {"positive", "negative", "diagnostic"}
++
++_TABLE = re.compile(r'^\[([A-Za-z0-9_.-]+)\]$')
++_ARRAY_TABLE = re.compile(r'^\[\[([A-Za-z0-9_.-]+)\]\]$')
++_KEYVAL = re.compile(r'^([A-Za-z0-9_-]+)\s*=\s*(.*)$')
++
++
++def _strip_comment(line):
++    """A `#` outside a string starts a comment."""
++    out, in_str = [], False
++    for ch in line:
++        if ch == '"':
++            in_str = not in_str
++        if ch == "#" and not in_str:
++            break
++        out.append(ch)
++    return "".join(out).strip()
++
++
++def _split_top(inner):
++    parts, cur, in_str = [], [], False
++    for ch in inner:
++        if ch == '"':
++            in_str = not in_str
++        if ch == "," and not in_str:
++            parts.append("".join(cur))
++            cur = []
++            continue
++        cur.append(ch)
++    if "".join(cur).strip():
++        parts.append("".join(cur))
++    return [p for p in parts if p.strip()]
++
++
++def _value(raw, where):
++    raw = raw.strip()
++    if raw.startswith("["):
++        if not raw.endswith("]"):
++            raise ManifestError(f"{where}: a multi-line array -- the reader takes single-line "
++                                "arrays only, as npkg's does")
++        inner = raw[1:-1].strip()
++        return [_value(p, where) for p in _split_top(inner)] if inner else []
++    if len(raw) >= 2 and raw.startswith('"') and raw.endswith('"'):
++        return raw[1:-1]
++    if raw in ("true", "false"):
++        return raw == "true"
++    try:
++        return int(raw)
++    except ValueError:
++        raise ManifestError(f"{where}: {raw!r} is not a string, integer, boolean or "
++                            "single-line array")
++
++
++class Manifest:
++    def __init__(self, tables, tests, path):
++        self.tables, self.tests, self.path = tables, tests, path
++
++    def need(self, table, key):
++        if key not in self.tables.get(table, {}):
++            raise ManifestError(f"{self.path}: [{table}] has no `{key}`")
++        return self.tables[table][key]
++
++
++def read(path):
++    tables, tests, section, target = {}, [], None, None
++    with open(path, encoding="utf-8") as fh:
++        lines = fh.read().split("\n")
++    for n, line in enumerate(lines, 1):
++        text = _strip_comment(line)
++        if not text:
++            continue
++        where = f"{path}:{n}"
++        m = _ARRAY_TABLE.match(text)
++        if m:
++            section = m.group(1)
++            if section != "test":
++                raise ManifestError(f"{where}: [[{section}]] -- the only array table the "
++                                    "schema has is [[test]]")
++            target = {}
++            tests.append(target)
++            continue
++        m = _TABLE.match(text)
++        if m:
++            section = m.group(1)
++            if section == "test" or (section not in SCHEMA and section not in ANY_KEY):
++                raise ManifestError(f"{where}: [{section}] is not a table the schema has")
++            target = tables.setdefault(section, {})
++            continue
++        m = _KEYVAL.match(text)
++        if not m:
++            raise ManifestError(f"{where}: {text!r} is neither a table header nor `key = value`")
++        if target is None:
++            raise ManifestError(f"{where}: `{m.group(1)}` before any table header")
++        key = m.group(1)
++        if section not in ANY_KEY and key not in SCHEMA[section]:
++            raise ManifestError(f"{where}: [{section}] has no key `{key}` in the schema "
++                                f"(it has: {', '.join(sorted(SCHEMA[section]))})")
++        if key in target:
++            raise ManifestError(f"{where}: `{key}` given twice in [{section}]")
++        target[key] = _value(m.group(2), where)
++    seen = set()
++    for i, t in enumerate(tests, 1):
++        where = f"{path}: [[test]] #{i}"
++        for k in ("name", "stage"):
++            if k not in t:
++                raise ManifestError(f"{where}: no `{k}`")
++        if t["name"] in seen:
++            raise ManifestError(f"{where}: `{t['name']}` is declared twice")
++        seen.add(t["name"])
++        if t["stage"] not in KNOWN_STAGES:
++            raise ManifestError(f"{where} ({t['name']}): stage `{t['stage']}` is not a stage")
++        if "kind" in t and t["kind"] not in KNOWN_KINDS:
++            raise ManifestError(f"{where} ({t['name']}): kind `{t['kind']}` is not a kind")
++        if ("path" in t) == ("paths" in t):
++            raise ManifestError(f"{where} ({t['name']}): exactly one of `path` and `paths`")
++    return Manifest(tables, tests, path)
++
++
++def paths_of(t):
++    """`path` names a directory; `paths` a list of them."""
++    return list(t["paths"]) if "paths" in t else [t["path"]]
+diff --git a/harness/run.py b/harness/run.py
+index 5ff35a7..5b7002d 100644
+--- a/harness/run.py
++++ b/harness/run.py
+@@ -1,11 +1,228 @@
+ #!/usr/bin/env python3
+-"""nparse's harness -- A STUB, until cycle 0.0.2 writes the runner (meta/roadmap/0.0/0.0.2.md).
++"""nparse's build and test runner, until `npkg` can build a library (PA-003).
+ 
+-CI runs it from cycle 0.0.1 on, so that the workflow's last step exists before the
+-thing it runs does; and it says what it is, so a green run is not read as a judged
+-one. It builds nothing, judges nothing, and exits 0.
++    NPKC=<pinned npkc> NPKRT=<pinned npkrt.o> python3 -B harness/run.py [--verdicts PATH]
++
++WHAT A RUN DOES, IN ORDER, and every step can fail it:
++
++1. reads `nitpick.toml` (`manifest.py`) and REFUSES BY NAME, before anything runs, an entry
++   this runner cannot honour -- at cycle 0.0.2 it judges `program` and `compile`/`positive`
++   entries, and `[build] opt-level = 0` -- exit 2, never a skip (the compiler's
++   `BUILD_REFERENCE.md` §7.1 rule);
++2. holds the toolchain to the manifest (`toolchain.py`): `llc`, `opt` and `ld.lld` at its
++   LLVM exactly, its datalayout the one the pinned `opt` derives from its triple, `$NPKC`
++   and `$NPKRT` set -- exit 2 otherwise;
++3. three BUILD STEPS (`meta/specs/BUILD.md` B-2, B-2a, B-4; @@PD-138@@): the scans' own
++   controls -- the floor program and a syscaller from `harness/baseline/`, whose objects
++   must differ by `npk_sys6` alone and whose call edges the scan must flag in the
++   syscaller's `main` and nowhere in the floor's, so a blind scan reddens the run; the
++   library -- every module under `src/`, each compiled as a root on its own and scanned, the
++   entry's artefacts left at `[build] output`; and REPRO -- `[build] entry` and every
++   conformance root built from two copies of the tree, each carrying its manifest, their IR
++   compared byte for byte;
++4. the suites, in manifest order (`stages.py`), every unit's -O0 IR scanned for call edges
++   the floor program lacks to a symbol `irscan.py` denies;
++5. holds `harness/baseline/PENDING.txt` to the pending units, the other direction: a line
++   no pending unit matched is a failure.
++
++It prints one line per step and unit, and LAST, the summary -- `harness: GREEN -- …` when
++nothing failed, `harness: RED -- …` otherwise -- and exits 0 on GREEN, 1 on RED and 2 when it
++could not proceed. Its scratch is `build/harness/`, cleared at the start of each run and left
++at its end; `[build] entry`'s artefacts are `[build] output` with `.ll` and `.o`.
+ """
++import os
++import shutil
+ import sys
+ 
+-print("harness: cycle 0.0.1's stub -- nothing is built or judged until cycle 0.0.2")
+-sys.exit(0)
++HERE = os.path.dirname(os.path.abspath(__file__))
++sys.path.insert(0, HERE)
++
++import build      # noqa: E402
++import irscan     # noqa: E402
++import manifest   # noqa: E402
++import stages     # noqa: E402
++import toolchain  # noqa: E402
++from elf import Obj  # noqa: E402
++
++ROOT = os.path.dirname(HERE)
++JUDGED = {("program", None), ("compile", "positive")}
++
++
++def out(line):
++    """Every line the runner prints: no path above the repository reaches a log or a record."""
++    print(line.replace(ROOT + os.sep, ""), flush=True)
++
++
++def stop(why):
++    out(f"harness: CANNOT PROCEED -- {why}")
++    sys.exit(2)
++
++
++def honour(man):
++    for t in man.tests:
++        if (t["stage"], t.get("kind")) not in JUDGED:
++            stop(f"[[test]] `{t['name']}` is stage `{t['stage']}`"
++                 f"{', kind `' + t['kind'] + '`' if 'kind' in t else ''}, which this runner does "
++                 "not judge at cycle 0.0.2 -- refused by name, never skipped")
++    if man.need("build", "opt-level") != 0:
++        stop("[build] opt-level is not 0 -- raising it is its own decision, and this runner "
++             "honours 0 only")
++
++
++def baseline(ctx, failures):
++    """The scans' controls: floor and syscaller, both built, both run, and their difference."""
++    got = {}
++    for name in ("floor", "syscaller"):
++        b = build.program(ctx, os.path.join(ROOT, "harness", "baseline", f"{name}.npk"),
++                          os.path.join(ctx.work, "baseline", name))
++        if b.npkc_exit != 0 or any(leg.stop for leg in b.legs):
++            failures.append(f"baseline {name}: " + (build.npkc_failure(b) if b.npkc_exit
++                            else "; ".join(f"{leg.name} {leg.stop}" for leg in b.legs if leg.stop)))
++            return None, None
++        if stages.run_binary(b.legs[0].binary) != 0:
++            failures.append(f"baseline {name}: does not exit 0")
++            return None, None
++        with open(b.ll, encoding="utf-8", errors="replace") as fh:
++            got[name] = (set(Obj(b.legs[0].binary + ".o").undefined()), fh.read(), b.legs[0].binary)
++    floor_undef, floor_ir, floor_bin = got["floor"]
++    sys_undef, sys_ir, _ = got["syscaller"]
++    floor_edges = irscan.edges(floor_ir)
++    diff = sorted(sys_undef ^ floor_undef)
++    flagged = irscan.findings(sys_ir, floor_edges, "syscaller")
++    ok = diff == ["npk_sys6"] and len(flagged) == 1 and "`main` calls `npk_sys6`" in flagged[0]
++    ok = ok and not irscan.findings(floor_ir, floor_edges, "floor")
++    out(f"{'ok  ' if ok else 'FAIL'}  build step 1, the scans' controls: the floor program has "
++        f"{len(floor_undef)} undefined symbols and {len(floor_edges)} call edges to the floor; the "
++        f"syscaller differs by {' '.join(diff) or 'nothing'}, and the call-edge scan flags "
++        f"{len(flagged)} edge(s) in it")
++    if not ok:
++        failures.append("build step 1: the no-syscall instruments did not see the syscaller "
++                        "exactly -- a blind scan passes everything")
++    return floor_edges, floor_bin
++
++
++def library(ctx, man, floor_edges, failures):
++    """B-2 and B-2a over the library: EVERY module under `src/`, each compiled as a root on its
++    own -- `[build] entry` reaches only what it imports, and a module it does not import yet
++    is library code all the same -- and the entry's artefacts left at `[build] output`."""
++    entry, output = man.need("build", "entry"), man.need("build", "output")
++    os.makedirs(os.path.dirname(os.path.join(ROOT, output)), exist_ok=True)
++    mods = sorted(os.path.relpath(os.path.join(d, f), ROOT)
++                  for d, _, fs in os.walk(os.path.join(ROOT, "src")) for f in fs if f.endswith(".npk"))
++    if entry not in mods:
++        failures.append(f"build step 2: [build] entry {entry} is not a module under src/")
++    bad = []
++    for rel in mods:
++        stem = os.path.join(ROOT, output) if rel == entry else os.path.join(ctx.work, "src", rel[:-4])
++        os.makedirs(os.path.dirname(stem), exist_ok=True)
++        ll, obj = stem + ".ll", stem + ".o"
++        rc, codes, text = build.npkc(ctx, os.path.join(ROOT, rel), ll)
++        if rc != 0 or text.strip():
++            bad.append(f"{rel}: npkc exit {rc}" + (": " + " ".join(c for c, _, _ in codes) if codes else ""))
++            continue
++        bad += build.target_problems(ctx, ll, rel)
++        r = build._run(["llc", *ctx.llc_flags, ll, "-o", obj])
++        if r[0] != 0:
++            bad.append(f"{rel}: llc refused it")
++            continue
++        bad += build.undefined_problems(ctx, obj, rel)
++        with open(ll, encoding="utf-8", errors="replace") as fh:
++            bad += irscan.findings(fh.read(), floor_edges, rel)
++    out(f"{'ok  ' if not bad else 'FAIL'}  build step 2, the library: {len(mods)} module(s) under src/, "
++        f"each compiled as a root and scanned{', no finding' if not bad else ': ' + '; '.join(bad)}")
++    failures += [f"build step 2: {b}" for b in bad]
++
++
++def repro(ctx, man, failures):
++    """B-4: the same tree from two directories, each copy with its manifest (D-236)."""
++    entry = man.need("build", "entry")
++    base = os.path.join(ctx.work, "repro")
++    roots = [entry] + sorted(os.path.join("tests", "conformance", f)
++                             for f in os.listdir(os.path.join(ROOT, "tests", "conformance"))
++                             if f.endswith(".npk"))
++    copies = [os.path.join(base, "a"), os.path.join(base, "bb", "deeper")]
++    for c in copies:
++        os.makedirs(c)
++        shutil.copy2(os.path.join(ROOT, "nitpick.toml"), c)
++        shutil.copytree(os.path.join(ROOT, "src"), os.path.join(c, "src"))
++        shutil.copytree(os.path.join(ROOT, "tests", "conformance"),
++                        os.path.join(c, "tests", "conformance"))
++    differ = []
++    for r in roots:
++        texts = []
++        for k, c in enumerate(copies):
++            ll = os.path.join(base, f"{k}.{r.replace(os.sep, '_')}.ll")
++            rc, _, _ = build.npkc(ctx, os.path.join(c, r), ll)
++            texts.append(open(ll, "rb").read() if rc == 0 else None)
++        if texts[0] is None or texts[0] != texts[1]:
++            differ.append(r)
++    out(f"{'ok  ' if not differ else 'FAIL'}  build step 3, repro: {len(roots)} root(s) from two "
++        f"directories, {'byte-identical IR' if not differ else 'DIFFERENT IR: ' + ' '.join(differ)}")
++    failures += [f"build step 3: {r} emits different IR from two directories (B-4)" for r in differ]
++
++
++def main(argv):
++    verdicts_path = None
++    if argv[1:2] == ["--verdicts"] and len(argv) == 3:
++        verdicts_path = argv[2]
++    elif len(argv) != 1:
++        stop("usage: run.py [--verdicts PATH]")
++    try:
++        man = manifest.read(os.path.join(ROOT, "nitpick.toml"))
++    except manifest.ManifestError as e:
++        stop(str(e))
++    honour(man)
++    try:
++        toolchain.check(man.need("toolchain", "llvm"), out)
++        toolchain.check_target(man.need("toolchain", "triple"),
++                               man.need("toolchain", "datalayout"), out)
++        npkc, npkrt = toolchain.compiler(out)
++    except (toolchain.ToolchainError, manifest.ManifestError) as e:
++        stop(str(e))
++    runtime_defined = Obj(npkrt).defined()
++    missing = sorted(irscan.DENIED - set(runtime_defined))
++    if missing:
++        stop(f"irscan.DENIED names {', '.join(missing)}, which the runtime does not define -- "
++             "the deny list is stale for this compiler")
++    work = os.path.join(ROOT, "build", "harness")
++    shutil.rmtree(work, ignore_errors=True)
++    os.makedirs(work)
++    ctx = build.Ctx(man, npkc, npkrt, runtime_defined, work)
++    failures = []
++    floor_edges, floor_bin = baseline(ctx, failures)
++    if floor_edges is None:
++        out("harness: RED -- " + "; ".join(failures))
++        return 1
++    library(ctx, man, floor_edges, failures)
++    repro(ctx, man, failures)
++    try:
++        pending_list = stages.read_pending_list(ROOT)
++    except (OSError, ValueError) as e:
++        stop(str(e))
++    st = stages.Stage(ROOT, ctx, floor_bin, pending_list, floor_edges)
++    for t in man.tests:
++        st.program_suite(t)
++    for key in sorted(set(pending_list) - st.pending_seen):
++        failures.append(f"harness/baseline/PENDING.txt names {key[0]} ({key[1]} {key[2]}), and no "
++                        "pending unit matched it")
++    n = {v: sum(1 for x in st.verdicts if x[0] == v) for v in ("PASS", "FAIL", "PEND")}
++    failures += [f"{s}/{os.path.basename(r)}" for v, s, r, _ in st.verdicts if v == "FAIL"]
++    if verdicts_path:
++        with open(verdicts_path, "w", encoding="utf-8") as fh:
++            for v, s, r, d in st.verdicts:
++                fh.write(f"{v}\t{s}\t{r}\t{d}\n")
++    labels = sorted({d.split(" ", 1)[0] for v, _, _, d in st.verdicts if v == "PEND"})
++    judged = n["PASS"] + n["FAIL"]
++    tail = (f"{n['PASS']} of {judged} units passed, {n['PEND']} pending"
++            f"{' (' + ', '.join(labels) + ')' if labels else ''}")
++    if failures:
++        for f in failures:
++            out(f"  failed: {f}")
++        out(f"harness: RED -- {len(failures)} failure(s); {tail}")
++        return 1
++    out(f"harness: GREEN -- 3 build steps; {tail}")
++    return 0
++
++
++if __name__ == "__main__":
++    sys.exit(main(sys.argv))
+diff --git a/harness/stages.py b/harness/stages.py
+new file mode 100644
+index 0000000..c84862b
+--- /dev/null
++++ b/harness/stages.py
+@@ -0,0 +1,163 @@
++#!/usr/bin/env python3
++"""The `program` stage, and `compile`/`positive` -- `meta/specs/BUILD.md` §3, B-3, B-5, B-5b.
++
++A UNIT is every `.npk` file directly in an entry's `path` (or each of its `paths`; below them
++too with `recursive = true`), in name order. Every one is a program, built by `build.py` at
++both legs and RUN `stress` times on each, and it PASSES when every run exits with its
++`expect-exit:`. Nothing is skipped: a suite's directory holds programs only, and a file with
++no `main` fails at the link, by name. `compile`/`positive` is judged the same way, the
++optimised leg included, because B-3 runs that leg on every program.
++
++A CAPPED UNIT (`mem-cap-mib: N`) runs under an N MiB address-space cap, and the floor program
++runs under the identical cap first and must exit 0: a cap so low that a program allocating
++nothing fails it measures the loader, not the unit (`PLAYBOOK.md` §9).
++
++A PENDING UNIT (`pending-until: DEF-<n> <observation> <argument>`, @@PD-139@@) is built like
++any other, and its verdict is PEND only when the one failure its marker names is what EVERY
++leg shows; it is then counted apart from the denominator, as neither a pass nor a failure.
++It is a FAILURE when it shows anything else, and a FAILURE when it MEETS its expectation --
++the run reddens to say the marker is stale, and its marker and its line in
++`harness/baseline/PENDING.txt` go, by the adoption that carries the fix. And every marker
++must have its line in that reviewed list, path, label and observation exactly, or the unit is
++a failure: a marker is a way for a red to leave a green run, so taking a unit out of the
++count is two edits in two files, one of them a reviewed line with a reason (`nitpick-regex`'s
++RX-154). `run.py` checks the other direction.
++"""
++import os
++import resource
++import subprocess
++
++import build
++import expect
++import irscan
++
++RUN_TIMEOUT = 600
++
++
++def _units(root, entry):
++    out = []
++    for rel in (entry["paths"] if "paths" in entry else [entry["path"]]):
++        top = os.path.join(root, rel)
++        if not os.path.isdir(top):
++            raise FileNotFoundError(f"[[test]] {entry['name']}: `{rel}` is not a directory")
++        if entry.get("recursive"):
++            for d, _, fs in sorted(os.walk(top)):
++                out += [os.path.join(d, f) for f in sorted(fs) if f.endswith(".npk")]
++        else:
++            out += [os.path.join(top, f) for f in sorted(os.listdir(top))
++                    if f.endswith(".npk") and os.path.isfile(os.path.join(top, f))]
++    return out
++
++
++def _cap(mib):
++    def limit():
++        resource.setrlimit(resource.RLIMIT_AS, (mib << 20, mib << 20))
++    return limit
++
++
++def run_binary(path, mib=None):
++    try:
++        r = subprocess.run([path], capture_output=True, timeout=RUN_TIMEOUT,
++                           preexec_fn=_cap(mib) if mib else None)
++        return r.returncode
++    except subprocess.TimeoutExpired:
++        return None
++
++
++def read_pending_list(root):
++    """{(path, label, observation): reason} from the reviewed list."""
++    got, p = {}, os.path.join(root, "harness", "baseline", "PENDING.txt")
++    with open(p, encoding="utf-8") as fh:
++        for line in fh:
++            if not line.strip() or line.startswith("#"):
++                continue
++            cols = line.rstrip("\n").split("\t")
++            if len(cols) != 4:
++                raise ValueError(f"harness/baseline/PENDING.txt: {line.strip()!r} is not "
++                                 "path<TAB>label<TAB>observation<TAB>reason")
++            got[(cols[0], cols[1], cols[2])] = cols[3]
++    return got
++
++
++class Stage:
++    def __init__(self, root, ctx, floor_binary, pending_list, floor_edges):
++        self.root, self.ctx, self.floor, self.floor_edges = root, ctx, floor_binary, floor_edges
++        self.pending_list, self.pending_seen, self.floor_under = pending_list, set(), {}
++        self.verdicts = []          # (PASS|FAIL|PEND, suite, relpath, detail)
++
++    def _say(self, verdict, suite, rel, detail):
++        detail = detail.replace(self.root + os.sep, "")
++        self.verdicts.append((verdict, suite, rel, detail))
++        print(f"{verdict} {suite}/{os.path.basename(rel)}: {detail}", flush=True)
++
++    def program_suite(self, entry):
++        for src in _units(self.root, entry):
++            rel = os.path.relpath(src, self.root)
++            self._unit(entry["name"], src, rel)
++
++    def _unit(self, suite, src, rel):
++        e = expect.read(src)
++        if not e.readable:
++            return self._say("FAIL", suite, rel, "UNREADABLE -- " + "; ".join(e.problems))
++        if e.errors:
++            return self._say("FAIL", suite, rel, "carries `expect-error:`, which a program "
++                                                 "stage cannot judge")
++        stem = os.path.join(self.ctx.work, suite, os.path.splitext(os.path.basename(src))[0])
++        b = build.program(self.ctx, src, stem)
++        exits, why = {}, None
++        if b.npkc_exit != 0:
++            why = build.npkc_failure(b)
++        else:
++            with open(b.ll, encoding="utf-8", errors="replace") as fh:
++                found = irscan.findings(fh.read(), self.floor_edges, rel)
++            stopped = [leg for leg in b.legs if leg.stop]
++            if found:
++                why = "; ".join(found)
++            elif stopped:
++                why = "; ".join(f"{leg.name} {leg.stop}" for leg in stopped)
++            elif e.mem_cap_mib and not self._floor_ok(e.mem_cap_mib):
++                why = (f"under {e.mem_cap_mib} MiB the floor program exits "
++                       f"{self.floor_under[e.mem_cap_mib]}: the cap measures the loader")
++            else:
++                for leg in b.legs:
++                    exits[leg.name] = [run_binary(leg.binary, e.mem_cap_mib)
++                                       for _ in range(e.stress)]
++        if e.pending:
++            return self._pending(suite, rel, e, b, exits, why)
++        if why:
++            return self._say("FAIL", suite, rel, why)
++        shown = ", ".join(f"{k} {self._show(v)}" for k, v in exits.items())
++        if all(x == e.exit for v in exits.values() for x in v):
++            return self._say("PASS", suite, rel, shown)
++        return self._say("FAIL", suite, rel, f"expected exit {e.exit}; {shown}")
++
++    def _pending(self, suite, rel, e, b, exits, why):
++        label, observation, arg = e.pending
++        key = (rel, label, f"{observation} {arg}")
++        marker = f"`pending-until: {label} {observation} {arg}`"
++        if key not in self.pending_list:
++            return self._say("FAIL", suite, rel, f"{marker} is NOT ON THE REVIEWED PENDING LIST "
++                                                 "(harness/baseline/PENDING.txt)")
++        self.pending_seen.add(key)
++        if (observation == "undefined-value" and b.npkc_exit == 0 and b.legs
++                and all(leg.stop and leg.undefined_value == arg for leg in b.legs)):
++            return self._say("PEND", suite, rel, f"{label} -- every leg refused by LLVM naming "
++                                                 f"the undefined value '{arg}', as its marker says")
++        if not why and all(x == e.exit for v in exits.values() for x in v):
++            return self._say("FAIL", suite, rel, f"STALE {marker}: it now meets its expectation, "
++                                                 f"exit {e.exit} at every leg -- {label} is fixed "
++                                                 "in this compiler; the marker and its "
++                                                 "PENDING.txt line go")
++        got = why or ", ".join(f"{k} {self._show(v)}" for k, v in exits.items())
++        return self._say("FAIL", suite, rel, f"PENDING ON A DIFFERENT FAILURE -- {marker}; "
++                                             f"this tree gives: {got}")
++
++    def _floor_ok(self, mib):
++        if mib not in self.floor_under:
++            self.floor_under[mib] = run_binary(self.floor, mib)
++        return self.floor_under[mib] == 0
++
++    @staticmethod
++    def _show(v):
++        v = ["hang" if x is None else str(x) for x in v]
++        return v[0] if len(v) == 1 else (f"{v[0]} x{len(v)}" if len(set(v)) == 1 else "/".join(v))
+diff --git a/harness/toolchain.py b/harness/toolchain.py
+new file mode 100644
+index 0000000..dedd517
+--- /dev/null
++++ b/harness/toolchain.py
+@@ -0,0 +1,78 @@
++#!/usr/bin/env python3
++"""The toolchain is a build input (the compiler's D-204), so it is ASSERTED, not reported.
++
++The manifest pins a patch release, so every check is exact: a patch release may change
++instruction selection (@@PD-136@@). It asks the three tools that run -- `llc`, `opt` and
++`ld.lld` -- and not `llvm-config`, a `-dev` package the build does not need. And it
++holds the manifest's `datalayout` to what the pinned `opt` derives from its `triple`, since
++`opt` keeps a wrong layout as written and `llc` accepts one in silence (`BUILD.md` B-1a,
++@@PD-138@@). After `nitpick-regex`'s `harness/toolchain.py`.
++"""
++import os
++import re
++import subprocess
++
++
++class ToolchainError(Exception):
++    pass
++
++
++_VERSION = re.compile(r"\b(\d+\.\d+\.\d+)\b")
++_LAYOUT = re.compile(r'^target datalayout = "([^"]*)"$', re.M)
++
++
++def _ask(tool):
++    try:
++        r = subprocess.run([tool, "--version"], capture_output=True, text=True, timeout=30)
++    except FileNotFoundError:
++        raise ToolchainError(f"`{tool}` is not on PATH -- it is one of the three binaries "
++                             "nitpick.toml [toolchain] pins, and a check skipped because "
++                             "its tool is missing is how a defect ships")
++    except subprocess.TimeoutExpired:
++        raise ToolchainError(f"`{tool} --version` did not answer in 30 s")
++    m = _VERSION.search(r.stdout + r.stderr)
++    if not m:
++        raise ToolchainError(f"`{tool} --version` printed no version: "
++                             f"{(r.stdout + r.stderr).strip()[:120]!r}")
++    return m.group(1)
++
++
++def check(llvm, out):
++    for tool in ("llc", "opt", "ld.lld"):
++        got = _ask(tool)
++        if got != llvm:
++            raise ToolchainError(f"`{tool}` is {got} and nitpick.toml [toolchain] llvm pins "
++                                 f"{llvm} exactly -- a refusal, not a warning (D-204)")
++        out(f"ok    {tool} {got}")
++
++
++def check_target(triple, datalayout, out):
++    try:
++        r = subprocess.run(["opt", "-S", "-"], input=f'target triple = "{triple}"\n',
++                           capture_output=True, text=True, timeout=30)
++    except (OSError, subprocess.SubprocessError) as e:
++        raise ToolchainError(f"`opt -S` over the triple probe failed: {e}")
++    m = _LAYOUT.search(r.stdout)
++    if r.returncode != 0 or not m:
++        raise ToolchainError("`opt -S` over a module stating only the pinned triple wrote no "
++                             f"`target datalayout`: {(r.stderr or r.stdout).strip()[:160]!r}")
++    if m.group(1) != datalayout:
++        raise ToolchainError(f"nitpick.toml pins the layout {datalayout!r}, and the pinned "
++                             f"`opt` derives {m.group(1)!r} from the triple {triple!r}")
++    out(f"ok    target {triple}, its layout the one the pinned opt derives")
++
++
++def compiler(out):
++    """`$NPKC` and `$NPKRT`: the pinned pair the board names (W-18)."""
++    got = []
++    for var, what in (("NPKC", "the pinned npkc binary"),
++                      ("NPKRT", "the pinned npkrt.o runtime object")):
++        p = os.environ.get(var, "")
++        if not p:
++            raise ToolchainError(f"${var} is not set; it must name {what} -- from the dispatch, "
++                                 "or by hand from `../.internal/toolchain/<commit>/`")
++        if not os.path.isfile(p):
++            raise ToolchainError(f"${var} names no file")
++        got.append(os.path.abspath(p))
++        out(f"ok    ${var} is a file")
++    return got[0], got[1]
+diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
+index 9ab4173..f90b997 100644
+--- a/meta/DECISIONS.md
++++ b/meta/DECISIONS.md
+@@ -954,3 +954,68 @@ ask, and holding the probes for it holds the cycle.
+ *Reversal, for the author:* to run the research before 0.0.0, move the gate from cycle
+ 0.0.5 to 0.0.0's step 0; to count the library routine, strike `CURRENCY.md`'s research
+ section and the gate, and nothing else moves.
++
++### @@PD-138@@ — the build is one module per root, held to the target rows, scanned two ways on both legs, and reproducible from two directories
++**2026-10-15, cycle 0.0.2.** Measured at the pin `7e91730`, and each a rule of `specs/BUILD.md`:
++
++- **One module per root** (§2's drawing). `npkc` emits a root and every module it imports as
++  one module — a function of an imported module is DEFINED in the root's emission — so a
++  program links as its one object and `npkrt.o`, and `src/` is compiled module by module, each
++  as a root of its own, to be scanned. The first writing's "one build of the library per run,
++  reused by every program" (this subcycle's first writing) described a library object nothing
++  emits.
++- **The target rows are held** (B-1a): every emitted and optimised module states the
++  manifest's `triple` and `datalayout`, and the layout row is the one the pinned `opt` derives.
++- **Two scans, both legs** (B-2, B-2a). Every object's undefined symbols are the runtime
++  object's own defines — the runtime the link uses — and every -O0 module's call edges to the
++  runtime are held to the floor program's: an edge to a syscall, a descriptor, the clock or a
++  task fails the build, naming the function, which is PA-006 read as a check. The floor
++  program has five undefined symbols and a syscaller six, the difference `npk_sys6`; the run
++  measures that pair every time and reddens if either scan stops seeing it.
++- **Reproducible** (B-4): `[build] entry` and every conformance root, built from two copies
++  each carrying its manifest, emit byte-identical modules; without the manifest the consumer's
++  two modules differ, which is the check's own failure, measured.
++
++*Alternatives declined:* **a library object linked into every program** — nothing emits one;
++**`llvm-nm` for the symbol table** — a fourth tool outside the pin, read as text (the first
++writing's reason stands);
++**the undefined-symbol scan alone behind "no syscall"** — it says THAT a symbol is needed and
++never where, and at an earlier compiler it could not see a syscall at all (`PLAYBOOK.md`);
++**a permit list for the edges** — the floor's own glue calls the allocator, the trap path and
++a descriptor's close, and `nitpick-regex` measured its permit list red on every probe; **only
++`[build] entry` scanned** — it reaches only what it imports, so a module not yet imported
++would pass whatever it called; **objects compared for repro** — B-4's claim is the IR, and with
++each copy's manifest the IR is identical; an object is what to quote for a SIZE across trees.
++
++*Reversal, for the author:* when the compiler's command line emits a module per object as its
++`BUILD_REFERENCE.md` §4.1 describes, the drawing and a library object come back by a decision;
++when a test must touch a descriptor, the deny list takes a scoped exemption by a decision; and when a re-pin renames a
++denied symbol, the run says so by name and the list moves with the adoption.
++
++### @@PD-139@@ — a unit red on a compiler defect is pending: its right answer, the one failure it is excused, and a reviewed list
++**2026-10-15, cycle 0.0.2.** `specs/BUILD.md` B-5b. A test that is CORRECT AND RED because a
++defect it meets is in the pinned compiler carries its RIGHT ANSWER as its ordinary markers,
++and one more: `// pending-until: DEF-<n> <observation> <argument>` — the compiler seat's
++registration of the defect, a label nothing resolves, and the one failure the unit is excused,
++on every leg. Its verdict is PEND only when that failure is what every leg shows; it is then
++printed and counted apart, neither a pass nor a failure. Any other failure fails it, and so
++does MEETING its expectation: the run reddens to say the marker is stale, and the marker and
++its line go, by the adoption that carries the fix. Every marker has a line in
++`harness/baseline/PENDING.txt` — path, label and observation exactly, and the reason — and
++the runner holds the list both ways: a marker it does not name fails, and a line no pending
++unit matched fails. At cycle 0.0.2 the observation is `undefined-value <symbol>` (`npkc`
++accepts, and LLVM refuses the module naming that value); the first unit is probe 06, on
++DEF-253. And `// mem-cap-mib: N` is the runner's other marker: the cap, after the floor
++program under it.
++
++*Alternatives declined:* **leave the defect directories out of the run** — a defect nobody's
++run re-derives is noticed fixed by accident, or never; **a plain `expect-` for the broken
++answer** — the suite would then defend the defect, and go red the day it is fixed with nothing
++saying why; **a marker that excuses any failure** — `nitpick-regex`'s third audit measured that
++shape absorbing a different failure, and a wrong expectation, into a green run (its RX-154);
++**a commit as the label** — none is announced for either fix, and the compiler seat's DEF id is
++the name both sides use.
++
++*Reversal, for the author:* none for the mechanism; each pending unit's marker and list line go
++when its fix is pinned, and a new observation form joins B-5b by a decision when a defect shows
++a failure this one cannot name.
+diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md
+index 1603419..6b5cd7d 100644
+--- a/meta/specs/BUILD.md
++++ b/meta/specs/BUILD.md
+@@ -44,19 +44,34 @@ compiler's own harness is Python for the same reason.
+ ## 2. The build, step by step
+ 
+ ```
+-src/lib.npk  (and every module it reaches by `use`)
+-   → npkc              →  build/nparse.ll        the emitted LLVM IR text
+-   → opt -O2           →  build/nparse.opt.ll    only on the check leg
+-   → llc               →  build/nparse.o         at the manifest's flags
+-   → undefined-symbol scan against the runtime allowlist
+-   → ld.lld -static    →  build/<program>        one program object + npkrt.o
++a root — a program, or one module under src/ compiled alone — and every module it imports
++   → npkc              →  <root>.ll              ONE module: the root and all it imports
++   → target rows       →  held to the manifest   (B-1a)
++   → llc               →  <root>.o               at the manifest's llc-flags
++   → undefined-symbol scan, call-edge scan       (B-2, B-2a)
++   → ld.lld -static    →  <program>              the program's one object + npkrt.o
++and the check leg, every program: the same <root>.ll → opt → llc -O2 → the scans → ld.lld (B-3)
+ ```
+ 
++*(Corrected 2026-10-15, cycle 0.0.2 — @@PD-138@@: the drawing compiled `src/lib.npk` into
++`build/nparse.ll` and `build/nparse.o` and then linked "one program object + npkrt.o", as if
++a library object sat between them. Measured at the pin `7e91730`, `npkc` emits a root and
++everything it imports as one module — an imported module's function is DEFINED in the
++root's emission — so a program links as its one object and the runtime, and the library is
++compiled on its own only to be scanned and compared.)*
++
+ **Rule B-1.** Every tool invocation is built from `nitpick.toml`'s
+ `[toolchain]` lists. No tool ever runs at its own defaults — `llc` defaults to
+ `-O2` and would optimise a build the manifest declined, which cost the compiler
+ project a measured 25× on one module.
+ 
++**Rule B-1a (@@PD-138@@) — the target rows are held.** Every module the build
++emits or optimises states the manifest's `target triple` and `target datalayout`,
++and the runner refuses a module that states others; and before anything runs it
++holds the `datalayout` row to what the pinned `opt` derives from the `triple`
++row, because `opt` keeps a wrong layout as written and `llc` accepts one in
++silence (the compiler's D-322 (5)).
++
+ **Rule B-2.** The undefined-symbol scan is a **build step, not a test**. Every
+ object is scanned and the build fails on any undefined symbol outside the
+ runtime allowlist derived from `runtime/npkrt.ll`'s own `define`s plus `main`.
+@@ -65,6 +80,26 @@ For `nparse` it should be nearly vacuous — the library makes no syscall at all
+ (`SAFETY.md` §2) — and **a symbol appearing here is therefore a finding**, not
+ a routine pass: it means something reached for the floor that had no business
+ doing so.
++*(Re-read 2026-10-15, cycle 0.0.2 — @@PD-138@@: the allowlist is the pinned
++`npkrt.o`'s own defined symbols, the runtime the link uses, and the scan runs on
++both legs' objects. Measured at the pin: the floor program's object has five
++undefined symbols, all the runtime's, and the runtime defines `memcpy`, `memmove`
++and `memset`, so a libcall `opt` mints links. The one way a source program would
++name a symbol of its own choosing, a plain function in an `extern` block, is
++`NITPICK-EXTERN-001` (an `extern` block is a driver's), so this scan catches what
++the toolchain emits; what stands behind "no syscall" is B-2a.)*
++
++**Rule B-2a (@@PD-138@@) — the call-edge scan, and its controls.** Every
++module's -O0 IR is read for its calls to the runtime, edge by edge — the calling
++function and the callee — and an edge the floor program does not have, to a
++symbol `harness/irscan.py` denies (a syscall, a descriptor, the clock, a task),
++fails the build, naming the function. It reads every module under `src/`,
++compiled as a root on its own — `src/lib.npk` reaches only what it imports — and
++every program. **The instruments are measured on every full run:** the floor
++program's object and a syscaller's must differ by `npk_sys6` alone, and the
++call-edge scan must flag the syscaller's `main` and nothing in the floor, so a
++scan gone blind reddens the run rather than passing everything (`PLAYBOOK.md`:
++an undefined-symbol scan once could not see a syscall at all).
+ 
+ **Rule B-3.** The optimised leg runs on every program, every time: the same
+ program re-emitted through `opt -O2` + `llc -O2` must produce the **same exit
+@@ -76,6 +111,12 @@ its first run there found a real defect that had passed for six cycles.
+ working directories produce byte-identical IR. `nparse` inherits this from the
+ compiler (D-078, D-204, D-236) and the harness has a `repro` stage that
+ measures it, because a property nobody measures is a property nobody has.
++*(Re-read 2026-10-15, cycle 0.0.2 — @@PD-138@@: each copy carries its manifest.
++The compiler records source paths relative to the manifest root (D-236), so a copy
++made without one — inside this repository, under its manifest — renders its paths
++by where it sits: measured at the pin, the conformance consumer copied twice without
++the manifest emits two different modules, and with it, one. The harness's `repro`
++step builds `[build] entry` and every conformance root from two copies.)*
+ 
+ ---
+ 
+@@ -106,6 +147,25 @@ compiler's, marker for marker, plus two of ours:
+ // expect-fault: DepthExceeded   the ParseError code this input must produce
+ ```
+ 
++**Rule B-5b (@@PD-139@@) — the runner's own markers, and the ones it does not
++judge.** Two markers the compiler's reader does not have:
++
++```
++// mem-cap-mib: 64           run under a 64 MiB address-space cap, after the floor
++                             program under the same cap, which must exit 0
++// pending-until: DEF-253 undefined-value @npk.m.Count->:Src.step
++                             CORRECT AND RED on the compiler defect DEF-253: the one
++                             failure excused, on every leg; listed in
++                             harness/baseline/PENDING.txt, both ways
++```
++
++A marker's value is the whole rest of its line, so one followed by prose cannot be
++read, and a file whose markers cannot be read fails. A marker of the compiler's
++grammar that this runner does not judge yet — `argv:`, `expect-note:`,
++`expect-obligation:`, `explore:`, `npkc-flags:` and their kin — and this library's
++`expect-roundtrip:` and `expect-fault:` until their stages exist, make their file
++fail by name: an expectation nobody checks is the failure this rule exists to stop.
++
+ **Rule B-6 — assert on codes and exit codes, never on message text.**
+ 
+ **Rule B-7 — unexpected diagnostics fail a test as surely as missing ones**

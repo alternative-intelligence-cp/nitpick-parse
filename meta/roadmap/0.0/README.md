@@ -14,7 +14,7 @@ in the owed-items table below.
 |---|---|
 | [0.0.0](0.0.0.md) | **yes** — probes measured, five patches, blocks with filled Expects |
 | [0.0.1](0.0.1.md) | **yes** — six patches over 0.0.0's record, blocks with filled Expects; CI's run is its worker's |
-| [0.0.2](0.0.2.md) | not yet |
+| [0.0.2](0.0.2.md) | **yes** — three patches over 0.0.1's record, blocks with filled Expects, the mutants' table; CI's run is its worker's |
 | [0.0.3](0.0.3.md) | not yet |
 | [0.0.4](0.0.4.md) | not yet |
 | [0.0.5](0.0.5.md) | not yet |
@@ -58,7 +58,9 @@ author.**
 | PD-135 | 0.0.1 | the layering is a table of what each module imports |
 | PD-136 | 0.0.1 | the toolchain is LLVM 20.1.8 with the compiler's target rows, in the manifest and in CI |
 | PD-137 | 0.0.1 | one currency table; the library is security-sensitive, and its three research items gate cycle 0.1 |
-| PD-138 onward | 0.0.2 … 0.0.5 | proposed by those files as they reach the pin |
+| PD-138 | 0.0.2 | the build is one module per root, held to the target rows, scanned two ways on both legs, and reproducible from two directories |
+| PD-139 | 0.0.2 | a unit red on a compiler defect is pending: its right answer, the one failure it is excused, and a reviewed list |
+| PD-140 onward | 0.0.3 … 0.0.5 | proposed by those files as they reach the pin |
 
 ## The pin, and what each later landing would move
 
@@ -89,7 +91,7 @@ started finishes at the pin it started at.
 0.0.0's §1.5 recursion edges, which measure the emitted frames at each leg, are re-measured by its block 0b. D-355, `NULL` legal only for `wild` pointers, is a later landing of its own: the cycle writes no `NULL` (`tools/rulings.py`) |
 | 116 (DEF-252, the use-after-free) | a callee's store of a view into a place its caller owns asks DEF-42's holder-scope question at the call: `NITPICK-BORROW-002` | **probe 08h's verdict** (`tests/probe/defect/view_reseat/`): refused, its right answer — it flips at the adoption of a pin of 116 or later |
 | 117 (D-353, with D-354) | a generic value parameter is a RESERVED form, refused by a code of its own, and D-336's corpus admits that verdict | **nothing**: none written; a capacity is a `fixed` constant (the libraries' S-135 answer) |
-| 118 (DEF-253, with DEF-254) | a synchronous `Self->` method called through a generic bound links; and a trait's default method calling a sibling on `self`, which never linked, links | **probe 06's verdict** (`tests/probe/defect/bound_pointer_receiver/`): it links and runs, exit 0 — it flips at the adoption of a pin of 118, and not at a pin below it; and nothing for DEF-254: no trait default calls a sibling on `self` (`tools/shapes.py`) |
+| 118 (DEF-253, with DEF-254) | a synchronous `Self->` method called through a generic bound links; and a trait's default method calling a sibling on `self`, which never linked, links | **probe 06's verdict** (`tests/probe/defect/bound_pointer_receiver/`): it links and runs, exit 0 — 0.0.2's PENDING unit on DEF-253, which flips at the adoption of a pin of 118, and not at a pin below it (the run then reddens to say its marker is stale, and the marker and its line in `harness/baseline/PENDING.txt` go); and nothing for DEF-254: no trait default calls a sibling on `self` (`tools/shapes.py`) |
 
 **Also ruled in landing 112's commit** (D-353 … D-359, the board's notice F54), each held to what the cycle writes:
 generic value parameters out until designed — 117 above; `NULL` legal only for `wild` pointers (D-355) — none written; a
@@ -136,6 +138,8 @@ block counts the lexical ones over what its patches add, with a scanner proved o
 | C — `fixed T[]` and `string_bytes`; `TYPE-072` on a clause-less `while`; the six-arm floor; the generic by-value refusals; the symbol scan's blindness to a syscall | 0.0.0's PD-132; every `while` states `decreases`; every program names the floor (0.0.0 §1.4); `Vec<T: Copy>` (0.0.4); a call-edge scan (0.0.2) |
 | a synchronous `Self->` method through a generic bound (0.0.0's first defect) | not written outside its defect directory (PD-131) |
 | a view re-seated by a callee into a place it was handed (0.0.0's second defect) | not written outside its defect directory (PD-132) |
+| a trait's default method calling a sibling on `self` (DEF-254, which links only from 118) | none written: `tools/shapes.py` counts it, with its own planted control (0.0.2 on) |
+| a module-level binding with no initialiser, or a plain one (DEF-250 at 114; D-211) | every one `fixed` with an initialiser but probe 12b's, refused on purpose: `tools/rulings.py` (0.0.2 on) |
 
 And `PLAYBOOK.md` §2's rows open at the pin are kept: the read-only view; no part of a `fixed` binding written; every
 path leaving explicitly; `main` exactly `int32(cstring[]:_~argv)`; each `Result` tested alone; a qualified `pick` arm;
@@ -174,8 +178,8 @@ no literal outside the envelope; `#size_of` measured, never summed; a container'
 | 6 | probe 10 against the 8 MiB stack | settled by 0.0.0: 50 000 levels complete; the traps are at 65 535 and 131 063 (PD-133) |
 | 7 | the bill, and `IntOverflow` | settled by 0.0.0's oracle measurements (PD-134) |
 | 8 | whether `nitpick-regex`'s answer on live contracts (A′, its `VERIFICATION.md` P-1b) binds this library | handed to 0.0.4, which writes the obligations (EK1) |
-| 9 | the `repro` check | handed to 0.0.2, which builds it |
-| 10 | the undefined-symbol scan | handed to 0.0.2: a call-edge scan of the IR stands behind PA-006 |
+| 9 | the `repro` check | settled by 0.0.2: each copy carries its manifest, since without it the consumer's two modules differ — the check's mutant (PD-138, `BUILD.md` B-4) |
+| 10 | the undefined-symbol scan | settled by 0.0.2: the call-edge scan stands behind PA-006, over every module under `src/` and every program, and the floor and the syscaller are its controls on every run (PD-138, B-2a) |
 | 11 | `tools/parse_check` and `tools/check` | handed to 0.0.3: `npkc` and the code family; `accept` struck |
 | 12 | which harness runs the dogfood consumer | handed to 0.0.5 (E2-6) |
 | 13 | the currency file's name | handed to 0.0.1 (E2-13) |
@@ -189,7 +193,7 @@ no literal outside the envelope; `#size_of` measured, never summed; a container'
 - **A program links as one object and `npkrt.o`**, as the last line of `specs/BUILD.md` §2's drawing has it — while
   that drawing's `llc → build/nparse.o` line, and 0.0.2's own pipeline, draw a library object beside it. `npkc`
   compiles a program and everything it imports into one module, so there is no library object to link. 0.0.2
-  measures the link and amends both.
+  measured it — an imported module's function is defined in the root's emission — and amends both (PD-138).
 
 ## Subcycles
 
@@ -230,12 +234,13 @@ file states its own acceptance when it reaches the pin, and where the two differ
 - [ ] `CLAUDE.md` and `CONTRIBUTING.md` re-read against 0.0.0's verdicts and extended
 
 ### 0.0.2 — the harness, part 1
-- [ ] `harness/manifest.py`, `toolchain.py`, `elf.py`, `build.py`, `stages.py`, `run.py`
-- [ ] one program object and `npkrt.o` per link, every argv built from the manifest's flag lists
-- [ ] the undefined-symbol scan as a build step, and a call-edge scan of the IR behind PA-006's "no syscall"
+- [ ] `harness/run.py`, `manifest.py`, `toolchain.py`, `expect.py`, `build.py`, `irscan.py`, `elf.py`, `stages.py`, and `baseline/`
+- [ ] one program object and `npkrt.o` per link, every argv built from the manifest's flag lists, every module the manifest's target rows
+- [ ] the undefined-symbol scan and the call-edge scan as build steps, over every module under `src/` and every program, the floor and the syscaller their controls on every run
 - [ ] the `program` stage at -O0 and again under `opt -O2`, same exit required; `expect-exit`, `stress` and `mem-cap-mib` honoured
-- [ ] the `repro` check: two builds from different working directories, each copy with its manifest — and **seen to fail** once
-- [ ] 0.0.0's `tests/probe/` green as the first real `program` suite
+- [ ] the `repro` check: two builds from different working directories, each copy with its manifest — and **seen to fail** without it
+- [ ] 0.0.0's `tests/probe/` green as the first real `program` suite; probe 06 PENDING on DEF-253, listed, and every way the mechanism can be wrong seen red
+- [ ] CI's harness step asserting the runner's unqualified green summary
 
 ### 0.0.3 — the harness, part 2
 - [ ] the parse sweep (`npkc` over every `.npk`, judged by the diagnostic's code family) and the refusal stage with the **exact-code** rule (B-7); `accept` struck
@@ -269,7 +274,7 @@ written into the specifications.
 ## Watch for
 
 - **Probe 05 is expected to be refused, probe 01a and probe 10b to trap, and probe 06 and probe 08h to show a
-  compiler defect.** All are *results*. A subcycle fails only on a verdict that is **undecided** — a compiler crash, a
+  compiler defect** — from 0.0.2 on, probe 06 a PENDING unit stating its right answer. All are *results*. A subcycle fails only on a verdict that is **undecided** — a compiler crash, a
   hang, or output nobody can read — or one that differs from its plan's Expect.
 - **A probe that fails is a finding, not an obstacle.** Record the exact diagnostic, decide the design change, amend
   the specification, and only then continue. Working around a compiler refusal in library code is what the compiler's

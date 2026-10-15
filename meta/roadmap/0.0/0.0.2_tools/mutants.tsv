@@ -1,0 +1,22 @@
+# 0.0.2's mutants of the harness's checks -- each one facet of one check broken alone, by the edits of one name;
+# `mutants.py` makes each edit exactly once in a copy of the tree's HEAD and runs the harness there.
+# TAB-separated: name, file, the text replaced, its replacement; `\n` is a newline and `\t` a tab.
+llvm-pin	nitpick.toml	llvm          = "20.1.8"	llvm          = "20.1.7"
+layout-pin	nitpick.toml	datalayout    = "e-m:e-p270	datalayout    = "e-m:o-p270
+schema-key	nitpick.toml	opt-level = 0\n	opt-level = 0\nlto       = true\n
+stage-unjudged	nitpick.toml	name  = "defect-bound"\nstage = "program"	name  = "defect-bound"\nstage = "check"
+scan-blind	harness/irscan.py	    "npk_sys6",\n	
+syscall-in-library	src/core/core.npk	mod:core;\n	mod:core;\n\npub func:core_pid = int64() {\n    Result<int64>:r = sys(39i64);\n    if (r.is_error) { pass 0i64; }\n    pass r.value;\n};\n
+runtime-lacks-symbol	harness/run.py	    runtime_defined = Obj(npkrt).defined()	    runtime_defined = [s for s in Obj(npkrt).defined() if s != "npk_trap"]
+repro-no-manifest	harness/run.py	        shutil.copy2(os.path.join(ROOT, "nitpick.toml"), c)\n	
+exit-wrong	tests/probe/probe01a_naive_accumulate.npk	// expect-exit: 93	// expect-exit: 94
+marker-unreadable	tests/probe/probe01b_checked_accumulate.npk	// expect-exit: 0\n	// expect-exit: 0 -- the checked one\n
+marker-unjudged	tests/probe/probe02_pod_event.npk	// expect-exit: 32\n	// expect-exit: 32\n// argv: one\n
+floor-control	harness/stages.py	        return self.floor_under[mib] == 0	        return self.floor_under[mib] == 1
+pending-unlisted	harness/baseline/PENDING.txt	tests/probe/defect/bound_pointer_receiver/probe06_trait_bound.npk\tDEF-253\tundefined-value @npk.probe06_trait_bound.Count->:Src.step\tthe compiler registered it DEF-253 (2026-10-15); green when a sync Self-> method called through a generic bound links and runs, exit 0 -- landing 118's fix, so it flips at the re-pin at 118 and stays pending at a pin below it\n	
+pending-orphan-line	harness/baseline/PENDING.txt	stays pending at a pin below it\n	stays pending at a pin below it\ntests/probe/probe01b_checked_accumulate.npk\tDEF-253\tundefined-value @npk.x\ta mutant's line\n
+pending-other-failure	tests/probe/defect/bound_pointer_receiver/probe06_trait_bound.npk	// pending-until: DEF-253 undefined-value @npk.probe06_trait_bound.Count->:Src.step	// pending-until: DEF-253 undefined-value @npk.probe06_trait_bound.Count:Src.step
+pending-other-failure	harness/baseline/PENDING.txt	\tundefined-value @npk.probe06_trait_bound.Count->:Src.step\t	\tundefined-value @npk.probe06_trait_bound.Count:Src.step\t
+pending-stale	tests/probe/defect/bound_pointer_receiver/case2_bound_by_value.npk	// expect-exit: 5\n	// expect-exit: 5\n// pending-until: DEF-253 undefined-value @npk.x\n
+pending-stale	harness/baseline/PENDING.txt	stays pending at a pin below it\n	stays pending at a pin below it\ntests/probe/defect/bound_pointer_receiver/case2_bound_by_value.npk\tDEF-253\tundefined-value @npk.x\ta mutant's line\n
+stress-three	tests/probe/probe01b_checked_accumulate.npk	// expect-exit: 0\n	// expect-exit: 1\n// stress: 3\n
