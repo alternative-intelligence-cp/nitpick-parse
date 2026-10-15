@@ -3,11 +3,12 @@
 **The probes, the harness, and `src/core/`.** Nothing in this cycle parses anything. What it produces is the ability
 to find out whether the rest of the plan is buildable, and the machinery every later cycle is tested by.
 
-**Re-derived at compiler `7e91730` (2026-10-15), by the Team seat's planner, in one pass over all six subcycle files.**
-They were written execution-grade at the repository's setup (2026-09-03), against the compiler's cycle 1.5 and LLVM
-20.1.2; each is now re-measured at the pin, with what the audits found owed carried into the step that owes it. **The
-re-derivation lands subcycle by subcycle, in order**, and the table below says which files are at the pin; a file not
-yet marked still holds its first writing, and the items it owes are in §4's map.
+**Being re-derived at compiler `7e91730` (from 2026-10-15) by the Team seat's planners, as one pass over all six
+subcycle files.** They were written execution-grade at the repository's setup (2026-09-03), against the compiler's
+cycle 1.5 and LLVM 20.1.2; each is re-measured at the pin, with what the audits found owed carried into the step that
+owes it. **The re-derivation lands subcycle by subcycle, in order**, and the table below says which files are at the
+pin; a file not yet marked still holds its first writing — not to be executed as it stands — and the items it owes are
+in the owed-items table below.
 
 | File | At `7e91730` |
 |---|---|
@@ -41,9 +42,9 @@ rather than asserted in a document. It is two programs, 01a and 01b, because a p
 
 PA-001 … PA-009, PA-012, PA-021, PA-022, PA-030. All settled. **Nothing in this cycle is blocked on a question.**
 
-**And the ones this cycle proposes**, PD-129 … PD-145 from the Team seat's block for this repository (PD-129 …
-PD-148; the last three unused), each landing in the subcycle step that first needs it and numbered at the review
-(`tools/decisions.txt`). Each is settled with a recommendation and states its reversal; **none is left open for the
+**And the ones this cycle proposes**, from PD-129 on, in the Team seat's block for this repository (PD-129 …
+PD-148), each landing in the subcycle step that first needs it and numbered at the review (`tools/decisions.txt`,
+which gains a line as each subcycle's file reaches the pin). Each is settled with a recommendation and states its reversal; **none is left open for the
 author.**
 
 | PD | Subcycle | Decides |
@@ -184,6 +185,9 @@ no literal outside the envelope; `#size_of` measured, never summed; a container'
 | [0.0.5](0.0.5.md) | **Close** — the findings, the handoff to 0.1 | `done/0.0/`, and 0.1 openable by a fresh session |
 
 ## Checklist
+
+The 0.0.2 … 0.0.5 items are the re-derivation's targets, drawn from the audits' owed items and 0.0.0's verdicts; each
+file states its own acceptance when it reaches the pin, and where the two differ, the file at the pin governs.
 
 ### 0.0.0 — the probes
 - [ ] `tests/probe/probe01a_naive_accumulate.npk` traps `IntOverflow` (93) and `probe01b_checked_accumulate.npk` exits 0 — **the flagship**
