@@ -1306,7 +1306,7 @@ index 0000000..dedd517
 +        out(f"ok    ${var} is a file")
 +    return got[0], got[1]
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index 3c0769f..755b8b7 100644
+index 0afecdc..673488e 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
 @@ -962,3 +962,81 @@ the gate to cycle 0.1, through 0.0.5's close — 0.0.0's gate item 7 and block 0

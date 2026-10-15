@@ -1,5 +1,5 @@
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index 39882a1..3c0769f 100644
+index 39882a1..0afecdc 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
 @@ -493,6 +493,8 @@ specification, and that is stated rather than hidden; its hand-built corpus is
@@ -27,7 +27,7 @@ index 39882a1..3c0769f 100644
 +known defects in the prior art and the reference implementations, the standards bodies'
 +current guidance, and the current test vectors (`CURRENCY.md` states each). **They
 +gate cycle 0.0's work**: its first work dispatch, cycle 0.0.0's, carries their three
-+digests, and its worker files them beside the table before any probe runs, so that a
++digests, and its worker files them in `meta/research/` before any probe runs, so that a
 +finding becomes a cycle-0.0 probe before it is anything else, as the workbench plan
 +skill asks. Each is a `security` digest, stale ninety days after its date (the
 +research skill's §6), so a later cycle reads the three dates before it starts, and all

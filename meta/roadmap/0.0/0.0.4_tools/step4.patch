@@ -12,7 +12,7 @@ index 5bedfed..cea15ed 100644
    event/      #   the event vocabulary, the Format trait, the depth stack
    doc/        #   the Document tree and the query API
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index 67caf9f..5cdb2e4 100644
+index 17d91a8..941ba0c 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
 @@ -1149,3 +1149,20 @@ eight) — every format's consumer owes `DivByZero` and `DivOverflow` already, t

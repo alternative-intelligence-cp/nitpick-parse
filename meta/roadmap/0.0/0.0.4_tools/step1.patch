@@ -1,5 +1,5 @@
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index cc6c9e6..9576232 100644
+index 7a6609e..8028524 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
 @@ -1099,3 +1099,23 @@ checks written now** — their inputs do not exist, and a check over nothing is
@@ -24,8 +24,8 @@ index cc6c9e6..9576232 100644
 +S-135).
 +
 +*Reversal, for the author:* to hold the ninth from cycle 0.0.4, step 1 adds `NPARSE_DUP_SCAN_MAX` to `limits.npk` at
-+1024, a ninth row to §7's table saying whether it is an option, and an assertion to `limits_values`; block 1's run
-+and the mutants move with them.
++1024, a ninth row to §7's table saying whether it is an option, and an assertion to `limits_values`, and
++`check_constants_named` then holds nine.
 diff --git a/meta/specs/SAFETY.md b/meta/specs/SAFETY.md
 index 7712438..eb2a7eb 100644
 --- a/meta/specs/SAFETY.md
