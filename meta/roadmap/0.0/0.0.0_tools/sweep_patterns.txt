@@ -1,0 +1,19 @@
+# cycle 0.0.0's stale-claim sweep: one subject per claim the steps change, `<subject> | <regex>`, case-insensitive,
+# over joined text (sweep.py). Each subject is swept in more than one wording; the control reads every removed hunk.
+the 24-byte value | \b24[- ]?bytes?\b|twenty-four bytes|\b24\b[^.]{0,20}\basserted
+the 56-byte node | \b56[- ]?bytes?\b|\b56\b[^.]{0,20}\basserted|^\s*\S+:\w+;\s*// 1\b
+a one- or two-byte enum field | (EventKind|ScalarKind|NodeKind|FaultCode|TextSrc):\w+;\s*// (1|2) bytes?
+the 28-byte compromise | two fields and 28 bytes
+no stack-depth guard | no stack[- ]?(depth )?guard|stack-depth guard
+an uncontrolled overflow | raw fault|uncontrolled fault|not a controlled stop|uncontrolled\*\* fault|blow the stack
+stack-depth as future work | 1\.5\.8|nothing exists today
+the arena's copying get refused | copy of an owning value is refused|returns a copy[^.]{0,80}(read back|refused|unreadable)|read back at all|would not compile|cannot be read back
+a Vec of owners uncopyable | (vec|array)[^.]{0,30}(of them )?(could not|cannot) be copied|stored in an array or an arena may own
+a plain byte-view slot | (?<!fixed )\buint8\[\]
+what a consumer owes | owes nothing|at most EParseState
+every index bounds-checked | index(ing)? into a slice, array or buffer|indexing is bounds-checked and traps
+the static path, unqualified | statically through a bound|static dispatch through a bound|<F: Format>
+the compiler's cycle | at cycle 1\.5\b|compiler's commit for cycle 1\.5\.0
+a cursor never returned | cannot be returned from a function
+exit 0 sees every leak | leak on any path
+the probe count | twelve small programs|twelve probes|thirteen probe

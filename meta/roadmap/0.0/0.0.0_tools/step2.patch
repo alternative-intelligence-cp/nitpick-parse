@@ -1,0 +1,1246 @@
+diff --git a/CLAUDE.md b/CLAUDE.md
+index 5ab614d..d1e3cc6 100644
+--- a/CLAUDE.md
++++ b/CLAUDE.md
+@@ -54,8 +54,9 @@ The shared house rules for every library in this ecosystem are
+   stated bounds. `[[[[[…` is the oldest trick there is and the language has no
+   stack guard.
+ - **`Event`, `Node` and every value stored in an array have no owning field.**
+-  An owning field makes the type move-only (TYPE-046) and an arena `get`
+-  returns a *copy*, so a node holding a `string` cannot be read back at all.
++  An arena refuses an owning element at `arena_make` (`NITPICK-TYPE-007`,
++  probe 05), so a node holding a `string` cannot be stored at all; and an owning
++  field costs a type `Copy`, which every container read here is (@@PD-130@@).
+   Text lives in a side pool addressed by offset and length.
+ - **No dependencies** (PA-005). Not the compiler's `src/`, not its `lib/`, not
+   `nregex`, not `ntime`. Adding one is a decision that has to be argued.
+@@ -75,8 +76,8 @@ that bite hardest here:
+ - **Plain integer `+ - *` traps on overflow** (D-210).
+ - **There are no closures** (D-018), which is most of why the parser is *pull*
+   rather than push.
+-- **Owning values are move-only** and **an arena `get` returns a copy**, so an
+-  arena element that owns anything cannot be read back.
++- **Owning values are move-only**, and **an arena refuses an owning element
++  at its make**, so an arena element that owns anything cannot be stored.
+ - **`string_slice` allocates an owned copy** (D-186); `string_bytes` is the
+   borrowed view. A parser that took a `string_slice` per token would allocate
+   per token.
+diff --git a/CONTRIBUTING.md b/CONTRIBUTING.md
+index ca5d62e..b9b9a0b 100644
+--- a/CONTRIBUTING.md
++++ b/CONTRIBUTING.md
+@@ -42,10 +42,10 @@ never for concluding; nothing is committed on the strength of a filtered run.
+    Range-check before the multiply, every time, and return a `Fault`. There is
+    a gate for this and it is not negotiable.
+ 
+-3. **Nothing in a cell, node or event may own anything.** An owning field makes
+-   the type move-only, and an arena `get` returns a copy — so a node holding a
+-   `string` cannot be read back at all. Text is an offset and a length into a
+-   pool.
++3. **Nothing in a cell, node or event may own anything.** An arena refuses an
++   owning element at `arena_make`, so a node holding a `string` cannot be stored
++   at all; and an owning field costs a type `Copy`. Text is an offset and a
++   length into a pool.
+ 
+ 4. **The parser is pull, not push.** The caller asks for the next event. This
+    is not a taste question: Nitpick has no closures, so a push parser's visitor
+diff --git a/README.md b/README.md
+index 28026ce..db6c51e 100644
+--- a/README.md
++++ b/README.md
+@@ -53,7 +53,7 @@ it is one of the library's gates.
+ stack-depth guard, and `[[[[[…` is the oldest trick there is. Both the parser
+ and the tree builder use an explicit stack with a stated, tested bound.
+ 
+-**Zero-copy by construction.** An `Event` is a plain 24-byte value with no
++**Zero-copy by construction.** An `Event` is a plain 32-byte value with no
+ owning field; scalar text is a `TextRef` into the caller's input, or into the
+ parser's scratch when an escape had to be decoded. Parsing a 1 GB file
+ allocates nothing proportional to the file.
+diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
+index 2b3c129..003a1b1 100644
+--- a/meta/DECISIONS.md
++++ b/meta/DECISIONS.md
+@@ -252,6 +252,8 @@ a push parser must be given a recording visitor before it can be observed at
+ all.
+ 
+ ### PA-021 — `Event` is POD; scalar text is a `TextRef`, never an owned string
++> **SUPERSEDED IN PART by @@PD-129@@ and @@PD-130@@ (2026-10-15)** — measured by cycle 0.0.0's probes; the rule stands.
++
+ **2026-09-03.** A plain 24-byte value with no owning field, so it returns by
+ value, sits in a `Vec`, compares and copies.
+ 
+@@ -261,6 +263,10 @@ copied or cleared; and **an arena `get` returns a copy** (D-152), and a copy of
+ an owning value is *refused* — so the same shape in a `Node` could not be read
+ back at all.
+ 
++*(2026-10-15, cycle 0.0.0: "24-byte" is 32, measured by probe 02, and both forcing
++reasons are restated by measurement — @@PD-129@@ and @@PD-130@@ supersede this
++decision in part. The rule, no owning field, stands.)*
++
+ ### PA-022 — nesting is an explicit stack; there is no native recursion
+ **2026-09-03.** Not in the parsers, not in the tree builder, not in the writers,
+ not in the comparison, not in the walk, not in the drop.
+@@ -300,6 +306,8 @@ avoid one.
+ ## The document model
+ 
+ ### PA-030 — the tree is an arena of POD nodes with a side string pool
++> **SUPERSEDED IN PART by @@PD-130@@ (2026-10-15)** — measured by cycle 0.0.0's probes; the rule stands.
++
+ **2026-09-03.** Not a linked structure of owning values.
+ 
+ *The forcing rule, stated precisely because it surprises people:* an arena
+@@ -312,6 +320,10 @@ compile. Text lives in the pool and a node addresses it by offset and length.
+ outlived its slot fails `get` with `StaleHandle` (−4106) rather than reading
+ freed memory — the use-after-free class closed structurally.
+ 
++*(2026-10-15, cycle 0.0.0: the refusal is at `arena_make`, `NITPICK-TYPE-007`,
++measured by probe 05 — not TYPE-046 at the `get`. @@PD-130@@ supersedes the stated
++reason in part; the tree, the pool and the stale-handle answer (probe 04) stand.)*
++
+ ### PA-031 — maps preserve insertion order
+ **2026-09-03.** A `Map` node's chain is in the order the input presented the
+ pairs, and a writer emits them in that order.
+@@ -367,6 +379,8 @@ they forget.
+ ## Diagnostics
+ 
+ ### PA-040 — one `ParseError` value with a closed code enum
++> **SUPERSEDED IN PART by @@PD-129@@ (2026-10-15)** — measured by cycle 0.0.0's probes; the rule stands.
++
+ **2026-09-03.** A plain 24-byte value: a `FaultCode`, flags, a span, an
+ `expected` bitmask, what was found, and the depth. No owning field, so it rides
+ inside `Step.Fault`, sits in a `Vec` when recovery collects several, and copies
+@@ -381,6 +395,11 @@ removed from `Result`, so the accessor pair `fault_found_byte` /
+ `fault_found_class` is the only way to read it — which is what the D-069
+ objection was actually about. The alternative is two fields and 28 bytes.
+ 
++*(2026-10-15, cycle 0.0.0: "a plain 24-byte value" is 28, measured by probe 03 —
++`FaultCode` is an `int32` tag — so the one `found` field already costs what this
++paragraph priced two at. @@PD-129@@ supersedes the number; whether the compromise
++still earns its keep is cycle 0.2.1's, where `ParseError` is built.)*
++
+ ### PA-041 — rendering is a function, not a format string
+ **2026-09-03.** No message text is stored in `ParseError`.
+ 
+@@ -391,6 +410,10 @@ translation possible, and keeps the struct at 24 bytes with no owning field.
+ The code `NPARSE-nnnn` is stable and the prose after it is not — the compiler's
+ own rule, for the same reason.
+ 
++*(2026-10-15, cycle 0.0.0: the struct is 28 bytes, measured by probe 03; @@PD-129@@.
++The reasoning stands — no stored text is still what keeps it free of an owning
++field.)*
++
+ *One limitation stated rather than mitigated:* the caret line counts
+ **codepoints, not display columns**, because `nparse` carries no Unicode width
+ tables and will not — that is `ntui`'s domain and two copies would be two
+@@ -671,3 +694,64 @@ A config linter is not a POSIX utility, so it takes a repository of its own —
+ **created at cycle 0.12, when it is needed, and not before**, which is the
+ compiler's own rule about not creating directories in anticipation. It is
+ registered in that workbench's `APPS.md` now so the name is claimed.
++
++---
++
++# The third batch — cycle 0.0's, at compiler `7e91730`
++
++Proposed by cycle 0.0's plan and accepted at its review; each lands with the
++subcycle step that first needs it, and each says what it was measured on.
++
++### @@PD-129@@ — the specification's types keep their enum fields, at their measured sizes
++**2026-10-15, cycle 0.0.0, on probes 02, 03 and 04.** `Event` is **32** bytes,
++`ParseError` **28**, `Node` **64** and `Step` **36** — each measured by a probe whose
++exit code is the `#size_of` it reports, so nothing was transcribed. The
++specifications had 24, 24 and 56, summed from field widths that gave a payload-free
++enum one or two bytes; it is an `int32` tag, four (the compiler's
++`TYPE_REFERENCE.md` §9.3). `EventKind`, `ScalarKind`, `NodeKind`, `TextSrc` and
++`FaultCode` stay enum-typed fields, and the rules that assert a size (E-6, F-1,
++D-3) assert these.
++
++It supersedes in part PA-021's "24-byte", and PA-040's; neither rule moves.
++
++*Alternatives declined:* **`uint8` fields with the enum read by `=>!`** — 24 bytes
++again, but `=>!` manufactures a tag without checking it (the compiler's D-140), so a
++forged or corrupted event would carry a tag no variant has and every `pick` over it
++would be wrong in silence; **reordering the fields** — no order beats the measured
++sizes, because the four-byte tags and the `uint32` spans fix the alignment; **one
++packed `uint16` for both kinds** — a bit-field the language has no type for, read by
++hand at every site.
++
++*Reversal, for the author:* if cycle 0.2's event ring proves the eight extra bytes
++an event are the budget that binds, the kinds move to `uint8` storage behind
++checked accessors that answer a `Fault` for a byte no variant has — E-6 returns to
++24, probe 02 keeps measuring this shape and a sibling probe measures that one, and
++every `Event` literal in 0.2's plan changes.
++
++### @@PD-130@@ — what an owning value may be stored in, measured
++**2026-10-15, cycle 0.0.0, on probes 05 and 09.** **An arena refuses an owning
++element type at `arena_make`** — `NITPICK-TYPE-007`, "this element type OWNS heap
++storage, and `get`/`put` copy bytes … owning elements await the generated
++deep-view accessors (D-183)" (probe 05). **A generic `Vec<T>` holds one** — `move
++T:x` in, read at the site that knows the shape, and freed by moving each element out
++and dropping it (probe 09) — **and a free that drops only the block exits 0
++uncapped and `HeapOom` under 64 MiB**, where the dropping free exits 0 under the
++same cap (probes 09b and 09c). So: the tree stays an arena of POD nodes with a side
++pool (PA-030), now for the reason the compiler gives; `Event`, `Node`,
++`ParseError` and `Frame` own nothing as a design rule — they derive `Copy`, which
++every container read here is — rather than as a language one; and the managed half
++of any container's obligations is gated by a capped pair, not by `exit 0`.
++
++It supersedes in part PA-030's stated reason, and PA-021's ("a copy of an owning
++value is refused"), which named the copy `get` makes; the rules stand.
++
++*Alternatives declined:* **keep the old reason** — it names a refusal that does not
++happen where it says, and the day the compiler's deep-view accessors land, a reader
++of the old text would not know the pool's necessity had changed; **text in the
++node, now** — refused at the make; **a `Vec` of owning nodes instead of an arena** —
++it gives up the generation-checked handle (PA-030's use-after-free answer, probe 04)
++for a container whose element drops `exit 0` cannot see.
++
++*Reversal, for the author:* when the compiler lands deep-view accessors for owning
++arena elements, probe 05 is accepted; re-decide then whether the pool stays a
++necessity or becomes an optimisation (`meta/roadmap/0.4/README.md`'s watch-for).
+diff --git a/meta/OPEN_QUESTIONS.md b/meta/OPEN_QUESTIONS.md
+index 92308ae..aadbcc8 100644
+--- a/meta/OPEN_QUESTIONS.md
++++ b/meta/OPEN_QUESTIONS.md
+@@ -94,6 +94,16 @@ element type may not own anything**, because `get` copies and a copy of an owner
+ is refused. It would have saved this library a design iteration and it will save
+ the next one.
+ 
++*(2026-10-15, cycle 0.0.0 — probe 05's evidence, measured at `7e91730`: the refusal
++is at `arena_make`, `NITPICK-TYPE-007`, whose own sentence says the element "OWNS
++heap storage, and `get`/`put` copy bytes" and names the answer the compiler plans,
++deep-view accessors (D-183). The diagnostic now says what this ask wanted the
++reference to say; the reference still does not (`MEMORY_REFERENCE.md` §4.2 at
++`7e91730`). @@PD-130@@. **This entry's id is this repository's own**: the workbench
++registry's `O-N4` is a different question, and no registry id has been issued for
++this one (the early ecosystem audit's ED2) — the orchestrator assigns one if it is
++raised, and nothing here numbers it.)*
++
+ ---
+ 
+ ## O-x — ours
+diff --git a/meta/roadmap/0.2/README.md b/meta/roadmap/0.2/README.md
+index 1394fcd..f7b1a15 100644
+--- a/meta/roadmap/0.2/README.md
++++ b/meta/roadmap/0.2/README.md
+@@ -27,8 +27,8 @@ cycle freezes**.
+ 
+ | # | Topic | Ends with |
+ |---|---|---|
+-| 0.2.0 | **The vocabulary** — `Event`, `EventKind`, `ScalarKind`, `TextRef`, the flags | 24 bytes, POD, asserted; the closed enums |
+-| 0.2.1 | **`Step` and `ParseError`** — the fault value, the code enum, the `expected` masks | 24 bytes, POD, asserted; `pick` exhaustiveness demonstrated |
++| 0.2.0 | **The vocabulary** — `Event`, `EventKind`, `ScalarKind`, `TextRef`, the flags | 32 bytes, POD, asserted (@@PD-129@@); the closed enums |
++| 0.2.1 | **`Step` and `ParseError`** — the fault value, the code enum, the `expected` masks | 28 bytes, POD, asserted (@@PD-129@@); `pick` exhaustiveness demonstrated |
+ | 0.2.2 | **The `Format` trait and `Options`** — the pull interface, the option checks | a trivial format implementing it, statically and through `dyn` |
+ | 0.2.3 | **The depth stack** — `Frame`, preallocation, the bound | 50 000 nesting handled, `DepthExceeded` at the bound |
+ | 0.2.4 | **`event_validate`** — the grammar wrapper | each of the six grammar violations caught |
+@@ -37,7 +37,7 @@ cycle freezes**.
+ ## Checklist
+ 
+ ### 0.2.0 — the vocabulary
+-- [ ] `Event` is exactly 24 bytes; `#size_of` asserted (probe 02's shape made permanent)
++- [ ] `Event` is exactly 32 bytes; `#size_of` asserted (probe 02's shape made permanent; 24 until cycle 0.0.0 measured 32, @@PD-129@@)
+ - [ ] **no owning field** — `check_no_owning_fields` goes live here
+ - [ ] `EventKind`'s nine and `ScalarKind`'s nine, both closed (PA-025), with a comment saying adding one is a major version
+ - [ ] `TextRef { src, lo, hi }` and `event_text(p, e) -> uint8[]`, returning a borrow
+@@ -46,7 +46,7 @@ cycle freezes**.
+ 
+ ### 0.2.1 — `Step` and `ParseError`
+ - [ ] `Step = { Ev(Event); Fault(ParseError); Done; }` (probe 03's shape)
+-- [ ] `ParseError` exactly 24 bytes, POD, `#size_of` asserted
++- [ ] `ParseError` exactly 28 bytes, POD, `#size_of` asserted (24 until cycle 0.0.0 measured 28, @@PD-129@@; and whether PA-040's one-field `found` compromise still earns its keep at 28 is settled here)
+ - [ ] the `FaultCode` enum, every variant in `specs/DIAGNOSTIC_MODEL.md` §3
+ - [ ] `check_codes_documented` live: every variant in the spec table, every one with a test that produces it (most pending until their format lands, and **pending must print as pending**)
+ - [ ] the `expected` bitmask over `TokenClass`
+@@ -87,8 +87,8 @@ demonstrated rather than asserted.
+   (`GLOSSARY.md`). The distinction between a *fault* (a value, from input) and
+   an *error* (an identity, from misuse) is the library's central design
+   decision, and letting the vocabulary blur is how it gets eroded.
+-- **`Event` having no owning field is not negotiable.** If the 24 bytes turn out
+-  too tight, the answer is a wider `Event` or a narrower `TextRef` — never a
++- **`Event` having no owning field is not negotiable.** If the 32 bytes
++  (@@PD-129@@ — 24 until cycle 0.0.0 measured them) turn out too tight, the answer is a wider `Event` or a narrower `TextRef` — never a
+   `string`.
+ - **Design the ring for push-back now.** The capability probe pattern (a
+   consumer reading events until a sentinel and pushing the rest back) is not
+diff --git a/meta/roadmap/0.4/README.md b/meta/roadmap/0.4/README.md
+index d9ffc4c..5d2e3b1 100644
+--- a/meta/roadmap/0.4/README.md
++++ b/meta/roadmap/0.4/README.md
+@@ -8,7 +8,7 @@ rather than a stream.
+ 
+ Because a value model designed before anything produced values is a value model
+ designed against imagination. JSON's corpus is what tells us whether the node
+-layout works, whether 56 bytes is right, and whether the sibling chain is
++layout works, whether 64 bytes is right (56 until cycle 0.0.0 measured 64, @@PD-129@@), and whether the sibling chain is
+ comfortable to walk — and it exists now.
+ 
+ ## Decisions in
+@@ -23,7 +23,7 @@ duplicate key our default would now reject.
+ 
+ | # | Topic | Ends with |
+ |---|---|---|
+-| 0.4.0 | **`Node` and the arena** — the layout, the pool, `doc_build` | 56 bytes asserted, a tree built from JSON |
++| 0.4.0 | **`Node` and the arena** — the layout, the pool, `doc_build` | 64 bytes asserted (@@PD-129@@), a tree built from JSON |
+ | 0.4.1 | **Order and duplicates** — the sibling chain, the pair alternation, `DupPolicy` | insertion order preserved and asserted |
+ | 0.4.2 | **Lookup** — `doc_find`, `doc_index` | a 10 000-key map, both paths, measured |
+ | 0.4.3 | **The accessors** — the six numeric, `doc_text`, `doc_string`, `doc_eq` | every accessor total |
+@@ -34,7 +34,7 @@ duplicate key our default would now reject.
+ ## Checklist
+ 
+ ### 0.4.0 — `Node` and the arena
+-- [ ] `Node` exactly 56 bytes, POD, `#size_of` asserted; `check_no_owning_fields` covers it
++- [ ] `Node` exactly 64 bytes, POD, `#size_of` asserted (56 until cycle 0.0.0 measured 64, @@PD-129@@); `check_no_owning_fields` covers it
+ - [ ] the arena of nodes with `Handle<Node>`, and a **stale handle answering `StaleHandle`** rather than reading freed memory (probe 04's shape made permanent)
+ - [ ] the pool: every scalar copied in exactly once, so a `Document`'s text is its own (D-6)
+ - [ ] `doc_build<F: Format>(p)` driving any format to `Done` — including the trivial fifth format from 0.3.3
+diff --git a/meta/roadmap/ROADMAP.md b/meta/roadmap/ROADMAP.md
+index 703792f..ba64191 100644
+--- a/meta/roadmap/ROADMAP.md
++++ b/meta/roadmap/ROADMAP.md
+@@ -116,8 +116,8 @@ boundary — and **exits 0**, proving no path traps. Plus `check_no_raw_accumula
+ live and *seen to fail* against a planted violation.
+ 
+ ### 0.2 — The event contract
+-`src/event/` and `src/diag/`: `Event` (24 bytes, POD, asserted), `Step`,
+-`ParseError` (24 bytes, POD, asserted), `TextRef`, `Options`, the `Format`
++`src/event/` and `src/diag/`: `Event` (32 bytes, POD, asserted), `Step`,
++`ParseError` (28 bytes, POD, asserted) — measured by cycle 0.0.0, @@PD-129@@ — `TextRef`, `Options`, the `Format`
+ trait, the preallocated depth stack, and **`event_validate`** — the wrapper
+ `Format` that asserts the stream grammar and is what every plugin is developed
+ against.
+diff --git a/meta/specs/DIAGNOSTIC_MODEL.md b/meta/specs/DIAGNOSTIC_MODEL.md
+index c625e96..0e4a604 100644
+--- a/meta/specs/DIAGNOSTIC_MODEL.md
++++ b/meta/specs/DIAGNOSTIC_MODEL.md
+@@ -19,18 +19,21 @@ exhaustiveness makes the caller look at it.
+ 
+ ```nitpick
+ pub struct:ParseError = {
+-    FaultCode:code;      // 2 bytes — the closed enum, §3
++    FaultCode:code;      // 4 bytes — the closed enum, §3; an int32 tag
+     uint16:flags;        // 2 — FL_RECOVERABLE, FL_AT_END, FL_IN_KEY
+     Span:span;           // 8 — where, in the input
+     uint32:expected;     // 4 — a bitmask of TokenClass, §4
+     uint32:found;        // 4 — the byte or token class actually present
+     uint32:depth;        // 4 — the nesting depth at the fault
+-};                       // 24 bytes, align 4
++};                       // 28 bytes, align 4 — measured (@@PD-129@@)
+ ```
+ 
++*(2026-10-15, cycle 0.0.0, @@PD-129@@: the comments said `2 bytes` for the code and `24 bytes` for the
++whole. Measured at compiler `7e91730` by probe 03 it is **28**: `FaultCode` is an `int32` tag.)*
++
+ **Rule F-1 — no owning field**, so it rides inside `Step.Fault(ParseError)`,
+ sits in a `Vec` when recovery collects several, and copies freely.
+-`#size_of<ParseError>()` is asserted at 24.
++`#size_of<ParseError>()` is asserted at 28 *(24 until cycle 0.0.0 measured 28 — @@PD-129@@)*.
+ 
+ **Rule F-2 — the span is always valid and always within the input**, and
+ `lo <= hi`. A fault at end of input has `lo == hi == src.len` and `FL_AT_END`.
+@@ -39,7 +42,7 @@ a diagnostic pointing outside the document is worse than none.
+ 
+ **Rule F-3 — no message text is stored.** Rendering is a function of the value
+ (§6), so messages stay free to improve, translations become possible, and the
+-struct stays 24 bytes with no owning field. This is the same reason the
++struct stays 28 bytes with no owning field *(it said 24; measured 28, @@PD-129@@)*. This is the same reason the
+ compiler's own tests assert on codes and never on text.
+ 
+ ---
+diff --git a/meta/specs/EVENT_MODEL.md b/meta/specs/EVENT_MODEL.md
+index c24f7a6..9cd5837 100644
+--- a/meta/specs/EVENT_MODEL.md
++++ b/meta/specs/EVENT_MODEL.md
+@@ -63,15 +63,20 @@ has so little left to do.
+ 
+ ```nitpick
+ pub struct:Event = {
+-    EventKind:kind;     // 1 byte
+-    ScalarKind:scalar;  // 1 byte — meaningful only when kind is Scalar or Key
++    EventKind:kind;     // 4 bytes — a payload-free enum is an int32 tag
++    ScalarKind:scalar;  // 4 bytes — meaningful only when kind is Scalar or Key
+     uint8:flags;        // 1 byte — EV_ESCAPED, EV_BIG, EV_NEG, EV_EMPTY
+-    uint8:_pad;
++    uint8:_pad;         // 1 byte, then 2 of padding
+     TextRef:text;       // 12 bytes — SCAN_MODEL.md §7
+     Span:span;          // 8 bytes — the whole construct, for diagnostics
+-};                      // 24 bytes, align 4
++};                      // 32 bytes, align 4 — measured, not summed (@@PD-129@@)
+ ```
+ 
++*(2026-10-15, cycle 0.0.0, @@PD-129@@: the comments said `1 byte` for each kind and `24 bytes` for the
++whole, which is the field widths added up. Measured at compiler `7e91730` by probe 02 —
++`tests/probe/probe02_pod_event.npk`, whose exit code is `#size_of<Event>()` — it is **32**: a payload-free
++enum is an `int32` tag, four bytes (the compiler's `TYPE_REFERENCE.md` §9.3).)*
++
+ ```nitpick
+ pub enum:EventKind = {
+     StartMap; EndMap;
+@@ -85,16 +90,22 @@ pub enum:EventKind = {
+ pub enum:ScalarKind = { Null; Bool; Int; Float; Str; Date; Time; DateTime; Raw; };
+ ```
+ 
+-**Rule E-5 (PA-021) — `Event` has no owning field.** It is a plain 24-byte
+-value: it can be returned by value, stored in a `Vec`, compared, and copied.
+-`SAFETY.md` §6 has the two language rules that force this, and the second —
+-an arena `get` returns a *copy*, and a copy of an owning value is refused — is
+-the one that would bite hardest if it were ignored.
++**Rule E-5 (PA-021, @@PD-130@@) — `Event` has no owning field.** It is a plain
++32-byte value that derives `Copy`: it can be returned by value, stored in a
++`Vec<T: Copy>`, compared, and copied. `SAFETY.md` §6 says what forces this —
++a design rule, not a language one: an owning field would cost `Copy`, and with
++it the by-value reads every container here makes.
++
++*(2026-10-15, cycle 0.0.0, @@PD-130@@: this rule said "a plain 24-byte value" — 32
++measured, @@PD-129@@ — and gave as its forcing reason that "an arena `get` returns a
++*copy*, and a copy of an owning value is refused". Measured at `7e91730`, the arena
++refuses an owning element at `arena_make`, `NITPICK-TYPE-007` (probe 05), and a `Vec`
++holds one (probe 09).)*
+ 
+ Scalar text is therefore a `TextRef`, never a `string`.
+ 
+-**Rule E-6 — `#size_of<Event>()` is asserted to be 24** by a probe and by a
+-unit test. A padding surprise changes the ring's memory budget and the
++**Rule E-6 — `#size_of<Event>()` is asserted to be 32** by a probe and by a
++unit test *(24 until cycle 0.0.0, which measured 32 — @@PD-129@@)*. A padding surprise changes the ring's memory budget and the
+ specification's number, and finding that out from a benchmark rather than from
+ a test is the wrong order.
+ 
+diff --git a/meta/specs/GLOSSARY.md b/meta/specs/GLOSSARY.md
+index 697dfa4..6b7d420 100644
+--- a/meta/specs/GLOSSARY.md
++++ b/meta/specs/GLOSSARY.md
+@@ -8,7 +8,7 @@ two ways, this table says which one `nparse` means.
+ | **input** | the `uint8[]` the caller owns and hands over. Never copied, never read from a file by this library. |
+ | **cursor** | the read position over the input, with its total operations. Never a lexer. |
+ | **span** | a half-open pair of byte offsets into the input. Never a line/column pair. |
+-| **event** | one item of the pull stream: a container boundary, a key, or a scalar. 24 bytes, no owning field. |
++| **event** | one item of the pull stream: a container boundary, a key, or a scalar. 32 bytes, no owning field (@@PD-129@@). |
+ | **step** | one call's answer: `Ev`, `Fault` or `Done`. |
+ | **fault** | a `ParseError` **value** — what a malformed input produces. **Never** an `error:` identity. |
+ | **error** | one of the two `error:` identities, `EParseState` and `EParseEncode`. Only a *caller* can cause one. |
+@@ -18,7 +18,7 @@ two ways, this table says which one `nparse` means.
+ | **format** | an implementation of the `Format` trait. What every other ecosystem would call a plugin. |
+ | **plugin** | the same thing. There is no other kind: no dynamic loading, no registry. |
+ | **document** | the arena-backed tree a caller gets when they want one instead of a stream. |
+-| **node** | one element of a document. 56 bytes, POD, addressing its text by offset into the pool. |
++| **node** | one element of a document. 64 bytes, POD (@@PD-129@@), addressing its text by offset into the pool. |
+ | **pool** | the document's byte store, holding every scalar's text exactly once. |
+ | **frame** | one entry of the explicit depth stack. |
+ | **depth** | container nesting, bounded by `NPARSE_MAX_DEPTH` and never held on the machine stack. |
+diff --git a/meta/specs/SAFETY.md b/meta/specs/SAFETY.md
+index b9d5a60..8e0dcee 100644
+--- a/meta/specs/SAFETY.md
++++ b/meta/specs/SAFETY.md
+@@ -22,8 +22,8 @@ costs a library that reads bytes somebody else controls.
+ | Indexing is bounds-checked and traps | D-070 | An index derived from input is a *crash*, not a smear. §4. |
+ | There is **no stack-depth guard**, and `stack-depth` is a 1.5.8 obligation kind | VERIFICATION_REFERENCE §365 | Native recursion on input-controlled depth is a stack overflow. §5. |
+ | **A mutable module-level binding is refused** | D-211 | All parser state is a value the caller holds. §6. |
+-| Owning values are **move-only** | TYPE-046 | No value stored in an array or an arena may own anything. §6. |
+-| An arena `get` returns a **copy** | D-152, MEMORY_REFERENCE §4.2 | A `Document` node holding a `string` could not be read back **at all**. §6. |
++| Owning values are **move-only** | TYPE-046 | A copy of an owner is refused, not where an owner is stored: a `Vec` holds one, and its free must drop each element, which `exit 0` cannot see. §6. |
++| An arena refuses an **owning element** at its make | D-183, MEMORY_REFERENCE §4.2 | A `Document` node holding a `string` could not be stored **at all** (`NITPICK-TYPE-007`, probe 05). §6. |
+ | `string_slice` allocates an **owned copy** | D-186 | A parser that sliced per token would allocate per token. §6. |
+ | Borrows are second class | D-004 | A `uint8[]` view of the input cannot be returned, stored past the call, or held across `await`. §6. |
+ | There are **no closures** | D-018 | A push parser's visitor would be a trait object plus hand-carried context. EVENT_MODEL.md §2. |
+@@ -83,7 +83,7 @@ Both are **caller mistakes**. Neither is reachable from any byte stream.
+ pub enum:Step = { Ev(Event); Fault(ParseError); Done; };
+ ```
+ 
+-`ParseError` is a plain 24-byte value (`DIAGNOSTIC_MODEL.md` §2) carrying a
++`ParseError` is a plain 28-byte value (`DIAGNOSTIC_MODEL.md` §2; @@PD-129@@) carrying a
+ closed code enum, a span, an expected set and what was found. It travels in the
+ **success** channel.
+ 
+@@ -210,14 +210,24 @@ a program with a genuine reason raises it and owns the consequence.
+ 
+ **Rule S-15 — nothing stored in an array or an arena owns anything.** `Event`,
+ `Node`, `ParseError`, `Frame` and every value in a `Vec` or an arena declare no
+-owning field. Two separate language rules force this and the second is the
+-sharper one:
+-
+-- an owning field makes the type move-only (TYPE-046), so a `Vec` of them
+-  cannot be copied, cleared or compared; and
+-- **an arena `get` returns a copy** (D-152), and a copy of an owning value is
+-  *refused* — so a `Document` node holding a `string` could not be read back at
+-  all.
++owning field (@@PD-130@@). One language rule forces it for the arena, and a design
++rule for the rest:
++
++- **an arena refuses an owning element type at its make** (`NITPICK-TYPE-007`,
++  the compiler's D-183; probe 05) — so a `Document` node holding a `string`
++  could not be stored at all; and
++- an owning field would cost the type `Copy`, and every by-value read of a
++  container element here is a copy (`Vec<T: Copy>`, the sibling libraries'
++  bound). A `Vec` CAN hold owners — probe 09 — but then its free must move each
++  element out and drop it, and nothing but a memory cap sees a free that does
++  not (S-18; probes 09b and 09c).
++
++*(2026-10-15, cycle 0.0.0, @@PD-130@@: until this subcycle the first bullet said an
++owning field made a `Vec` of them impossible to copy, clear or compare, and the
++second that the arena's copying `get` was refused TYPE-046. Measured at
++`7e91730`, neither is the mechanism: `PLAYBOOK.md` §2's row on move-only values
++records the first as false at every kept pin, and probe 05 is refused at the
++make.)*
+ 
+ Text therefore lives in a side pool and is addressed by offset and length
+ (`VALUE_MODEL.md` §3).
+@@ -235,7 +245,13 @@ them is portable to the current language.
+ 
+ **Rule S-18 — every `wild` byte is paired on every path.** `Vec<T>`'s block is
+ `wild`; a scope that made one frees it, so `exit 0` never trips D-151. The test
+-programs exit 0 on purpose, so a leak on any path turns a pass into a trap.
++programs exit 0 on purpose, so a leak of a `wild` block on any path turns a pass
++into a trap. **A managed body is not `wild`, and `exit 0` cannot see it leak**: a
++container whose free drops the block and not the owning elements in it exits 0
++uncapped, and `HeapOom` (92) under a 64 MiB cap where the dropping free exits 0
++under the same cap (probes 09b and 09c, measured at `7e91730`). That pair, run by
++the harness under its `mem-cap-mib:` marker, is the gate on the managed half
++(@@PD-130@@).
+ 
+ **Rule S-19 — allocation is bounded by a stated function of the input.** The
+ parser's scratch is bounded by `NPARSE_MAX_SCALAR`; the depth stack by
+diff --git a/meta/specs/VALUE_MODEL.md b/meta/specs/VALUE_MODEL.md
+index aac9176..22853b4 100644
+--- a/meta/specs/VALUE_MODEL.md
++++ b/meta/specs/VALUE_MODEL.md
+@@ -17,14 +17,22 @@ pub struct:Document = {
+ };
+ ```
+ 
+-**Rule D-1 (PA-030) — the tree is an arena of POD nodes with a side string
+-pool.** Not a linked structure of owning values, and the reason is a language
+-rule rather than a preference:
+-
+-> **An arena `get` returns a copy** (D-152, `MEMORY_REFERENCE.md` §4.2), and a
+-> copy of an owning value is *refused* (TYPE-046). A node holding a `string`
+-> could therefore not be read back **at all** — not "would be slow", not "would
+-> allocate": `doc.nodes.get(h)` would not compile.
++**Rule D-1 (PA-030, @@PD-130@@) — the tree is an arena of POD nodes with a side
++string pool.** Not a linked structure of owning values, and the reason is a
++language rule rather than a preference:
++
++> **An arena refuses an owning element type at its make** — `arena_make` is
++> `NITPICK-TYPE-007`, "this element type OWNS heap storage, and `get`/`put` copy
++> bytes" (the compiler's D-183; measured at `7e91730` by probe 05,
++> `tests/probe/refused/probe05_arena_owning.npk`). A node holding a `string` could
++> therefore not be stored **at all** — not "would be slow", not "would allocate":
++> `arena<Node>` would not compile.
++
++*(2026-10-15, cycle 0.0.0, @@PD-130@@: until this subcycle the quotation said the
++refusal was TYPE-046's, of the copy `doc.nodes.get(h)` makes. The arena refuses
++earlier, at the make; and the compiler names its answer for owning elements —
++generated deep-view accessors — so the day those land, probe 05 stops being refused
++and the pool's necessity is re-decided, as @@PD-130@@ says.)*
+ 
+ So text lives in the pool and a node addresses it by offset and length.
+ `SAFETY.md` §6 states the rule; this is where it bites hardest.
+@@ -41,20 +49,21 @@ a `Vec` of indices.
+ 
+ ```nitpick
+ pub struct:Node = {
+-    NodeKind:kind;      // 1
++    NodeKind:kind;      // 4 — an int32 tag
+     uint8:flags;        // 1 — ND_BIG, ND_NEG, ND_ESCAPED
+-    uint16:_pad;        // 2
++    uint16:_pad;        // 2, after 1 of padding
+     uint32:len;         // 4 — pool byte length, or member count
+-    uint64:a;           // 8 — pool offset, or int64 value, or flt64 bits
++    uint64:a;           // 8, after 4 of padding — pool offset, or int64 value, or flt64 bits
+     Handle<Node>:first; // 16 — first child, or the vacant handle
+     Handle<Node>:next;  // 16 — next sibling, or the vacant handle
+     Span:span;          // 8
+-};                      // 56 bytes
++};                      // 64 bytes — measured, not summed (@@PD-129@@)
+ 
+ pub enum:NodeKind = { Null; Bool; Int; Float; Str; Seq; Map; Date; Time; DateTime; };
+ ```
+ 
+-**Rule D-3 — no owning field, asserted.** `#size_of<Node>()` is checked by a
++**Rule D-3 — no owning field, asserted.** `#size_of<Node>()` — 64, measured by
++probe 04 at `7e91730` where this table had summed 56 (@@PD-129@@) — is checked by a
+ test, and `check_no_owning_fields` (`TESTING.md` §3) covers `Node`, `Event` and
+ every value stored in a `Vec` or an arena.
+ 
+diff --git a/src/doc/README.md b/src/doc/README.md
+index 75284ff..0486c85 100644
+--- a/src/doc/README.md
++++ b/src/doc/README.md
+@@ -2,5 +2,5 @@
+ 
+ `Document`: an arena-backed tree of POD nodes with a side string pool,
+ insertion-ordered maps, a duplicate-key policy, and the query API. Nodes own
+-nothing — an arena `get` returns a copy, so an owning field would make a node
+-unreadable. Governed by `meta/specs/VALUE_MODEL.md`. Built in cycle 0.4.
++nothing — an arena refuses an owning element at `arena_make`, so an owning field
++would make a node unstorable. Governed by `meta/specs/VALUE_MODEL.md`. Built in cycle 0.4.
+diff --git a/tests/probe/probe02_pod_event.npk b/tests/probe/probe02_pod_event.npk
+new file mode 100644
+index 0000000..66c22e7
+--- /dev/null
++++ b/tests/probe/probe02_pod_event.npk
+@@ -0,0 +1,119 @@
++// expect-exit: 32
++//
++// PROBE 02 -- `Event` AS `EVENT_MODEL.md` §2 DECLARES IT, IN A `Vec`, AND ITS SIZE.
++//
++// ASKS: `#size_of<Event>()` for the specification's own fields -- `EventKind` and `ScalarKind`
++// are payload-free enums -- and a `Vec<Event>` of 100 000: fill, read back, copy whole, compare,
++// clear, free. The exit code IS the size (`PLAYBOOK.md` §6: a measured number nobody can
++// transcribe), narrowed by `=>!` to the `int32` `exit` takes.
++//
++// DEPENDS ON THE ANSWER: E-5 and E-6 (`#size_of<Event>()` asserted at 24) and PA-021 ("a plain
++// 24-byte value"), and the event ring's memory budget.
++//
++// EXPECTED: 32, not 24. A payload-free enum is an `int32` tag, four bytes (the compiler's
++// `TYPE_REFERENCE.md` §9.3), so the two kind fields are eight bytes where the specification
++// counted two. The plan's earlier shape -- `uint8` fields standing in for the enums -- measures
++// 24 and asks a different question. Every assertion has its own code, 10 … 19.
++//
++// A DIFFERENT SIZE re-derives `EVENT_MODEL.md` §2's table from this measurement.
++mod:probe02_pod_event;
++
++// The shapes as `meta/specs/` declares them -- copied, since a probe imports nothing from `src/`
++// (P-1) and `src/` holds none yet.
++#[derive(Eq, Debug, Copy)]
++enum:EventKind = { StartMap; EndMap; StartSeq; EndSeq; Key; Scalar; Comment; DocStart; DocEnd; };
++#[derive(Eq, Debug, Copy)]
++enum:ScalarKind = { Null; Bool; Int; Float; Str; Date; Time; DateTime; Raw; };
++#[derive(Eq, Debug, Copy)]
++enum:TextSrc = { Input; Scratch; };
++#[derive(Eq, Debug, Copy)]
++struct:Span = { uint32:lo; uint32:hi; };
++#[derive(Eq, Debug, Copy)]
++struct:TextRef = { TextSrc:src; uint32:lo; uint32:hi; };
++#[derive(Eq, Debug, Copy)]
++struct:Event = { EventKind:kind; ScalarKind:scalar; uint8:flags; uint8:_pad; TextRef:text; Span:span; };
++
++// The container, as small as the question needs: `Vec<T: Copy>`, the bound both sibling
++// libraries' `Vec` carries.
++struct:Vec<T: Copy> = { wild T->:items; int64:count; int64:cap; };
++
++func:vec_init<T: Copy> = Vec<T>(int64:cap) never fails {
++    int64:n = cap;
++    if (n < 1i64) { n = 1i64; }
++    wild int8->:mem = alloc(n * #size_of<T>());
++    pass Vec{ items: mem =>! wild T->, count: 0i64, cap: n };
++};
++
++func:vec_push<T: Copy> = NIL(Vec<T>->:v, T:x) never fails {
++    if (v.count == v.cap) {
++        int64:nc = v.cap * 2i64;
++        wild int8->:bigger = ralloc(v.items =>! wild int8->, nc * #size_of<T>());
++        v.items = bigger =>! wild T->;
++        v.cap = nc;
++    }
++    v.items[v.count] = x;
++    v.count = v.count + 1i64;
++    pass NIL;
++};
++
++func:vec_free<T: Copy> = NIL(Vec<T>->:v) never fails {
++    dalloc(v.items =>! wild int8->);
++    v.count = 0i64;
++    v.cap = 0i64;
++    pass NIL;
++};
++
++func:make = Event(int64:i) never fails {
++    pass Event{ kind: EventKind.Scalar, scalar: ScalarKind.Int, flags: 1u8, _pad: 0u8,
++                text: TextRef{ src: TextSrc.Input, lo: (i =>! uint32), hi: ((i + 3i64) =>! uint32) },
++                span: Span{ lo: (i =>! uint32), hi: ((i + 5i64) =>! uint32) } };
++};
++
++func:main = int32(cstring[]:_~argv) {
++    Vec<Event>:v = raw vec_init::<Event>(16i64);
++    for (int64:i in 0i64...100000i64) { drop vec_push(@v, raw make(i)); }
++    if (v.count != 100000i64) { exit 10i32; }
++    // read back: every element is the one written
++    for (int64:i in 0i64...100000i64) {
++        Event:e = v.items[i];
++        if (e.text.lo != (i =>! uint32)) { exit 11i32; }
++        if (e.span.hi != ((i + 5i64) =>! uint32)) { exit 12i32; }
++    }
++    // copy the whole vector, element by element, and compare with the derived `Eq`
++    Vec<Event>:w = raw vec_init::<Event>(v.count);
++    for (int64:i in 0i64...v.count) { drop vec_push(@w, v.items[i]); }
++    for (int64:i in 0i64...v.count) {
++        Result<bool>:same = v.items[i].eq(w.items[i]);
++        if (same.is_error) { exit 13i32; }
++        if (!same.value) { exit 14i32; }
++    }
++    // a changed copy is not equal
++    Event:x = w.items[7i64];
++    x.flags = 2u8;
++    Result<bool>:diff = x.eq(v.items[7i64]);
++    if (diff.is_error) { exit 15i32; }
++    if (diff.value) { exit 16i32; }
++    // clear, then free both
++    v.count = 0i64;
++    if (v.count != 0i64) { exit 17i32; }
++    drop vec_free(@v);
++    drop vec_free(@w);
++    if (#size_of<Span>() != 8i64) { exit 18i32; }
++    if (#size_of<TextRef>() != 12i64) { exit 19i32; }
++    exit (#size_of<Event>() =>! int32);
++};
++
++func:failsafe = int32(Error:e) {
++    pick (e) {
++        (HeapBadRequest)    { exit 91i32; },
++        (HeapOom)           { exit 92i32; },
++        (IntOverflow)       { exit 93i32; },
++        (OutOfBounds)       { exit 94i32; },
++        (Unreachable)       { exit 95i32; },
++        (WildLeak)          { exit 96i32; },
++        (StackExhausted)    { exit 106i32; },
++        (MachineFault)      { exit 107i32; },
++        (*)                 { exit 99i32; }
++    }
++    exit 9i32;
++};
+diff --git a/tests/probe/probe03_payload_enum.npk b/tests/probe/probe03_payload_enum.npk
+new file mode 100644
+index 0000000..53cf575
+--- /dev/null
++++ b/tests/probe/probe03_payload_enum.npk
+@@ -0,0 +1,129 @@
++// expect-exit: 36
++//
++// PROBE 03 -- `Step`, THE WHOLE INTERFACE: A PAYLOAD ENUM OVER TWO STRUCTS.
++//
++// ASKS: `Step` exactly as `EVENT_MODEL.md` §1 declares it -- `Ev(Event)`, `Fault(ParseError)`,
++// `Done` -- with `#[derive(Eq, Debug, Copy)]`; both payload arms destructured in a `pick`; `Step`
++// stored in a `Vec` and read back; and its size, which is the exit code.
++//
++// DEPENDS ON THE ANSWER: PA-023 (the interface), and the argument for it -- that `pick`
++// exhaustiveness forces a caller to handle a fault -- which needs the shape to exist; and
++// `DIAGNOSTIC_MODEL.md` F-1, which asserts `ParseError` at 24.
++//
++// EXPECTED: 36 -- a four-byte tag and a payload slot for the larger payload, `Event`'s 32. And
++// `ParseError` measures 28, not 24: its `FaultCode` is a four-byte tag where the specification
++// counted two (code 19 below). Every derive name is spelled exactly: at `7e91730` an unknown
++// attribute name is accepted and ignored (the compiler's DEF-236 (d)), so a misspelling would
++// pass in silence.
++//
++// A NEGATIVE VERDICT -- refused -- costs the interface: a `Step` struct with a kind tag and both
++// payloads inline, which is bigger and loses the exhaustiveness argument.
++mod:probe03_payload_enum;
++
++// The shapes as `meta/specs/` declares them -- copied, since a probe imports nothing from `src/`
++// (P-1) and `src/` holds none yet.
++#[derive(Eq, Debug, Copy)]
++enum:EventKind = { StartMap; EndMap; StartSeq; EndSeq; Key; Scalar; Comment; DocStart; DocEnd; };
++#[derive(Eq, Debug, Copy)]
++enum:ScalarKind = { Null; Bool; Int; Float; Str; Date; Time; DateTime; Raw; };
++#[derive(Eq, Debug, Copy)]
++enum:TextSrc = { Input; Scratch; };
++#[derive(Eq, Debug, Copy)]
++struct:Span = { uint32:lo; uint32:hi; };
++#[derive(Eq, Debug, Copy)]
++struct:TextRef = { TextSrc:src; uint32:lo; uint32:hi; };
++#[derive(Eq, Debug, Copy)]
++struct:Event = { EventKind:kind; ScalarKind:scalar; uint8:flags; uint8:_pad; TextRef:text; Span:span; };
++#[derive(Eq, Debug, Copy)]
++enum:FaultCode = { UnexpectedByte; UnexpectedEnd; DepthExceeded; };
++#[derive(Eq, Debug, Copy)]
++struct:ParseError = { FaultCode:code; uint16:flags; Span:span; uint32:expected; uint32:found; uint32:depth; };
++#[derive(Eq, Debug, Copy)]
++enum:Step = { Ev(Event); Fault(ParseError); Done; };
++
++// The container, as small as the question needs: `Vec<T: Copy>`, the bound both sibling
++// libraries' `Vec` carries.
++struct:Vec<T: Copy> = { wild T->:items; int64:count; int64:cap; };
++
++func:vec_init<T: Copy> = Vec<T>(int64:cap) never fails {
++    int64:n = cap;
++    if (n < 1i64) { n = 1i64; }
++    wild int8->:mem = alloc(n * #size_of<T>());
++    pass Vec{ items: mem =>! wild T->, count: 0i64, cap: n };
++};
++
++func:vec_push<T: Copy> = NIL(Vec<T>->:v, T:x) never fails {
++    if (v.count == v.cap) {
++        int64:nc = v.cap * 2i64;
++        wild int8->:bigger = ralloc(v.items =>! wild int8->, nc * #size_of<T>());
++        v.items = bigger =>! wild T->;
++        v.cap = nc;
++    }
++    v.items[v.count] = x;
++    v.count = v.count + 1i64;
++    pass NIL;
++};
++
++func:vec_free<T: Copy> = NIL(Vec<T>->:v) never fails {
++    dalloc(v.items =>! wild int8->);
++    v.count = 0i64;
++    v.cap = 0i64;
++    pass NIL;
++};
++
++func:weigh = int64(Step:s) never fails {
++    int64:w = 0i64;
++    pick (s) {
++        (Step.Ev(e))    { w = 1000i64 + (e.text.lo => int64); },
++        (Step.Fault(f)) { w = 2000i64 + (f.depth => int64); },
++        (Step.Done)     { w = 3000i64; }
++    }
++    pass w;
++};
++
++func:main = int32(cstring[]:_~argv) {
++    Event:e = Event{ kind: EventKind.Scalar, scalar: ScalarKind.Int, flags: 0u8, _pad: 0u8,
++                     text: TextRef{ src: TextSrc.Input, lo: 7u32, hi: 9u32 },
++                     span: Span{ lo: 0u32, hi: 9u32 } };
++    ParseError:f = ParseError{ code: FaultCode.DepthExceeded, flags: 0u16,
++                               span: Span{ lo: 1u32, hi: 2u32 },
++                               expected: 0u32, found: 0u32, depth: 5u32 };
++    if (raw weigh(Step.Ev(e)) != 1007i64) { exit 10i32; }
++    if (raw weigh(Step.Fault(f)) != 2005i64) { exit 11i32; }
++    if (raw weigh(Step.Done) != 3000i64) { exit 12i32; }
++    // in a Vec, read back through the pick
++    Vec<Step>:v = raw vec_init::<Step>(4i64);
++    drop vec_push(@v, Step.Ev(e));
++    drop vec_push(@v, Step.Fault(f));
++    drop vec_push(@v, Step.Done);
++    int64:total = 0i64;
++    for (int64:i in 0i64...v.count) { total = total + raw weigh(v.items[i]); }
++    if (total != 6012i64) { exit 13i32; }
++    // the derived Eq reads the tag and then the payload
++    Result<bool>:same = v.items[1i64].eq(Step.Fault(f));
++    if (same.is_error) { exit 14i32; }
++    if (!same.value) { exit 15i32; }
++    Result<bool>:diff = v.items[0i64].eq(v.items[1i64]);
++    if (diff.is_error) { exit 16i32; }
++    if (diff.value) { exit 17i32; }
++    Result<string>:shown = v.items[2i64].debug();
++    if (shown.is_error) { exit 18i32; }
++    drop vec_free(@v);
++    if (#size_of<ParseError>() != 28i64) { exit 19i32; }
++    exit (#size_of<Step>() =>! int32);
++};
++
++func:failsafe = int32(Error:e) {
++    pick (e) {
++        (HeapBadRequest)    { exit 91i32; },
++        (HeapOom)           { exit 92i32; },
++        (IntOverflow)       { exit 93i32; },
++        (OutOfBounds)       { exit 94i32; },
++        (Unreachable)       { exit 95i32; },
++        (WildLeak)          { exit 96i32; },
++        (StackExhausted)    { exit 106i32; },
++        (MachineFault)      { exit 107i32; },
++        (*)                 { exit 99i32; }
++    }
++    exit 9i32;
++};
+diff --git a/tests/probe/probe04_arena_pod.npk b/tests/probe/probe04_arena_pod.npk
+new file mode 100644
+index 0000000..4c218a8
+--- /dev/null
++++ b/tests/probe/probe04_arena_pod.npk
+@@ -0,0 +1,69 @@
++// expect-exit: 64
++//
++// PROBE 04 -- AN ARENA OF POD NODES, AND THE COPYING `get`.
++//
++// ASKS: `arena<Node>` with `Node` as `VALUE_MODEL.md` §2 declares it: `alloc`, `put`, `get` --
++// and that `get` returns a COPY, so writing the copy leaves the slot as it was -- `free`, a
++// handle used after `free` answering `StaleHandle` (-4106) through `Result.err` rather than
++// trapping, `put` through a stale handle refused the same way, `reset` retiring every handle,
++// and `destroy`. The exit code is `#size_of<Node>()`.
++//
++// DEPENDS ON THE ANSWER: PA-030 (`Document` is exactly this) and D-3, which asserts `Node` at 56;
++// the generation-checked handle is the use-after-free guarantee the value model rests on.
++//
++// EXPECTED: 64, not 56 -- `NodeKind` is a four-byte tag where the specification counted one byte,
++// which moves `a` to offset 16. And an arena program owes `StaleHandle` beyond the six floor arms
++// (`NITPICK-REACH-003` names it), so a consumer of `src/doc/` will too.
++mod:probe04_arena_pod;
++
++enum:NodeKind = { Null; Bool; Int; Float; Str; Seq; Map; Date; Time; DateTime; };
++struct:Span = { uint32:lo; uint32:hi; };
++struct:Node = { NodeKind:kind; uint8:flags; uint16:_pad; uint32:len; uint64:a;
++                Handle<Node>:first; Handle<Node>:next; Span:span; };
++
++func:main = int32(cstring[]:_~argv) {
++    arena<Node>:ar = arena_make(4096i64);
++    Handle<Node>:h = ar.alloc();
++    Handle<Node>:h2 = ar.alloc();
++    Node:n = Node{ kind: NodeKind.Int, flags: 0u8, _pad: 0u16, len: 0u32, a: 42u64,
++                   first: h2, next: h2, span: Span{ lo: 1u32, hi: 3u32 } };
++    Result<NIL>:p = ar.put(h, n);
++    if (p.is_error) { exit 10i32; }
++    Result<Node>:g = ar.get(h);
++    if (g.is_error) { exit 11i32; }
++    Node:copy = g.value;
++    if (copy.a != 42u64) { exit 12i32; }
++    // the copy is a copy: writing it does not write the slot
++    copy.a = 7u64;
++    Result<Node>:g2 = ar.get(h);
++    if (g2.is_error) { exit 13i32; }
++    if (g2.value.a != 42u64) { exit 14i32; }
++    // a freed handle is stale: an answer, never a trap
++    Result<NIL>:fr = ar.free(h);
++    if (fr.is_error) { exit 15i32; }
++    Result<Node>:stale = ar.get(h);
++    if (!stale.is_error) { exit 16i32; }
++    if (stale.err != StaleHandle) { exit 17i32; }
++    Result<NIL>:sp = ar.put(h, n);
++    if (!sp.is_error) { exit 18i32; }
++    // reset retires every handle
++    ar.reset();
++    Result<Node>:after = ar.get(h2);
++    if (!after.is_error) { exit 19i32; }
++    ar.destroy();
++    exit (#size_of<Node>() =>! int32);
++};
++
++func:failsafe = int32(Error:e) {
++    pick (e) {
++        (HeapBadRequest)    { exit 91i32; },
++        (HeapOom)           { exit 92i32; },
++        (Unreachable)       { exit 95i32; },
++        (WildLeak)          { exit 96i32; },
++        (StackExhausted)    { exit 106i32; },
++        (MachineFault)      { exit 107i32; },
++        (StaleHandle)       { exit 110i32; },
++        (*)                 { exit 99i32; }
++    }
++    exit 9i32;
++};
+diff --git a/tests/probe/probe09_generic_move.npk b/tests/probe/probe09_generic_move.npk
+new file mode 100644
+index 0000000..d1c08b2
+--- /dev/null
++++ b/tests/probe/probe09_generic_move.npk
+@@ -0,0 +1,92 @@
++// expect-exit: 0
++//
++// PROBE 09 -- `move T:v` INTO A GENERIC CONTAINER, AT A SCALAR `T` AND AN OWNING ONE.
++//
++// ASKS: `vec_push<T>(v, move T:x)` for `T = int32` and for `T` a struct holding a `string`, read
++// back at the site that knows the element's shape, and freed -- the owning one by a free that
++// moves each element out and drops it.
++//
++// DEPENDS ON THE ANSWER: PA-004's `Vec<T>` and `0.0.4.md`'s claim that it must hold both shapes.
++//
++// EXPECTED: exit 0 at -O0 and through `opt -O2`. The container holds an owning `T`; but its free
++// must drop each element, and `exit 0` cannot see that it did not (`probe09b` and `probe09c`,
++// the pair under one memory cap). What the language gives a GENERIC by-value read, and which
++// bound the library's `Vec` therefore takes, is `0.0.4.md`'s question.
++mod:probe09_generic_move;
++
++// An UNBOUNDED generic container -- the question is whether one holds an owning `T` at all.
++struct:Vec<T> = { wild T->:items; int64:count; int64:cap; };
++
++func:vec_init<T> = Vec<T>(int64:cap) never fails {
++    int64:n = cap;
++    if (n < 1i64) { n = 1i64; }
++    wild int8->:mem = alloc(n * #size_of<T>());
++    pass Vec{ items: mem =>! wild T->, count: 0i64, cap: n };
++};
++
++func:vec_push<T> = NIL(Vec<T>->:v, move T:x) never fails {
++    if (v.count == v.cap) {
++        int64:nc = v.cap * 2i64;
++        wild int8->:bigger = ralloc(v.items =>! wild int8->, nc * #size_of<T>());
++        v.items = bigger =>! wild T->;
++        v.cap = nc;
++    }
++    v.items[v.count] = move(x);
++    v.count = v.count + 1i64;
++    pass NIL;
++};
++
++// Drops every element, then the block.
++func:vec_free_owning<T> = NIL(Vec<T>->:v) never fails {
++    for (int64:i in 0i64...v.count) {
++        T:x = move(v.items[i]);
++        discard(x);
++    }
++    dalloc(v.items =>! wild int8->);
++    v.count = 0i64;
++    v.cap = 0i64;
++    pass NIL;
++};
++
++// Frees the block and nothing else: an owning `T`'s bodies are left behind.
++func:vec_free<T> = NIL(Vec<T>->:v) never fails {
++    dalloc(v.items =>! wild int8->);
++    v.count = 0i64;
++    v.cap = 0i64;
++    pass NIL;
++};
++
++struct:Owning = { string:text; uint32:n; };
++
++func:main = int32(cstring[]:_~argv) {
++    Vec<int32>:a = raw vec_init::<int32>(1i64);
++    for (int64:i in 0i64...1000i64) { drop vec_push(@a, (i =>! int32)); }
++    if (a.count != 1000i64) { exit 10i32; }
++    if (a.items[999i64] != 999i32) { exit 11i32; }
++    drop vec_free(@a);
++    Vec<Owning>:b = raw vec_init::<Owning>(1i64);
++    for (int64:j in 0i64...1000i64) {
++        Owning:o = Owning{ text: string_concat("item ", int_to_string(j)), n: (j =>! uint32) };
++        drop vec_push(@b, move(o));
++    }
++    if (b.count != 1000i64) { exit 12i32; }
++    if (b.items[999i64].n != 999u32) { exit 13i32; }
++    if (b.items[999i64].text.len != 8i64) { exit 14i32; }
++    drop vec_free_owning(@b);
++    exit 0i32;
++};
++
++func:failsafe = int32(Error:e) {
++    pick (e) {
++        (HeapBadRequest)    { exit 91i32; },
++        (HeapOom)           { exit 92i32; },
++        (IntOverflow)       { exit 93i32; },
++        (OutOfBounds)       { exit 94i32; },
++        (Unreachable)       { exit 95i32; },
++        (WildLeak)          { exit 96i32; },
++        (StackExhausted)    { exit 106i32; },
++        (MachineFault)      { exit 107i32; },
++        (*)                 { exit 99i32; }
++    }
++    exit 9i32;
++};
+diff --git a/tests/probe/probe09b_owning_free_leaks.npk b/tests/probe/probe09b_owning_free_leaks.npk
+new file mode 100644
+index 0000000..0aaef73
+--- /dev/null
++++ b/tests/probe/probe09b_owning_free_leaks.npk
+@@ -0,0 +1,91 @@
++// expect-exit: 92
++// mem-cap-mib: 64
++//
++// PROBE 09b -- A GENERIC FREE THAT DOES NOT DROP ITS OWNING ELEMENTS, UNDER A 64 MiB CAP.
++//
++// ASKS: two thousand rounds, each filling a `Vec<Owning>` with 256 elements of 512-byte strings
++// and freeing it with `vec_free` -- the block only. About 262 MB of bodies are left behind. Does
++// anything notice?
++//
++// EXPECTED: `HeapOom`, 92, at -O0 and through `opt -O2`, under the cap; uncapped it exits 0,
++// because D-151's leak check counts `wild` blocks and a `string`'s body is managed (`PLAYBOOK.md`
++// §2, "Freeing a generic container's block does NOT drop its elements"). `probe09c` is the same
++// program with the dropping free, and must exit 0 under the same cap: the pair's two outcomes are
++// the gate, and a program that allocates nothing runs under 64 MiB (the harness's control).
++mod:probe09b_owning_free_leaks;
++
++// An UNBOUNDED generic container -- the question is whether one holds an owning `T` at all.
++struct:Vec<T> = { wild T->:items; int64:count; int64:cap; };
++
++func:vec_init<T> = Vec<T>(int64:cap) never fails {
++    int64:n = cap;
++    if (n < 1i64) { n = 1i64; }
++    wild int8->:mem = alloc(n * #size_of<T>());
++    pass Vec{ items: mem =>! wild T->, count: 0i64, cap: n };
++};
++
++func:vec_push<T> = NIL(Vec<T>->:v, move T:x) never fails {
++    if (v.count == v.cap) {
++        int64:nc = v.cap * 2i64;
++        wild int8->:bigger = ralloc(v.items =>! wild int8->, nc * #size_of<T>());
++        v.items = bigger =>! wild T->;
++        v.cap = nc;
++    }
++    v.items[v.count] = move(x);
++    v.count = v.count + 1i64;
++    pass NIL;
++};
++
++// Drops every element, then the block.
++func:vec_free_owning<T> = NIL(Vec<T>->:v) never fails {
++    for (int64:i in 0i64...v.count) {
++        T:x = move(v.items[i]);
++        discard(x);
++    }
++    dalloc(v.items =>! wild int8->);
++    v.count = 0i64;
++    v.cap = 0i64;
++    pass NIL;
++};
++
++// Frees the block and nothing else: an owning `T`'s bodies are left behind.
++func:vec_free<T> = NIL(Vec<T>->:v) never fails {
++    dalloc(v.items =>! wild int8->);
++    v.count = 0i64;
++    v.cap = 0i64;
++    pass NIL;
++};
++
++struct:Owning = { string:text; uint32:n; };
++
++func:main = int32(cstring[]:_~argv) {
++    string:pad = string_concat("0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef", "");
++    for (int64:round in 0i64...2000i64) {
++        Vec<Owning>:b = raw vec_init::<Owning>(1i64);
++        for (int64:j in 0i64...256i64) {
++            string:t = string_concat(pad, pad);
++            t = string_concat(t, t);
++            t = string_concat(t, t);
++            Owning:o = Owning{ text: move(t), n: (j =>! uint32) };
++            drop vec_push(@b, move(o));
++        }
++        if (b.count != 256i64) { exit 12i32; }
++        drop vec_free(@b);
++    }
++    exit 0i32;
++};
++
++func:failsafe = int32(Error:e) {
++    pick (e) {
++        (HeapBadRequest)    { exit 91i32; },
++        (HeapOom)           { exit 92i32; },
++        (IntOverflow)       { exit 93i32; },
++        (OutOfBounds)       { exit 94i32; },
++        (Unreachable)       { exit 95i32; },
++        (WildLeak)          { exit 96i32; },
++        (StackExhausted)    { exit 106i32; },
++        (MachineFault)      { exit 107i32; },
++        (*)                 { exit 99i32; }
++    }
++    exit 9i32;
++};
+diff --git a/tests/probe/probe09c_owning_free_drops.npk b/tests/probe/probe09c_owning_free_drops.npk
+new file mode 100644
+index 0000000..0906a61
+--- /dev/null
++++ b/tests/probe/probe09c_owning_free_drops.npk
+@@ -0,0 +1,84 @@
++// expect-exit: 0
++// mem-cap-mib: 64
++//
++// PROBE 09c -- PROBE 09b WITH THE FREE THAT DROPS EACH ELEMENT, UNDER THE SAME 64 MiB CAP.
++//
++// EXPECTED: exit 0 at -O0 and through `opt -O2`. With `probe09b`'s 92 this is the pair whose
++// opposite outcomes under one cap are the only gate on a container's managed half.
++mod:probe09c_owning_free_drops;
++
++// An UNBOUNDED generic container -- the question is whether one holds an owning `T` at all.
++struct:Vec<T> = { wild T->:items; int64:count; int64:cap; };
++
++func:vec_init<T> = Vec<T>(int64:cap) never fails {
++    int64:n = cap;
++    if (n < 1i64) { n = 1i64; }
++    wild int8->:mem = alloc(n * #size_of<T>());
++    pass Vec{ items: mem =>! wild T->, count: 0i64, cap: n };
++};
++
++func:vec_push<T> = NIL(Vec<T>->:v, move T:x) never fails {
++    if (v.count == v.cap) {
++        int64:nc = v.cap * 2i64;
++        wild int8->:bigger = ralloc(v.items =>! wild int8->, nc * #size_of<T>());
++        v.items = bigger =>! wild T->;
++        v.cap = nc;
++    }
++    v.items[v.count] = move(x);
++    v.count = v.count + 1i64;
++    pass NIL;
++};
++
++// Drops every element, then the block.
++func:vec_free_owning<T> = NIL(Vec<T>->:v) never fails {
++    for (int64:i in 0i64...v.count) {
++        T:x = move(v.items[i]);
++        discard(x);
++    }
++    dalloc(v.items =>! wild int8->);
++    v.count = 0i64;
++    v.cap = 0i64;
++    pass NIL;
++};
++
++// Frees the block and nothing else: an owning `T`'s bodies are left behind.
++func:vec_free<T> = NIL(Vec<T>->:v) never fails {
++    dalloc(v.items =>! wild int8->);
++    v.count = 0i64;
++    v.cap = 0i64;
++    pass NIL;
++};
++
++struct:Owning = { string:text; uint32:n; };
++
++func:main = int32(cstring[]:_~argv) {
++    string:pad = string_concat("0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef", "");
++    for (int64:round in 0i64...2000i64) {
++        Vec<Owning>:b = raw vec_init::<Owning>(1i64);
++        for (int64:j in 0i64...256i64) {
++            string:t = string_concat(pad, pad);
++            t = string_concat(t, t);
++            t = string_concat(t, t);
++            Owning:o = Owning{ text: move(t), n: (j =>! uint32) };
++            drop vec_push(@b, move(o));
++        }
++        if (b.count != 256i64) { exit 12i32; }
++        drop vec_free_owning(@b);
++    }
++    exit 0i32;
++};
++
++func:failsafe = int32(Error:e) {
++    pick (e) {
++        (HeapBadRequest)    { exit 91i32; },
++        (HeapOom)           { exit 92i32; },
++        (IntOverflow)       { exit 93i32; },
++        (OutOfBounds)       { exit 94i32; },
++        (Unreachable)       { exit 95i32; },
++        (WildLeak)          { exit 96i32; },
++        (StackExhausted)    { exit 106i32; },
++        (MachineFault)      { exit 107i32; },
++        (*)                 { exit 99i32; }
++    }
++    exit 9i32;
++};
+diff --git a/tests/probe/refused/probe05_arena_owning.npk b/tests/probe/refused/probe05_arena_owning.npk
+new file mode 100644
+index 0000000..e06787a
+--- /dev/null
++++ b/tests/probe/refused/probe05_arena_owning.npk
+@@ -0,0 +1,44 @@
++// expect-error: NITPICK-TYPE-007
++// expect-error-at: 25:34
++//
++// PROBE 05 -- AN ARENA WHOSE ELEMENT OWNS A `string`. EXPECTED REFUSED.
++//
++// ASKS: is `arena<Owning>` with a `string` field refused, and WHERE? The plan asked whether the
++// copy `get` makes collides with TYPE-046's refusal of a copy of an owner.
++//
++// DEPENDS ON THE ANSWER: PA-030 and `VALUE_MODEL.md` D-1, which say a node holding a `string`
++// "would not compile" -- the forcing rule behind the side pool.
++//
++// EXPECTED: refused at the MAKE, not at the copy: `NITPICK-TYPE-007` at `arena_make`, "this
++// element type OWNS heap storage, and `get`/`put` copy bytes ... owning elements await the
++// generated deep-view accessors (D-183)". So the pool is a necessity at `7e91730` for the reason
++// the compiler gives -- and the day the compiler's deep-view accessors land, this probe stops
++// being refused and the pool's necessity is re-decided.
++//
++// A NEGATIVE VERDICT -- accepted -- makes the pool an optimisation rather than a necessity, and
++// PA-030 is superseded.
++mod:probe05_arena_owning;
++
++struct:Owning = { string:text; uint32:n; };
++
++func:main = int32(cstring[]:_~argv) {
++    arena<Owning>:ar = arena_make(16i64);
++    Handle<Owning>:h = ar.alloc();
++    Owning:back = ar.get(h) ?| Owning{ text: "", n: 0u32 };
++    if (back.n != 0u32) { exit 10i32; }
++    ar.destroy();
++    exit 0i32;
++};
++
++func:failsafe = int32(Error:e) {
++    pick (e) {
++        (HeapBadRequest)    { exit 91i32; },
++        (HeapOom)           { exit 92i32; },
++        (Unreachable)       { exit 95i32; },
++        (WildLeak)          { exit 96i32; },
++        (StackExhausted)    { exit 106i32; },
++        (MachineFault)      { exit 107i32; },
++        (*)                 { exit 99i32; }
++    }
++    exit 9i32;
++};

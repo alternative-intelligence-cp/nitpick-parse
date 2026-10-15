@@ -1,0 +1,15 @@
+mod:shapes_clean;
+// The same shapes, ONLY in comments and strings, and one ordinary program around them:
+// enum:Mixed = { A; B = 3i32; }; macro:twice; NIL:nothing; opaque struct; #[derive(Bogus)]
+// uint8[]:plain; int32->:p = @x; give 1i32; fall; frac; alloc; #wild_slice; stack; a.is_error || b.is_error
+/* exit 3i64; func:failsafe = int32(Error:e) { exit 9i32; }; */
+func:main = int32(cstring[]:_~argv) {
+    string:s = string_concat("give fall frac stack #wild_slice uint8[] alloc opaque macro", "");
+    exit 0i32;
+};
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (*) { exit 99i32; }
+    }
+    exit 9i32;
+};

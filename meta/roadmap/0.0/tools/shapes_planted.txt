@@ -1,0 +1,23 @@
+mod:shapes_planted;
+// Every shape shapes.py counts, once each, IN CODE. Never compiled: a lexical fixture.
+enum:Mixed = { A; B = 3i32; };
+macro:twice = (x) { x + x };
+struct:Holder = { NIL:nothing; int32:n; };
+opaque struct:Hidden;
+#[derive(Eq, Bogus)]
+struct:P = { uint8[]:plain; };
+func:f = int32(int32:x) {
+    int32->:p = @x;
+    int32:y = move(x);
+    give 1i32;
+    fall;
+    frac64:q = frac;
+    func int64():g = alloc;
+    uint8[]:w = #wild_slice<uint8>(p, 4i64);
+    int32:stack = 1i32;
+    if (a.is_error || b.is_error) { exit 3i64; }
+    exit 0i32;
+};
+func:failsafe = int32(Error:e) {
+    exit 9i32;
+};

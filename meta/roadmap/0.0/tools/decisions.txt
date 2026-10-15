@@ -1,0 +1,27 @@
+# meta/roadmap/0.0/tools/decisions.txt -- cycle 0.0's proposed decisions, in PD order, and the base they are numbered from.
+#
+# The plan proposes PD-129 ... PD-145 (the Team seat's block for this repository runs to PD-148, and the three after
+# PD-145 are unused). At the libraries' seat's review each accepted PD becomes this repository's next decision number
+# in PD order, after `base`. `apply.py` writes the numbers into every patch at the moment it applies it -- each
+# `@@PD-nnn@@` becomes `PA-<base + rank>` -- so no file of this plan states a number before the review gives it.
+#
+# If the review declines a PD, it deletes that line here and re-cuts the hunks that declare or cite it; every later
+# number then moves down by one, in every patch, by this file alone.
+base PA-103
+PD-129
+PD-130
+PD-131
+PD-132
+PD-133
+PD-134
+PD-135
+PD-136
+PD-137
+PD-138
+PD-139
+PD-140
+PD-141
+PD-142
+PD-143
+PD-144
+PD-145

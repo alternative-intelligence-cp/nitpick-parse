@@ -1,0 +1,70 @@
+diff --git a/meta/roadmap/ROADMAP.md b/meta/roadmap/ROADMAP.md
+index 04c170c..3d9f951 100644
+--- a/meta/roadmap/ROADMAP.md
++++ b/meta/roadmap/ROADMAP.md
+@@ -93,13 +93,16 @@ Enough detail that a reader can tell whether a cycle is finished without
+ opening it. The per-cycle README has the subcycle map and the checklist.
+ 
+ ### 0.0 — Foundations
+-The **language probes** first: twelve small programs asking the compiler whether
+-the shapes the design depends on are spellable — a 24-byte POD in a `Vec`, a
+-tagged enum with payloads in a `pick`, an arena of POD nodes with a `get` that
+-copies, a trait with a `Self->` receiver through a bound **and** through `dyn`,
+-a `uint8[]` borrow at every escape-analysis edge, and — the one that matters
+-most — **an accumulate-with-check that provably does not trap where the naive
+-one does.** A probe that fails changes the design.
++The **language probes** first — the programs in `tests/probe/`, every verdict in
++`0.0/0.0.0.md` §7 — asking the compiler whether the shapes the design depends on are
++spellable: the specification's own `Event`, `Step` and `Node` with their sizes
++measured, an arena whose `get` copies and which refuses an owning element, a
++trait with a `Self->` receiver through a bound **and** through `dyn`, the
++read-only view at every edge the readers use, native recursion against an
++explicit stack, and — the one that matters most — **an accumulate-with-check
++that provably does not trap where the naive one does.** A probe that fails
++changes the design; cycle 0.0.0's verdicts moved numbers and reasons across the
++specifications, and found two compiler defects.
+ 
+ Then the harness (`harness/run.py`, its self-check, the stages), the manifest's
+ test table, CI, and `src/core/` — `Vec<T>`, `Bytes`, `SmallMap<K,V>` and
+diff --git a/tests/probe/README.md b/tests/probe/README.md
+new file mode 100644
+index 0000000..3a22f33
+--- /dev/null
++++ b/tests/probe/README.md
+@@ -0,0 +1,36 @@
++# `tests/probe/` — the language probes
++
++Small programs that ask the compiler whether a shape `meta/specs/` depends on is
++spellable, compilable and correct — written and measured by cycle 0.0.0
++([`meta/roadmap/0.0/0.0.0.md`](../../meta/roadmap/0.0/0.0.0.md), whose §7 holds every
++verdict), and kept as a regression suite for the language this library is built
++on. **A probe is never deleted.** A compiler change that breaks one of these
++shapes is caught here, not by a format failing mysteriously in a later cycle.
++
++Every probe is a program: its own `main` and `failsafe`, importing nothing from
++`src/` (P-1). Its `failsafe` names exactly the identities the compiler says can
++reach it (`NITPICK-REACH-003`), with the arm codes of `PLAYBOOK.md` §3 item 8 and
++the three the library adds — 97 `DivByZero`, 98 `DivOverflow`, 110 `StaleHandle`
++(`meta/DECISIONS.md`, @@PD-134@@) — and every assertion's own code is below 91.
++
++## The three kinds, one directory each
++
++| directory | what a file there is | its header |
++|---|---|---|
++| `tests/probe/` | a program that compiles, links and runs; judged by its exit code at `-O0` and again through `opt -O2` | `// expect-exit: N`, and `// mem-cap-mib: N` where it runs under an address-space cap |
++| [`refused/`](refused/) | a program the compiler must refuse with exactly the codes it names | `// expect-error: CODE` and `// expect-error-at: L:C` |
++| [`defect/`](defect/) | the reproduction of a compiler defect, with its controls and a README saying what it blocks | the verdict it was written against, as a comment |
++
++A probe's header is a hypothesis; the verdict is the table in `0.0.0.md` §7. A
++size probe's exit code IS the `#size_of` it measures, so the number cannot be
++transcribed wrongly.
++
++## The defects, at compiler `7e91730`
++
++- [`defect/bound_pointer_receiver/`](defect/bound_pointer_receiver/README.md) —
++  probe 06: a synchronous `Self->` method called through a generic bound is
++  accepted by `npkc` and refused by `llc`. It blocks static dispatch through a
++  bound (@@PD-131@@).
++- [`defect/view_reseat/`](defect/view_reseat/README.md) — probe 08h: a view
++  re-seated by a callee outlives a block's `string` and reads freed memory
++  (@@PD-132@@).
