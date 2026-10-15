@@ -3,4 +3,4 @@
 the consumer in examples | linter in .?examples/|configuration linter in .?examples|in this repository rather than a separate one|built and run by the harness, so a broken example
 the copied counts | five measurements|three measurements|one decision batch is settled|four for the project.s author
 the consumer among the examples | dogfood program|\[ \] the 0\.12 linter\b
-the TOML pin | TOML.{0,6}v1\.0\.0
+the TOML pin | TOML.{0,8}v?1\.0\.0

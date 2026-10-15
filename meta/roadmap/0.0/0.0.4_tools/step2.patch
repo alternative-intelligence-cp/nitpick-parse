@@ -1,19 +1,21 @@
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index 1036678..677cbc8 100644
+index 9576232..67caf9f 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
-@@ -1111,3 +1111,31 @@ that sets it; **a capacity as a generic value parameter** — the compiler reser
- and a `fixed` constant covers each capacity (the libraries' answer on its S-135).
- 
- *Reversal, for the author:* none; a new bound is a row of §7 and a line here, by a decision.
+@@ -1119,3 +1119,33 @@ S-135).
+ *Reversal, for the author:* to hold the ninth from cycle 0.0.4, step 1 adds `NPARSE_DUP_SCAN_MAX` to `limits.npk` at
+ 1024, a ninth row to §7's table saying whether it is an option, and an assertion to `limits_values`; block 1's run
+ and the mutants move with them.
 +
 +### @@PD-144@@ — the containers check their own indexes and trap the language's `OutOfBounds` on misuse; an obligation is a comment unless a decision accepts its arm; `Bytes` has no view at the pin
 +**2026-10-15, cycle 0.0.4.** Measured at the pin `7e91730`. `Vec<T: Copy>` and `Bytes` check every index and count in
 +their own accessors — an index through a `wild` block or a `buffer`'s `.ptr` does not trap, since a bare pointer
 +carries no length — and a misuse (an index out of range, an empty pop, a use after free, a negative capacity) traps
-+the language's `OutOfBounds` through one helper per module, while a capacity of zero, which an input can ask for,
-+is one: `core` imports nothing (`BUILD.md` B-17) and declares no
-+error identity (`SAFETY.md` S-6). No field carries a `limit<…>`. Every function's obligation is a comment in the exact
++the language's `OutOfBounds` through one helper per module, since `core` imports nothing (`BUILD.md` B-17) and
++declares no error identity (`SAFETY.md` S-6). A capacity of zero, which an input can ask for, is no misuse:
++`vec_init(0)` gives a capacity of one, so every `Vec` the module made has `cap >= 1` and a freed one, `cap == 0`, is
++told apart by the `cap <= 0` check its verbs make — the `vec_ops` unit asserts the floor (its exits 43 … 46). No
++field carries a `limit<…>`. Every function's obligation is a comment in the exact
 +syntax it would take, with a test standing in (`VERIFICATION.md` P-1a): at the pin a live `requires`, `ensures` or
 +`limit` charges every consumer an arm — `RequiresViolated`, `EnsuresViolated`, `LimitViolated` — measured, and the
 +early ecosystem audit's EK1 asked each library to say so. `Bytes` grows by doubling through `.ptr` and `mcpy`, offers
@@ -35,10 +37,10 @@ index 1036678..677cbc8 100644
 +*Reversal, for the author:* when D-341 lands, `Bytes` may offer a frozen view by a decision; when a decision accepts
 +the contracts' arms, the comments become clauses, a marker deleted per site.
 diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md
-index 2737f88..24fdc3f 100644
+index 2737f88..7de1f9f 100644
 --- a/meta/specs/BUILD.md
 +++ b/meta/specs/BUILD.md
-@@ -252,6 +252,12 @@ into it and nothing converts back (`NITPICK-TYPE-007`; @@PD-132@@).
+@@ -252,6 +252,13 @@ into it and nothing converts back (`NITPICK-TYPE-007`; @@PD-132@@).
    fall back on** — see `VALUE_MODEL.md` §5 for what a `Document` does about
    large maps.
  
@@ -46,7 +48,8 @@ index 2737f88..24fdc3f 100644
 +generic by-value read needs the bound and a generic free cannot see an owning element's drop (@@PD-130@@), with a
 +fourth field, a hidden zero-length `string[0]`, which costs no byte and makes a `Vec` move-only, so a copy of its
 +header — a second handle on its block — is `NITPICK-TYPE-046`; every index and count is checked by its own
-+accessors, because an index through a `wild` block does not trap, and a misuse traps the language's `OutOfBounds`.)*
++accessors, because an index through a `wild` block does not trap, and a misuse traps the language's `OutOfBounds`;
++`vec_init(0)` gives a capacity of one, so that `cap <= 0` marks only a freed `Vec`.)*
 +
  **Rule B-13.** `nparse` declares no other container. The `Document` tree is an
  `arena<Node>` with `Handle<Node>`, which is what the language provides for
@@ -84,6 +87,22 @@ index 9f7bc59..4ccbc9c 100644
  | pool read (`doc_text`) | `a + len <= pool.len` | contract, Z3 |
  | depth stack push/pop | `count < NPARSE_MAX_DEPTH`; `count > 0` on pop | contract, Z3 |
  | class table lookup | the index is a `uint8`, so `< 256` by type | free |
+diff --git a/nitpick.toml b/nitpick.toml
+index ba3b830..1358862 100644
+--- a/nitpick.toml
++++ b/nitpick.toml
+@@ -118,8 +118,9 @@ name  = "defect-reseat"
+ stage = "check"
+ path  = "tests/probe/defect/view_reseat"
+ 
+-# Cycle 0.0.4's unit suite (@@PD-143@@): `src/core/`'s programs, each judged by
+-# its exit at -O0 and through `opt -O2`.
++# Cycle 0.0.4's unit suite (@@PD-143@@, @@PD-144@@): `src/core/`'s programs, each
++# judged by its exit at -O0 and through `opt -O2`; a misuse traps `OutOfBounds`
++# (94) by design, and a forgotten free `WildLeak` (96).
+ [[test]]
+ name  = "unit"
+ stage = "program"
 diff --git a/src/core/vec.npk b/src/core/vec.npk
 new file mode 100644
 index 0000000..8a826d8

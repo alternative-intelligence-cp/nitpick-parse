@@ -7,7 +7,10 @@ to find out whether the rest of the plan is buildable, and the machinery every l
 over all six subcycle files.** They were written execution-grade at the repository's setup (2026-09-03), against the
 compiler's cycle 1.5 and LLVM 20.1.2; each is re-measured at the pin, with what the audits found owed carried into the
 step that owes it (the owed-items table below). **All six are at the pin**, each rehearsed over a simulated record of
-the subcycles before it, and the pass's last commit ran every block of all six once more, each `SAME`.
+the subcycles before it, and the pass's last commit ran every block of all six once more, each `SAME`. **Its first fix
+round** (2026-10-15, after the plan verification's FAIL) answered that verification's findings at their source — the
+tools, the six files' patches and texts, and this README — and moved the research gate to cycle 0.0's first dispatch
+(PD-137, by the libraries' reviewer's ruling); its own confirmation pass ran every block of all six again.
 
 | File | At `7e91730` |
 |---|---|
@@ -56,13 +59,13 @@ author.**
 | PD-134 | 0.0.0 | what a consumer owes, measured; the tests' arm codes |
 | PD-135 | 0.0.1 | the layering is a table of what each module imports |
 | PD-136 | 0.0.1 | the toolchain is LLVM 20.1.8 with the compiler's target rows, in the manifest and in CI |
-| PD-137 | 0.0.1 | one currency table; the library is security-sensitive, and its three research items gate cycle 0.1 |
+| PD-137 | 0.0.1 | one currency table; the library is security-sensitive, and its three research items gate cycle 0.0's work, answered at its first dispatch (0.0.0's gate) |
 | PD-138 | 0.0.2 | the build is one module per root, held to the target rows, scanned two ways on both legs, and reproducible from two directories |
 | PD-139 | 0.0.2 | a unit red on a compiler defect is pending: its right answer, the one failure it is excused, and a reviewed list |
 | PD-140 | 0.0.3 | the refusals and the sweep are judged by `npkc`; `accept` struck; a refusal a set of codes at their sites; the reseat's defect a pending refusal |
 | PD-141 | 0.0.3 | the self-check is its own printed list, live and pending, run before any judgment; a filtered run concludes nothing |
 | PD-142 | 0.0.3 | the tree checks read their authorities; the error budget keyed by module and name, private identities included |
-| PD-143 | 0.0.4 | `limits.npk` holds `SAFETY.md` §7's eight bounds, and no ninth |
+| PD-143 | 0.0.4 | `limits.npk` holds `SAFETY.md` §7's eight bounds at 0.0.4, and `VALUE_MODEL.md` D-16's ninth joins them with its switch, in cycle 0.4 |
 | PD-144 | 0.0.4 | the containers check their own indexes and trap `OutOfBounds` on misuse; an obligation a comment unless a decision accepts its arm; `Bytes` has no view at the pin |
 | PD-145 | 0.0.4 | `SmallMap` waits for its first consumer |
 | PD-146 … PD-148 | — | unused: 0.0.5 proposes none |
@@ -112,7 +115,8 @@ and in no landing above; the day one carries it, 0.0.4's `Bytes` may offer a fro
 
 **At the re-pin, the adoption is:** 0.0.0's blocks 1 … 4 at the new pin (every verdict in its §6), the defect
 directories' verdicts (re-derived first: the pin flips each fix it carries), each subcycle's facts block, CI's pinned rows (the commit and the compiler's `npkc.ll` digest,
-`b79f89c5…` at `7e91730`), and this table's "what it would move" column, row by row.
+`b79f89c5…` at `7e91730`), `harness/irscan.py`'s two lists re-classed against the new runtime object (the runner stops on
+a symbol neither list holds), and this table's "what it would move" column, row by row.
 
 ## The shapes this cycle does not write
 
@@ -167,7 +171,7 @@ past cycle 0.0.
 | PL-6, `=> dyn` and landing 94 | 0.0.0 step 3 | probe 07 drives an owning implementation through the explicit cast |
 | E2-6, where the dogfood consumer lives | 0.0.5's patch 1 | fixes: six lines made PA-103's — the cycle map's, three of the 0.12 roadmap's, and two the claim's subject found (`examples/README.md`, the 1.0 roadmap); its own repository's runner runs it |
 | E2-10, counts against sets | 0.0.5's patch 1 | fixes: `ROADMAP.md`'s and `OPEN_QUESTIONS.md`'s copied counts dropped, the entries their own count; the workbench's `LIBRARIES.md` is the orchestrator's (W-16) |
-| E2-13, no `CURRENCY.md` | 0.0.1 | `meta/research/CURRENCY.md` created; the library counted security-sensitive and its three research items named |
+| E2-13, no `CURRENCY.md` | 0.0.1 | `meta/research/CURRENCY.md` created; the library counted security-sensitive and its three research items named, answered at cycle 0.0's first dispatch, before any probe (0.0.0's gate item 7) |
 | E2-15, `CLAUDE.md`'s empty heading | 0.0.1 step 5 | the paragraph moved under "What this is" |
 | EC2, what an index does | 0.0.0 step 4; 0.0.4 | `SAFETY.md`'s row and `VERIFICATION.md` §2 with probe 11's measurement; every accessor of `Vec` and `Bytes` checks its own index, measured not to trap through a pointer (PD-144) |
 | EC3, "every public `error:`" | 0.0.3 | `check_error_budget` keyed by module and name, private identities included (measured: a private identity a reachable `fail` raises is owed as `<module>.<name>`); EC3's sentences and twins, and six more found by the claim's subject (PD-142) |
@@ -176,7 +180,7 @@ past cycle 0.0.
 | EK1, `VERIFICATION.md` P-1 | 0.0.4 | P-1 superseded in part by P-1a: an obligation is a comment unless a decision accepts the arm its live clause costs — measured: each of `requires`, `ensures` and `limit` charges every consumer one (PD-144) |
 | EC9, a re-pin mid-cycle | this README | a re-pin is taken between subcycles; the landing table is the adoption |
 | E3-1 (= ES1 and PL-5), "no stack guard" | 0.0.0 step 4 | fixes: native recursion traps `StackExhausted` (PD-133); `README.md`'s, `CLAUDE.md`'s and `OPEN_QUESTIONS.md`'s O-N2 sentences restated, O-N2 struck as answered |
-| E3-14, the TOML pins | 0.0.1 step 5; 0.0.5's patch 1 | fixes: `CURRENCY.md`'s TOML row (0.0.1), and `FORMATS.md` 15 and 68 and the 0.6 roadmap's scope line each carry the superseded fact beside the pin; cycle 0.6.0 decides the version |
+| E3-14, the TOML pins | 0.0.1 step 5; 0.0.5's patch 1 | fixes: `CURRENCY.md`'s TOML row (0.0.1), and `FORMATS.md` 15 and 68, the 0.6 roadmap's scope line, and the two its subject found, `README.md`'s format row and `src/format/README.md`, each carry the superseded fact beside the pin; cycle 0.6.0 decides the version |
 
 ## The planning brief's open points, and each one's answer
 
@@ -191,7 +195,7 @@ past cycle 0.0.
 | 7 | the bill, and `IntOverflow` | settled by 0.0.0's oracle measurements (PD-134) |
 | 8 | whether `nitpick-regex`'s answer on live contracts (A′, its `VERIFICATION.md` P-1b) binds this library | settled by 0.0.4: it does, as `VERIFICATION.md` P-1a (PD-144) |
 | 9 | the `repro` check | settled by 0.0.2: each copy carries its manifest, since without it the consumer's two modules differ — the check's mutant (PD-138, `BUILD.md` B-4) |
-| 10 | the undefined-symbol scan | settled by 0.0.2: the call-edge scan stands behind PA-006, over every module under `src/` and every program, and the floor and the syscaller are its controls on every run (PD-138, B-2a) |
+| 10 | the undefined-symbol scan | settled by 0.0.2: the call-edge scan stands behind PA-006 and `SAFETY.md` §2, over every module under `src/` and every program, with the runtime's global symbols classed whole — each denied by the facet that forbids it, or the floor's — and the floor and the syscaller its controls on every run; what no call-edge scan can see is named (PD-138, B-2a) |
 | 11 | `tools/parse_check` and `tools/check` | settled by 0.0.3: both are compiler sources at the pin, so `npkc` judges the sweep by the code family and the refusals by their codes; `accept` struck (PD-140) |
 | 12 | which harness runs the dogfood consumer | settled by 0.0.5: its own repository's, under `nitpick-apps` (PA-103); this library's harness runs `tests/conformance/` and reaches into no other repository |
 | 13 | the currency file's name | handed to 0.0.1 (E2-13) |
@@ -215,7 +219,7 @@ past cycle 0.0.
 | [0.0.1](0.0.1.md) | **The skeleton** — the module layout, `src/lib.npk`, the manifest's toolchain rows and test table, CI, `CURRENCY.md` | `npkc` compiles an empty library and a program that imports it |
 | [0.0.2](0.0.2.md) | **The harness, part 1** — build, the `program` stage, the toolchain pin, `repro` | one test program builds, links, runs, and its exit code is judged |
 | [0.0.3](0.0.3.md) | **The harness, part 2** — the refusal and parse stages, the self-check, the tree checks | the self-check proves the harness can fail |
-| [0.0.4](0.0.4.md) | **`src/core/`** — `limits.npk`, `Vec<T>`, `Bytes`, `SmallMap<K,V>` | the primitives, with their suites and their obligations written |
+| [0.0.4](0.0.4.md) | **`src/core/`** — `limits.npk`, `Vec<T>`, `Bytes`; `SmallMap<K,V>` waits for its consumer (PD-145) | the primitives, with their suites and their obligations written |
 | [0.0.5](0.0.5.md) | **Close** — the findings, the handoff to 0.1 | `done/0.0/`, and 0.1 openable by a fresh session |
 
 ## Checklist
@@ -235,6 +239,7 @@ file states its own acceptance when it reaches the pin, and where the two differ
 - [ ] `probe12_module_fixed.npk` and its three refusals — a `fixed` table read and ranged; a plain module binding `NITPICK-TYPE-055`
 - [ ] every verdict in `0.0.0.md` §6 re-measured, SAME, and every consequence in `meta/specs/` and `meta/DECISIONS.md` in the commit of its verdict
 - [ ] `tests/probe/README.md`; block 6's sweep read
+- [ ] the three research digests filed before any probe runs, each printed by block 0a (PD-137)
 
 ### 0.0.1 — the skeleton
 - [ ] `src/lib.npk` exists and `pub use`s nothing yet (`use` is not transitive, so the surface is a deliberate list)
@@ -242,7 +247,7 @@ file states its own acceptance when it reaches the pin, and where the two differ
 - [ ] `nitpick.toml`'s `[toolchain]` pinned to LLVM 20.1.8 with the `triple` and `datalayout` rows, and its `[[test]]` table's first entries
 - [ ] a consumer program under `tests/conformance/` imports `src/lib.npk` by relative path and compiles, links, runs and exits 0, with a comment naming O-N1
 - [ ] CI: a workflow running `harness/run.py` on push, with LLVM 20.1.8 and the compiler built from the pinned commit, every hex value quoted
-- [ ] `meta/research/CURRENCY.md`
+- [ ] `meta/research/CURRENCY.md`, its three research rows each linking its digest
 - [ ] `CLAUDE.md` and `CONTRIBUTING.md` re-read against 0.0.0's verdicts and extended
 
 ### 0.0.2 — the harness, part 1
@@ -253,6 +258,7 @@ file states its own acceptance when it reaches the pin, and where the two differ
 - [ ] the `repro` check: two builds from different working directories, each copy with its manifest — and **seen to fail** without it
 - [ ] 0.0.0's `tests/probe/` green as the first real `program` suite; probe 06 PENDING on DEF-253, listed, and every way the mechanism can be wrong seen red
 - [ ] CI's harness step asserting the runner's unqualified green summary
+- [ ] `irscan.py`'s two lists class the runtime's global symbols whole, and each denied facet a source construct reaches seen red
 
 ### 0.0.3 — the harness, part 2
 - [ ] the parse sweep (`npkc` over every `.npk`, judged by the diagnostic's code family) and the refusal stage with the **exact-code** rule (B-7, a set at its sites); `accept` struck
@@ -263,10 +269,10 @@ file states its own acceptance when it reaches the pin, and where the two differ
 - [ ] EC3's sentences corrected; each mutant red by the check it breaks
 
 ### 0.0.4 — `src/core/`
-- [ ] `src/core/limits.npk` — the eight bounds of `specs/SAFETY.md` §7, each with its row; no ninth
+- [ ] `src/core/limits.npk` — the eight bounds of `specs/SAFETY.md` §7, each with its row; `VALUE_MODEL.md` D-16's ninth joins it in cycle 0.4 (PD-143)
 - [ ] `src/core/vec.npk` — `Vec<T: Copy>`, every accessor boundary-tested at `0`, `count-1` and `count`, a misuse trapping `OutOfBounds`
 - [ ] `src/core/bytes.npk` — `Bytes` over `buffer` through `.ptr`, `put_uint` allocation-free, growth doubling and counted, no view
-- [ ] `SmallMap` deferred to its first consumer (PD-145)
+- [ ] `SmallMap` deferred to its first consumer (PD-145), and no document saying `src/core/` holds it
 - [ ] every obligation written as a comment in the syntax it would take, with a unit standing in (`VERIFICATION.md` P-1a)
 - [ ] every unit exits as it expects at both legs; the forgotten free traps `WildLeak`; each mutant red by a unit
 
@@ -274,7 +280,8 @@ file states its own acceptance when it reaches the pin, and where the two differ
 - [ ] every probe verdict reconciled against the specifications by **reading them**, 01a and 05 by name
 - [ ] E2-6's six lines PA-103's, E2-10's counts left to their sets, E3-14's pins with the superseded fact beside them
 - [ ] the cycle's findings written as a numbered list; the close audit run and triaged (W-22); a full green run, its output quoted
-- [ ] `0.1/0.1.0.md` written execution-grade before the cycle closes, its gate naming PD-137's research digests
+- [ ] the sweep over the close's patch, before any commit of the worker's own
+- [ ] `0.1/0.1.0.md` written execution-grade before the cycle closes, its gate naming PD-137's three research digests with their dates (each stale ninety days after its own)
 - [ ] cycle moved to `done/0.0/` by the last block, every reference to it moved, `ROADMAP.md` updated
 
 ## Gate

@@ -1,8 +1,21 @@
+diff --git a/README.md b/README.md
+index 5bedfed..cea15ed 100644
+--- a/README.md
++++ b/README.md
+@@ -92,7 +92,7 @@ works on it unchanged.
+ 
+ ```
+ src/          # THE LIBRARY — Nitpick source only
+-  core/       #   Vec, Bytes, SmallMap, and the one file of named limits
++  core/       #   Vec, Bytes, and the one file of named limits (SmallMap waits)
+   scan/       #   cursor, spans, UTF-8, escapes, non-trapping number scanning
+   event/      #   the event vocabulary, the Format trait, the depth stack
+   doc/        #   the Document tree and the query API
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index 677cbc8..d4bb3bc 100644
+index 67caf9f..5cdb2e4 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
-@@ -1139,3 +1139,20 @@ eight) — every format's consumer owes `DivByZero` and `DivOverflow` already, t
+@@ -1149,3 +1149,20 @@ eight) — every format's consumer owes `DivByZero` and `DivOverflow` already, t
  
  *Reversal, for the author:* when D-341 lands, `Bytes` may offer a frozen view by a decision; when a decision accepts
  the contracts' arms, the comments become clauses, a marker deleted per site.
@@ -16,18 +29,33 @@ index 677cbc8..d4bb3bc 100644
 +cycle 0.0's gate asks a suite of `Vec` and of `Bytes`.
 +
 +*Alternatives declined:* **build it now, keyed through a bound** — a by-value comparison through a bound links and a
-+`Self->` one does not (DEF-253, PD-131), so the shape would be chosen by a defect; **an `int64` key** — a guess at a
++`Self->` one does not (DEF-253, @@PD-131@@), so the shape would be chosen by a defect; **an `int64` key** — a guess at a
 +consumer; **its overflow as `EParseState`** — not reachable from `core`, and an overflow an input can drive must be a
 +value the caller turns into a `Fault`.
 +
 +*Reversal, for the author:* to have the primitive set whole at cycle 0.0, a step of 0.0.4 builds
 +`SmallMap<K: Copy, V: Copy>` over a by-value key comparison, its insert answering `false` when full; that step's suite
 +joins the gate, and the checklist and the cycle README move with it.
+diff --git a/meta/roadmap/ROADMAP.md b/meta/roadmap/ROADMAP.md
+index 006b31b..8c722fe 100644
+--- a/meta/roadmap/ROADMAP.md
++++ b/meta/roadmap/ROADMAP.md
+@@ -106,8 +106,8 @@ changes the design; cycle 0.0.0's verdicts moved numbers and reasons across the
+ specifications, and found two compiler defects.
+ 
+ Then the harness (`harness/run.py`, its self-check, the stages), the manifest's
+-test table, CI, and `src/core/` — `Vec<T>`, `Bytes`, `SmallMap<K,V>` and
+-`limits.npk`.
++test table, CI, and `src/core/` — `Vec<T>`, `Bytes` and `limits.npk`;
++`SmallMap<K,V>` waits for its first consumer (@@PD-145@@).
+ 
+ ### 0.1 — Scan
+ `src/scan/`: the total cursor, `Span`, the generated 256-byte class table, the
 diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md
-index c4a5955..81fb9ec 100644
+index bb39c06..d87af8f 100644
 --- a/meta/specs/BUILD.md
 +++ b/meta/specs/BUILD.md
-@@ -263,6 +263,10 @@ accessors, because an index through a `wild` block does not trap, and a misuse t
+@@ -264,6 +264,10 @@ accessors, because an index through a `wild` block does not trap, and a misuse t
  compiler's D-341, unbuilt) — and its `take` is an owned copy, after which it is empty; it is freed when it leaves
  scope, so it has no `free`, and `bytes_capacity` reads the capacity its hidden buffer holds.)*
  
@@ -38,18 +66,36 @@ index c4a5955..81fb9ec 100644
  **Rule B-13.** `nparse` declares no other container. The `Document` tree is an
  `arena<Node>` with `Handle<Node>`, which is what the language provides for
  graph-shaped data.
+diff --git a/src/core/README.md b/src/core/README.md
+index f15d4d9..587fed3 100644
+--- a/src/core/README.md
++++ b/src/core/README.md
+@@ -1,6 +1,8 @@
+ # `src/core/` — storage primitives
+ 
+-`Vec<T>`, `Bytes`, `SmallMap<K,V>`, and `limits.npk` — every named bound in the
+-library, in one file, because a bound scattered across call sites is a bound
+-nobody can audit. Depends on nothing. Governed by `meta/specs/BUILD.md` §5.
+-Built in cycle 0.0.4.
++`Vec<T>`, `Bytes`, and `limits.npk` — the library's named bounds, in one file,
++because a bound scattered across call sites is a bound nobody can audit.
++Depends on nothing. Governed by `meta/specs/BUILD.md` §5. Built in cycle 0.0.4;
++`SmallMap<K,V>`, which B-12 also names, waits for its first consumer
++(@@PD-145@@), and `VALUE_MODEL.md` D-16's bound joins `limits.npk` in cycle 0.4
++(@@PD-143@@).
 diff --git a/src/core/core.npk b/src/core/core.npk
-index 597c9cc..8a7d664 100644
+index 597c9cc..a8ad657 100644
 --- a/src/core/core.npk
 +++ b/src/core/core.npk
-@@ -1,8 +1,14 @@
+@@ -1,8 +1,15 @@
  mod:core;
  
 -// `src/core/` — the storage primitives — `Vec<T>`, `Bytes`, `SmallMap<K,V>` — and `limits.npk`, every named bound.
 -// Specified by `meta/specs/BUILD.md` §5 and `SAFETY.md` §7; built from cycle 0.0.4. A placeholder until then, by cycle 0.0.1's plan:
 -// it compiles, so the parse sweep has this directory to sweep, and it is replaced, not deleted.
 +// `src/core/` — the storage primitives, the layer's entry. Since cycle 0.0.4 the layer holds three
-+// modules: `limits.npk`, every named bound (`meta/specs/SAFETY.md` §7's table, one constant per row);
++// modules: `limits.npk`, the named bounds (`meta/specs/SAFETY.md` §7's table, one constant per row,
++// and `VALUE_MODEL.md` D-16's ninth from cycle 0.4);
 +// `vec.npk`, `Vec<T: Copy>`, the growable array over a `wild` block; and `bytes.npk`, `Bytes`, the
 +// byte sink over a `buffer`. `SmallMap<K,V>` (`meta/specs/BUILD.md` B-12) is not built yet.
 +// Specified by `meta/specs/BUILD.md` §5 and `SAFETY.md` §7.

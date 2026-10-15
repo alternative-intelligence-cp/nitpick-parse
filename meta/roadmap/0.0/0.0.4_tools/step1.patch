@@ -1,48 +1,57 @@
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index cc6c9e6..1036678 100644
+index cc6c9e6..9576232 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
-@@ -1099,3 +1099,15 @@ checks written now** — their inputs do not exist, and a check over nothing is
+@@ -1099,3 +1099,23 @@ checks written now** — their inputs do not exist, and a check over nothing is
  
  *Reversal, for the author:* none for the key; a layer S-6 does not list, or a third name, is a change to `SAFETY.md` §3
  by a decision, which the check then reads.
 +
-+### @@PD-143@@ — `limits.npk` holds `SAFETY.md` §7's eight bounds, and no ninth
++### @@PD-143@@ — `limits.npk` holds `SAFETY.md` §7's eight bounds at cycle 0.0.4, and the ninth joins them with its consumer
 +**2026-10-15, cycle 0.0.4.** `src/core/limits.npk` declares each bound of `SAFETY.md` §7's table as a `pub fixed int64`
 +with its row — `NPARSE_MAX_DEPTH`, `_SCALAR`, `_KEY`, `_MEMBERS`, `_DIGITS`, `_EXPONENT`, `_ERRORS` and `_INPUT` — and
-+nothing else; `check_constants_named` (cycle 0.0.3) holds the file's values to the table and every other module under
-+`src/` to naming them. The first writing listed a ninth, `NPARSE_DUP_SCAN_MAX`, which no specification defines.
++`check_constants_named` (cycle 0.0.3) holds the file's values to the table and every other module under `src/` to
++naming them. A ninth bound has a specification and no row: `VALUE_MODEL.md` D-16's `NPARSE_DUP_SCAN_MAX`, the 1024
++pairs past which a map's duplicate check switches from a scan to an index built incrementally — "a named constant",
++the switch "invisible to the answer". It joins `limits.npk` in the cycle that writes the switch, cycle 0.4, whose
++roadmap lists it, with its cases on the bound and past it, as §7 asks of every bound.
 +
-+*Alternatives declined:* **the ninth** — a bound no rule sets is a number nobody can audit; it comes with the rule
-+that sets it; **a capacity as a generic value parameter** — the compiler reserves the form (its D-353, landing 117),
-+and a `fixed` constant covers each capacity (the libraries' answer on its S-135).
++*Alternatives declined:* **the ninth now** — no module reads it before cycle 0.4, its cases need the switch, and
++`check_constants_named` refuses a constant §7's table does not list, so it would come with a ninth row, which must say
++whether it is a per-parse option (S-20 makes every row one but `NPARSE_MAX_INPUT`; D-16 does not say) — the
++consumer's cycle's to decide, with the switch measured; **a capacity as a generic value parameter** — the compiler
++reserves the form (its D-353, landing 117), and a `fixed` constant covers each capacity (the libraries' answer on its
++S-135).
 +
-+*Reversal, for the author:* none; a new bound is a row of §7 and a line here, by a decision.
++*Reversal, for the author:* to hold the ninth from cycle 0.0.4, step 1 adds `NPARSE_DUP_SCAN_MAX` to `limits.npk` at
++1024, a ninth row to §7's table saying whether it is an option, and an assertion to `limits_values`; block 1's run
++and the mutants move with them.
 diff --git a/meta/specs/SAFETY.md b/meta/specs/SAFETY.md
-index 7712438..39c5b3d 100644
+index 7712438..eb2a7eb 100644
 --- a/meta/specs/SAFETY.md
 +++ b/meta/specs/SAFETY.md
-@@ -300,6 +300,9 @@ is a loop over attacker-controlled length without one.
+@@ -300,6 +300,11 @@ is a loop over attacker-controlled length without one.
  | `NPARSE_MAX_ERRORS` | 64 | faults collected in recovery mode before parsing stops | parsing stops; the collected set is returned |
  | `NPARSE_MAX_INPUT` | 2^47 | the input length the cursor's arithmetic is proven over | `EParseState` (a caller mistake, not an input) |
  
 +*(2026-10-15, cycle 0.0.4 — @@PD-143@@: `src/core/limits.npk` holds these eight, each a `pub fixed int64` with its
-+row, and `check_constants_named` holds the file to this table and every other module to naming them.)*
++row, and `check_constants_named` holds the file to this table and every other module to naming them. A ninth bound,
++`VALUE_MODEL.md` D-16's `NPARSE_DUP_SCAN_MAX`, has no row here yet: it joins the table and the file with its switch,
++in cycle 0.4.)*
 +
  **Rule S-20.** Every one of these is a per-parse option except `NPARSE_MAX_INPUT`,
  which is a property of the cursor's arithmetic proof and is not adjustable.
  
 diff --git a/nitpick.toml b/nitpick.toml
-index a2bbd9b..1358862 100644
+index a2bbd9b..ba3b830 100644
 --- a/nitpick.toml
 +++ b/nitpick.toml
-@@ -118,6 +118,14 @@ name  = "defect-reseat"
+@@ -118,6 +118,13 @@ name  = "defect-reseat"
  stage = "check"
  path  = "tests/probe/defect/view_reseat"
  
-+# Cycle 0.0.4's unit suite (@@PD-143@@, @@PD-144@@): `src/core/`'s programs, each
-+# judged by its exit at -O0 and through `opt -O2`; a misuse traps `OutOfBounds`
-+# (94) by design, and a forgotten free `WildLeak` (96).
++# Cycle 0.0.4's unit suite (@@PD-143@@): `src/core/`'s programs, each judged by
++# its exit at -O0 and through `opt -O2`.
 +[[test]]
 +name  = "unit"
 +stage = "program"
@@ -53,10 +62,10 @@ index a2bbd9b..1358862 100644
  # judges is judged there first, by its own rule. The runner refuses a manifest
 diff --git a/src/core/limits.npk b/src/core/limits.npk
 new file mode 100644
-index 0000000..a883bd0
+index 0000000..052f8d9
 --- /dev/null
 +++ b/src/core/limits.npk
-@@ -0,0 +1,65 @@
+@@ -0,0 +1,66 @@
 +mod:limits;
 +
 +// MAY IMPORT: nothing (`meta/specs/BUILD.md` B-17's table); `core` is the bottom layer.
@@ -65,7 +74,8 @@ index 0000000..a883bd0
 +//
 +// `meta/specs/SAFETY.md` §7's table, one constant per row, in the table's order; PA-004 puts
 +// them here and S-19 says why there are bounds at all: nothing grows without a bound somebody
-+// can name. Each constant carries its row -- what it bounds, and what exceeding it does -- and
++// can name. A ninth, `VALUE_MODEL.md` D-16's `NPARSE_DUP_SCAN_MAX`, joins them with its switch,
++// in cycle 0.4 (@@PD-143@@). Each constant carries its row -- what it bounds, and what exceeding it does -- and
 +// the rule that sets it, because the number is in the table and the reason is what a later
 +// cycle, a consumer's options, or a review will look for.
 +//

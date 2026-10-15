@@ -3,4 +3,5 @@
 the rungs refusing contracts | rungs refuse the constructs|premature .?ensures.? is a build failure
 SmallMap's overflow | EParseState on overflow|SmallMap[^.]{0,80}EParseState
 a view of Bytes | view\(\)[^.]{0,30}borrowed|Bytes view|hands a borrowed .?uint8
-the ninth limit | DUP_SCAN
+the ninth limit | DUP_SCAN|no specification defines|has no specification
+SmallMap built in cycle 0.0 | (Vec|Bytes)[^.]{0,40}SmallMap|SmallMap[^.]{0,60}\b(built|0\.0\.4|cycle 0\.0)\b|primitives[^.]{0,60}SmallMap
