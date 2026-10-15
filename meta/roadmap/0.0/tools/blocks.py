@@ -14,7 +14,7 @@ goes to `$REPO/.internal/w00/blocks/<subcycle>-<id>.out`.
 
 Its EXPECTED output is the fenced `text` block whose first line is `# expect <id>`. The comparison masks what
 legitimately varies from run to run -- a run's seconds (`in 91.2 s`), the machine's free memory (`available GiB:`),
-a calendar date -- and nothing else; a line the plan writes as `# (any)` matches any one line. It prints `SAME <id>`
+a calendar date, and `check_refs`'s file counts, which every later plan of the cycle moves -- and nothing else; a line the plan writes as `# (any)` matches any one line. It prints `SAME <id>`
 or the lines that differ, and exits 1 if any block differs.
 """
 import os
@@ -27,6 +27,10 @@ _MASKS = [
     (re.compile(r"\bin \d+(\.\d+)? s\b"), "in <s> s"),
     (re.compile(r"available GiB: \d+"), "available GiB: <n>"),
     (re.compile(r"\b\d{4}-\d{2}-\d{2}\b"), "<date>"),
+    # check_refs's denominators count every tracked file, this cycle's later plans and tools among them, so they
+    # move with every subcycle the pass adds; its verdict -- clean, or each finding -- is what a block compares.
+    (re.compile(r"\(\d+ md files via git ls-files; leak scan \d+ text of \d+ tracked\)"),
+     "(<n> md files via git ls-files; leak scan <n> text of <n> tracked)"),
 ]
 
 
