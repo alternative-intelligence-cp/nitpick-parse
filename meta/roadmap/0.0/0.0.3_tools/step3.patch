@@ -25,7 +25,7 @@ index 8585379..eb288f5 100644
  The compiler binary is the **pinned toolchain** the board names
  (`../BOARD.md`, W-18): `$NPKC` and `$NPKRT` are supplied to every session by the
 diff --git a/CONTRIBUTING.md b/CONTRIBUTING.md
-index 21ade9f..af9907c 100644
+index 4552218..9ee46d8 100644
 --- a/CONTRIBUTING.md
 +++ b/CONTRIBUTING.md
 @@ -32,7 +32,7 @@ never for concluding; nothing is committed on the strength of a filtered run.
@@ -61,7 +61,7 @@ index 787ca4a..5bedfed 100644
  **Parsing a number cannot stop your program.** Plain integer overflow *traps*
  in Nitpick (D-210), so the ordinary `acc = acc * 10 + d` accumulator crashes the
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index df5617f..1c105e5 100644
+index a3fcd08..cc6c9e6 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
 @@ -149,6 +149,9 @@ cycle 0.12's application; semantic versioning thereafter.

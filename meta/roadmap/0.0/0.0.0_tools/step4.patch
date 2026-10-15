@@ -54,7 +54,7 @@ index db6c51e..a997a84 100644
  | **doc** | `Document` — an arena-backed tree of POD nodes with a side string pool, insertion-ordered maps, and a duplicate-key policy |
  | **diag** | `ParseError`: a closed code enum, a span, an expected set, and a renderer |
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index 19b9416..4a7b62c 100644
+index fa4368a..c279516 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
 @@ -268,6 +268,8 @@ reasons are restated by measurement — @@PD-129@@ and @@PD-130@@ supersede this
@@ -78,7 +78,7 @@ index 19b9416..4a7b62c 100644
  ### PA-023 — a syntax error is a value in the success channel
  **2026-09-03.** `Step = { Ev(Event); Fault(ParseError); Done; }`. `Step.Fault`
  is not `Result.err`. See PA-008 for the full argument.
-@@ -786,3 +793,101 @@ nothing in it is generic over a trait.
+@@ -787,3 +794,101 @@ nothing in it is generic over a trait.
  *Reversal, for the author:* if the compiler side rules the shape out rather than
  fixing it, a later decision moves G-4's intended path to `dyn` openly, and the
  blocked checklist items take `dyn Format`.
@@ -507,7 +507,7 @@ index 8e0dcee..a85ab40 100644
     the caller's bytes. The borrow rules enforce it within a call; across calls
     it is the caller's discipline and it is stated in `EVENT_MODEL.md` §5.
 diff --git a/meta/specs/SCAN_MODEL.md b/meta/specs/SCAN_MODEL.md
-index ff0f41f..ad40c19 100644
+index ff0f41f..64353b1 100644
 --- a/meta/specs/SCAN_MODEL.md
 +++ b/meta/specs/SCAN_MODEL.md
 @@ -10,7 +10,7 @@ was this. It declares **no errors** and performs **no I/O**.
@@ -519,7 +519,7 @@ index ff0f41f..ad40c19 100644
      int64:pos;          // the read position, 0 <= pos <= src.len
  };
  ```
-@@ -21,12 +21,31 @@ prelude's `read_file` and hands the bytes over. This is what keeps the library
+@@ -21,12 +21,33 @@ prelude's `read_file` and hands the bytes over. This is what keeps the library
  free of syscalls (`SAFETY.md` §2), free of a descriptor lifetime, and testable
  from a byte literal.
  
@@ -531,7 +531,9 @@ index ff0f41f..ad40c19 100644
 -the public API.
 +**Rule C-2 (@@PD-132@@).** `Cursor` holds a **read-only borrow** (`fixed uint8[]`,
 +D-004, D-351), so it is second class, and what that means was measured at
-+compiler `7e91730` (probe 08 and its refusals):
++compiler `7e91730` (probe 08 and its refusals) — but for two clauses no probe
++asks: the `await` one, since this library has no `await`, and the `fixed`
++field's code, which no probe provokes:
 +
 +- a function handed the caller's bytes **may return** a `Cursor` over them, or a
 +  reader holding one — `json_reader`'s shape compiles and runs; a `Cursor` over
@@ -557,7 +559,7 @@ index ff0f41f..ad40c19 100644
  
  **Rule C-3 — the operations, and all of them are total.**
  
-@@ -38,7 +57,7 @@ the public API.
+@@ -38,7 +59,7 @@ the public API.
  | `cur_take(c, n)` | advances `min(n, remaining)`; returns how many |
  | `cur_at_end(c)` | `pos >= src.len` |
  | `cur_remaining(c)` | `src.len - pos`, never negative |
@@ -856,7 +858,7 @@ index 0000000..accce24
 +};
 diff --git a/tests/probe/probe10_explicit_stack.npk b/tests/probe/probe10_explicit_stack.npk
 new file mode 100644
-index 0000000..09229d4
+index 0000000..7abddfb
 --- /dev/null
 +++ b/tests/probe/probe10_explicit_stack.npk
 @@ -0,0 +1,119 @@
@@ -946,17 +948,17 @@ index 0000000..09229d4
 +};
 +
 +func:main = int32(cstring[]:_~argv) {
-+    string:open = string_concat("[", "");
++    string:brackets = string_concat("[", "");
 +    string:shut = string_concat("]", "");
 +    int64:n = 1i64;
 +    int64:k = 0i64;
 +    while (n < 65536i64) decreases 64i64 - k {
-+        open = string_concat(open, open);
++        brackets = string_concat(brackets, brackets);
 +        shut = string_concat(shut, shut);
 +        n = n * 2i64;
 +        k = k + 1i64;
 +    }
-+    fixed uint8[]:o = string_bytes(open);
++    fixed uint8[]:o = string_bytes(brackets);
 +    fixed uint8[]:c = string_bytes(shut);
 +    int64:d = raw max_depth(o[0i64...DEPTH], c[0i64...DEPTH]);
 +    if (d != DEPTH) { exit 10i32; }

@@ -43,7 +43,7 @@ index 316a4a1..7733ba7 100644
  Three shapes that surprise a C or Rust habit: adjacent string literals do not
  concatenate; `discard(x);` takes parentheses and `defer { … }` takes no
 diff --git a/CONTRIBUTING.md b/CONTRIBUTING.md
-index b9b9a0b..21ade9f 100644
+index b9b9a0b..4552218 100644
 --- a/CONTRIBUTING.md
 +++ b/CONTRIBUTING.md
 @@ -28,7 +28,7 @@ A settled decision's text is never rewritten — supersede it with a new one.
@@ -55,7 +55,7 @@ index b9b9a0b..21ade9f 100644
  
  1. **A syntax error is not an error.** It is a `Fault` value in the success
     channel, and `pick` exhaustiveness is what forces the caller to handle it.
-@@ -52,6 +52,17 @@ never for concluding; nothing is committed on the strength of a filtered run.
+@@ -52,6 +52,19 @@ never for concluding; nothing is committed on the strength of a filtered run.
     would be a trait object plus hand-carried context at every call, and
     streaming would not compose.
  
@@ -63,7 +63,9 @@ index b9b9a0b..21ade9f 100644
 +
 +5. **A size is measured, never summed.** A payload-free enum is a four-byte tag,
 +   so `Event` is 32 bytes where its fields once added up to 24. Every type whose
-+   size a rule asserts has a test whose exit code is that size.
++   size a rule asserts is measured by a probe: `Event` and `Node` by the probe's
++   exit code (02 and 04), and `ParseError` by an assertion in probe 03, which exits
++   19 at any other size.
 +6. **Two compiler defects are open, and the library does not route around
 +   them.** A synchronous `Self->` method called through a generic bound does not
 +   link, and a view re-seated by a callee can outlive its bytes —

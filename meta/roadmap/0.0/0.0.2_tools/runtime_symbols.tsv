@@ -1,0 +1,124 @@
+# 0.0.2 -- the pinned runtime object's 119 global functions, the only runtime symbols a module's call can reach
+# (a call to a local one does not link), each classed against the facets of PA-006 and SAFETY.md §2: DENIED by the
+# facet that forbids it, or the FLOOR, the language's own machinery every program may reach. TAB-separated: symbol,
+# class, why -- the runtime's or the emitter's own words, shortened. harness/irscan.py's DENIED and FLOOR are
+# these rows, and facts.sh holds the three together with the object (0.0.2.md §1.5).
+npk_close	deny: a file or descriptor	the fd quartet, whole files and standard input, a path probed, a descriptor's drop, the reactor's registration: a file, a descriptor, a device
+npk_io_register	deny: a file or descriptor	the fd quartet, whole files and standard input, a path probed, a descriptor's drop, the reactor's registration: a file, a descriptor, a device
+npk_io_unwatch	deny: a file or descriptor	the fd quartet, whole files and standard input, a path probed, a descriptor's drop, the reactor's registration: a file, a descriptor, a device
+npk_ofd_close	deny: a file or descriptor	the fd quartet, whole files and standard input, a path probed, a descriptor's drop, the reactor's registration: a file, a descriptor, a device
+npk_open	deny: a file or descriptor	the fd quartet, whole files and standard input, a path probed, a descriptor's drop, the reactor's registration: a file, a descriptor, a device
+npk_path_exists	deny: a file or descriptor	the fd quartet, whole files and standard input, a path probed, a descriptor's drop, the reactor's registration: a file, a descriptor, a device
+npk_read	deny: a file or descriptor	the fd quartet, whole files and standard input, a path probed, a descriptor's drop, the reactor's registration: a file, a descriptor, a device
+npk_read_file	deny: a file or descriptor	the fd quartet, whole files and standard input, a path probed, a descriptor's drop, the reactor's registration: a file, a descriptor, a device
+npk_read_stdin	deny: a file or descriptor	the fd quartet, whole files and standard input, a path probed, a descriptor's drop, the reactor's registration: a file, a descriptor, a device
+npk_write	deny: a file or descriptor	the fd quartet, whole files and standard input, a path probed, a descriptor's drop, the reactor's registration: a file, a descriptor, a device
+npk_write_file	deny: a file or descriptor	the fd quartet, whole files and standard input, a path probed, a descriptor's drop, the reactor's registration: a file, a descriptor, a device
+npk_clone_exec	deny: a process	a supervised child process spawned, and the driver registry that tracks and kills them
+npk_driver_kill_all	deny: a process	a supervised child process spawned, and the driver registry that tracks and kills them
+npk_driver_live_count	deny: a process	a supervised child process spawned, and the driver registry that tracks and kills them
+npk_driver_retire	deny: a process	a supervised child process spawned, and the driver registry that tracks and kills them
+npk_sigreturn	deny: a signal handler	the signal restorer, x86_64's rt_sigreturn trampoline
+npk_barrier_arrive	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_barrier_cancel	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_barrier_poll	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_ch_close	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_ch_closed	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_ch_open	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_ch_reclaim	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_ch_recv_wait	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_ch_send_wait	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_ch_try_recv	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_ch_try_send	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_cv_begin	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_cv_broadcast	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_cv_done	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_cv_signal	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_exec	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_frame_alloc	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_frame_drain	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_frame_exec_destroy	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_frame_exec_new	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_frame_free	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_frozen_get	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_guard_release	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_join_deadline	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_mutex_acquire_wait	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_park_sleep	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_park_take	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_park_until	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_rq_pop	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_rq_push	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_run_until	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_rw_read_wait	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_rw_release_read	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_rw_write_wait	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_sarena_bump	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_sarena_destroy	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_sarena_make	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_sarena_slot	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_sl_earliest	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_sl_push	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_sl_wake_due	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_step	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_task_done	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_thread_entry	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_thread_exit	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_thread_join	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_thread_start	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_windup_all	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_windup_grace	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_windup_note	deny: concurrency	the executor, its ready queue and sleepers, task frames and their freeze flag, threads, channels, the mutex, rwlock, condvar and barrier, a lock's release, parking, deadlines and wind-up, and the shared arena a second thread reaches
+npk_wildx_alloc	deny: machine code	`wildx`, memory the program writes machine code into and calls: x86-64's instructions
+npk_wildx_call	deny: machine code	`wildx`, memory the program writes machine code into and calls: x86-64's instructions
+npk_wildx_free	deny: machine code	`wildx`, memory the program writes machine code into and calls: x86-64's instructions
+npk_wildx_seal	deny: machine code	`wildx`, memory the program writes machine code into and calls: x86-64's instructions
+npk_mono_now	deny: the clock	CLOCK_MONOTONIC, the deadline substrate's one clock
+npk_environ	deny: the environment	the process environment, and how many hardware threads the program may use
+npk_hardware_concurrency	deny: the environment	the process environment, and how many hardware threads the program may use
+npk_clone_raw	deny: the kernel	the `sys` builtin's one entry, and the raw clone under the thread trampoline: a syscall
+npk_sys6	deny: the kernel	the `sys` builtin's one entry, and the raw clone under the thread trampoline: a syscall
+__divti3	floor: LLVM's libcalls	what LLVM lowers a 128-bit division or a float remainder to; no module's IR calls one
+__modti3	floor: LLVM's libcalls	what LLVM lowers a 128-bit division or a float remainder to; no module's IR calls one
+__udivti3	floor: LLVM's libcalls	what LLVM lowers a 128-bit division or a float remainder to; no module's IR calls one
+__umodti3	floor: LLVM's libcalls	what LLVM lowers a 128-bit division or a float remainder to; no module's IR calls one
+fmod	floor: LLVM's libcalls	what LLVM lowers a 128-bit division or a float remainder to; no module's IR calls one
+fmodf	floor: LLVM's libcalls	what LLVM lowers a 128-bit division or a float remainder to; no module's IR calls one
+npk_int_to_string	floor: strings	the string builtins
+npk_string_concat	floor: strings	the string builtins
+npk_string_equals	floor: strings	the string builtins
+npk_string_from_bytes	floor: strings	the string builtins
+npk_string_slice	floor: strings	the string builtins
+npk_to_cstring	floor: strings	the string builtins
+npk_arena_alloc	floor: the arena	`arena<T>` (D-152)
+npk_arena_at	floor: the arena	`arena<T>` (D-152)
+npk_arena_destroy	floor: the arena	`arena<T>` (D-152)
+npk_arena_free	floor: the arena	`arena<T>` (D-152)
+npk_arena_make	floor: the arena	`arena<T>` (D-152)
+npk_arena_reset	floor: the arena	`arena<T>` (D-152)
+_start	floor: the entry	the process entry and the main thread's stack switch, which nothing calls
+npk_switch_stack	floor: the entry	the process entry and the main thread's stack switch, which nothing calls
+memcpy	floor: the heap	the wild, managed and internal allocators, a buffer's cell, the wild-live registry, and the copies LLVM and `mcpy` call
+memmove	floor: the heap	the wild, managed and internal allocators, a buffer's cell, the wild-live registry, and the copies LLVM and `mcpy` call
+memset	floor: the heap	the wild, managed and internal allocators, a buffer's cell, the wild-live registry, and the copies LLVM and `mcpy` call
+npk_aalloc	floor: the heap	the wild, managed and internal allocators, a buffer's cell, the wild-live registry, and the copies LLVM and `mcpy` call
+npk_alloc	floor: the heap	the wild, managed and internal allocators, a buffer's cell, the wild-live registry, and the copies LLVM and `mcpy` call
+npk_alloc_managed	floor: the heap	the wild, managed and internal allocators, a buffer's cell, the wild-live registry, and the copies LLVM and `mcpy` call
+npk_buffer_new	floor: the heap	the wild, managed and internal allocators, a buffer's cell, the wild-live registry, and the copies LLVM and `mcpy` call
+npk_calloc	floor: the heap	the wild, managed and internal allocators, a buffer's cell, the wild-live registry, and the copies LLVM and `mcpy` call
+npk_dalloc	floor: the heap	the wild, managed and internal allocators, a buffer's cell, the wild-live registry, and the copies LLVM and `mcpy` call
+npk_ralloc	floor: the heap	the wild, managed and internal allocators, a buffer's cell, the wild-live registry, and the copies LLVM and `mcpy` call
+npk_wild_live_count	floor: the heap	the wild, managed and internal allocators, a buffer's cell, the wild-live registry, and the copies LLVM and `mcpy` call
+npk_wild_release_all	floor: the heap	the wild, managed and internal allocators, a buffer's cell, the wild-live registry, and the copies LLVM and `mcpy` call
+__morestack	floor: the stack guard	the split-stack prologue's entries and their landings (D-305)
+__morestack_non_split	floor: the stack guard	the split-stack prologue's entries and their landings (D-305)
+npk_stack_exhausted	floor: the stack guard	the split-stack prologue's entries and their landings (D-305)
+npk_stack_foreign	floor: the stack guard	the split-stack prologue's entries and their landings (D-305)
+npk_chain_depth	floor: the trap route	a guard's trap, a program's raise, the origin chain, `failsafe` on its own stack, and the language's `exit`
+npk_chain_push	floor: the trap route	a guard's trap, a program's raise, the origin chain, `failsafe` on its own stack, and the language's `exit`
+npk_chain_reset	floor: the trap route	a guard's trap, a program's raise, the origin chain, `failsafe` on its own stack, and the language's `exit`
+npk_chain_site	floor: the trap route	a guard's trap, a program's raise, the origin chain, `failsafe` on its own stack, and the language's `exit`
+npk_exit	floor: the trap route	a guard's trap, a program's raise, the origin chain, `failsafe` on its own stack, and the language's `exit`
+npk_fs_switch_call	floor: the trap route	a guard's trap, a program's raise, the origin chain, `failsafe` on its own stack, and the language's `exit`
+npk_raise	floor: the trap route	a guard's trap, a program's raise, the origin chain, `failsafe` on its own stack, and the language's `exit`
+npk_trap	floor: the trap route	a guard's trap, a program's raise, the origin chain, `failsafe` on its own stack, and the language's `exit`

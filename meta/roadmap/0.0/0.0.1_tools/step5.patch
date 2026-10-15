@@ -1,5 +1,5 @@
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index 02aac3d..9ab4173 100644
+index 39882a1..3c0769f 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
 @@ -493,6 +493,8 @@ specification, and that is stated rather than hidden; its hand-built corpus is
@@ -11,12 +11,12 @@ index 02aac3d..9ab4173 100644
  **2026-09-03.** In `meta/research/format-versions.md`, with the document's own
  version string and the date it was read. "TOML" without a version is three
  incompatible languages.
-@@ -926,3 +928,29 @@ number, and the harness asserts the tools against it.
+@@ -927,3 +929,36 @@ number, and the harness asserts the tools against it.
  *Reversal, for the author:* none for the rows; the one re-pin, at landing 118, moves
  `NITPICK_COMMIT` and the emission's digest in CI, and the LLVM row only if a landing
  moves the compiler's D-349.
 +
-+### @@PD-137@@ — one currency table; the library is security-sensitive, and its three research items gate cycle 0.1
++### @@PD-137@@ — one currency table; the library is security-sensitive, and its three research items gate cycle 0.0's work
 +**2026-10-15, cycle 0.0.1.** Every outside fact the plan rests on is a row of
 +`meta/research/CURRENCY.md` (the workbench research skill's §7, and `PLAYBOOK.md`
 +§12), the formats' versions included: it supersedes in part PA-054, whose
@@ -25,28 +25,35 @@ index 02aac3d..9ab4173 100644
 +is hostile by design, and PA-008, PA-012 and PA-022 exist for that reason — so the
 +three research items the workbench plan skill requires for such a library are owed:
 +known defects in the prior art and the reference implementations, the standards bodies'
-+current guidance, and the current test vectors (`CURRENCY.md` states each). They gate
-+cycle 0.1, through cycle 0.0.5's close: a finding that asks the language a question
-+becomes a cycle-0.0 probe first. TOML's row records that v1.1.0 is published and that
-+the version is cycle 0.6.0's to decide. The early ecosystem audit's E2-13.
++current guidance, and the current test vectors (`CURRENCY.md` states each). **They
++gate cycle 0.0's work**: its first work dispatch, cycle 0.0.0's, carries their three
++digests, and its worker files them beside the table before any probe runs, so that a
++finding becomes a cycle-0.0 probe before it is anything else, as the workbench plan
++skill asks. Each is a `security` digest, stale ninety days after its date (the
++research skill's §6), so a later cycle reads the three dates before it starts, and all
++three are re-run at hardening (its §8). TOML's row records that v1.1.0 is published
++and that the version is cycle 0.6.0's to decide. The early ecosystem audit's E2-13.
 +
 +*Alternatives declined:* **keep `format-versions.md` beside `CURRENCY.md`** — two
 +tables of outside facts, and the workbench's checks read one; **name the file
 +`format-versions.md` and put every row in it** — the workbench's rule, its audit and
 +its research skill name `CURRENCY.md`; **count the library routine** — its threat is
-+the input, and the research would be skipped where it matters most; **run the
-+research before cycle 0.0's probes** — none of it bears on a language shape the probes
-+ask, and holding the probes for it holds the cycle.
++the input, and the research would be skipped where it matters most; **gate cycle 0.1
++on them, through cycle 0.0.5's close** — the plan skill puts the three before the
++cycle map, and a finding that arrives after cycle 0.0 is archived has no cycle 0.0 to
++become a probe in (the plan verification of 2026-10-15, its finding 16).
 +
-+*Reversal, for the author:* to run the research before 0.0.0, move the gate from cycle
-+0.0.5 to 0.0.0's step 0; to count the library routine, strike `CURRENCY.md`'s research
-+section and the gate, and nothing else moves.
++*Reversal, for the author:* to let cycle 0.0's probes run before the research, move
++the gate to cycle 0.1, through 0.0.5's close — 0.0.0's gate item 7 and block 0a's three
++research lines go, `CURRENCY.md`'s three research rows wait for their digests, and
++`0.1/0.1.0.md`'s gate names them; to count the library routine, strike `CURRENCY.md`'s
++research section and its three rows, and the gate with them.
 diff --git a/meta/research/CURRENCY.md b/meta/research/CURRENCY.md
 new file mode 100644
-index 0000000..2104817
+index 0000000..7a073e5
 --- /dev/null
 +++ b/meta/research/CURRENCY.md
-@@ -0,0 +1,50 @@
+@@ -0,0 +1,55 @@
 +# Currency — the facts from outside the compiler tree this plan rests on
 +
 +One row per standard, data release, corpus, reference implementation and outside tool the plan
@@ -65,12 +72,15 @@ index 0000000..2104817
 +| Python — the harness's interpreter | 3.12.3, the version on the workbench and on `ubuntu-24.04` | by cycle 0.0.2, which writes the harness | python.org | @@PD-137@@ |
 +| UTF-8 — what a JSON, TOML or YAML input must be (`SCAN_MODEL.md` §3) | RFC 3629 (STD 63) and the Unicode Standard's Table 3-7, the edition to be named | **not yet** — cycle 0.1, whose decoder reads it, checks it before it starts | rfc-editor.org/rfc/rfc3629; unicode.org | PA-013 |
 +| JSON | RFC 8259 | not yet — cycle 0.3 | rfc-editor.org/rfc/rfc8259 | PA-050 |
-+| TOML | v1.0.0, as `FORMATS.md` names it. **v1.1.0 is published** (the workbench's currency audit of 2026-10-09, a lead to verify at the source), and nobody has compared the two | not yet — cycle 0.6.0 decides the version (PA-054 as @@PD-137@@ amends it) | toml.io; github.com/toml-lang/toml/releases | PA-054 |
++| TOML | v1.0.0, as `FORMATS.md` names it. **v1.1.0 is published** (the workbench's currency audit of 2026-10-09, which the second research item below reads at the source, before cycle 0.0's first probe), and nobody has compared the two | not yet — cycle 0.6.0 decides the version (PA-054 as @@PD-137@@ amends it) | toml.io; github.com/toml-lang/toml/releases | PA-054 |
 +| CSV | RFC 4180, and the dialects `FORMATS.md` §6 names | not yet — cycle 0.7 | rfc-editor.org/rfc/rfc4180 | PA-050 |
 +| YAML | 1.2's core schema; which revision of 1.2 is not yet stated | not yet — cycle 0.8 | yaml.org/spec | PA-051 |
 +| RFC 3339 — the shape of TOML's date-times | RFC 3339 | not yet — cycle 0.6 | rfc-editor.org/rfc/rfc3339 | PA-054 |
 +| IEEE 754 binary64 — what `num_flt64` rounds to | IEEE 754-2019 | not yet — cycle 0.4 | ieee.org | PA-033 |
 +| The corpora: JSONTestSuite, toml-test, the yaml-test-suite, the W3C CSVW tests | a commit each, recorded in each corpus's `PROVENANCE.md` | not yet — each with its format's cycle | each project's repository | PA-053, PA-081 |
++| Research item 1 below — known defects in the prior art and the reference implementations | what its digest records, as of its date | by cycle 0.0's first work dispatch, before any probe: [`security-defects.md`](security-defects.md), stale ninety days after its date | cve.org, nvd.nist.gov, each project's tracker | @@PD-137@@ |
++| Research item 2 below — the standards bodies' current guidance, and the current TOML version | what its digest records, as of its date | by the same dispatch: [`security-guidance.md`](security-guidance.md), stale ninety days after its date | rfc-editor.org, toml.io, yaml.org | @@PD-137@@ |
++| Research item 3 below — the current versions of the test vectors | what its digest records, as of its date | by the same dispatch: [`security-vectors.md`](security-vectors.md), stale ninety days after its date | each corpus's repository | @@PD-137@@ |
 +
 +## The research this library owes, because it is security-sensitive
 +
@@ -79,7 +89,7 @@ index 0000000..2104817
 +an input can be hostile — PA-008 (no input reaches an error identity), PA-012 (no arithmetic on
 +input traps) and PA-022 (no input-controlled recursion). So the workbench research skill's §8
 +applies, and these three requests are owed, each in its §3 shape, each `sensitivity: security`
-+(two independent primaries, stale after ninety days), each filed here as a digest when it returns:
++(two independent primaries, stale after ninety days), each filed here as a digest, as its row cites it:
 +
 +1. **Known defects in the prior art and the reference implementations** the formats' cycles will
 +   read — parsers of JSON, TOML, YAML and CSV: their published vulnerabilities and the classes they
@@ -93,10 +103,12 @@ index 0000000..2104817
 +   its sets encode), the yaml-test-suite, the CSVW tests. *Would change the plan if* a corpus's
 +   current version judges a case differently from the version a cycle planned against.
 +
-+**They gate cycle 0.1** (cycle 0.0.5's close holds them): a finding that is a question about the
-+language becomes a cycle-0.0 probe before it is anything else (the workbench plan skill), and cycle
-+0.1's scanner is the first code an input reaches. The orchestrator dispatches them: by the workbench's
-+rule on research, more than one fetch is a request to the researcher, who never writes into a repository.
++**They gate cycle 0.0's work** (@@PD-137@@): its first work dispatch, cycle 0.0.0's, carries their
++three digests, and its worker files them here before any probe runs, so that a finding becomes a
++cycle-0.0 probe before it is anything else (the workbench plan skill). The orchestrator dispatches the
++requests: by the workbench's rule on research, more than one fetch is a request to the researcher, who
++never writes into a repository. A later cycle reads the three dates before it starts, since each is
++stale ninety days after its own, and all three are re-run at hardening.
 diff --git a/meta/research/README.md b/meta/research/README.md
 index 17d2d93..6f5d659 100644
 --- a/meta/research/README.md

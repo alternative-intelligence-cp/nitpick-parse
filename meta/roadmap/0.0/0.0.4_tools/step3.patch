@@ -1,8 +1,8 @@
 diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md
-index 9d55994..66757e7 100644
+index 24fdc3f..c4a5955 100644
 --- a/meta/specs/BUILD.md
 +++ b/meta/specs/BUILD.md
-@@ -251,6 +251,11 @@ fourth field, a hidden zero-length `string[0]`, which costs no byte and makes a
+@@ -258,6 +258,11 @@ fourth field, a hidden zero-length `string[0]`, which costs no byte and makes a
  header — a second handle on its block — is `NITPICK-TYPE-046`; every index and count is checked by its own
  accessors, because an index through a `wild` block does not trap, and a misuse traps the language's `OutOfBounds`.)*
  

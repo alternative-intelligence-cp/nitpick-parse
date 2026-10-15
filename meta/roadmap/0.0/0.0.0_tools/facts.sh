@@ -77,7 +77,7 @@ echo "§1.7 files the patches touch that hold \`@@PD-\` as the tree stands: $n"
 echo "§1.7 placeholders in the patches: $(grep -ohE '@@PD-[0-9]+@@' "$T0"/step*.patch | sort -u | tr '\n' ' ')"
 echo "§1.7 numbered by decisions.txt: $(python3 -B -c "
 import sys; sys.path.insert(0, '$TL'); import apply
-t = apply.numbers(); print(' '.join('%s=%s' % (k, t[k]) for k in sorted(t) if k <= 'PD-134'))")"
+t = apply.numbers(); print(' '.join('%s=base+%d' % (k, int(t[k].split('-')[1]) - apply.base_number()) for k in sorted(t) if k <= 'PD-134'))")"
 
 # §1.8 -- every rule and section the added lines cite exists in the tree the patches leave
 python3 -B "$TL/pointers.py" "$d" "$T0" | sed "s|$d/||g"

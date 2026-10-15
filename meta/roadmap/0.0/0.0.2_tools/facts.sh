@@ -68,15 +68,25 @@ ok = all(elf.Obj(sys.argv[2] + '/%s.o' % p).undefined() == open(sys.argv[2] + '/
 print('§1.4 harness/elf.py reads the same two sets: %s' % ('yes' if ok else 'NO'))
 " "$d/harness" "$F"
 
-# §1.5 -- the call-edge scan's deny list: every name a define of the pinned runtime object
-llvm-nm --defined-only "$NPKRT" | awk '{print $3}' | sort -u > "$F/rt.nm"
+# §1.5 -- the runtime classed whole: every global symbol of the pinned runtime object -- all a module's call can
+# resolve to -- one row of runtime_symbols.tsv, and irscan.py's DENIED and FLOOR the table's two halves (llvm-nm,
+# independently of the harness's ELF reader)
+llvm-nm --defined-only --extern-only "$NPKRT" | awk '{print $3}' | sort -u > "$F/rt.nm"
 python3 -B -c "
-import sys; sys.path.insert(0, sys.argv[1])
+import sys, collections; sys.path.insert(0, sys.argv[1])
 import irscan
-rt = set(open(sys.argv[2]).read().split())
-print('§1.5 irscan.DENIED: %d names, %d of them defined by the runtime object; the runtime defines %d symbols, memcpy, memmove and memset %s' % (
-    len(irscan.DENIED), len(irscan.DENIED & rt), len(rt), 'among them' if {'memcpy', 'memmove', 'memset'} <= rt else 'NOT all among them'))
-" "$d/harness" "$F/rt.nm"
+g = set(open(sys.argv[2]).read().split())
+rows = [l.rstrip('\n').split('\t') for l in open(sys.argv[3], encoding='utf-8') if l.strip() and not l.startswith('#')]
+names = [r[0] for r in rows]
+whole = len(names) == len(set(names)) and set(names) == g
+print('§1.5 the runtime object\'s global symbols, by llvm-nm: %d -- every one a row of runtime_symbols.tsv, and no row anything else: %s' % (len(g), 'yes' if whole else 'NO'))
+for half in ('deny', 'floor'):
+    c = collections.Counter(r[1].split(': ', 1)[1] for r in rows if r[1].startswith(half + ': '))
+    print('§1.5 %s: %s -- %d' % ('denied, by facet' if half == 'deny' else 'the floor', ', '.join('%s %d' % kv for kv in sorted(c.items())), sum(c.values())))
+deny = {r[0] for r in rows if r[1].startswith('deny: ')}
+floor = {r[0] for r in rows if r[1].startswith('floor: ')}
+print('§1.5 irscan.DENIED and irscan.FLOOR are the table\'s two halves: %s' % ('yes' if irscan.DENIED == deny and irscan.FLOOR == floor else 'NO'))
+" "$d/harness" "$F/rt.nm" "$T2/runtime_symbols.tsv"
 
 # §1.6 -- one module per root: an imported module's function is DEFINED in the root's emission; and an extern
 mkdir -p "$F/sep"
@@ -165,7 +175,7 @@ echo "§1.12 the rulings' clean control: $(python3 -B "$TL/rulings.py" "$TL/ruli
 echo "§1.13 placeholders in the patches: $(grep -ohE '@@PD-[0-9]+@@' "$T2"/step*.patch | sort -u | tr '\n' ' ')"
 echo "§1.13 decisions.txt numbers them: $(python3 -B -c "
 import sys; sys.path.insert(0, sys.argv[1]); import apply
-t = apply.numbers(); print(' '.join('%s=%s' % (k, t[k]) for k in ('PD-138', 'PD-139') if k in t) or 'NEITHER')" "$TL")"
+t = apply.numbers(); print(' '.join('%s=base+%d' % (k, int(t[k].split('-')[1]) - apply.base_number()) for k in ('PD-138', 'PD-139') if k in t) or 'NEITHER')" "$TL")"
 python3 -B "$TL/pointers.py" "$d" "$T2" | sed 's/^§1\.8 /§1.14 /'
 
 # §1.15 -- the workflow, read as GitHub reads it, and its harness step's logic run against two logs

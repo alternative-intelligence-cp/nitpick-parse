@@ -1,5 +1,5 @@
 diff --git a/harness/README.md b/harness/README.md
-index 182809a..0134b94 100644
+index 182809a..fc84361 100644
 --- a/harness/README.md
 +++ b/harness/README.md
 @@ -8,3 +8,43 @@ Built in cycles 0.0.2 and 0.0.3.
@@ -27,7 +27,7 @@ index 182809a..0134b94 100644
 +| `toolchain.py` | `llc`, `opt`, `ld.lld` at the manifest's LLVM; its `datalayout` the one the pinned `opt` derives (`BUILD.md` B-1a) |
 +| `expect.py` | the markers a test file carries (B-5, B-5b) |
 +| `build.py` | one root to one module, both legs, the undefined-symbol scan (B-2), and `npkc`'s exit alphabet |
-+| `irscan.py` | the call-edge scan and its deny list (B-2a) |
++| `irscan.py` | the call-edge scan, and its two lists that class the runtime's global symbols: DENIED by facet, and FLOOR (B-2a) |
 +| `elf.py` | an ELF64 symbol table, read with `struct` |
 +| `stages.py` | the `program` stage and `compile`/`positive`: both legs, `stress`, the cap, and the pending units (B-5b) |
 +| `baseline/` | the floor program and the syscaller (build step 1, and the cap's control), and `PENDING.txt`, the reviewed list of pending units |
@@ -277,10 +277,10 @@ index 0000000..0f53c4d
 +    return f"npkc exit {b.npkc_exit}"
 diff --git a/harness/elf.py b/harness/elf.py
 new file mode 100644
-index 0000000..313808d
+index 0000000..fa9f090
 --- /dev/null
 +++ b/harness/elf.py
-@@ -0,0 +1,67 @@
+@@ -0,0 +1,72 @@
 +#!/usr/bin/env python3
 +"""An ELF64 relocatable object's symbol table, read with `struct`.
 +
@@ -348,6 +348,11 @@ index 0000000..313808d
 +    def defined(self):
 +        return sorted({n for n, _, typ, shndx in self.syms
 +                       if n and shndx != SHN_UNDEF and typ not in (STT_FILE, STT_SECTION)})
++
++    def exported(self):
++        """Every global symbol the object defines: all another object's reference can resolve to."""
++        return sorted({n for n, bind, typ, shndx in self.syms
++                       if n and shndx != SHN_UNDEF and bind != STB_LOCAL and typ not in (STT_FILE, STT_SECTION)})
 diff --git a/harness/expect.py b/harness/expect.py
 new file mode 100644
 index 0000000..8e23986
@@ -490,20 +495,20 @@ index 0000000..8e23986
 +    return read_text(text, path)
 diff --git a/harness/irscan.py b/harness/irscan.py
 new file mode 100644
-index 0000000..37b2e47
+index 0000000..7996f28
 --- /dev/null
 +++ b/harness/irscan.py
-@@ -0,0 +1,92 @@
+@@ -0,0 +1,144 @@
 +#!/usr/bin/env python3
-+"""The emitted IR's CALL EDGES to the floor -- `BUILD.md` B-2a (@@PD-138@@), the instrument
-+behind PA-006's "no syscall" and `SAFETY.md` §2's "no concurrency".
++"""The emitted IR's CALL EDGES to the runtime -- `BUILD.md` B-2a (@@PD-138@@), the instrument
++behind PA-006 and `SAFETY.md` §2, for every facet of theirs a runtime function serves.
 +
 +WHY CALL EDGES. An undefined-symbol scan reports THAT an object needs a runtime symbol and
 +never WHERE it is called from; and at an earlier compiler every syscall went through one
 +symbol the empty program already carried, so a program that made one had the same symbol set
 +as one that did not (`PLAYBOOK.md`: "the undefined-symbol scan ... CANNOT SEE A SYSCALL"). At
 +the pin `7e91730` the floor program's object has 5 undefined symbols and a syscaller's 6, the
-+difference exactly `npk_sys6` (cycle 0.0.2's §1.3) -- and `run.py` re-measures that pair on
++difference exactly `npk_sys6` (cycle 0.0.2's §1.4) -- and `run.py` re-measures that pair on
 +every full run, so the day a prelude starts emitting the symbol again the run says so.
 +
 +WHAT IT SCANS. Every `(enclosing function, callee)` edge in the -O0 IR whose callee is
@@ -514,30 +519,83 @@ index 0000000..37b2e47
 +`harness/irscan.py`, whose three measured lessons (the intrinsics, the glue's numbering, a
 +deny list rather than a permit list) this keeps.
 +
-+THE DENY LIST is four families of the runtime's own defines at the pin, each a thing this
-+library never does: the kernel, a descriptor, the clock, a task. `run.py` holds every name
-+here to the runtime object's defined symbols, so a name that stops existing reddens the run
-+instead of scanning for what can never appear.
++THE TWO LISTS CLASS THE RUNTIME WHOLE. At the pin the runtime object defines 119 global symbols,
++the only runtime symbols a module's call can reach (a call to a local one does not link), and
++each is in exactly one list here: DENIED, by the facet of PA-006 or `SAFETY.md` §2 that forbids
++it -- the kernel, a file or descriptor, a process, a signal handler, the clock, the
++environment, concurrency (a task, a channel, a lock, a wait, a deadline) and machine code -- or
++FLOOR, the language's own machinery any program may reach: the heap, the arena, strings, the
++trap route, the stack guard, LLVM's libcalls and the entry. `run.py` holds both to the runtime
++object on every run: a name in neither, or one that is not defined, stops it, so a re-pin that
++adds or renames a runtime function is classed before a run can be green again (cycle 0.0.2's
++plan carries the table, `0.0.2_tools/runtime_symbols.tsv`, with each class's reason).
++
++WHAT IT CANNOT SEE: a facet whose construct lowers to no runtime call -- an atomic operation is
++an LLVM instruction, and a mutex or rwlock made and never held is a managed allocation -- what
++an allowed function does inside the runtime, and every other way to be platform-specific. A
++call-edge scan says nothing of those; review does.
 +"""
 +import re
 +
-+DENIED = {
-+    # every syscall in the language
-+    "npk_sys6",
-+    # descriptors and files
-+    "npk_open", "npk_close", "npk_read", "npk_read_file", "npk_read_stdin", "npk_write",
-+    "npk_write_file", "npk_ofd_close", "npk_io_register", "npk_io_unwatch", "npk_std_fds",
-+    # the clock
-+    "npk_mono_now",
-+    # tasks, threads, channels and their waits
-+    "npk_exec", "npk_exec_pool", "npk_main_exec", "npk_clone_exec", "npk_frame_exec_new",
-+    "npk_frame_exec_destroy", "npk_run_until", "npk_join_deadline", "npk_thread_start",
-+    "npk_thread_entry", "npk_thread_exit", "npk_thread_join", "npk_thread_reg",
-+    "npk_thread_stack_bytes", "npk_park_forever", "npk_park_sleep", "npk_park_take",
-+    "npk_park_until", "npk_windup_all", "npk_windup_grace", "npk_windup_note", "npk_ch_open",
-+    "npk_ch_open_lock", "npk_ch_close", "npk_ch_closed", "npk_rw_read_wait",
-+    "npk_rw_write_wait", "npk_rw_release_read",
-+}
++_FAMILIES = (
++    ("the kernel", "makes no syscall", (
++        "npk_sys6",
++        "npk_clone_raw",
++    )),
++    ("a file or descriptor", "reads no file, opens no descriptor and touches no device", (
++        "npk_close", "npk_io_register", "npk_io_unwatch", "npk_ofd_close", "npk_open", "npk_path_exists",
++        "npk_read", "npk_read_file", "npk_read_stdin", "npk_write", "npk_write_file",
++    )),
++    ("a process", "spawns no process", (
++        "npk_clone_exec", "npk_driver_kill_all", "npk_driver_live_count", "npk_driver_retire",
++    )),
++    ("a signal handler", "installs no signal handler", (
++        "npk_sigreturn",
++    )),
++    ("the clock", "has no clock", (
++        "npk_mono_now",
++    )),
++    ("the environment", "has no environment", (
++        "npk_environ", "npk_hardware_concurrency",
++    )),
++    ("concurrency", "has no concurrency: no task, no channel, no lock, no await, no deadline", (
++        "npk_barrier_arrive", "npk_barrier_cancel", "npk_barrier_poll", "npk_ch_close", "npk_ch_closed",
++        "npk_ch_open", "npk_ch_reclaim", "npk_ch_recv_wait", "npk_ch_send_wait", "npk_ch_try_recv",
++        "npk_ch_try_send", "npk_cv_begin", "npk_cv_broadcast", "npk_cv_done", "npk_cv_signal", "npk_exec",
++        "npk_frame_alloc", "npk_frame_drain", "npk_frame_exec_destroy", "npk_frame_exec_new", "npk_frame_free",
++        "npk_frozen_get", "npk_guard_release", "npk_join_deadline", "npk_mutex_acquire_wait", "npk_park_sleep",
++        "npk_park_take", "npk_park_until", "npk_rq_pop", "npk_rq_push", "npk_run_until", "npk_rw_read_wait",
++        "npk_rw_release_read", "npk_rw_write_wait", "npk_sarena_bump", "npk_sarena_destroy", "npk_sarena_make",
++        "npk_sarena_slot", "npk_sl_earliest", "npk_sl_push", "npk_sl_wake_due", "npk_step", "npk_task_done",
++        "npk_thread_entry", "npk_thread_exit", "npk_thread_join", "npk_thread_start", "npk_windup_all",
++        "npk_windup_grace", "npk_windup_note",
++    )),
++    ("machine code", "runs no machine code it made, so nothing in it is x86-64-specific", (
++        "npk_wildx_alloc", "npk_wildx_call", "npk_wildx_free", "npk_wildx_seal",
++    )),
++)
++DENIED = frozenset(n for _, _, names in _FAMILIES for n in names)
++FACET = {n: (facet, rule) for facet, rule, names in _FAMILIES for n in names}
++
++FLOOR = frozenset((
++    # the heap
++    "memcpy", "memmove", "memset", "npk_aalloc", "npk_alloc", "npk_alloc_managed", "npk_buffer_new", "npk_calloc",
++    "npk_dalloc", "npk_ralloc", "npk_wild_live_count", "npk_wild_release_all",
++    # the arena
++    "npk_arena_alloc", "npk_arena_at", "npk_arena_destroy", "npk_arena_free", "npk_arena_make", "npk_arena_reset",
++    # strings
++    "npk_int_to_string", "npk_string_concat", "npk_string_equals", "npk_string_from_bytes", "npk_string_slice",
++    "npk_to_cstring",
++    # the trap route
++    "npk_chain_depth", "npk_chain_push", "npk_chain_reset", "npk_chain_site", "npk_exit", "npk_fs_switch_call",
++    "npk_raise", "npk_trap",
++    # the stack guard
++    "__morestack", "__morestack_non_split", "npk_stack_exhausted", "npk_stack_foreign",
++    # LLVM's libcalls
++    "__divti3", "__modti3", "__udivti3", "__umodti3", "fmod", "fmodf",
++    # the entry
++    "_start", "npk_switch_stack",
++))
 +
 +_SYM = r'@(?:"([^"]*)"|([\w.$\-]+))'
 +_DEFINE = re.compile(r'^\s*define\b.*?' + _SYM + r'\s*\(')
@@ -581,10 +639,9 @@ index 0000000..37b2e47
 +
 +
 +def findings(ir_text, baseline, name):
-+    """One line per denied edge the floor program does not have, naming the function."""
-+    return [f"{name}: `{fn}` calls `{callee}`, and the floor program does not -- this library "
-+            "makes no syscall, touches no descriptor, reads no clock and starts no task "
-+            "(PA-006, SAFETY.md §2); a legitimate call is a decision, not an edit here"
++    """One line per denied edge the floor program does not have, naming the function and the facet."""
++    return [f"{name}: `{fn}` calls `{callee}`, and the floor program does not -- {FACET[callee][0]}: this "
++            f"library {FACET[callee][1]} (PA-006, SAFETY.md §2); a legitimate call is a decision, not an edit here"
 +            for fn, callee in sorted(edges(ir_text) - baseline) if callee in DENIED]
 diff --git a/harness/manifest.py b/harness/manifest.py
 new file mode 100644
@@ -751,10 +808,10 @@ index 0000000..2a8686b
 +    """`path` names a directory; `paths` a list of them."""
 +    return list(t["paths"]) if "paths" in t else [t["path"]]
 diff --git a/harness/run.py b/harness/run.py
-index 5ff35a7..5b7002d 100644
+index 5ff35a7..bb39d5e 100644
 --- a/harness/run.py
 +++ b/harness/run.py
-@@ -1,11 +1,228 @@
+@@ -1,11 +1,234 @@
  #!/usr/bin/env python3
 -"""nparse's harness -- A STUB, until cycle 0.0.2 writes the runner (meta/roadmap/0.0/0.0.2.md).
 +"""nparse's build and test runner, until `npkg` can build a library (PA-003).
@@ -772,7 +829,8 @@ index 5ff35a7..5b7002d 100644
 +   `BUILD_REFERENCE.md` §7.1 rule);
 +2. holds the toolchain to the manifest (`toolchain.py`): `llc`, `opt` and `ld.lld` at its
 +   LLVM exactly, its datalayout the one the pinned `opt` derives from its triple, `$NPKC`
-+   and `$NPKRT` set -- exit 2 otherwise;
++   and `$NPKRT` set -- and holds `irscan.py`'s two lists to `$NPKRT`: every name in them
++   defined, and every global symbol it defines in one of them -- exit 2 otherwise;
 +3. three BUILD STEPS (`meta/specs/BUILD.md` B-2, B-2a, B-4; @@PD-138@@): the scans' own
 +   controls -- the floor program and a syscaller from `harness/baseline/`, whose objects
 +   must differ by `npk_sys6` alone and whose call edges the scan must flag in the
@@ -943,10 +1001,15 @@ index 5ff35a7..5b7002d 100644
 +    except (toolchain.ToolchainError, manifest.ManifestError) as e:
 +        stop(str(e))
 +    runtime_defined = Obj(npkrt).defined()
-+    missing = sorted(irscan.DENIED - set(runtime_defined))
++    rt = Obj(npkrt)
++    missing = sorted((irscan.DENIED | irscan.FLOOR) - set(rt.defined()))
 +    if missing:
-+        stop(f"irscan.DENIED names {', '.join(missing)}, which the runtime does not define -- "
-+             "the deny list is stale for this compiler")
++        stop(f"irscan.py names {', '.join(missing)}, which the runtime does not define -- "
++             "its lists are stale for this compiler")
++    unclassed = sorted(set(rt.exported()) - irscan.DENIED - irscan.FLOOR)
++    if unclassed:
++        stop(f"the runtime defines {', '.join(unclassed)}, which irscan.py classes neither DENIED nor FLOOR -- "
++             "class each by PA-006 and SAFETY.md §2 before the call-edge scan stands behind it")
 +    work = os.path.join(ROOT, "build", "harness")
 +    shutil.rmtree(work, ignore_errors=True)
 +    os.makedirs(work)
@@ -1243,13 +1306,13 @@ index 0000000..dedd517
 +        out(f"ok    ${var} is a file")
 +    return got[0], got[1]
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index 9ab4173..f90b997 100644
+index 3c0769f..755b8b7 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
-@@ -954,3 +954,68 @@ ask, and holding the probes for it holds the cycle.
- *Reversal, for the author:* to run the research before 0.0.0, move the gate from cycle
- 0.0.5 to 0.0.0's step 0; to count the library routine, strike `CURRENCY.md`'s research
- section and the gate, and nothing else moves.
+@@ -962,3 +962,81 @@ the gate to cycle 0.1, through 0.0.5's close — 0.0.0's gate item 7 and block 0
+ research lines go, `CURRENCY.md`'s three research rows wait for their digests, and
+ `0.1/0.1.0.md`'s gate names them; to count the library routine, strike `CURRENCY.md`'s
+ research section and its three rows, and the gate with them.
 +
 +### @@PD-138@@ — the build is one module per root, held to the target rows, scanned two ways on both legs, and reproducible from two directories
 +**2026-10-15, cycle 0.0.2.** Measured at the pin `7e91730`, and each a rule of `specs/BUILD.md`:
@@ -1264,10 +1327,18 @@ index 9ab4173..f90b997 100644
 +  manifest's `triple` and `datalayout`, and the layout row is the one the pinned `opt` derives.
 +- **Two scans, both legs** (B-2, B-2a). Every object's undefined symbols are the runtime
 +  object's own defines — the runtime the link uses — and every -O0 module's call edges to the
-+  runtime are held to the floor program's: an edge to a syscall, a descriptor, the clock or a
-+  task fails the build, naming the function, which is PA-006 read as a check. The floor
-+  program has five undefined symbols and a syscaller six, the difference `npk_sys6`; the run
-+  measures that pair every time and reddens if either scan stops seeing it.
++  runtime are held to the floor program's. `harness/irscan.py` classes the runtime object's
++  global symbols — 119 at the pin, all a call can resolve to — each in exactly one of two
++  lists: DENIED, 75, by the facet of PA-006 or `SAFETY.md` §2 that forbids it (the kernel, a
++  file or descriptor, a process, a signal handler, the clock, the environment, concurrency,
++  machine code), or FLOOR, 44, the language's own machinery (the heap, the arena, strings, the
++  trap route, the stack guard, LLVM's libcalls, the entry). An edge to a denied symbol fails
++  the build, naming the function and the facet, and the run stops on a symbol in neither list.
++  So the scan reads PA-006 and §2 as a check for every facet a runtime function serves, and
++  for no facet whose construct lowers to no runtime call — an atomic operation is an LLVM
++  instruction, and a lock made and never held is a managed allocation — which review holds.
++  The floor program has five undefined symbols and a syscaller six, the difference
++  `npk_sys6`; the run measures that pair every time and reddens if either scan stops seeing it.
 +- **Reproducible** (B-4): `[build] entry` and every conformance root, built from two copies
 +  each carrying its manifest, emit byte-identical modules; without the manifest the consumer's
 +  two modules differ, which is the check's own failure, measured.
@@ -1277,6 +1348,10 @@ index 9ab4173..f90b997 100644
 +writing's reason stands);
 +**the undefined-symbol scan alone behind "no syscall"** — it says THAT a symbol is needed and
 +never where, and at an earlier compiler it could not see a syscall at all (`PLAYBOOK.md`);
++**the first writing's deny list, 41 names in four families** — seven of them local symbols no
++call can reach, and 41 global functions in PA-006's and §2's facets left out: the plan
++verification of 2026-10-15 named ten of those, and its runs stayed green with two of them, the
++environment's and a path probe's, called from `src/`;
 +**a permit list for the edges** — the floor's own glue calls the allocator, the trap path and
 +a descriptor's close, and `nitpick-regex` measured its permit list red on every probe; **only
 +`[build] entry` scanned** — it reaches only what it imports, so a module not yet imported
@@ -1285,8 +1360,9 @@ index 9ab4173..f90b997 100644
 +
 +*Reversal, for the author:* when the compiler's command line emits a module per object as its
 +`BUILD_REFERENCE.md` §4.1 describes, the drawing and a library object come back by a decision;
-+when a test must touch a descriptor, the deny list takes a scoped exemption by a decision; and when a re-pin renames a
-+denied symbol, the run says so by name and the list moves with the adoption.
++when a test must touch a descriptor, the deny list takes a scoped exemption by a decision; and when a re-pin adds,
++renames or removes a runtime function, the run stops naming it, and the lists move with the adoption, each new
++function classed by these facets.
 +
 +### @@PD-139@@ — a unit red on a compiler defect is pending: its right answer, the one failure it is excused, and a reviewed list
 +**2026-10-15, cycle 0.0.2.** `specs/BUILD.md` B-5b. A test that is CORRECT AND RED because a
@@ -1316,7 +1392,7 @@ index 9ab4173..f90b997 100644
 +when its fix is pinned, and a new observation form joins B-5b by a decision when a defect shows
 +a failure this one cannot name.
 diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md
-index 1603419..f31ed99 100644
+index 1603419..8d12b45 100644
 --- a/meta/specs/BUILD.md
 +++ b/meta/specs/BUILD.md
 @@ -44,19 +44,34 @@ compiler's own harness is Python for the same reason.
@@ -1360,7 +1436,7 @@ index 1603419..f31ed99 100644
  **Rule B-2.** The undefined-symbol scan is a **build step, not a test**. Every
  object is scanned and the build fails on any undefined symbol outside the
  runtime allowlist derived from `runtime/npkrt.ll`'s own `define`s plus `main`.
-@@ -65,6 +80,26 @@ For `nparse` it should be nearly vacuous — the library makes no syscall at all
+@@ -65,6 +80,33 @@ For `nparse` it should be nearly vacuous — the library makes no syscall at all
  (`SAFETY.md` §2) — and **a symbol appearing here is therefore a finding**, not
  a routine pass: it means something reached for the floor that had no business
  doing so.
@@ -1376,10 +1452,17 @@ index 1603419..f31ed99 100644
 +**Rule B-2a (@@PD-138@@) — the call-edge scan, and its controls.** Every
 +module's -O0 IR is read for its calls to the runtime, edge by edge — the calling
 +function and the callee — and an edge the floor program does not have, to a
-+symbol `harness/irscan.py` denies (a syscall, a descriptor, the clock, a task),
-+fails the build, naming the function. It reads every module under `src/`,
++symbol `harness/irscan.py` denies, fails the build, naming the function and the
++facet. `irscan.py` classes every global symbol of the runtime object — all a call
++can resolve to — in exactly one of two lists: DENIED, by the facet of PA-006 or
++`SAFETY.md` §2 that forbids it (the kernel, a file or descriptor, a process, a
++signal handler, the clock, the environment, concurrency, machine code), or FLOOR,
++the language's own machinery; the run stops on a symbol in neither, or a name in
++either that the runtime does not define. It reads every module under `src/`,
 +compiled as a root on its own — `src/lib.npk` reaches only what it imports — and
-+every program. **The instruments are measured on every full run:** the floor
++every program. It cannot see a facet whose construct lowers to no runtime call —
++an atomic operation, a lock made and never held — which review holds. **The
++instruments are measured on every full run:** the floor
 +program's object and a syscaller's must differ by `npk_sys6` alone, and the
 +call-edge scan must flag the syscaller's `main` and nothing in the floor, so a
 +scan gone blind reddens the run rather than passing everything (`PLAYBOOK.md`:
@@ -1387,7 +1470,7 @@ index 1603419..f31ed99 100644
  
  **Rule B-3.** The optimised leg runs on every program, every time: the same
  program re-emitted through `opt -O2` + `llc -O2` must produce the **same exit
-@@ -76,6 +111,12 @@ its first run there found a real defect that had passed for six cycles.
+@@ -76,6 +118,12 @@ its first run there found a real defect that had passed for six cycles.
  working directories produce byte-identical IR. `nparse` inherits this from the
  compiler (D-078, D-204, D-236) and the harness has a `repro` stage that
  measures it, because a property nobody measures is a property nobody has.
@@ -1400,7 +1483,7 @@ index 1603419..f31ed99 100644
  
  ---
  
-@@ -106,6 +147,25 @@ compiler's, marker for marker, plus two of ours:
+@@ -106,6 +154,25 @@ compiler's, marker for marker, plus two of ours:
  // expect-fault: DepthExceeded   the ParseError code this input must produce
  ```
  

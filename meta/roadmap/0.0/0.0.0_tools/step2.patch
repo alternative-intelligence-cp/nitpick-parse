@@ -58,7 +58,7 @@ index 28026ce..db6c51e 100644
  parser's scratch when an escape had to be decoded. Parsing a 1 GB file
  allocates nothing proportional to the file.
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index 2b3c129..003a1b1 100644
+index 2b3c129..c60989b 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
 @@ -252,6 +252,8 @@ a push parser must be given a recording visitor before it can be observed at
@@ -133,7 +133,7 @@ index 2b3c129..003a1b1 100644
  *One limitation stated rather than mitigated:* the caret line counts
  **codepoints, not display columns**, because `nparse` carries no Unicode width
  tables and will not — that is `ntui`'s domain and two copies would be two
-@@ -671,3 +694,64 @@ A config linter is not a POSIX utility, so it takes a repository of its own —
+@@ -671,3 +694,65 @@ A config linter is not a POSIX utility, so it takes a repository of its own —
  **created at cycle 0.12, when it is needed, and not before**, which is the
  compiler's own rule about not creating directories in anticipation. It is
  registered in that workbench's `APPS.md` now so the name is claimed.
@@ -147,13 +147,14 @@ index 2b3c129..003a1b1 100644
 +
 +### @@PD-129@@ — the specification's types keep their enum fields, at their measured sizes
 +**2026-10-15, cycle 0.0.0, on probes 02, 03 and 04.** `Event` is **32** bytes,
-+`ParseError` **28**, `Node` **64** and `Step` **36** — each measured by a probe whose
-+exit code is the `#size_of` it reports, so nothing was transcribed. The
-+specifications had 24, 24 and 56, summed from field widths that gave a payload-free
-+enum one or two bytes; it is an `int32` tag, four (the compiler's
-+`TYPE_REFERENCE.md` §9.3). `EventKind`, `ScalarKind`, `NodeKind`, `TextSrc` and
-+`FaultCode` stay enum-typed fields, and the rules that assert a size (E-6, F-1,
-+D-3) assert these.
++`Step` **36** and `Node` **64**, each the exit code of the probe that measures it
++(02, 03 and 04 exit with its `#size_of`), so none of the three was transcribed; and
++`ParseError` is **28**, an assertion in probe 03, which exits 19 at any other size.
++The specifications had `Event` and `ParseError` at 24 and `Node` at 56, summed from
++field widths that gave a payload-free enum one or two bytes; it is an `int32` tag,
++four (the compiler's `TYPE_REFERENCE.md` §9.3). `EventKind`, `ScalarKind`,
++`NodeKind`, `TextSrc` and `FaultCode` stay enum-typed fields, and the rules that
++assert a size (E-6, F-1, D-3) assert these.
 +
 +It supersedes in part PA-021's "24-byte", and PA-040's; neither rule moves.
 +

@@ -1,5 +1,5 @@
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index 003a1b1..19b9416 100644
+index c60989b..fa4368a 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
 @@ -559,10 +559,15 @@ bound is the intended path and what every example uses; `dyn` costs an indirect
@@ -18,7 +18,7 @@ index 003a1b1..19b9416 100644
  
  **Every shipped format runs it, and so does a deliberately trivial fifth format
  that lives in `tests/`.** That fifth one is the test of the claim that nothing
-@@ -755,3 +760,29 @@ for a container whose element drops `exit 0` cannot see.
+@@ -756,3 +761,29 @@ for a container whose element drops `exit 0` cannot see.
  *Reversal, for the author:* when the compiler lands deep-view accessors for owning
  arena elements, probe 05 is accepted; re-decide then whether the pool stays a
  necessity or becomes an optimisation (`meta/roadmap/0.4/README.md`'s watch-for).

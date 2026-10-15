@@ -34,10 +34,10 @@ index 40c5495..a2bbd9b 100644
  # a root, none with a LEX- or PARSE- code. It comes last, so a file a suite
  # judges is judged there first, by its own rule. The runner refuses a manifest
 diff --git a/tests/probe/README.md b/tests/probe/README.md
-index 7e6534a..ad0767c 100644
+index ef3614a..55aa740 100644
 --- a/tests/probe/README.md
 +++ b/tests/probe/README.md
-@@ -34,4 +34,5 @@ transcribed wrongly.
+@@ -36,4 +36,5 @@ reports is an assertion with its own exit code below 20 (02's `Span` and
    directory, probe 06 as a pending unit.
  - [`defect/view_reseat/`](defect/view_reseat/README.md) — probe 08h: a view
    re-seated by a callee outlives a block's `string` and reads freed memory

@@ -41,7 +41,7 @@ git -C "$NPK_TREE" show "$PIN:src/frontend/keywords.npk" > "$F/keywords.npk"
 echo "§1.6 placeholders in the patches: $(grep -ohE '@@PD-[0-9]+@@' "$T3"/step*.patch | sort -u | tr '\n' ' ')"
 echo "§1.6 decisions.txt numbers them: $(python3 -B -c "
 import sys; sys.path.insert(0, sys.argv[1]); import apply
-t = apply.numbers(); print(' '.join('%s=%s' % (k, t[k]) for k in ('PD-140', 'PD-141', 'PD-142') if k in t) or 'NONE')" "$TL")"
+t = apply.numbers(); print(' '.join('%s=base+%d' % (k, int(t[k].split('-')[1]) - apply.base_number()) for k in ('PD-140', 'PD-141', 'PD-142') if k in t) or 'NONE')" "$TL")"
 python3 -B "$TL/pointers.py" "$d" "$T3" | sed 's/^§1\.8 /§1.7 /'
 
 rm -rf "${F:?}"

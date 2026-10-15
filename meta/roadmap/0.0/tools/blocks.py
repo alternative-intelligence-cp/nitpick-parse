@@ -98,18 +98,18 @@ def compare_one(got, want, table=None):
 
 
 def selftest():
-    """Planted lines through `compare_one`, over a planted table -- base 100, PD-1 … PD-3 -- and over the same
+    """Planted lines through `compare_one`, over a planted table -- base 10, PD-1 … PD-3 -- and over the same
     table with PD-2 declined, which moves PD-3 down a number and must not move its label."""
-    full = {"PD-1": "PA-101", "PD-2": "PA-102", "PD-3": "PA-103"}
-    declined = {"PD-1": "PA-101", "PD-3": "PA-102"}
+    full = {"PD-1": "PA-011", "PD-2": "PA-012", "PD-3": "PA-013"}
+    declined = {"PD-1": "PA-011", "PD-3": "PA-012"}
     cases = [
-        ("a run's number at its PD's rank, against that PD's label", "high PA-103", "high @@PD-3@@", full, True),
-        ("the same after the review declines an earlier PD", "high PA-102", "high @@PD-3@@", declined, True),
-        ("a run's number one rank off, against the label", "high PA-102", "high @@PD-3@@", full, False),
-        ("the label's line with one other word changed", "highest PA-103", "high @@PD-3@@", full, False),
-        ("the base, against itself", "base PA-100", "base PA-100", full, True),
-        ("a number past the last rank, against any label", "high PA-104", "high @@PD-3@@", full, False),
-        ("an Expect that writes a number past the base out", "high PA-103", "high PA-103", full, False),
+        ("a run's number at its PD's rank, against that PD's label", "high PA-013", "high @@PD-3@@", full, True),
+        ("the same after the review declines an earlier PD", "high PA-012", "high @@PD-3@@", declined, True),
+        ("a run's number one rank off, against the label", "high PA-012", "high @@PD-3@@", full, False),
+        ("the label's line with one other word changed", "highest PA-013", "high @@PD-3@@", full, False),
+        ("the base, against itself", "base PA-010", "base PA-010", full, True),
+        ("a number past the last rank, against any label", "high PA-014", "high @@PD-3@@", full, False),
+        ("an Expect that writes a number past the base out", "high PA-013", "high PA-013", full, False),
     ]
     ok = 0
     for what, got, want, table, same in cases:

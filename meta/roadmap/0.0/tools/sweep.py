@@ -17,8 +17,9 @@ emphasis strip that deleted every `_` made every pattern holding one unmatchable
     emphasised span -- never inside an identifier, so `NPARSE_DUP_SCAN_MAX` and `tools/parse_check` are matched whole;
   * a pattern holding a part the transform makes unmatchable is REFUSED, by name, before anything is swept: a
     literal `*` or backtick (the transform deletes both), a line anchor `^` or `$` (joined text has one line, so
-    each would match only at the file's ends), or a newline (the joining removes every one) -- a part that can never
-    match, even an optional one, says its pattern was written against the file and not against the joined text;
+    each would match only at the file's ends), a newline (the joining removes every one), or a heading's marker, two
+    or more `#` and a space (the transform strips it from every line it starts) -- a part that can never match, even
+    an optional one, says its pattern was written against the file and not against the joined text;
   * `control` runs the transform's own self-test first -- one planted text and pattern per character class, each
     matched, and one pattern per refused kind, each refused -- and prints its count.
 
@@ -79,6 +80,8 @@ def unmatchable(rx):
                 walk(x)
 
     walk(sre_parse.parse(rx, re.I))
+    if re.search(r"(?<!\\)##+ ", rx):
+        found.append("a heading's marker")
     return ", ".join(sorted(set(found))) or None
 
 
@@ -129,7 +132,7 @@ _PLANTED = [
     ("a quotation's marker", ["> quoted words"], r"quoted words"),
     ("a table row's marker", ["| cell | next |"], r"cell \| next"),
 ]
-_REFUSED = [r"uncontrolled\*\* fault", r"`code`", r"^starts here", r"ends here$", r"one\ntwo"]
+_REFUSED = [r"uncontrolled\*\* fault", r"`code`", r"^starts here", r"ends here$", r"one\ntwo", r"## heading words"]
 
 
 def selftest():

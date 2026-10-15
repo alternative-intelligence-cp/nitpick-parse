@@ -1,8 +1,8 @@
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index 4a7b62c..78721e9 100644
+index c279516..7d64e69 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
-@@ -891,3 +891,19 @@ budget.
+@@ -892,3 +892,19 @@ budget.
  *Reversal, for the author:* none for the measurement. The three codes are offered
  to the workbench for `PLAYBOOK.md` §3 item 8; if it assigns others, the probes and
  units change their arm lines to match, and nothing else moves.

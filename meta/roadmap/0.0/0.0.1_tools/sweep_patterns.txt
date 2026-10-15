@@ -9,4 +9,5 @@ format-versions.md | format-versions
 the four surprises | four things
 a library tied to no platform | not tied to linux|linux-specific or x86-64-specific|nothing in this library is linux-specific
 the planning status | status: planning|no library code exists yet
-the empty heading | ## what this is ## before starting
+the empty heading | what this is before starting
+the research gating cycle 0.1 | gates? cycle 0\.1|research[^.]{0,80}\bcycle 0\.1\b|cycle 0\.1[^.]{0,40}\bresearch

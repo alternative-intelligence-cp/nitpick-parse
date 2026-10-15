@@ -1,8 +1,8 @@
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index 90888cc..973ec63 100644
+index 1036678..677cbc8 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
-@@ -1090,3 +1090,31 @@ that sets it; **a capacity as a generic value parameter** — the compiler reser
+@@ -1111,3 +1111,31 @@ that sets it; **a capacity as a generic value parameter** — the compiler reser
  and a `fixed` constant covers each capacity (the libraries' answer on its S-135).
  
  *Reversal, for the author:* none; a new bound is a row of §7 and a line here, by a decision.
@@ -35,10 +35,10 @@ index 90888cc..973ec63 100644
 +*Reversal, for the author:* when D-341 lands, `Bytes` may offer a frozen view by a decision; when a decision accepts
 +the contracts' arms, the comments become clauses, a marker deleted per site.
 diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md
-index 2eea6a9..9d55994 100644
+index 2737f88..24fdc3f 100644
 --- a/meta/specs/BUILD.md
 +++ b/meta/specs/BUILD.md
-@@ -245,6 +245,12 @@ into it and nothing converts back (`NITPICK-TYPE-007`; @@PD-132@@).
+@@ -252,6 +252,12 @@ into it and nothing converts back (`NITPICK-TYPE-007`; @@PD-132@@).
    fall back on** — see `VALUE_MODEL.md` §5 for what a `Document` does about
    large maps.
  

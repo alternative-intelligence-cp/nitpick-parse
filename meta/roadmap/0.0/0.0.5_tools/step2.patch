@@ -25,7 +25,7 @@ index 234f8cb..89cdeb0 100644
  measured, an arena whose `get` copies and which refuses an owning element, a
  trait with a `Self->` receiver through a bound **and** through `dyn`, the
 diff --git a/tests/probe/README.md b/tests/probe/README.md
-index ad0767c..73c15a2 100644
+index 55aa740..5fa138e 100644
 --- a/tests/probe/README.md
 +++ b/tests/probe/README.md
 @@ -2,7 +2,7 @@

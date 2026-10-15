@@ -28,10 +28,10 @@ index 04c170c..4d6a5f8 100644
  test table, CI, and `src/core/` — `Vec<T>`, `Bytes`, `SmallMap<K,V>` and
 diff --git a/tests/probe/README.md b/tests/probe/README.md
 new file mode 100644
-index 0000000..b4b8af3
+index 0000000..7a129e3
 --- /dev/null
 +++ b/tests/probe/README.md
-@@ -0,0 +1,36 @@
+@@ -0,0 +1,38 @@
 +# `tests/probe/` — the language probes
 +
 +Small programs that ask the compiler whether a shape `meta/specs/` depends on is
@@ -56,8 +56,10 @@ index 0000000..b4b8af3
 +| [`defect/`](defect/) | the reproduction of a compiler defect, with its controls and a README saying what it blocks | the verdict it was written against, as a comment |
 +
 +A probe's header is a hypothesis; the verdict is the table in `0.0.0.md` §6. A
-+size probe's exit code IS the `#size_of` it measures, so the number cannot be
-+transcribed wrongly.
++size probe exits with the `#size_of` of its subject — `Event` (02), `Step` (03),
++`Node` (04) — so that number cannot be transcribed wrongly; any other size it
++reports is an assertion with its own exit code below 20 (02's `Span` and
++`TextRef`, 03's `ParseError`).
 +
 +## The defects, at compiler `7e91730`
 +
