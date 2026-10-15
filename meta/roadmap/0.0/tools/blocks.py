@@ -6,6 +6,7 @@ lines; this does not. Modelled on `nitpick-regex`'s `meta/roadmap/0.2/0.2.4_tool
     python3 -B blocks.py list    "$REPO" <subcycle>               # the blocks, in order
     python3 -B blocks.py run     "$REPO" <subcycle> <id> [...]    # run blocks, save outputs
     python3 -B blocks.py compare "$REPO" <subcycle> <id> [...]    # diff saved outputs vs Expect
+    python3 -B blocks.py selftest                                 # the labels' control: what they hide, and not
 
 A BLOCK is a fenced `bash` block in `meta/roadmap/0.0/<subcycle>.md` whose first line is `# block <id>`; it is run by a
 fresh `bash -c` with only `REPO=<the repository>` before it -- the worker's situation exactly, where no variable or
@@ -16,11 +17,21 @@ Its EXPECTED output is the fenced `text` block whose first line is `# expect <id
 legitimately varies from run to run -- a run's seconds (`in 91.2 s`), the machine's free memory (`available GiB:`),
 a calendar date, and `check_refs`'s file counts, which every later plan of the cycle moves -- and nothing else; a line the plan writes as `# (any)` matches any one line. It prints `SAME <id>`
 or the lines that differ, and exits 1 if any block differs.
+
+A DECISION NUMBER PAST THE BASE IS READ AS ITS LABEL. The plan never writes those numbers out: they are the review's
+to give (`decisions.txt`), and a block that prints one -- the decision log's highest, say -- prints whatever the review
+gave. So, on the RUN'S side only, every `PA-<n>` with n past `decisions.txt`'s base becomes the label of the PD at that
+rank, `@@PD-<m>@@`, numbered exactly as `apply.py` numbers the patches; the Expect writes the label. A number at or
+below the base is left as it is; a number past the last rank is left as it is, and differs from any label; an
+Expect that writes a number past the base out differs from every run. `selftest` shows each of those on planted lines.
 """
 import os
 import re
 import subprocess
 import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from apply import numbers  # noqa: E402 -- the one reading of decisions.txt, apply.py's
 
 FENCE = re.compile(r"^```(bash|text)\n(.*?)^```", re.S | re.M)
 _MASKS = [
@@ -62,8 +73,18 @@ def mask(line):
     return line.rstrip()
 
 
-def compare_one(got, want):
-    g = [mask(x) for x in got.rstrip("\n").split("\n")] if got.strip() else []
+def labels(table=None):
+    """{"PA-<n>": "@@PD-<m>@@"} for every rank past the base, by `decisions.txt` unless a table is given."""
+    return {pa: "@@%s@@" % pd for pd, pa in (numbers() if table is None else table).items()}
+
+
+def label(line, table):
+    return re.sub(r"\bPA-\d+\b", lambda m: table.get(m.group(0), m.group(0)), line)
+
+
+def compare_one(got, want, table=None):
+    table = labels() if table is None else table
+    g = [mask(label(x, table)) for x in got.rstrip("\n").split("\n")] if got.strip() else []
     w = [mask(x) for x in want.rstrip("\n").split("\n")] if want.strip() else []
     diffs = []
     for i in range(max(len(g), len(w))):
@@ -76,7 +97,32 @@ def compare_one(got, want):
     return diffs
 
 
+def selftest():
+    """Planted lines through `compare_one`, over a planted table -- base 100, PD-1 … PD-3 -- and over the same
+    table with PD-2 declined, which moves PD-3 down a number and must not move its label."""
+    full = {"PD-1": "PA-101", "PD-2": "PA-102", "PD-3": "PA-103"}
+    declined = {"PD-1": "PA-101", "PD-3": "PA-102"}
+    cases = [
+        ("a run's number at its PD's rank, against that PD's label", "high PA-103", "high @@PD-3@@", full, True),
+        ("the same after the review declines an earlier PD", "high PA-102", "high @@PD-3@@", declined, True),
+        ("a run's number one rank off, against the label", "high PA-102", "high @@PD-3@@", full, False),
+        ("the label's line with one other word changed", "highest PA-103", "high @@PD-3@@", full, False),
+        ("the base, against itself", "base PA-100", "base PA-100", full, True),
+        ("a number past the last rank, against any label", "high PA-104", "high @@PD-3@@", full, False),
+        ("an Expect that writes a number past the base out", "high PA-103", "high PA-103", full, False),
+    ]
+    ok = 0
+    for what, got, want, table, same in cases:
+        verdict = not compare_one(got, want, labels(table))
+        ok += verdict == same
+        print("%-62s %s" % (what + ":", "SAME" if verdict else "DIFF"))
+    print("the labels' control: %d of %d as planted" % (ok, len(cases)))
+    return 0 if ok == len(cases) else 1
+
+
 def main(argv):
+    if len(argv) == 2 and argv[1] == "selftest":
+        return selftest()
     if len(argv) < 4 or argv[1] not in ("list", "run", "compare"):
         print(__doc__)
         return 2

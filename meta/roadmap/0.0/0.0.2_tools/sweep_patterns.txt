@@ -7,6 +7,6 @@ the symbol scan behind no syscall | undefined-symbol scan[^.]{0,120}(syscall|vac
 the consumer's step in CI | conformance consumer, all four steps|all four steps run and the last
 the defect entries left to 0.0.3 | 0\.0\.3 gives each|cycle 0\.0\.3 gives
 the Python row unchecked | by cycle 0\.0\.2, which writes the harness
-the verdicts' section | 0\.0\.0\.md[`)]*,? (whose )?§7|table in `?0\.0\.0\.md`? §7
-the plan's P-1 in a probe's README | from `?src/`?\s*\(P-1\)
+the verdicts' section | 0\.0\.0\.md\)*,? (whose )?§7|table in 0\.0\.0\.md §7
+the plan's P-1 in a probe's README | from src/\s*\(P-1\)
 the re-pin after 115 | re-?pin[^.]{0,30}\b115\b|104 … 115|104 \.\.\. 115|after landing 115

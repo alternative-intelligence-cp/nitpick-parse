@@ -3,10 +3,12 @@
 # The plan proposes PDs from PD-129 on, in the Team seat's block for this repository (PD-129 ... PD-148), and a line is
 # added here as each subcycle's file reaches the pin. At the libraries' seat's review each accepted PD becomes this
 # repository's next decision number in the order of this file, after `base`. `apply.py` writes the numbers into every patch at the moment it applies it -- each
-# `@@PD-nnn@@` becomes `PA-<base + rank>` -- so no file of this plan states a number before the review gives it.
+# `@@PD-nnn@@` becomes `PA-<base + rank>`, and a patch whose added lines hold a bare `PD-` label or a number past the
+# base is refused -- and an Expect writes a number past the base as its label, which `blocks.py` reads a run's number
+# as; so no file of this plan states a number before the review gives it.
 #
 # If the review declines a PD, it deletes that line here and re-cuts the hunks that declare or cite it; every later
-# number then moves down by one, in every patch, by this file alone.
+# number then moves down by one, in every patch and in every run's output, and no Expect moves -- by this file alone.
 base PA-103
 PD-129
 PD-130

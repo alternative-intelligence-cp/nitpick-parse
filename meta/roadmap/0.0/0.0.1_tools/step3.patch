@@ -33,7 +33,7 @@ index a997a84..2251249 100644
  ## Licence
  
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index 78721e9..827610d 100644
+index 78721e9..02aac3d 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
 @@ -907,3 +907,22 @@ again** — a table is the form a check can read without a second, hand-written

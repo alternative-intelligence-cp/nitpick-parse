@@ -4,8 +4,10 @@
 #     REPO=<the dispatch's REPO>; . "$REPO/meta/roadmap/0.0/tools/env.sh"
 #
 # THE PATHS ARE THE CHECKOUT'S: `WB` is the directory above it (the workbench), `NPK_TREE` the compiler beside that,
-# `CHECK` the workbench's `skills/check/scripts` -- so a block run in a relocated copy finds another workbench or none,
-# and the blocks are run in the checkout the dispatch names. `$NPK_TREE` is read with `git show` and `git rev-parse`
+# `CHECK` the workbench's `skills/check/scripts`, and `check_refs` resolves `CLAUDE.md`'s two links up into the
+# workbench, `../BOARD.md` and `../WORKSTREAMS.md` -- so a block run in a relocated copy finds another workbench or
+# none (and, without those two files, two `broken-link` findings in every `refs`), and the blocks are run in the
+# checkout the dispatch names. `$NPK_TREE` is read with `git show` and `git rev-parse`
 # alone. The toolchain is the pin `7e91730`'s, whose LLVM, 20.1.8, is the machine's own: `llc`, `opt` and `ld.lld` are
 # found on PATH, and every step 0 block prints what each reports -- anything but 20.1.8 is a stop. `$NPKC` and
 # `$NPKRT` come from the dispatch's TOOLCHAIN line when it sets them, and from the workbench's copy of the pin when it
@@ -122,4 +124,20 @@ refs() {
   ( cd "$REPO" && python3 -B "$CHECK/check_refs.py" . ) > "$A/refs.out" 2>&1
   echo "check_refs exit $?"
   sed -E 's/  +/ /g' "$A/refs.out"
+}
+
+# `apply.py`'s label checks, each seen to STOP on a mutated copy of this plan's folder: a bare PD-131 in an added line
+# of 0.0.4's step 4 (the plan verification of 2026-10-15, its finding 1), and @@PD-144@@ cited in 0.0.4's step 1,
+# which step 2 declares (its finding 5). The copy is applied to no tree -- the checks stop it before `git apply` runs,
+# and a check that did not would fail on the missing directory instead, a different line -- and is removed after.
+#     label_mutants
+label_mutants() {
+  local d="$A/labels"
+  rm -rf "${d:?}"; mkdir -p "$d"; cp -r "$TOOLS/.." "$d/plan"
+  sed -i '0,/^+.*@@PD-131@@/s/@@PD-131@@/PD-131/' "$d/plan/0.0.4_tools/step4.patch"
+  echo "label mutant, a bare PD-131 in 0.0.4's step 4: $(python3 -B "$d/plan/tools/apply.py" "$d/none" 0.0.4 4 2>&1)"
+  cp "$TOOLS/../0.0.4_tools/step4.patch" "$d/plan/0.0.4_tools/step4.patch"
+  sed -i '0,/^+.*@@PD-143@@/s/@@PD-143@@/@@PD-143@@, @@PD-144@@/' "$d/plan/0.0.4_tools/step1.patch"
+  echo "label mutant, @@PD-144@@ cited in 0.0.4's step 1: $(python3 -B "$d/plan/tools/apply.py" "$d/none" 0.0.4 1 2>&1)"
+  rm -rf "${d:?}"
 }

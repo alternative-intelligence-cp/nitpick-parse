@@ -576,7 +576,7 @@ index 75284ff..0486c85 100644
 +would make a node unstorable. Governed by `meta/specs/VALUE_MODEL.md`. Built in cycle 0.4.
 diff --git a/tests/probe/probe02_pod_event.npk b/tests/probe/probe02_pod_event.npk
 new file mode 100644
-index 0000000..66c22e7
+index 0000000..278878f
 --- /dev/null
 +++ b/tests/probe/probe02_pod_event.npk
 @@ -0,0 +1,119 @@
@@ -701,7 +701,7 @@ index 0000000..66c22e7
 +};
 diff --git a/tests/probe/probe03_payload_enum.npk b/tests/probe/probe03_payload_enum.npk
 new file mode 100644
-index 0000000..53cf575
+index 0000000..4eaa8e4
 --- /dev/null
 +++ b/tests/probe/probe03_payload_enum.npk
 @@ -0,0 +1,129 @@

@@ -1,5 +1,5 @@
 diff --git a/meta/roadmap/ROADMAP.md b/meta/roadmap/ROADMAP.md
-index 04c170c..3d9f951 100644
+index 04c170c..4d6a5f8 100644
 --- a/meta/roadmap/ROADMAP.md
 +++ b/meta/roadmap/ROADMAP.md
 @@ -93,13 +93,16 @@ Enough detail that a reader can tell whether a cycle is finished without
@@ -28,7 +28,7 @@ index 04c170c..3d9f951 100644
  test table, CI, and `src/core/` — `Vec<T>`, `Bytes`, `SmallMap<K,V>` and
 diff --git a/tests/probe/README.md b/tests/probe/README.md
 new file mode 100644
-index 0000000..3a22f33
+index 0000000..b4b8af3
 --- /dev/null
 +++ b/tests/probe/README.md
 @@ -0,0 +1,36 @@

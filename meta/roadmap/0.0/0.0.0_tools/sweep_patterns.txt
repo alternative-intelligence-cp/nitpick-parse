@@ -1,11 +1,11 @@
 # cycle 0.0.0's stale-claim sweep: one subject per claim the steps change, `<subject> | <regex>`, case-insensitive,
 # over joined text (sweep.py). Each subject is swept in more than one wording; the control reads every removed hunk.
 the 24-byte value | \b24[- ]?bytes?\b|twenty-four bytes|\b24\b[^.]{0,20}\basserted
-the 56-byte node | \b56[- ]?bytes?\b|\b56\b[^.]{0,20}\basserted|^\s*\S+:\w+;\s*// 1\b
+the 56-byte node | \b56[- ]?bytes?\b|\b56\b[^.]{0,20}\basserted|\S+:\w+;\s*// 1\b
 a one- or two-byte enum field | (EventKind|ScalarKind|NodeKind|FaultCode|TextSrc):\w+;\s*// (1|2) bytes?
 the 28-byte compromise | two fields and 28 bytes
 no stack-depth guard | no stack[- ]?(depth )?guard|stack-depth guard
-an uncontrolled overflow | raw fault|uncontrolled fault|not a controlled stop|uncontrolled\*\* fault|blow the stack
+an uncontrolled overflow | raw fault|uncontrolled fault|not a controlled stop|blow the stack
 stack-depth as future work | 1\.5\.8|nothing exists today
 the arena's copying get refused | copy of an owning value is refused|returns a copy[^.]{0,80}(read back|refused|unreadable)|read back at all|would not compile|cannot be read back
 a Vec of owners uncopyable | (vec|array)[^.]{0,30}(of them )?(could not|cannot) be copied|stored in an array or an arena may own

@@ -1,5 +1,5 @@
 diff --git a/harness/README.md b/harness/README.md
-index 182809a..6f2f6a0 100644
+index 182809a..0134b94 100644
 --- a/harness/README.md
 +++ b/harness/README.md
 @@ -8,3 +8,43 @@ Built in cycles 0.0.2 and 0.0.3.
@@ -1316,7 +1316,7 @@ index 9ab4173..f90b997 100644
 +when its fix is pinned, and a new observation form joins B-5b by a decision when a defect shows
 +a failure this one cannot name.
 diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md
-index 1603419..6b5cd7d 100644
+index 1603419..f31ed99 100644
 --- a/meta/specs/BUILD.md
 +++ b/meta/specs/BUILD.md
 @@ -44,19 +44,34 @@ compiler's own harness is Python for the same reason.

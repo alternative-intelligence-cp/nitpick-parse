@@ -1,5 +1,5 @@
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index 827610d..5e65247 100644
+index 02aac3d..9ab4173 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
 @@ -493,6 +493,8 @@ specification, and that is stated rather than hidden; its hand-built corpus is
