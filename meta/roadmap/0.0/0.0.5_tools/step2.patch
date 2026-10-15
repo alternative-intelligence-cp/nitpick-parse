@@ -1,0 +1,52 @@
+diff --git a/CLAUDE.md b/CLAUDE.md
+index eb288f5..90edeba 100644
+--- a/CLAUDE.md
++++ b/CLAUDE.md
+@@ -117,7 +117,7 @@ compiler's own bootstrap ladder, and `[dependencies]` resolves to nothing.
+ `NPKC=… NPKRT=… python3 -B harness/run.py` builds and scans every module under
+ `src/`, runs every suite `nitpick.toml` declares at −O0 and through `opt -O2`,
+ and prints its verdict last (`harness/README.md`). *(Until cycle 0.0.2 the probes
+-were run by hand, by `meta/roadmap/0.0/0.0.0.md` §2's command.)* Since cycle 0.0.3 it
++were run by hand, by `meta/roadmap/done/0.0/0.0.0.md` §2's command.)* Since cycle 0.0.3 it
+ runs its self-check before it judges anything, judges the refusals by their codes,
+ sweeps every `.npk` in the tree, and runs the tree checks; `--only` concludes nothing.
+ 
+diff --git a/meta/roadmap/ROADMAP.md b/meta/roadmap/ROADMAP.md
+index 234f8cb..89cdeb0 100644
+--- a/meta/roadmap/ROADMAP.md
++++ b/meta/roadmap/ROADMAP.md
+@@ -98,7 +98,7 @@ opening it. The per-cycle README has the subcycle map and the checklist.
+ 
+ ### 0.0 — Foundations
+ The **language probes** first — the programs in `tests/probe/`, every verdict in
+-`0.0/0.0.0.md` §6 — asking the compiler whether the shapes the design depends on are
++`done/0.0/0.0.0.md` §6 — asking the compiler whether the shapes the design depends on are
+ spellable: the specification's own `Event`, `Step` and `Node` with their sizes
+ measured, an arena whose `get` copies and which refuses an owning element, a
+ trait with a `Self->` receiver through a bound **and** through `dyn`, the
+diff --git a/tests/probe/README.md b/tests/probe/README.md
+index ad0767c..73c15a2 100644
+--- a/tests/probe/README.md
++++ b/tests/probe/README.md
+@@ -2,7 +2,7 @@
+ 
+ Small programs that ask the compiler whether a shape `meta/specs/` depends on is
+ spellable, compilable and correct — written and measured by cycle 0.0.0
+-([`meta/roadmap/0.0/0.0.0.md`](../../meta/roadmap/0.0/0.0.0.md), whose §6 holds every
++([`meta/roadmap/done/0.0/0.0.0.md`](../../meta/roadmap/done/0.0/0.0.0.md), whose §6 holds every
+ verdict), and kept as a regression suite for the language this library is built
+ on. **A probe is never deleted.** A compiler change that breaks one of these
+ shapes is caught here, not by a format failing mysteriously in a later cycle.
+diff --git a/tests/probe/probe01a_naive_accumulate.npk b/tests/probe/probe01a_naive_accumulate.npk
+index 244e840..2cb52f6 100644
+--- a/tests/probe/probe01a_naive_accumulate.npk
++++ b/tests/probe/probe01a_naive_accumulate.npk
+@@ -1,7 +1,7 @@
+ // expect-exit: 93
+ //
+ // PROBE 01a -- THE NAIVE DECIMAL ACCUMULATOR, AND WHETHER IT TRAPS. The flagship's first half
+-// (`meta/roadmap/0.0/0.0.0.md` §4).
++// (`meta/roadmap/done/0.0/0.0.0.md` §4).
+ //
+ // ASKS: twenty-three nines fed to `acc = acc * 10 + d` in an `int64` -- the accumulator every
+ // parser in every other language writes. Does plain overflow trap here (the compiler's D-210),

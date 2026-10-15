@@ -1,0 +1,6 @@
+# 0.0.5's stale-claim sweep: one subject per claim the steps changed, `<subject> | <regex>`, matched case-insensitively
+# over joined text (`../tools/sweep.py`). A candidate is not a finding: 0.0.5.md §2 gives each one's class.
+the consumer in examples | linter in .?examples/|configuration linter in .?examples|in this repository rather than a separate one|built and run by the harness, so a broken example
+the copied counts | five measurements|three measurements|one decision batch is settled|four for the project.s author
+the consumer among the examples | dogfood program|\[ \] the 0\.12 linter$|\[ \] the 0\.12 linter 
+the TOML pin | TOML.{0,6}v1\.0\.0

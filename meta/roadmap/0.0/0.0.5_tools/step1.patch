@@ -1,0 +1,156 @@
+diff --git a/examples/README.md b/examples/README.md
+index bac3b73..db14885 100644
+--- a/examples/README.md
++++ b/examples/README.md
+@@ -2,4 +2,6 @@
+ 
+ Runnable demonstrations, **built and run by the harness**, so a broken example
+ is a red run. One per format plus the architectural ones — a streaming
+-consumer, a custom `Format` plugin, and the cycle-0.13 dogfood program.
++consumer and a custom `Format` plugin. *(Corrected 2026-10-15, cycle 0.0.5 — the early ecosystem audit's E2-6:
++this listed "the cycle-0.13 dogfood program" among them; the dogfood consumer is cycle 0.12's, in its own repository
++under `nitpick-apps` (PA-103).)*
+diff --git a/meta/OPEN_QUESTIONS.md b/meta/OPEN_QUESTIONS.md
+index 8884e48..ffd67a8 100644
+--- a/meta/OPEN_QUESTIONS.md
++++ b/meta/OPEN_QUESTIONS.md
+@@ -14,9 +14,10 @@ is struck through here with the decision's number, **never deleted** — the
+ question is part of the record of how the answer was reached.
+ 
+ **No cycle in the plan is blocked on a question.** What remains open is open by
+-design: three measurements taken in the cycles that can take them, two questions
+-that wait for a consumer to ask, one gated on the compiler's tooling, and four
+-that are the compiler's rather than ours.
++design, each entry saying why: a measurement taken in the cycle that can take it, a
++question that waits for a consumer to ask, a gate on the compiler's tooling, or the
++compiler's rather than ours. *(Corrected 2026-10-15, cycle 0.0.5 — E2-10: this
++counted three, two, one and four; the entries below are the count.)*
+ 
+ ---
+ 
+diff --git a/meta/roadmap/0.12/README.md b/meta/roadmap/0.12/README.md
+index 59a45c4..24b8701 100644
+--- a/meta/roadmap/0.12/README.md
++++ b/meta/roadmap/0.12/README.md
+@@ -7,8 +7,9 @@
+ > compiler's dependency resolution lands, and the repository's GitHub
+ > description and topics are set in the same pass that creates it.
+ 
+-**A configuration linter in `examples/`, written against the library as a
+-user.**
++**A configuration linter, in its own repository under `nitpick-apps` (PA-103), written against the
++library as a user.** *(Corrected 2026-10-15, cycle 0.0.5 — the early ecosystem audit's E2-6: this said "in
++`examples/`", which the header above and PA-103 decline.)*
+ 
+ ## Why a cycle
+ 
+@@ -17,9 +18,9 @@ demonstrates the features the author was thinking about. A program with a
+ purpose finds what is missing, what is awkward, and what is wrong — and it finds
+ it before a 1.0 that would have to keep it.
+ 
+-This is Q-4's answer, in this repository rather than a separate one, so the
+-program moves with the API and a breaking change breaks it in the same commit
+-rather than six months later.
++This is Q-4's answer, PA-103: a repository of its own, created at this cycle, so the program has its own
++lifetime. *(Corrected 2026-10-15, cycle 0.0.5 — E2-6: this said "in this repository rather than a separate
++one", Q-4's first recommendation, which PA-103 settled the other way.)*
+ 
+ ## What to build, and why this one
+ 
+@@ -69,7 +70,10 @@ gets an answer with evidence behind it.
+ - [ ] all four formats through one code path
+ - [ ] recovery on, reporting every problem in a deliberately broken file of each format
+ - [ ] a large real configuration tree linted, with time and memory noted
+-- [ ] built **and run** by the harness, so a broken example is a red run
++- [ ] built **and run** by its own repository's runner, against this library's tree by relative path until
++      dependency roots exist (O-N1); this library's harness runs `tests/conformance/` and does not reach into
++      another repository *(2026-10-15, cycle 0.0.5 — E2-6: this said "by the harness", which harness was stated
++      nowhere)*
+ 
+ ### 0.12.1 — triage
+ - [ ] every finding classified: **defect** (the library is wrong), **gap** (a consumer reasonably needs something absent), or **cost** (the library is right and this is what the design costs)
+diff --git a/meta/roadmap/0.6/README.md b/meta/roadmap/0.6/README.md
+index dc7cef2..ff58ee1 100644
+--- a/meta/roadmap/0.6/README.md
++++ b/meta/roadmap/0.6/README.md
+@@ -1,6 +1,7 @@
+ # Cycle 0.6 — TOML
+ 
+-**`src/format/toml.npk` and `src/emit/toml.npk`: TOML v1.0.0, complete.** The
++**`src/format/toml.npk` and `src/emit/toml.npk`: TOML v1.0.0, complete** — or v1.1.0, which the workbench's
++currency audit of 2026-10-09 reports published and the version item below decides at 0.6.0 (E3-14, 2026-10-15). The
+ format with the hardest semantics in the 1.0 set, and the one that brings a
+ second, independent oracle with it.
+ 
+diff --git a/meta/roadmap/1.0/README.md b/meta/roadmap/1.0/README.md
+index 94a2869..1e7defc 100644
+--- a/meta/roadmap/1.0/README.md
++++ b/meta/roadmap/1.0/README.md
+@@ -59,7 +59,7 @@ decide it.
+ - [ ] the transcode loop (`WRITER_MODEL.md` W-15)
+ - [ ] a custom `Format` plugin
+ - [ ] a streaming consumer over JSON Lines
+-- [ ] the 0.12 linter
++- [ ] the 0.12 linter's findings folded back — the linter itself lives under `nitpick-apps` (PA-103), not here *(E2-6, 2026-10-15: this listed it among the examples)*
+ - [ ] every example built **and run** by the harness, so a broken example is a red run
+ 
+ ### 1.0.4 — versioning
+diff --git a/meta/roadmap/ROADMAP.md b/meta/roadmap/ROADMAP.md
+index 006b31b..234f8cb 100644
+--- a/meta/roadmap/ROADMAP.md
++++ b/meta/roadmap/ROADMAP.md
+@@ -3,12 +3,15 @@
+ The specification set (`meta/specs/`) is written and the decisions it rests on
+ are in `meta/DECISIONS.md`. This is the plan built on them.
+ 
+-**One decision batch is settled** — PA-001 … PA-083, written with the
+-specification set. What remains open in `../OPEN_QUESTIONS.md` is open *by
+-design*: five measurements taken in the cycles that can take them, two questions
+-waiting for a consumer to ask, one gated on the compiler's tooling, four that
+-are the compiler's rather than ours, and four for the project's author, none of
+-which gates cycle 0.0. **No cycle in this plan is blocked on a decision.**
++**The decisions are settled in batches** — the founding one, PA-001 … PA-083, written with the
++specification set, and each later one appended whole (`../DECISIONS.md`). What remains open in
++`../OPEN_QUESTIONS.md` is open *by design*, each entry with the reason it stays open — a measurement taken in
++the cycle that can take it, a question waiting for a consumer, a gate on the compiler's tooling, or the compiler's
++rather than ours — and the questions for the project's author are settled. **No cycle in this plan is blocked on a
++decision.** *(Corrected 2026-10-15, cycle 0.0.5 — the early ecosystem audit's E2-10: this paragraph counted "one
++decision batch", five measurements, two questions, one gated, four the compiler's and four for the author, where
++`../OPEN_QUESTIONS.md` counted three measurements and its author's four are settled; a count copied from a set
++drifts from it, so the set holds its own.)*
+ 
+ ## How this is organised
+ 
+@@ -186,7 +189,7 @@ proportional to the input is copied" is a claim and a claim nobody measures is a
+ claim nobody has. O-P8's interning measurement lands here.
+ 
+ ### 0.12 — The dogfood consumer
+-A configuration linter in `examples/`, reading TOML, JSON and YAML, using
++A configuration linter, in its own repository under `nitpick-apps` (PA-103), reading TOML, JSON and YAML, using
+ `Document`, recovery, multi-fault rendering and the path language — the four
+ things nothing else in the plan exercises hard. Written **without changing the
+ library**, so every friction is recorded rather than smoothed over, then
+diff --git a/meta/specs/FORMATS.md b/meta/specs/FORMATS.md
+index 829ce77..d9a0d0f 100644
+--- a/meta/specs/FORMATS.md
++++ b/meta/specs/FORMATS.md
+@@ -12,7 +12,7 @@ behind it rather than a claim.
+ | Format | Specification | Subset | Corpus | Cycle |
+ |---|---|---|---|---|
+ | **JSON** | RFC 8259 | **complete** | JSONTestSuite | 0.3 |
+-| **TOML** | v1.0.0 | **complete** | toml-test | 0.6 |
++| **TOML** | v1.0.0 — the workbench's currency audit of 2026-10-09 reports v1.1.0 published, a lead cycle 0.6.0 verifies and decides (`../research/CURRENCY.md`) | **complete** | toml-test | 0.6 |
+ | **CSV** | RFC 4180 + dialects | **complete**, plus the dialects §6 names | hand-built + the W3C CSVW cases | 0.7 |
+ | **YAML** | 1.2 core schema | **a stated subset**, §4 | yaml-test-suite, filtered to the subset | 0.8 |
+ 
+@@ -67,6 +67,10 @@ number or an escape rule becomes visible.
+ 
+ ## 3. TOML — v1.0.0, complete
+ 
++*(2026-10-15, cycle 0.0.5 — the ecosystem audit of 2026-10-15's E3-14: the workbench's currency audit of 2026-10-09
++reports TOML v1.1.0 published, which nothing here has compared with v1.0.0 yet; this section is v1.0.0's until cycle
++0.6.0 reads both at the source and decides, by `../research/CURRENCY.md`'s TOML row and PA-054.)*
++
+ **Rule R-8.** The whole language: bare and quoted keys, dotted keys, basic and
+ literal strings, multi-line forms, integers in four bases, floats including
+ `inf` and `nan`, booleans, the four date-time types, arrays, inline tables,

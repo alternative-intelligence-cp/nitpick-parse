@@ -3,12 +3,11 @@
 **The probes, the harness, and `src/core/`.** Nothing in this cycle parses anything. What it produces is the ability
 to find out whether the rest of the plan is buildable, and the machinery every later cycle is tested by.
 
-**Being re-derived at compiler `7e91730` (from 2026-10-15) by the Team seat's planners, as one pass over all six
-subcycle files.** They were written execution-grade at the repository's setup (2026-09-03), against the compiler's
-cycle 1.5 and LLVM 20.1.2; each is re-measured at the pin, with what the audits found owed carried into the step that
-owes it. **The re-derivation lands subcycle by subcycle, in order**, and the table below says which files are at the
-pin; a file not yet marked still holds its first writing — not to be executed as it stands — and the items it owes are
-in the owed-items table below.
+**Re-derived at compiler `7e91730` (2026-10-15) by the Team seat's planners, T6 and its continuation T6b, as one pass
+over all six subcycle files.** They were written execution-grade at the repository's setup (2026-09-03), against the
+compiler's cycle 1.5 and LLVM 20.1.2; each is re-measured at the pin, with what the audits found owed carried into the
+step that owes it (the owed-items table below). **All six are at the pin**, each rehearsed over a simulated record of
+the subcycles before it, and the pass's last commit ran every block of all six once more, each `SAME`.
 
 | File | At `7e91730` |
 |---|---|
@@ -17,7 +16,7 @@ in the owed-items table below.
 | [0.0.2](0.0.2.md) | **yes** — three patches over 0.0.1's record, blocks with filled Expects, the mutants' table; CI's run is its worker's |
 | [0.0.3](0.0.3.md) | **yes** — three patches over 0.0.2's record, blocks with filled Expects, the mutants' table; CI's run is its worker's |
 | [0.0.4](0.0.4.md) | **yes** — four patches over 0.0.3's record, blocks with filled Expects, the mutants' table; CI's run is its worker's |
-| [0.0.5](0.0.5.md) | not yet |
+| [0.0.5](0.0.5.md) | **yes** — two patches over 0.0.4's record, blocks with filled Expects, the archive its last block; its execution, the close, is the libraries' seat's |
 
 ## Why this shape
 
@@ -153,6 +152,11 @@ no literal outside the envelope; `#size_of` measured, never summed; a container'
 
 ## What the audits found owed, and where each is carried
 
+**The workbench's ecosystem audit of 2026-10-15** (`meta/audits/ecosystem-2026-10-15.md` in the workbench) read this
+repository's `main`, not this branch: it re-checked E2-4, E2-6, E2-10, E2-13, E2-15, EC2, EC3, ED2 and EK1 and found each
+still open there, and raised E3-1 and E3-14. **The plan fixes every one, in the step this table names**; none is carried
+past cycle 0.0.
+
 | Item | Carried by | How |
 |---|---|---|
 | PL-1, the read-only view (E2-2) | 0.0.0 step 4 | every reader, cursor, text and document slot `fixed uint8[]`, measured by probe 08's family; PD-132 |
@@ -161,8 +165,8 @@ no literal outside the envelope; `#size_of` measured, never summed; a container'
 | PL-4 and E2-4, LLVM 20.1.8 and the manifest's rows | 0.0.1 | `[toolchain]` with `llvm`, `triple` and `datalayout` as the compiler's `BUILD_REFERENCE.md` §1 gives them, worded as `nitpick-regex`'s manifest; `CLAUDE.md` and `README.md`; CI |
 | PL-5, the compiler's state | 0.0.0 step 4 | `BUILD.md` §1 re-read and dated, `README.md`'s status, O-N2 answered, PA-022's note |
 | PL-6, `=> dyn` and landing 94 | 0.0.0 step 3 | probe 07 drives an owning implementation through the explicit cast |
-| E2-6, where the dogfood consumer lives | 0.0.5 | the roadmap's four lines made PA-103's; which harness runs it |
-| E2-10, counts against sets | 0.0.5 | `ROADMAP.md`'s decision and question counts derived from their sets; the workbench's `LIBRARIES.md` is the orchestrator's |
+| E2-6, where the dogfood consumer lives | 0.0.5's patch 1 | fixes: six lines made PA-103's — the cycle map's, three of the 0.12 roadmap's, and two the claim's subject found (`examples/README.md`, the 1.0 roadmap); its own repository's runner runs it |
+| E2-10, counts against sets | 0.0.5's patch 1 | fixes: `ROADMAP.md`'s and `OPEN_QUESTIONS.md`'s copied counts dropped, the entries their own count; the workbench's `LIBRARIES.md` is the orchestrator's (W-16) |
 | E2-13, no `CURRENCY.md` | 0.0.1 | `meta/research/CURRENCY.md` created; the library counted security-sensitive and its three research items named |
 | E2-15, `CLAUDE.md`'s empty heading | 0.0.1 step 5 | the paragraph moved under "What this is" |
 | EC2, what an index does | 0.0.0 step 4; 0.0.4 | `SAFETY.md`'s row and `VERIFICATION.md` §2 with probe 11's measurement; every accessor of `Vec` and `Bytes` checks its own index, measured not to trap through a pointer (PD-144) |
@@ -171,6 +175,8 @@ no literal outside the envelope; `#size_of` measured, never summed; a container'
 | ES1, "nothing exists today" | 0.0.0 step 4 | O-N2 struck as answered |
 | EK1, `VERIFICATION.md` P-1 | 0.0.4 | P-1 superseded in part by P-1a: an obligation is a comment unless a decision accepts the arm its live clause costs — measured: each of `requires`, `ensures` and `limit` charges every consumer one (PD-144) |
 | EC9, a re-pin mid-cycle | this README | a re-pin is taken between subcycles; the landing table is the adoption |
+| E3-1 (= ES1 and PL-5), "no stack guard" | 0.0.0 step 4 | fixes: native recursion traps `StackExhausted` (PD-133); `README.md`'s, `CLAUDE.md`'s and `OPEN_QUESTIONS.md`'s O-N2 sentences restated, O-N2 struck as answered |
+| E3-14, the TOML pins | 0.0.1 step 5; 0.0.5's patch 1 | fixes: `CURRENCY.md`'s TOML row (0.0.1), and `FORMATS.md` 15 and 68 and the 0.6 roadmap's scope line each carry the superseded fact beside the pin; cycle 0.6.0 decides the version |
 
 ## The planning brief's open points, and each one's answer
 
@@ -187,7 +193,7 @@ no literal outside the envelope; `#size_of` measured, never summed; a container'
 | 9 | the `repro` check | settled by 0.0.2: each copy carries its manifest, since without it the consumer's two modules differ — the check's mutant (PD-138, `BUILD.md` B-4) |
 | 10 | the undefined-symbol scan | settled by 0.0.2: the call-edge scan stands behind PA-006, over every module under `src/` and every program, and the floor and the syscaller are its controls on every run (PD-138, B-2a) |
 | 11 | `tools/parse_check` and `tools/check` | settled by 0.0.3: both are compiler sources at the pin, so `npkc` judges the sweep by the code family and the refusals by their codes; `accept` struck (PD-140) |
-| 12 | which harness runs the dogfood consumer | handed to 0.0.5 (E2-6) |
+| 12 | which harness runs the dogfood consumer | settled by 0.0.5: its own repository's, under `nitpick-apps` (PA-103); this library's harness runs `tests/conformance/` and reaches into no other repository |
 | 13 | the currency file's name | handed to 0.0.1 (E2-13) |
 | 14 | sweeps | settled: every sweep runs inside this repository and prints its denominator (`tools/sweep.py`) |
 
@@ -265,11 +271,11 @@ file states its own acceptance when it reaches the pin, and where the two differ
 - [ ] every unit exits as it expects at both legs; the forgotten free traps `WildLeak`; each mutant red by a unit
 
 ### 0.0.5 — close
-- [ ] every probe verdict reconciled against the specifications by **reading them**, not by remembering
-- [ ] the cycle's findings written as a numbered list
-- [ ] the close audit run and triaged (W-22); a full green run, verdicts committed
-- [ ] `0.1/0.1.0.md` written execution-grade before the cycle closes
-- [ ] cycle moved to `done/0.0/`, `ROADMAP.md` updated
+- [ ] every probe verdict reconciled against the specifications by **reading them**, 01a and 05 by name
+- [ ] E2-6's six lines PA-103's, E2-10's counts left to their sets, E3-14's pins with the superseded fact beside them
+- [ ] the cycle's findings written as a numbered list; the close audit run and triaged (W-22); a full green run, its output quoted
+- [ ] `0.1/0.1.0.md` written execution-grade before the cycle closes, its gate naming PD-137's research digests
+- [ ] cycle moved to `done/0.0/` by the last block, every reference to it moved, `ROADMAP.md` updated
 
 ## Gate
 
