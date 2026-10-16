@@ -1,11 +1,11 @@
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index 8028524..17d91a8 100644
+index 6cefd4d..9ff11dd 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
-@@ -1119,3 +1119,33 @@ S-135).
- *Reversal, for the author:* to hold the ninth from cycle 0.0.4, step 1 adds `NPARSE_DUP_SCAN_MAX` to `limits.npk` at
- 1024, a ninth row to §7's table saying whether it is an option, and an assertion to `limits_values`, and
- `check_constants_named` then holds nine.
+@@ -1122,3 +1122,33 @@ S-135).
+ Expects and no other block of 0.0.4 or 0.0.5: block 0b, whose §1.5 counts one more `exit` operand, declared name and
+ `fixed` binding, and block 5's sweep, whose ninth-limit subject gains the new row. Every text that says the ninth
+ waits for cycle 0.4 is rewritten with them, and what the new words move is retaken too.
 +
 +### @@PD-144@@ — the containers check their own indexes and trap the language's `OutOfBounds` on misuse; an obligation is a comment unless a decision accepts its arm; `Bytes` has no view at the pin
 +**2026-10-15, cycle 0.0.4.** Measured at the pin `7e91730`. `Vec<T: Copy>` and `Bytes` check every index and count in

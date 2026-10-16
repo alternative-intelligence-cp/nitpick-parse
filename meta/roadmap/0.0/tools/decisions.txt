@@ -5,10 +5,38 @@
 # repository's next decision number in the order of this file, after `base`. `apply.py` writes the numbers into every patch at the moment it applies it -- each
 # `@@PD-nnn@@` becomes `PA-<base + rank>`, and a patch whose added lines hold a bare `PD-` label or a number past the
 # base is refused -- and an Expect writes a number past the base as its label, which `blocks.py` reads a run's number
-# as; so no file of this plan states a number before the review gives it.
+# as; so no file of this plan states a number before the review gives it. Four Expect lines print a PD's rank here
+# instead, `PD-k=base+r`: the number less the base, which holds only while the review accepts every PD before it.
 #
-# If the review declines a PD, it deletes that line here and re-cuts the hunks that declare or cite it; every later
-# number then moves down by one, in every patch and in every run's output, and no Expect moves -- by this file alone.
+# If the review declines a PD, it deletes that line here, and re-cuts the hunks that declare or cite it and the plan's
+# text that names it; every later number then moves down by one, in every patch and in every run's output. A label an
+# Expect writes for a number a run prints is read back through this file, so it stands while the PD it names is
+# accepted. A decline moves these Expect lines -- named by subcycle file, block and first words -- and each is
+# retaken with the re-cut, from a run in plan order:
+#   * the four rank lines -- 0.0.0 0b `§1.7 numbered by decisions.txt:`, 0.0.2 0b `§1.13 decisions.txt numbers them:`,
+#     and 0.0.3 0b and 0.0.4 0b `§1.6 decisions.txt numbers them:` -- each when the review declines a PD it lists, or
+#     any earlier PD;
+#   * the six lines naming the decision log's highest -- 0.0.1 0a `decisions: the highest by value` and 0.0.1 0b
+#     `§1.1 decisions: the highest by value`, and 0a's `decisions: the highest by value` in each of 0.0.2 ... 0.0.5 --
+#     each only when the PD it names is declined;
+#   * the five lines listing a subcycle's placeholders -- 0.0.0 0b and 0.0.1 0b `§1.7 placeholders in the patches:`,
+#     0.0.2 0b `§1.13 placeholders in the patches:`, and 0.0.3 0b and 0.0.4 0b `§1.6 placeholders in the patches:` --
+#     each when the declined PD is one it lists, since the re-cut takes that PD's labels out of the patches;
+#   * 0.0.0 0a's `label mutant, a bare PD-131` line, which plants on PD-131's placeholder, and its `label mutant,
+#     @@PD-144@@ cited` line, which plants on PD-143's and PD-144's: each when a PD it plants on is declined, and
+#     `env.sh`'s `label_mutants` is re-cut with it;
+# and whatever else the re-cut's own words move, as for any amended patch.
+# MEASURED 2026-10-15 by that procedure, in stand-ins built as the plan's confirmation pass is (`0.0.0.md` §11): the
+# line deleted here; the hunks re-cut by the least edit -- each `@@PD-n@@` of the declined PD, in every patch, written
+# as the plain text `declined<n>`, which is no label, no number and no rule id; and every block of the six files run
+# in plan order, each subcycle over the simulated record of the ones before it, and compared with its Expect.
+#   (a) PD-130 moved exactly the four rank lines and the placeholder lines of 0.0.0 and 0.0.4.
+#   (b) PD-134, PD-137, PD-139, PD-142 and PD-145, together, moved exactly the four rank lines, the six
+#       highest-decision lines and the five placeholder lines.
+#   (c) PD-131, PD-143 and PD-144, together, moved exactly the four rank lines, the placeholder lines of 0.0.0, 0.0.2
+#       and 0.0.4, and both label mutants.
+#   Every other line of the 45 blocks read SAME in each. And 0.0.0's block 0a alone, with PD-131, then PD-143, then
+#   PD-144 declined by itself, moved the first mutant, then the second, then the second, and no other line.
 base PA-103
 PD-129
 PD-130

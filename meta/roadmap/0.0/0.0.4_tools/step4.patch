@@ -12,10 +12,10 @@ index 5bedfed..cea15ed 100644
    event/      #   the event vocabulary, the Format trait, the depth stack
    doc/        #   the Document tree and the query API
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index 17d91a8..941ba0c 100644
+index 9ff11dd..b88ff2a 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
-@@ -1149,3 +1149,20 @@ eight) — every format's consumer owes `DivByZero` and `DivOverflow` already, t
+@@ -1152,3 +1152,20 @@ eight) — every format's consumer owes `DivByZero` and `DivOverflow` already, t
  
  *Reversal, for the author:* when D-341 lands, `Bytes` may offer a frozen view by a decision; when a decision accepts
  the contracts' arms, the comments become clauses, a marker deleted per site.

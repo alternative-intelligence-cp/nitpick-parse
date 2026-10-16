@@ -1,8 +1,8 @@
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index 7a6609e..8028524 100644
+index 7a6609e..6cefd4d 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
-@@ -1099,3 +1099,23 @@ checks written now** — their inputs do not exist, and a check over nothing is
+@@ -1099,3 +1099,26 @@ checks written now** — their inputs do not exist, and a check over nothing is
  
  *Reversal, for the author:* none for the key; a layer S-6 does not list, or a third name, is a change to `SAFETY.md` §3
  by a decision, which the check then reads.
@@ -25,7 +25,10 @@ index 7a6609e..8028524 100644
 +
 +*Reversal, for the author:* to hold the ninth from cycle 0.0.4, step 1 adds `NPARSE_DUP_SCAN_MAX` to `limits.npk` at
 +1024, a ninth row to §7's table saying whether it is an option, and an assertion to `limits_values`, and
-+`check_constants_named` then holds nine.
++`check_constants_named` then holds nine. Run in the plan's order, those three additions move two of cycle 0.0.4's
++Expects and no other block of 0.0.4 or 0.0.5: block 0b, whose §1.5 counts one more `exit` operand, declared name and
++`fixed` binding, and block 5's sweep, whose ninth-limit subject gains the new row. Every text that says the ninth
++waits for cycle 0.4 is rewritten with them, and what the new words move is retaken too.
 diff --git a/meta/specs/SAFETY.md b/meta/specs/SAFETY.md
 index 7712438..eb2a7eb 100644
 --- a/meta/specs/SAFETY.md

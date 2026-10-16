@@ -128,16 +128,36 @@ refs() {
 
 # `apply.py`'s label checks, each seen to STOP on a mutated copy of this plan's folder: a bare PD-131 in an added line
 # of 0.0.4's step 4 (the plan verification of 2026-10-15, its finding 1), and @@PD-144@@ cited in 0.0.4's step 1,
-# which step 2 declares (its finding 5). The copy is applied to no tree -- the checks stop it before `git apply` runs,
-# and a check that did not would fail on the missing directory instead, a different line -- and is removed after.
+# which step 2 declares (its finding 5); and, planted in 0.0.0's step 1, which carries no label, a number past the
+# base -- `PA-` and the base plus 900, made here and named in the output, so no file of the plan writes it -- and
+# @@PD-999@@, which no step declares (the second plan verification's finding 6). The copy is applied to no tree --
+# the checks stop it before `git apply` runs, and a check that did not would fail on the missing directory instead, a
+# different line -- and is removed after.
 #     label_mutants
 label_mutants() {
-  local d="$A/labels"
+  local d="$A/labels" pa
+  pa="PA-$(( $(sed -n 's/^base PA-//p' "$TOOLS/decisions.txt") + 900 ))"
   rm -rf "${d:?}"; mkdir -p "$d"; cp -r "$TOOLS/.." "$d/plan"
   sed -i '0,/^+.*@@PD-131@@/s/@@PD-131@@/PD-131/' "$d/plan/0.0.4_tools/step4.patch"
   echo "label mutant, a bare PD-131 in 0.0.4's step 4: $(python3 -B "$d/plan/tools/apply.py" "$d/none" 0.0.4 4 2>&1)"
   cp "$TOOLS/../0.0.4_tools/step4.patch" "$d/plan/0.0.4_tools/step4.patch"
   sed -i '0,/^+.*@@PD-143@@/s/@@PD-143@@/@@PD-143@@, @@PD-144@@/' "$d/plan/0.0.4_tools/step1.patch"
   echo "label mutant, @@PD-144@@ cited in 0.0.4's step 1: $(python3 -B "$d/plan/tools/apply.py" "$d/none" 0.0.4 1 2>&1)"
+  cp "$TOOLS/../0.0.4_tools/step1.patch" "$d/plan/0.0.4_tools/step1.patch"
+  sed -i "0,/^+\/\/ PROBE 01a/s//+\/\/ $pa PROBE 01a/" "$d/plan/0.0.0_tools/step1.patch"
+  echo "label mutant, a number past the base in 0.0.0's step 1: $(python3 -B "$d/plan/tools/apply.py" "$d/none" 0.0.0 1 2>&1 | sed "s/$pa/the base plus 900/")"
+  cp "$TOOLS/../0.0.0_tools/step1.patch" "$d/plan/0.0.0_tools/step1.patch"
+  sed -i '0,/^+\/\/ PROBE 01a/s//+\/\/ @@PD-999@@ PROBE 01a/' "$d/plan/0.0.0_tools/step1.patch"
+  echo "label mutant, a placeholder no step declares in 0.0.0's step 1: $(python3 -B "$d/plan/tools/apply.py" "$d/none" 0.0.0 1 2>&1)"
   rm -rf "${d:?}"
+}
+
+# Whether a file's first line is a research digest's heading, `# <topic> — research digest` -- the line by which
+# `sweep.py` leaves a digest out of every sweep (its `DIGEST`, after the workbench research skill's §5), so a digest
+# filed with another first line would be swept as live text: `first line a digest heading`, or `... NOT ...`.
+#     heading <file>
+heading() {
+  python3 -B -c 'import os, sys; sys.path.insert(0, sys.argv[1]); import sweep
+first = open(sys.argv[2], encoding="utf-8").readline() if os.path.isfile(sys.argv[2]) else ""
+print("first line %sa digest heading" % ("" if sweep.DIGEST.match(first.rstrip("\n")) else "NOT "))' "$TOOLS" "$1"
 }
