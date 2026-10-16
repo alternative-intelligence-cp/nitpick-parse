@@ -17,5 +17,6 @@ for f in security-defects security-guidance security-vectors; do
   echo "§1.3 $f.md: $(grep -m1 -oE 'As of [0-9]{4}-[0-9]{2}-[0-9]{2}' "$REPO/meta/research/$f.md" 2>/dev/null || echo MISSING)"
 done
 
-# §1.4 -- every place outside this folder that names a file in it, the archive's patch's sites
+# §1.4 -- every place outside this folder that names a file in it: the archive's patch's sites, and the research
+# digests' lines that quote its paths in code spans, which are history and stay as they are
 echo "§1.4 outside meta/roadmap/0.0/, naming a file in it: $(cd "$REPO" && git ls-files | grep -v '^meta/roadmap/0\.0/' | xargs grep -n -E 'roadmap/0\.0/|`0\.0/0\.0\.[0-5]\.md' 2>/dev/null | sed -E 's/^([^:]+:[0-9]+):.*/\1/' | tr '\n' ' ')"
