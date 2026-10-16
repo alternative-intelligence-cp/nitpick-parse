@@ -1,5 +1,5 @@
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index 39882a1..0afecdc 100644
+index 39882a1..39b80a2 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
 @@ -493,6 +493,8 @@ specification, and that is stated rather than hidden; its hand-built corpus is
@@ -27,12 +27,12 @@ index 39882a1..0afecdc 100644
 +known defects in the prior art and the reference implementations, the standards bodies'
 +current guidance, and the current test vectors (`CURRENCY.md` states each). **They
 +gate cycle 0.0's work**: its first work dispatch, cycle 0.0.0's, carries their three
-+digests, and its worker files them in `meta/research/` before any probe runs, so that a
-+finding becomes a cycle-0.0 probe before it is anything else, as the workbench plan
-+skill asks. Each is a `security` digest, stale ninety days after its date (the
-+research skill's §6), so a later cycle reads the three dates before it starts, and all
-+three are re-run at hardening (its §8). TOML's row records that v1.1.0 is published
-+and that the version is cycle 0.6.0's to decide. The early ecosystem audit's E2-13.
++digests, and its worker files them in `meta/research/` before any probe runs, so that a finding that asks
++the language a question becomes a cycle-0.0 probe before it is anything else, as the workbench plan skill
++asks; `CURRENCY.md`'s research section says where every other finding is held and who decides it. Each is
++a `security` digest, stale ninety days after its date (the research skill's §6), so a later cycle reads the
++three dates before it starts, and all three are re-run at hardening (its §8). TOML's row records that v1.1.0
++is published and that the version is cycle 0.6.0's to decide. The early ecosystem audit's E2-13.
 +
 +*Alternatives declined:* **keep `format-versions.md` beside `CURRENCY.md`** — two
 +tables of outside facts, and the workbench's checks read one; **name the file
@@ -50,10 +50,10 @@ index 39882a1..0afecdc 100644
 +research section and its three rows, and the gate with them.
 diff --git a/meta/research/CURRENCY.md b/meta/research/CURRENCY.md
 new file mode 100644
-index 0000000..7a073e5
+index 0000000..9ef29ca
 --- /dev/null
 +++ b/meta/research/CURRENCY.md
-@@ -0,0 +1,55 @@
+@@ -0,0 +1,107 @@
 +# Currency — the facts from outside the compiler tree this plan rests on
 +
 +One row per standard, data release, corpus, reference implementation and outside tool the plan
@@ -72,12 +72,12 @@ index 0000000..7a073e5
 +| Python — the harness's interpreter | 3.12.3, the version on the workbench and on `ubuntu-24.04` | by cycle 0.0.2, which writes the harness | python.org | @@PD-137@@ |
 +| UTF-8 — what a JSON, TOML or YAML input must be (`SCAN_MODEL.md` §3) | RFC 3629 (STD 63) and the Unicode Standard's Table 3-7, the edition to be named | **not yet** — cycle 0.1, whose decoder reads it, checks it before it starts | rfc-editor.org/rfc/rfc3629; unicode.org | PA-013 |
 +| JSON | RFC 8259 | not yet — cycle 0.3 | rfc-editor.org/rfc/rfc8259 | PA-050 |
-+| TOML | v1.0.0, as `FORMATS.md` names it. **v1.1.0 is published** (the workbench's currency audit of 2026-10-09, which the second research item below reads at the source, before cycle 0.0's first probe), and nobody has compared the two | not yet — cycle 0.6.0 decides the version (PA-054 as @@PD-137@@ amends it) | toml.io; github.com/toml-lang/toml/releases | PA-054 |
++| TOML | v1.0.0, as `FORMATS.md` names it. **v1.1.0 is published** (the workbench's currency audit of 2026-10-09, which the second research item below read at the source before cycle 0.0's first probe), and that item's digest lists the five changes the project's changelog gives from v1.0.0 to v1.1.0 in what a parser accepts, the fifth, on integer and float sizes, one that may loosen the integer rule ([`security-guidance.md`](security-guidance.md)) | not yet — cycle 0.6.0 decides the version (PA-054 as @@PD-137@@ amends it) | toml.io; github.com/toml-lang/toml/releases | PA-054 |
 +| CSV | RFC 4180, and the dialects `FORMATS.md` §6 names | not yet — cycle 0.7 | rfc-editor.org/rfc/rfc4180 | PA-050 |
-+| YAML | 1.2's core schema; which revision of 1.2 is not yet stated | not yet — cycle 0.8 | yaml.org/spec | PA-051 |
++| YAML | 1.2's core schema; which revision of 1.2 is not yet stated — the current one is 1.2.2, of 2021-10-01, "no normative changes from the YAML specification v1.2" ([`security-guidance.md`](security-guidance.md)) | not yet — cycle 0.8, which names the revision (R-1) | yaml.org/spec | PA-051 |
 +| RFC 3339 — the shape of TOML's date-times | RFC 3339 | not yet — cycle 0.6 | rfc-editor.org/rfc/rfc3339 | PA-054 |
 +| IEEE 754 binary64 — what `num_flt64` rounds to | IEEE 754-2019 | not yet — cycle 0.4 | ieee.org | PA-033 |
-+| The corpora: JSONTestSuite, toml-test, the yaml-test-suite, the W3C CSVW tests | a commit each, recorded in each corpus's `PROVENANCE.md` | not yet — each with its format's cycle | each project's repository | PA-053, PA-081 |
++| The corpora: JSONTestSuite, toml-test, the yaml-test-suite, the W3C CSVW tests | a commit each, recorded in each corpus's `PROVENANCE.md` — toml-test's with the TOML version its gate runs, chosen by `-toml=<version>` or that version's `tests/files-toml-<version>` list and never by the runner's default, which its v2.0.0 notes and its README state differently; the yaml-test-suite's from a dated `data-<date>` tag, never its force-pushed `data` branch ([`security-vectors.md`](security-vectors.md)) | not yet — each with its format's cycle | each project's repository | PA-053, PA-081 |
 +| Research item 1 below — known defects in the prior art and the reference implementations | what its digest records, as of its date | by cycle 0.0's first work dispatch, before any probe: [`security-defects.md`](security-defects.md), stale ninety days after its date | cve.org, nvd.nist.gov, each project's tracker | @@PD-137@@ |
 +| Research item 2 below — the standards bodies' current guidance, and the current TOML version | what its digest records, as of its date | by the same dispatch: [`security-guidance.md`](security-guidance.md), stale ninety days after its date | rfc-editor.org, toml.io, yaml.org | @@PD-137@@ |
 +| Research item 3 below — the current versions of the test vectors | what its digest records, as of its date | by the same dispatch: [`security-vectors.md`](security-vectors.md), stale ninety days after its date | each corpus's repository | @@PD-137@@ |
@@ -104,11 +104,63 @@ index 0000000..7a073e5
 +   current version judges a case differently from the version a cycle planned against.
 +
 +**They gate cycle 0.0's work** (@@PD-137@@): its first work dispatch, cycle 0.0.0's, carries their
-+three digests, and its worker files them here before any probe runs, so that a finding becomes a
-+cycle-0.0 probe before it is anything else (the workbench plan skill). The orchestrator dispatches the
-+requests: by the workbench's rule on research, more than one fetch is a request to the researcher, who
-+never writes into a repository. A later cycle reads the three dates before it starts, since each is
-+stale ninety days after its own, and all three are re-run at hardening.
++three digests, and its worker files them here before any probe runs, so that a finding that asks the
++language a question becomes a cycle-0.0 probe before it is anything else (the workbench plan skill);
++the section below says where every other finding is held, and who decides it. The orchestrator
++dispatches the requests: by the workbench's rule on research, more than one fetch is a request to the
++researcher, who never writes into a repository. A later cycle reads the three dates before it starts,
++since each is stale ninety days after its own, and all three are re-run at hardening.
++
++### What the three found, and where each finding is held
++
++The three are each `As of` 2026-10-16, and their gate fired that day, at cycle 0.0's planning: the
++first's and the third's *would change the plan if* came true, and the second contradicted this table's
++TOML row as the plan had written it, which said nobody had compared v1.0.0 and v1.1.0. So the plan was
++re-cut that day, before any probe ran, to hold each finding where the cycle that owns it will read it.
++None asks the language a question, by the libraries' reviewer's reading, so none became a probe. Each
++digest states its own confidence and gaps, among them claims that rest on one primary source where a
++`security` request asks for two.
++
++- **[`security-defects.md`](security-defects.md)** — eleven defect classes with published records. Two have
++  no full guard here:
++  - CSV formula injection, a field that begins `=`, `+`, `-` or `@`, with no rule at all (`WRITER_MODEL.md`
++    W-9 sets only JSON's escapes): the [0.7 roadmap](../roadmap/0.7/README.md), at 0.7.4;
++  - the quadratic class, guarded in part: `VALUE_MODEL.md` D-16's index past 1024 pairs, if it takes D-13's
++    unkeyed FNV-1a order — the [0.4 roadmap](../roadmap/0.4/README.md), at 0.4.1; TOML's header and
++    dotted-key resolution, whose cost no rule bounds (`FORMATS.md` R-11) — the
++    [0.6 roadmap](../roadmap/0.6/README.md), at 0.6.2; and the line and column count a rendered fault
++    needs, already O-P3, a measurement taken at cycle 0.9.
++
++  And its partial points:
++  - D-16's bound, 1024 pairs, which no limits row names yet: the 0.4 roadmap's switch, at 0.4.1, names it;
++  - YAML's alias expansion, guarded only by R-13's refusal while the budget R-14 promises is unwritten: the
++    [0.8 roadmap](../roadmap/0.8/README.md), at 0.8.0;
++  - `SAFETY.md` §7's `NPARSE_MAX_SCALAR` row, "a single JSON string", which leaves its reach to a TOML
++    string, a CSV field and a YAML scalar unstated: cycle 0.0.4, whose `limits.npk` quotes the row and whose
++    plan hands the reach on to cycles 0.6, 0.7 and 0.8. No row names a total for a document's nodes or its
++    pool's bytes either: no line, since S-19 bounds a `Document` "by the node and pool growth its arena
++    does";
++  - an input over 4 GiB, which `SCAN_MODEL.md` C-5 refuses with `EParseState` while `SAFETY.md` §3 says no
++    byte stream reaches either identity: the [0.1 roadmap](../roadmap/0.1/README.md), at 0.1.1, holds it
++    open for the author's answer to the workbench's question 36 (2026-10-16).
++- **[`security-guidance.md`](security-guidance.md)** — no standards body clearly requires now what a rule
++  here permits; its one open case is TOML's lossless-integer rule, which no rule here states. It
++  contradicted the TOML row by listing what v1.1.0 changes:
++  - the version, which stays cycle 0.6.0's to decide: the TOML row above, and the 0.6 roadmap's version
++    item, at 0.6.0;
++  - what TOML's text requires and no rule here states — the whole document UTF-8, no control character but
++    tab in a comment or a string, ASCII bare keys, an unlisted escape an error, and an error for an integer
++    that cannot be represented losslessly, which `VALUE_MODEL.md` D-19 leaves to the format: the 0.6
++    roadmap, at 0.6.0 and 0.6.1; and `SCAN_MODEL.md` C-9's "strings and keys" for TOML: the 0.1 roadmap,
++    at 0.1.3;
++  - YAML 1.2's current revision, 1.2.2: the YAML row above;
++  - RFC 8259's verified erratum 7600, which limits the leading-zero ban to a number's integer part: no
++    line — R-7's JSONTestSuite gate decides those cases, in cycle 0.3.
++- **[`security-vectors.md`](security-vectors.md)** — toml-test carries TOML 1.0 and 1.1, its sources
++  disagree on its default, and on 2026-09-15 it withdrew its two leading-BOM valid cases: the corpora row
++  above, and the 0.6 roadmap's corpus, at 0.6.0. The yaml-test-suite is vendored from a dated tag: the
++  corpora row. JSONTestSuite and the CSVW tests show no change it found: no line, and their cycles, 0.3
++  and 0.7, check their rows before they start.
 diff --git a/meta/research/README.md b/meta/research/README.md
 index 17d2d93..6f5d659 100644
 --- a/meta/research/README.md
@@ -121,19 +173,101 @@ index 17d2d93..6f5d659 100644
 +[`CURRENCY.md`](CURRENCY.md) is the table of every outside fact the plan rests on, with the day each
 +was checked (@@PD-137@@); a research digest is filed beside it as `<topic>.md` and cited by the row
 +it checks.
+diff --git a/meta/roadmap/0.1/README.md b/meta/roadmap/0.1/README.md
+index 28096b5..9bf6ca7 100644
+--- a/meta/roadmap/0.1/README.md
++++ b/meta/roadmap/0.1/README.md
+@@ -26,7 +26,8 @@ attention.
+ 
+ PA-010 … PA-014, and PA-004's `limits.npk`. All settled.
+ 
+-**Open questions to settle:** none. **Open by design:** O-P2
++**Open questions to settle:** one, put to the author — what an input over 4 GiB answers, held at
++0.1.1 below. **Open by design:** O-P2
+ (`NPARSE_MAX_SCALAR`) is a *measurement*, taken at cycle 0.3 against the
+ JSONTestSuite corpus, not here.
+ 
+@@ -58,6 +59,7 @@ JSONTestSuite corpus, not here.
+ - [ ] **every operation total**: an out-of-range position clamps, never traps, never returns garbage — asserted at `pos == 0`, `pos == len`, `pos > len`
+ - [ ] `Span { uint32:lo; uint32:hi; }`, half-open, with `lo <= hi` maintained
+ - [ ] an input longer than `0xFFFFFFFF` refused at entry with `EParseState` (C-5) — a caller mistake, not an input's
++- [ ] **held open for the author's answer to the workbench's question 36** (asked 2026-10-16): C-5's refusal above and `SAFETY.md` §7's `NPARSE_MAX_INPUT` row — 2^47, `EParseState`, "a caller mistake, not an input", unreachable behind C-5 while a span is 32 bits — are one input-size path, and a hostile input over 4 GiB takes it to the consuming program's `failsafe` and stops it, which S-1 exists to prevent: `SAFETY.md` §3 says no byte stream reaches either identity, and §8 names no duty to cap an input's size. The two ways out: the oversize input answers a `Fault` of its own kind, the same for both (S-2), which the question recommends; or §8 states the duty and §3's "No" is qualified. The answer settles it here, by a decision of this cycle's, and C-5 stands as written until then ([`security-defects.md`](../../research/security-defects.md), its item 5)
+ - [ ] `scan_line_col(src, offset)` counting from the start, one-based, and **the only place a one-based number exists**
+ - [ ] the `Cursor`-holding-a-borrow shape from probe 08's fourth edge, exercised at every call depth the formats will use
+ 
+@@ -69,6 +71,7 @@ JSONTestSuite corpus, not here.
+ ### 0.1.3 — UTF-8
+ - [ ] the decoder accepts exactly Unicode Table 3-7: no overlongs, no surrogates, nothing above `U+10FFFF`, per-lead-byte continuation ranges
+ - [ ] `scan_utf8(c) -> Optional<Utf8Step>` returning `NIL` on ill-formed input, with **no policy** — reject-or-substitute is the format's (C-11)
++- [ ] C-9's clause that TOML requires UTF-8 "for strings and keys", read against TOML's own sentence, "A TOML file must be a valid UTF-8 encoded Unicode document" (v1.1.0's text, as [`security-guidance.md`](../../research/security-guidance.md) quotes it), and C-9's TOML policy stated from TOML's text at the source, for the version `FORMATS.md` pins
+ - [ ] a corpus test over every boundary of every sequence length, including the four overlong forms and both surrogate halves
+ - [ ] the codepoint accumulation goes through `arith.npk` like everything else (C-12), even though a four-byte sequence cannot overflow a `uint32` — because the rule admits no exceptions and an unchecked accumulation is something a reader has to reason about
+ - [ ] a `prove` comment: the length is 1…4 and the codepoint is a scalar value
+diff --git a/meta/roadmap/0.4/README.md b/meta/roadmap/0.4/README.md
+index 9177963..23e1ef7 100644
+--- a/meta/roadmap/0.4/README.md
++++ b/meta/roadmap/0.4/README.md
+@@ -48,6 +48,7 @@ duplicate key our default would now reject.
+ - [ ] `DupPolicy` — `Error` (default), `First`, `Last`
+ - [ ] O-P1 confirmed: no JSONTestSuite `y_` case contains a duplicate key the default would reject; if one does, the decision is amended rather than the test skipped
+ - [ ] duplicate detection switching to an incremental index beyond `NPARSE_DUP_SCAN_MAX`, **invisible to the answer** (D-16)
++- [ ] that index's worst case under hostile keys bounded, or the index ordered by key bytes, before it ships: if it takes D-13's order, an unkeyed FNV-1a hash, keys built to share one hash fall in one equal-hash run and are scanned there, and the quadratic case D-16's switch exists to end returns ([`security-defects.md`](../../research/security-defects.md): its residual on D-13's index, which the same keys degrade to a scan)
+ 
+ ### 0.4.2 — lookup
+ - [ ] `doc_find` as a linear scan of the pair chain, comparing pool bytes
 diff --git a/meta/roadmap/0.6/README.md b/meta/roadmap/0.6/README.md
-index b77b380..dc7cef2 100644
+index b77b380..0980322 100644
 --- a/meta/roadmap/0.6/README.md
 +++ b/meta/roadmap/0.6/README.md
-@@ -39,7 +39,7 @@ it.
+@@ -37,12 +37,15 @@ it.
+ 
+ ### 0.6.0 — the corpus
  - [ ] toml-test vendored with `PROVENANCE.md`, both `valid/` and `invalid/`
++- [ ] that `PROVENANCE.md` naming the TOML version the gate runs, never the runner's default (`CURRENCY.md`'s corpora row); and the two leading-BOM valid cases toml-test withdrew on 2026-09-15 (`0d1c92e`, which leaves a leading BOM to the implementation) read against `allow_bom`: TOML's answer to a leading BOM stated, and the exact pass count taken from the vendored commit, before or after `0d1c92e` ([`security-vectors.md`](../../research/security-vectors.md))
  - [ ] the `corpus` stage judging `valid/` as accepted and `invalid/` as faulted, with an **exact** pass count
  - [ ] **the expected-JSON second oracle** (R-12): every `valid/` case's tree printed as JSON and compared to the corpus's own expected encoding — **the only check in the suite that does not go through our own reader**
 -- [ ] the specification version pinned in `meta/research/format-versions.md` (PA-054) — "TOML" without a version is three incompatible languages
-+- [ ] the specification version pinned as `meta/research/CURRENCY.md`'s TOML row (PA-054, @@PD-137@@) — "TOML" without a version is three incompatible languages; **v1.1.0 is published** and this cycle decides between it and v1.0.0, with the two compared and R-8 re-read against the one chosen
++- [ ] the specification version pinned as `meta/research/CURRENCY.md`'s TOML row (PA-054, @@PD-137@@) — "TOML" without a version is three incompatible languages; **v1.1.0 is published** and this cycle decides between it and v1.0.0, with the two compared — the research gate's [`security-guidance.md`](../../research/security-guidance.md) lists the five changes the project's changelog gives, and this cycle reads both texts at the source — and R-8 re-read against the one chosen
++- [ ] what TOML's text requires and no rule here states yet, each stated with its case for the version chosen: the whole document valid UTF-8, comments included; no control character but tab, U+007F among them, in a comment or a string; bare keys of ASCII `A-Za-z0-9_-` only; an escape not listed reserved, and an error (v1.1.0's text, as [`security-guidance.md`](../../research/security-guidance.md) quotes it)
  
  ### 0.6.1 — scalars
  - [ ] integers in base 10, 16, 8 and 2, with underscores, through `arith.npk` (PA-012)
++- [ ] an integer that cannot be represented losslessly: v1.1.0's text says "an error must be thrown", and its changelog that parsers are "free to support any int or float size" (#1058), which may loosen that; `VALUE_MODEL.md` D-19 leaves the `Fault` over `ND_BIG` to the format, and no TOML rule states it yet — stated here, with its `toml-test` case ([`security-guidance.md`](../../research/security-guidance.md))
+ - [ ] floats including `inf`, `-inf`, `nan`, exponents, and the underscore rules
+ - [ ] basic strings, multi-line basic, literal strings, multi-line literal — with the line-ending-backslash and leading-newline trimming rules
+ - [ ] `\U0001F600`-style eight-digit escapes through `scan_hex8`
+@@ -56,6 +59,7 @@ it.
+ - [ ] a key in a table closed by a later header as `Fault(BadTable)`
+ - [ ] a dotted key that would escape an inline table refused
+ - [ ] every `toml-test` table case green, and the ones that are subtle listed in the record with what they taught
++- [ ] the cost of R-11's header and dotted-key resolution bounded under hostile input: no rule bounds it, and the research gate's defects digest, by its own reading, counts it among the quadratic class's unguarded costs ([`security-defects.md`](../../research/security-defects.md))
+ 
+ ### 0.6.3 — arrays of tables and inline tables
+ - [ ] `[[x]]` appending; mixing `[[x]]` with `[x]` refused
+diff --git a/meta/roadmap/0.7/README.md b/meta/roadmap/0.7/README.md
+index bf1bc90..db9ffd8 100644
+--- a/meta/roadmap/0.7/README.md
++++ b/meta/roadmap/0.7/README.md
+@@ -57,6 +57,7 @@ PA-050, PA-053, PA-060. All settled.
+ 
+ ### 0.7.4 — the writer
+ - [ ] the canonical form: the dialect's delimiter and line ending, a field quoted **iff** it contains the delimiter, the quote, `\r` or `\n`, no trailing delimiter
++- [ ] **formula injection**, a published class with no rule here (CVE-2021-41270, CVE-2023-51763; `WRITER_MODEL.md` W-9 sets only JSON's escapes): a writer rule beside W-9 says whether the writer neutralises a field that begins `=`, `+`, `-` or `@` or the duty is the caller's, before the writer ships ([`security-defects.md`](../../research/security-defects.md))
+ - [ ] `EParseEncode` for what CSV cannot represent: a nested container, a map value that is not a scalar
+ - [ ] the round trip green over the corpus, per dialect
+ 
+diff --git a/meta/roadmap/0.8/README.md b/meta/roadmap/0.8/README.md
+index 07cf954..26ef560 100644
+--- a/meta/roadmap/0.8/README.md
++++ b/meta/roadmap/0.8/README.md
+@@ -51,6 +51,7 @@ writer) is decided here too.
+ - [ ] yaml-test-suite vendored with `PROVENANCE.md`
+ - [ ] **the filter is a committed list of case identifiers with the excluded construct named per case** (V-11) — not a regex, not a count
+ - [ ] **every excluded case must produce `Fault(Unsupported)`**, so the exclusions are *tested* rather than skipped — this is the difference between a stated subset and an unstated gap
++- [ ] anchors and aliases refused by name, every case, while the expansion budget R-14 promises is unwritten: alias expansion is a published class (CVE-2017-18640, CVE-2019-11253, CVE-2026-45304), R-13's refusal is its only guard here, and no alias ships before that budget ([`security-defects.md`](../../research/security-defects.md))
+ - [ ] the suite's expected event streams compared mechanically against ours — **the largest single reason to have adopted this event vocabulary** rather than inventing one
+ - [ ] Q-1 confirmed: the actual proportion of the suite touching excluded constructs, measured and recorded
+ 
 diff --git a/meta/specs/FORMATS.md b/meta/specs/FORMATS.md
 index d8d1bc8..829ce77 100644
 --- a/meta/specs/FORMATS.md

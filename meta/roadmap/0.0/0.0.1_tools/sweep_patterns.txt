@@ -11,3 +11,4 @@ a library tied to no platform | not tied to linux|linux-specific or x86-64-speci
 the planning status | status: planning|no library code exists yet
 the empty heading | what this is before starting
 the research gating cycle 0.1 | gates? cycle 0\.1|research[^.]{0,80}\bcycle 0\.1\b|cycle 0\.1[^.]{0,40}\bresearch
+the scanner's cycle with no open question | open questions to settle:? none|blocked on a (question|decision)

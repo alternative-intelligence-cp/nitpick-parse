@@ -10,7 +10,10 @@ step that owes it (the owed-items table below). **All six are at the pin**, each
 the subcycles before it, and the pass's last commit ran every block of all six once more, each `SAME`. **Its first fix
 round** (2026-10-15, after the plan verification's FAIL) answered that verification's findings at their source — the
 tools, the six files' patches and texts, and this README — and moved the research gate to cycle 0.0's first dispatch
-(PD-137, by the libraries' reviewer's ruling); its own confirmation pass ran every block of all six again.
+(PD-137, by the libraries' reviewer's ruling); its own confirmation pass ran every block of all six again. **Its
+research re-cut** (2026-10-16), after that gate fired on the three digests, held their findings — `CURRENCY.md`'s
+research section, in 0.0.1's step 5, says where each is held, or who decides it — and 0.0.0's gate item 7 now knows
+the three by their sha256.
 
 | File | At `7e91730` |
 |---|---|
@@ -239,7 +242,7 @@ file states its own acceptance when it reaches the pin, and where the two differ
 - [ ] `probe12_module_fixed.npk` and its three refusals — a `fixed` table read and ranged; a plain module binding `NITPICK-TYPE-055`
 - [ ] every verdict in `0.0.0.md` §6 re-measured, SAME, and every consequence in `meta/specs/` and `meta/DECISIONS.md` in the commit of its verdict
 - [ ] `tests/probe/README.md`; block 6's sweep read
-- [ ] the three research digests filed before any probe runs, each printed by block 0a (PD-137)
+- [ ] the three research digests filed before any probe runs, each printed by block 0a with its sha256, the three this plan holds (PD-137)
 
 ### 0.0.1 — the skeleton
 - [ ] `src/lib.npk` exists and `pub use`s nothing yet (`use` is not transitive, so the surface is a deliberate list)
@@ -247,7 +250,7 @@ file states its own acceptance when it reaches the pin, and where the two differ
 - [ ] `nitpick.toml`'s `[toolchain]` pinned to LLVM 20.1.8 with the `triple` and `datalayout` rows, and its `[[test]]` table's first entries
 - [ ] a consumer program under `tests/conformance/` imports `src/lib.npk` by relative path and compiles, links, runs and exits 0, with a comment naming O-N1
 - [ ] CI: a workflow running `harness/run.py` on push, with LLVM 20.1.8 and the compiler built from the pinned commit, every hex value quoted
-- [ ] `meta/research/CURRENCY.md`, its three research rows each linking its digest
+- [ ] `meta/research/CURRENCY.md`, its three research rows each linking its digest, and its research section saying what each digest found and where each finding is held
 - [ ] `CLAUDE.md` and `CONTRIBUTING.md` re-read against 0.0.0's verdicts and extended
 
 ### 0.0.2 — the harness, part 1

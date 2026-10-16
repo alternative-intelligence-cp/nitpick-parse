@@ -80,7 +80,7 @@ index 7733ba7..8585379 100644
  The compiler binary is the **pinned toolchain** the board names
  (`../BOARD.md`, W-18): `$NPKC` and `$NPKRT` are supplied to every session by the
 diff --git a/meta/research/CURRENCY.md b/meta/research/CURRENCY.md
-index 7a073e5..be73917 100644
+index 9ef29ca..7219a2e 100644
 --- a/meta/research/CURRENCY.md
 +++ b/meta/research/CURRENCY.md
 @@ -13,7 +13,7 @@ says which.
@@ -91,7 +91,7 @@ index 7a073e5..be73917 100644
 +| Python — the harness's interpreter | 3.12.3, the version on the workbench and on `ubuntu-24.04` | 2026-10-15, cycle 0.0.2: `python3 --version` on the workbench, 3.12.3; on `ubuntu-24.04` by the first CI run of the harness, whose log prints it and the record quotes | python.org | @@PD-137@@ |
  | UTF-8 — what a JSON, TOML or YAML input must be (`SCAN_MODEL.md` §3) | RFC 3629 (STD 63) and the Unicode Standard's Table 3-7, the edition to be named | **not yet** — cycle 0.1, whose decoder reads it, checks it before it starts | rfc-editor.org/rfc/rfc3629; unicode.org | PA-013 |
  | JSON | RFC 8259 | not yet — cycle 0.3 | rfc-editor.org/rfc/rfc8259 | PA-050 |
- | TOML | v1.0.0, as `FORMATS.md` names it. **v1.1.0 is published** (the workbench's currency audit of 2026-10-09, which the second research item below reads at the source, before cycle 0.0's first probe), and nobody has compared the two | not yet — cycle 0.6.0 decides the version (PA-054 as @@PD-137@@ amends it) | toml.io; github.com/toml-lang/toml/releases | PA-054 |
+ | TOML | v1.0.0, as `FORMATS.md` names it. **v1.1.0 is published** (the workbench's currency audit of 2026-10-09, which the second research item below read at the source before cycle 0.0's first probe), and that item's digest lists the five changes the project's changelog gives from v1.0.0 to v1.1.0 in what a parser accepts, the fifth, on integer and float sizes, one that may loosen the integer rule ([`security-guidance.md`](security-guidance.md)) | not yet — cycle 0.6.0 decides the version (PA-054 as @@PD-137@@ amends it) | toml.io; github.com/toml-lang/toml/releases | PA-054 |
 diff --git a/tests/probe/README.md b/tests/probe/README.md
 index 7a129e3..ef3614a 100644
 --- a/tests/probe/README.md

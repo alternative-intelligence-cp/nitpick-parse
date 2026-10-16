@@ -83,7 +83,7 @@ index 59a45c4..24b8701 100644
  ### 0.12.1 — triage
  - [ ] every finding classified: **defect** (the library is wrong), **gap** (a consumer reasonably needs something absent), or **cost** (the library is right and this is what the design costs)
 diff --git a/meta/roadmap/0.6/README.md b/meta/roadmap/0.6/README.md
-index dc7cef2..ff58ee1 100644
+index 0980322..d432dcf 100644
 --- a/meta/roadmap/0.6/README.md
 +++ b/meta/roadmap/0.6/README.md
 @@ -1,6 +1,7 @@
@@ -144,7 +144,7 @@ index 8c722fe..6ce3628 100644
  things nothing else in the plan exercises hard. Written **without changing the
  library**, so every friction is recorded rather than smoothed over, then
 diff --git a/meta/specs/FORMATS.md b/meta/specs/FORMATS.md
-index 829ce77..48a6ac7 100644
+index 829ce77..8d4cbdd 100644
 --- a/meta/specs/FORMATS.md
 +++ b/meta/specs/FORMATS.md
 @@ -12,7 +12,7 @@ behind it rather than a claim.
@@ -156,13 +156,14 @@ index 829ce77..48a6ac7 100644
  | **CSV** | RFC 4180 + dialects | **complete**, plus the dialects §6 names | hand-built + the W3C CSVW cases | 0.7 |
  | **YAML** | 1.2 core schema | **a stated subset**, §4 | yaml-test-suite, filtered to the subset | 0.8 |
  
-@@ -67,6 +67,10 @@ number or an escape rule becomes visible.
+@@ -67,6 +67,11 @@ number or an escape rule becomes visible.
  
  ## 3. TOML — v1.0.0, complete
  
 +*(2026-10-15, cycle 0.0.5 — the ecosystem audit of 2026-10-15's E3-14: the workbench's currency audit of 2026-10-09
-+reports TOML v1.1.0 published, which nothing here has compared with v1.0.0 yet; this section is v1.0.0's until cycle
-+0.6.0 reads both at the source and decides, by `../research/CURRENCY.md`'s TOML row and PA-054.)*
++reports TOML v1.1.0 published, and the research gate's `../research/security-guidance.md` lists what it changes from
++v1.0.0, from the project's changelog; this section is v1.0.0's until cycle 0.6.0 reads both at the source and
++decides, by `../research/CURRENCY.md`'s TOML row and PA-054.)*
 +
  **Rule R-8.** The whole language: bare and quoted keys, dotted keys, basic and
  literal strings, multi-line forms, integers in four bases, floats including
