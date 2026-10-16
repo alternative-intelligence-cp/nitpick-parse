@@ -19,8 +19,9 @@ for t in tools/parse_check.npk tools/check.npk; do
   echo "§1.2 the compiler's $t at the pin: $(git -C "$NPK_TREE" cat-file -e "$PIN:$t" 2>/dev/null && echo "a source, $(git -C "$NPK_TREE" show "$PIN:$t" | wc -l) lines" || echo absent)"
 done
 
-# §1.3 -- probe 08h and its control: the reseat through a callee accepted, the same reseat done directly refused
-codes "$d/tests/probe/defect/view_reseat/probe08h_view_reseated.npk" | sed 's/^/§1.3 /'
+# §1.3 -- probe 08h and its control: the reseat through a callee refused, as the same reseat done directly is (at
+# `7e91730` the callee's was accepted, DEF-252; the pin carries landing 116's fix)
+codes "$d/tests/probe/refused/probe08h_view_reseated.npk" | sed 's/^/§1.3 /'
 codes "$d/tests/probe/refused/probe08g_holder_outlives_view.npk" | sed 's/^/§1.3 /'
 
 # §1.4 -- an error identity is a module and a name (the ecosystem audit's EC3), measured

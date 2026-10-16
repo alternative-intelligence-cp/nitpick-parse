@@ -1,86 +1,31 @@
-diff --git a/harness/baseline/PENDING.txt b/harness/baseline/PENDING.txt
-index b20185a..2cd06b4 100644
---- a/harness/baseline/PENDING.txt
-+++ b/harness/baseline/PENDING.txt
-@@ -12,3 +12,4 @@
- # files, this one reviewed. A unit that MEETS its expectation reddens the run to say its marker is
- # stale, and the marker and its line here go together, by the adoption that carries the fix.
- tests/probe/defect/bound_pointer_receiver/probe06_trait_bound.npk	DEF-253	undefined-value @npk.probe06_trait_bound.Count->:Src.step	the compiler registered it DEF-253 (2026-10-15); green when a sync Self-> method called through a generic bound links and runs, exit 0 -- landing 118's fix, so it flips at the re-pin at 118 and stays pending at a pin below it
-+tests/probe/defect/view_reseat/probe08h_view_reseated.npk	DEF-252	accepted	the compiler registered it DEF-252 (2026-10-15); green when npkc refuses a callee's reseat of a view into a place its caller owns, NITPICK-BORROW-002 -- landing 116's fix, so it flips at the re-pin at 118 and stays pending at a pin below 116
 diff --git a/nitpick.toml b/nitpick.toml
-index 40c5495..a2bbd9b 100644
+index 9deca7f..7425898 100644
 --- a/nitpick.toml
 +++ b/nitpick.toml
-@@ -103,6 +103,21 @@ name  = "defect-bound"
+@@ -93,6 +93,15 @@ name  = "probe"
  stage = "program"
- path  = "tests/probe/defect/bound_pointer_receiver"
+ path  = "tests/probe"
  
 +# Cycle 0.0.3's refusals (@@PD-140@@): the probes refused on purpose, each judged
-+# by `npkc` alone against exactly the codes and sites it names (`BUILD.md` B-7);
-+# and the reseat's compiler defect, DEF-252 -- probe 08h's right answer a
-+# refusal, and the one failure it is excused, `accepted`, in its header and in
-+# `harness/baseline/PENDING.txt`.
++# by `npkc` alone against exactly the codes and sites it names (`BUILD.md` B-7),
++# probe 08h among them -- the reseat a callee makes, refused from the compiler's
++# landing 116 (DEF-252).
 +[[test]]
 +name  = "refused"
 +stage = "check"
 +path  = "tests/probe/refused"
 +
-+[[test]]
-+name  = "defect-reseat"
-+stage = "check"
-+path  = "tests/probe/defect/view_reseat"
-+
  # The parse sweep (cycle 0.0.3, @@PD-140@@): every `.npk` in the tree compiled as
  # a root, none with a LEX- or PARSE- code. It comes last, so a file a suite
  # judges is judged there first, by its own rule. The runner refuses a manifest
 diff --git a/tests/probe/README.md b/tests/probe/README.md
-index ef3614a..55aa740 100644
+index e7a6b31..27f8b97 100644
 --- a/tests/probe/README.md
 +++ b/tests/probe/README.md
-@@ -36,4 +36,5 @@ reports is an assertion with its own exit code below 20 (02's `Span` and
-   directory, probe 06 as a pending unit.
- - [`defect/view_reseat/`](defect/view_reseat/README.md) — probe 08h: a view
-   re-seated by a callee outlives a block's `string` and reads freed memory
--  (@@PD-132@@).
-+  (@@PD-132@@). The compiler's DEF-252; since cycle 0.0.3 the harness judges the
-+  directory, probe 08h as a pending refusal.
-diff --git a/tests/probe/defect/view_reseat/README.md b/tests/probe/defect/view_reseat/README.md
-index bfd584b..26b5859 100644
---- a/tests/probe/defect/view_reseat/README.md
-+++ b/tests/probe/defect/view_reseat/README.md
-@@ -4,6 +4,12 @@
- re-measured by its run.** A use-after-free in safe code. Raised with the cycle's plan by path; the
- workbench registry numbers it, and nothing here does (`../../../../meta/DECISIONS.md`, @@PD-132@@).
- 
-+*(2026-10-15, cycle 0.0.3: the compiler seat registered it as **DEF-252**, and its fix is the compiler's landing 116,
-+which the libraries' one re-pin, at 118, carries. Since this subcycle the harness judges this directory — `nitpick.toml`'s
-+`defect-reseat` entry, a `check` suite: probe 08h's right answer, refused `NITPICK-BORROW-002`, and its one excused
-+failure, accepted, in its header and in `../../../../harness/baseline/PENDING.txt` (`BUILD.md` B-5b, @@PD-140@@). It
-+flips at the adoption of a pin of 116 or later; at a pin below 116 it stays pending.)*
-+
- ## The program, and its control
- 
- | file | the reseat | at `7e91730` |
-diff --git a/tests/probe/defect/view_reseat/probe08h_view_reseated.npk b/tests/probe/defect/view_reseat/probe08h_view_reseated.npk
-index c242d9e..544c553 100644
---- a/tests/probe/defect/view_reseat/probe08h_view_reseated.npk
-+++ b/tests/probe/defect/view_reseat/probe08h_view_reseated.npk
-@@ -1,5 +1,16 @@
--// npkc: 0
--// run: 170 at -O0 and through opt -O2 -- the free poison, 0xAA
-+// expect-error: NITPICK-BORROW-002
-+// pending-until: DEF-252 accepted
-+//
-+// PENDING UNTIL THE COMPILER FIXES DEF-252, its registration of this defect (2026-10-15). The two lines above
-+// are the harness's (`BUILD.md` B-5b, @@PD-139@@ and @@PD-140@@): the RIGHT ANSWER -- refused, `NITPICK-BORROW-002`,
-+// the code the same reseat done as a direct assignment gets (`../../refused/probe08g_holder_outlives_view.npk`)
-+// -- and the one failure this unit is excused, which is what `7e91730` gives: `npkc` accepts it, exit 0, with no
-+// diagnostic. The fix is the compiler's landing 116, which the libraries' one re-pin (at 118) carries, so this
-+// unit FLIPS AT THAT ADOPTION, at a pin of 116 or later; at a pin below 116 it stays pending. The day `npkc`
-+// refuses it with exactly that code, the run reddens to say the marker is stale; the marker and its line in
-+// `harness/baseline/PENDING.txt` go, the unit is green, and this file moves to `../../refused/` by a decision
-+// that says so (`README.md`). Until cycle 0.0.3 these lines read `npkc: 0` and `run: 170 at -O0 and through opt
-+// -O2`, cycle 0.0.0's measurement of the run, which `README.md` keeps.
- //
- // PROBE 08h -- PROBE 08g's RESEAT, DONE BY A CALLEE. A COMPILER DEFECT AT `7e91730`.
- //
+@@ -41,4 +41,5 @@ ordinary one here:
+   `probe` suite runs the three.
+ - probe 08h, [`refused/probe08h_view_reseated.npk`](refused/probe08h_view_reseated.npk) — a view
+   re-seated by a callee, which read freed memory at `7e91730`: the compiler's DEF-252,
+-  refused from its landing 116, `NITPICK-BORROW-002` (@@PD-132@@).
++  refused from its landing 116, `NITPICK-BORROW-002` (@@PD-132@@). Since cycle 0.0.3 the harness's
++  `refused` suite judges it by that code at its site.

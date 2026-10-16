@@ -25,7 +25,7 @@ index 8585379..eb288f5 100644
  The compiler binary is the **pinned toolchain** the board names
  (`../BOARD.md`, W-18): `$NPKC` and `$NPKRT` are supplied to every session by the
 diff --git a/CONTRIBUTING.md b/CONTRIBUTING.md
-index 4552218..9ee46d8 100644
+index cefcaf4..a1970f5 100644
 --- a/CONTRIBUTING.md
 +++ b/CONTRIBUTING.md
 @@ -32,7 +32,7 @@ never for concluding; nothing is committed on the strength of a filtered run.
@@ -61,7 +61,7 @@ index 787ca4a..5bedfed 100644
  **Parsing a number cannot stop your program.** Plain integer overflow *traps*
  in Nitpick (D-210), so the ordinary `acc = acc * 10 + d` accumulator crashes the
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index 9386392..fb30928 100644
+index f86b987..91930f6 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
 @@ -149,6 +149,9 @@ cycle 0.12's application; semantic versioning thereafter.
@@ -75,7 +75,7 @@ index 9386392..fb30928 100644
    variant** — a consumer's exhaustive `pick` stops compiling;
  - removing or renaming any public name, as usual.
 diff --git a/meta/roadmap/0.2/README.md b/meta/roadmap/0.2/README.md
-index 8df38c5..6fddb15 100644
+index fb3269d..ead3044 100644
 --- a/meta/roadmap/0.2/README.md
 +++ b/meta/roadmap/0.2/README.md
 @@ -60,7 +60,7 @@ cycle freezes**.
@@ -123,7 +123,7 @@ index 186c83d..94a2869 100644
        than infer it
  
 diff --git a/meta/roadmap/ROADMAP.md b/meta/roadmap/ROADMAP.md
-index 4d6a5f8..006b31b 100644
+index 1f1ce11..951ed22 100644
 --- a/meta/roadmap/ROADMAP.md
 +++ b/meta/roadmap/ROADMAP.md
 @@ -47,7 +47,8 @@ whether it kept them.**

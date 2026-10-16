@@ -1,8 +1,8 @@
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index fb30928..1896eeb 100644
+index 91930f6..e2cca4b 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
-@@ -1099,3 +1099,26 @@ checks written now** — their inputs do not exist, and a check over nothing is
+@@ -1106,3 +1106,26 @@ checks written now** — their inputs do not exist, and a check over nothing is
  
  *Reversal, for the author:* none for the key; a layer S-6 does not list, or a third name, is a change to `SAFETY.md` §3
  by a decision, which the check then reads.
@@ -46,12 +46,12 @@ index 7712438..eb2a7eb 100644
  which is a property of the cursor's arithmetic proof and is not adjustable.
  
 diff --git a/nitpick.toml b/nitpick.toml
-index a2bbd9b..ba3b830 100644
+index 7425898..deb6434 100644
 --- a/nitpick.toml
 +++ b/nitpick.toml
-@@ -118,6 +118,13 @@ name  = "defect-reseat"
+@@ -102,6 +102,13 @@ name  = "refused"
  stage = "check"
- path  = "tests/probe/defect/view_reseat"
+ path  = "tests/probe/refused"
  
 +# Cycle 0.0.4's unit suite (@@PD-143@@): `src/core/`'s programs, each judged by
 +# its exit at -O0 and through `opt -O2`.

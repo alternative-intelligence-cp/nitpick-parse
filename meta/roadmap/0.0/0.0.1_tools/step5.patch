@@ -1,5 +1,5 @@
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index 39882a1..39b80a2 100644
+index 2242667..2e96ec6 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
 @@ -493,6 +493,8 @@ specification, and that is stated rather than hidden; its hand-built corpus is
@@ -11,7 +11,7 @@ index 39882a1..39b80a2 100644
  **2026-09-03.** In `meta/research/format-versions.md`, with the document's own
  version string and the date it was read. "TOML" without a version is three
  incompatible languages.
-@@ -927,3 +929,36 @@ number, and the harness asserts the tools against it.
+@@ -930,3 +932,36 @@ number, and the harness asserts the tools against it.
  *Reversal, for the author:* none for the rows; the one re-pin, at landing 118, moves
  `NITPICK_COMMIT` and the emission's digest in CI, and the LLVM row only if a landing
  moves the compiler's D-349.
@@ -204,7 +204,7 @@ index 28096b5..9bf6ca7 100644
  - [ ] the codepoint accumulation goes through `arith.npk` like everything else (C-12), even though a four-byte sequence cannot overflow a `uint32` — because the rule admits no exceptions and an unchecked accumulation is something a reader has to reason about
  - [ ] a `prove` comment: the length is 1…4 and the codepoint is a scalar value
 diff --git a/meta/roadmap/0.4/README.md b/meta/roadmap/0.4/README.md
-index 9177963..23e1ef7 100644
+index 5d2e3b1..250b241 100644
 --- a/meta/roadmap/0.4/README.md
 +++ b/meta/roadmap/0.4/README.md
 @@ -48,6 +48,7 @@ duplicate key our default would now reject.

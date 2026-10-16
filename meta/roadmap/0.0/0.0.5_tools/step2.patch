@@ -12,7 +12,7 @@ index eb288f5..90edeba 100644
  sweeps every `.npk` in the tree, and runs the tree checks; `--only` concludes nothing.
  
 diff --git a/meta/roadmap/ROADMAP.md b/meta/roadmap/ROADMAP.md
-index 6ce3628..27f90c7 100644
+index 58cf21e..9ac3e9d 100644
 --- a/meta/roadmap/ROADMAP.md
 +++ b/meta/roadmap/ROADMAP.md
 @@ -98,7 +98,7 @@ opening it. The per-cycle README has the subcycle map and the checklist.
@@ -25,7 +25,7 @@ index 6ce3628..27f90c7 100644
  measured, an arena whose `get` copies and which refuses an owning element, a
  trait with a `Self->` receiver through a bound **and** through `dyn`, the
 diff --git a/tests/probe/README.md b/tests/probe/README.md
-index 55aa740..5fa138e 100644
+index 27f8b97..df1d534 100644
 --- a/tests/probe/README.md
 +++ b/tests/probe/README.md
 @@ -2,7 +2,7 @@

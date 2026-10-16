@@ -112,12 +112,13 @@ for w in with without; do
   echo "§1.7 the consumer from two copies $w the manifest: $(cmp -s "$F/rp-$w-a.ll" "$F/rp-$w-bb_deeper.ll" && echo 'byte-identical' || echo 'two different modules')"
 done
 
-# §1.8 -- probe 06 at both legs: the module LLVM refuses, and the value each tool names
-( cd "$d/tests/probe/defect/bound_pointer_receiver" && "$NPKC" probe06_trait_bound.npk -o "$F/p6.ll" ); echo "§1.8 probe 06: npkc $?"
-llc -O0 -filetype=obj -relocation-model=static "$F/p6.ll" -o "$F/p6.o" 2> "$F/p6.llc"; echo "§1.8 llc $? -- $(grep -m1 -oE "use of undefined value '[^']+'" "$F/p6.llc")"
-opt -O2 -S "$F/p6.ll" -o "$F/p6.2.ll" 2> "$F/p6.opt"; echo "§1.8 opt $? -- $(grep -m1 -oE "use of undefined value '[^']+'" "$F/p6.opt")"
+# §1.8 -- probe 06 at both legs: what LLVM says of its module, and the undefined value it names if it names one (at
+# `7e91730` each tool named one, DEF-253; the pin carries landing 118's fix)
+( cd "$d/tests/probe" && "$NPKC" probe06_trait_bound.npk -o "$F/p6.ll" ); echo "§1.8 probe 06: npkc $?"
+llc -O0 -filetype=obj -relocation-model=static "$F/p6.ll" -o "$F/p6.o" 2> "$F/p6.llc"; echo "§1.8 llc $? -- $(grep -m1 -oE "use of undefined value '[^']+'" "$F/p6.llc" || echo 'no undefined value named')"
+opt -O2 -S "$F/p6.ll" -o "$F/p6.2.ll" 2> "$F/p6.opt"; echo "§1.8 opt $? -- $(grep -m1 -oE "use of undefined value '[^']+'" "$F/p6.opt" || echo 'no undefined value named')"
 
-# §1.9 -- the markers: every file of the three suites the patched manifest declares, read by the patched reader
+# §1.9 -- the markers: every file of the suites the patched manifest declares, read by the patched reader
 python3 -B - "$d" <<'PY'
 import os, sys
 sys.path.insert(0, os.path.join(sys.argv[1], "harness"))

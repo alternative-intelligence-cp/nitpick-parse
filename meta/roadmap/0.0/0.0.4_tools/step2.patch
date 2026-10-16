@@ -1,8 +1,8 @@
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index 1896eeb..06eab13 100644
+index e2cca4b..eb87d01 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
-@@ -1122,3 +1122,33 @@ S-135).
+@@ -1129,3 +1129,33 @@ S-135).
  Expects and no other block of 0.0.4 or 0.0.5: block 0b, whose §1.5 counts one more `exit` operand, declared name and
  `fixed` binding, and block 5's sweep, whose ninth-limit subject gains the new row. Every text that says the ninth
  waits for cycle 0.4 is rewritten with them, and what the new words move is retaken too.
@@ -37,7 +37,7 @@ index 1896eeb..06eab13 100644
 +*Reversal, for the author:* when D-341 lands, `Bytes` may offer a frozen view by a decision; when a decision accepts
 +the contracts' arms, the comments become clauses, a marker deleted per site.
 diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md
-index 2737f88..7de1f9f 100644
+index 699b571..af07870 100644
 --- a/meta/specs/BUILD.md
 +++ b/meta/specs/BUILD.md
 @@ -252,6 +252,13 @@ into it and nothing converts back (`NITPICK-TYPE-007`; @@PD-132@@).
@@ -88,12 +88,12 @@ index 9f7bc59..4ccbc9c 100644
  | depth stack push/pop | `count < NPARSE_MAX_DEPTH`; `count > 0` on pop | contract, Z3 |
  | class table lookup | the index is a `uint8`, so `< 256` by type | free |
 diff --git a/nitpick.toml b/nitpick.toml
-index ba3b830..1358862 100644
+index deb6434..622e2aa 100644
 --- a/nitpick.toml
 +++ b/nitpick.toml
-@@ -118,8 +118,9 @@ name  = "defect-reseat"
+@@ -102,8 +102,9 @@ name  = "refused"
  stage = "check"
- path  = "tests/probe/defect/view_reseat"
+ path  = "tests/probe/refused"
  
 -# Cycle 0.0.4's unit suite (@@PD-143@@): `src/core/`'s programs, each judged by
 -# its exit at -O0 and through `opt -O2`.

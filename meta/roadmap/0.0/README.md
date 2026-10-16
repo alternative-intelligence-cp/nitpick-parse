@@ -13,7 +13,8 @@ tools, the six files' patches and texts, and this README — and moved the resea
 (PD-137, by the libraries' reviewer's ruling); its own confirmation pass ran every block of all six again. **Its
 research re-cut** (2026-10-16), after that gate fired on the three digests, held their findings — `CURRENCY.md`'s
 research section, in 0.0.1's step 5, says where each is held, or who decides it — and 0.0.0's gate item 7 now knows
-the three by their sha256.
+the three by their sha256. **Its adoption of the libraries' one re-pin** (2026-10-16) moved it to compiler `c9baa9e`
+before any subcycle started, by the landing table below, row by row.
 
 | File | At `c9baa9e` |
 |---|---|
@@ -34,7 +35,8 @@ Two of the compiler project's most expensive lessons decide this cycle's content
   payload enum over two structs, a trait with a `Self->` receiver reached through a bound and through `dyn`. **0.0.0
   asks the compiler about all of them before anything is built on them** — and at `7e91730` it answered that the
   specification's sizes, summed from field widths, were wrong for `Event`, `ParseError` and `Node`; that several of
-  its reasons named a mechanism the compiler does not use; and that the trait's static path is a compiler defect.
+  its reasons named a mechanism the compiler does not use; and that the trait's static path was a compiler defect —
+  which the compiler fixed in its landing 118, so at the pin `c9baa9e` the answer is that it runs.
 - **"Diagnostics come first, not last — they are how every later cycle is tested."** Here that is the harness. A
   suite written after the code is a suite shaped by the code.
 
@@ -56,7 +58,7 @@ author.**
 |---|---|---|
 | PD-129 | 0.0.0 | the specification's types keep their enum fields, at their measured sizes |
 | PD-130 | 0.0.0 | what an owning value may be stored in: the arena refuses at its make; a `Vec`'s free must drop its owners |
-| PD-131 | 0.0.0 | static dispatch through a bound is held on a compiler defect, and nothing is re-spelled around it |
+| PD-131 | 0.0.0 | static dispatch through a bound is the intended path, measured; nothing was re-spelled around the defect that held it |
 | PD-132 | 0.0.0 | every slot a reader's bytes reach is the read-only view; a view travels only as far as its bytes |
 | PD-133 | 0.0.0 | native recursion traps; PA-022 stands, its reason a whole-program stop |
 | PD-134 | 0.0.0 | what a consumer owes, measured; the tests' arm codes |
@@ -65,7 +67,7 @@ author.**
 | PD-137 | 0.0.1 | one currency table; the library is security-sensitive, and its three research items gate cycle 0.0's work, answered at its first dispatch (0.0.0's gate) |
 | PD-138 | 0.0.2 | the build is one module per root, held to the target rows, scanned two ways on both legs, and reproducible from two directories |
 | PD-139 | 0.0.2 | a unit red on a compiler defect is pending: its right answer, the one failure it is excused, and a reviewed list |
-| PD-140 | 0.0.3 | the refusals and the sweep are judged by `npkc`; `accept` struck; a refusal a set of codes at their sites; the reseat's defect a pending refusal |
+| PD-140 | 0.0.3 | the refusals and the sweep are judged by `npkc`; `accept` struck; a refusal a set of codes at their sites; a refusal the pin does not give a pending one |
 | PD-141 | 0.0.3 | the self-check is its own printed list, live and pending, run before any judgment; a filtered run concludes nothing |
 | PD-142 | 0.0.3 | the tree checks read their authorities; the error budget keyed by module and name, private identities included |
 | PD-143 | 0.0.4 | `limits.npk` holds `SAFETY.md` §7's eight bounds at 0.0.4, and `VALUE_MODEL.md` D-16's ninth joins them with its switch, in cycle 0.4 |
@@ -88,22 +90,21 @@ started finishes at the pin it started at.
 
 | Landing | What it does, by the compiler's notice or the board | What it would move here |
 |---|---|---|
-| 104 (DEF-249) | an `exit` operand is held to `int32`, `NITPICK-TYPE-007` otherwise | **nothing**: every `exit` operand the cycle's programs write is an `int32` — a literal, a `=>! int32` cast (the size probes' `#size_of`, an `int64`), an `int32` `Result`'s value, an `int32` call — counted by 0.0.0's §1.6 and re-counted by each later subcycle's facts |
-| 105 (DEF-159) | a value stored through a held `@x` after `move(x)` is dropped at the scope's exit; the emission of every function with an address-taken owning binding moves | **no answer moves**: the cycle holds no `@` in a binding (§1.6). What moves is emission: the compiler's own `npkc.ll` digest, which 0.0.1's CI asserts against the pin's row, and any IR byte count a record quotes |
-| 106 (D-342 R1, D-343) | an enum values every variant or none; a macro parameter the body declares is refused | **nothing**: no valued enum variant, no macro |
-| 107 (DEF-243) | a builtin named as a value is refused | **nothing**: every builtin is called |
-| 108 (DEF-202) | an aggregate `fixed` binding may be initialised by naming another | **newly allowed**, not used: every `fixed` table stays a literal (probe 12); probe 01b's `U64_MAX` is a scalar built from a scalar, which `7e91730` accepts |
-| 109 (DEF-224, D-352) | `failsafe`'s `pick` is found through bare blocks | **newly allowed**, not used: every `failsafe` opens with its `pick` |
-| 110 (DEF-226) | `pick (r.is_error)` carries the check out | **nothing**: the cycle tests a `Result` with `if (r.is_error)` |
-| 111 (DEF-233, DEF-238) | a `give` or `fall` outside its arm is `NITPICK-TYPE-094`; a `frac` member written is `NITPICK-TYPE-024` | **nothing**: none written. At `7e91730` a stray `give`/`fall` ends `npkc` at exit 3 with no message, which a refusal fixture would misread; none is planned |
-| 112 (DEF-232; its notice F54; on the compiler's `main` as `958890a`) | a `NIL` member is the zero-sized `{}`, as D-084 says; the checker unchanged | **nothing**: no `NIL` field (`tools/shapes.py`, in each subcycle's facts) |
-| 113 (its notice F55: DEF-235, DEF-236 (c)(d)(e), DEF-237, DEF-234 (c)) | `NITPICK-PARSE-001` at a keyword declared as a name of ANY kind; `NITPICK-TYPE-045` at a `joins` deadline that is not a constant; `NITPICK-DERIVE-007` at an attribute not named `derive`, and at any attribute on a local binding (`DERIVE-004` at `#[derive]` on an impl); `NITPICK-RESOLVE-014` at an `opaque struct` outside an `extern` block; two texts | **nothing, checked against F55's text and the pin's keyword table**: every declared name of every kind the rule lists, in every `.npk` the cycle's patches add, read against `src/frontend/keywords.npk` at the pin — 170 words, the same set in landing 113's work — by `tools/names.py`, proved on a planted control holding each kind: none is a keyword. Every attribute is `derive`, on a struct or an enum; no `joins`, no `opaque`; and the two `??` the cycle writes, in probe 01b, are on an `Optional`, not a `Result`. *(Corrected 2026-10-15: this row named five words and a local `buffer`, the defects' first reading; F55's rule is every keyword, every kind of name.)* |
-| 114 (DEF-250; F56) | the D-211 check hoisted out of the initialiser's branch: a module-level binding with no initialiser — `int64:counter;`, and the bare struct, `stack`, `wild`, `wildx`, `pub`, `atomic<int64>` and channel forms — is `NITPICK-TYPE-055` at its declaration | **nothing**: every module-level binding the cycle writes is a `fixed` one with an initialiser, but probe 12b's, a plain one with an initialiser, refused on purpose and `TYPE-055` at the pin already (`tools/rulings.py`) |
-| 115 (DEF-251; F57) | every emitted `define` carries LLVM's `null_pointer_is_valid` | **every program's emitted IR moves, by design**: CI's `npkc.ll` row — the compiler's own emission, `b79f89c5…` at `7e91730` — moves with the re-pin as with any; the cycle records no digest or byte count of its own programs' IR, and no comparison of IR across two pins; and
-0.0.0's §1.5 recursion edges, which measure the emitted frames at each leg, are re-measured by its block 0b. D-355, `NULL` legal only for `wild` pointers, is a later landing of its own: the cycle writes no `NULL` (`tools/rulings.py`) |
-| 116 (DEF-252, the use-after-free) | a callee's store of a view into a place its caller owns asks DEF-42's holder-scope question at the call: `NITPICK-BORROW-002` | **probe 08h's verdict** (`tests/probe/defect/view_reseat/`): refused, `NITPICK-BORROW-002`, its right answer — 0.0.3's PENDING refusal on DEF-252, which flips at the adoption of a pin of 116 or later and stays pending below it |
-| 117 (D-353, with D-354) | a generic value parameter is a RESERVED form, refused by a code of its own, and D-336's corpus admits that verdict | **nothing**: none written; a capacity is a `fixed` constant (the libraries' S-135 answer) |
-| 118 (DEF-253, with DEF-254) | a synchronous `Self->` method called through a generic bound links; and a trait's default method calling a sibling on `self`, which never linked, links | **probe 06's verdict** (`tests/probe/defect/bound_pointer_receiver/`): it links and runs, exit 0 — 0.0.2's PENDING unit on DEF-253, which flips at the adoption of a pin of 118, and not at a pin below it (the run then reddens to say its marker is stale, and the marker and its line in `harness/baseline/PENDING.txt` go); and nothing for DEF-254: no trait default calls a sibling on `self` (`tools/shapes.py`) |
+| 104 (DEF-249) | an `exit` operand is held to `int32`, `NITPICK-TYPE-007` otherwise | **nothing**: every `exit` operand the cycle's programs write is an `int32` — a literal, a `=>! int32` cast (the size probes' `#size_of`, an `int64`), an `int32` `Result`'s value, an `int32` call — counted by 0.0.0's §1.6 and re-counted by each later subcycle's facts. *At the adoption, at `c9baa9e`: nothing moved* — every program compiled and ran at both legs, and block 0b's count of operands is the same. |
+| 105 (DEF-159) | a value stored through a held `@x` after `move(x)` is dropped at the scope's exit; the emission of every function with an address-taken owning binding moves | **no answer moves**: the cycle holds no `@` in a binding (§1.6). What moves is emission: the compiler's own `npkc.ll` digest, which 0.0.1's CI asserts against the pin's row, and any IR byte count a record quotes. *At the adoption:* CI's `npkc.ll` row moved, to notice 118's `1f48a31a…`, 31 731 079 B; and of the cycle's 78 `.npk` files, each compiled as a root at both pins and compared through the compiler's `meta/roadmap/1.6/tools/attrnorm.py` (`git show c9baa9e:`), 65 emit the same IR, 11 are refused at one pin or both, probe 06's differs by landing 118's symbol, and `tests/unit/bytes_put_uint.npk`'s by one drop's guard in `renders`, which takes an owning binding's address — the emission this row says moves; its exit is the same at both pins. |
+| 106 (D-342 R1, D-343) | an enum values every variant or none; a macro parameter the body declares is refused | **nothing**: no valued enum variant, no macro. *At the adoption, at `c9baa9e`: nothing moved* — every program of the cycle compiled and ran at both legs, and every refusal kept its codes and sites, as at `7e91730`. |
+| 107 (DEF-243) | a builtin named as a value is refused | **nothing**: every builtin is called. *At the adoption, at `c9baa9e`: nothing moved* — every program of the cycle compiled and ran at both legs, and every refusal kept its codes and sites, as at `7e91730`. |
+| 108 (DEF-202) | an aggregate `fixed` binding may be initialised by naming another | **newly allowed**, not used: every `fixed` table stays a literal (probe 12); probe 01b's `U64_MAX` is a scalar built from a scalar, which `7e91730` accepts. *At the adoption:* not used, and nothing moved. |
+| 109 (DEF-224, D-352) | `failsafe`'s `pick` is found through bare blocks | **newly allowed**, not used: every `failsafe` opens with its `pick`. *At the adoption:* not used, and nothing moved; measured, a `pick` in a bare block is found at `c9baa9e` and `REACH-001` at `7e91730`. |
+| 110 (DEF-226) | `pick (r.is_error)` carries the check out | **nothing**: the cycle tests a `Result` with `if (r.is_error)`. *At the adoption, at `c9baa9e`: nothing moved* — every program of the cycle compiled and ran at both legs, and every refusal kept its codes and sites, as at `7e91730`. |
+| 111 (DEF-233, DEF-238) | a `give` or `fall` outside its arm is `NITPICK-TYPE-094`; a `frac` member written is `NITPICK-TYPE-024` | **nothing**: none written. At `7e91730` a stray `give`/`fall` ends `npkc` at exit 3 with no message, which a refusal fixture would misread; none is planned. *At the adoption, at `c9baa9e`: nothing moved* — every program of the cycle compiled and ran at both legs, and every refusal kept its codes and sites, as at `7e91730`. |
+| 112 (DEF-232; its notice F54; on the compiler's `main` as `958890a`) | a `NIL` member is the zero-sized `{}`, as D-084 says; the checker unchanged | **nothing**: no `NIL` field (`tools/shapes.py`, in each subcycle's facts). *At the adoption, at `c9baa9e`: nothing moved* — every program of the cycle compiled and ran at both legs, and every refusal kept its codes and sites, as at `7e91730`. |
+| 113 (its notice F55: DEF-235, DEF-236 (c)(d)(e), DEF-237, DEF-234 (c)) | `NITPICK-PARSE-001` at a keyword declared as a name of ANY kind; `NITPICK-TYPE-045` at a `joins` deadline that is not a constant; `NITPICK-DERIVE-007` at an attribute not named `derive`, and at any attribute on a local binding (`DERIVE-004` at `#[derive]` on an impl); `NITPICK-RESOLVE-014` at an `opaque struct` outside an `extern` block; two texts | **nothing, checked against F55's text and the pin's keyword table**: every declared name of every kind the rule lists, in every `.npk` the cycle's patches add, read against `src/frontend/keywords.npk` at the pin — 170 words, the same set in landing 113's work — by `tools/names.py`, proved on a planted control holding each kind: none is a keyword. Every attribute is `derive`, on a struct or an enum; no `joins`, no `opaque`; and the two `??` the cycle writes, in probe 01b, are on an `Optional`, not a `Result`. *(Corrected 2026-10-15: this row named five words and a local `buffer`, the defects' first reading; F55's rule is every keyword, every kind of name.)* *At the adoption: nothing moved* — the pin's `src/frontend/keywords.npk` is byte-identical to `7e91730`'s, its 170 words; `tools/names.py` finds no declared name among them, and at `c9baa9e` the compiler's own parse sweep (0.0.3) none; an unknown attribute is `NITPICK-DERIVE-007` at the pin, measured, and none is written. |
+| 114 (DEF-250; F56) | the D-211 check hoisted out of the initialiser's branch: a module-level binding with no initialiser — `int64:counter;`, and the bare struct, `stack`, `wild`, `wildx`, `pub`, `atomic<int64>` and channel forms — is `NITPICK-TYPE-055` at its declaration | **nothing**: every module-level binding the cycle writes is a `fixed` one with an initialiser, but probe 12b's, a plain one with an initialiser, refused on purpose and `TYPE-055` at the pin already (`tools/rulings.py`). *At the adoption: nothing moved* — probe 12b is `TYPE-055` at 9:1 at both pins. |
+| 115 (DEF-251; F57) | every emitted `define` carries LLVM's `null_pointer_is_valid` | **every program's emitted IR moves, by design**: CI's `npkc.ll` row — the compiler's own emission, `b79f89c5…` at `7e91730` — moves with the re-pin as with any; the cycle records no digest or byte count of its own programs' IR, and no comparison of IR across two pins; and 0.0.0's §1.5 recursion edges, which measure the emitted frames at each leg, are re-measured by its block 0b. D-355, `NULL` legal only for `wild` pointers, is a later landing of its own: the cycle writes no `NULL` (`tools/rulings.py`). *At the adoption:* CI's row moved (row 105); the attribute, 1 528 of it on the new side, is the whole difference for 65 of the 67 programs both pins emit (row 105's comparison); and §1.5's four edges are the same at `c9baa9e`. |
+| 116 (DEF-252, the use-after-free) | a callee's store of a view into a place its caller owns asks DEF-42's holder-scope question at the call: `NITPICK-BORROW-002` | **probe 08h's verdict** (`tests/probe/defect/view_reseat/`): refused, `NITPICK-BORROW-002`, its right answer — 0.0.3's PENDING refusal on DEF-252, which flips at the adoption of a pin of 116 or later and stays pending below it. *At the adoption:* probe 08h is refused at `c9baa9e`, `NITPICK-BORROW-002` at 30:20, and lands in `refused/` by 0.0.0's own convention (its §3), so 0.0.3's pending refusal is not made, and PD-132's third clause and reversal say what the pin holds. |
+| 117 (D-353, with D-354) | a generic value parameter is a RESERVED form, refused by a code of its own, and D-336's corpus admits that verdict | **nothing**: none written; a capacity is a `fixed` constant (the libraries' S-135 answer). *At the adoption, at `c9baa9e`: nothing moved* — every program of the cycle compiled and ran at both legs, and every refusal kept its codes and sites, as at `7e91730`. |
+| 118 (DEF-253, with DEF-254) | a synchronous `Self->` method called through a generic bound links; and a trait's default method calling a sibling on `self`, which never linked, links | **probe 06's verdict** (`tests/probe/defect/bound_pointer_receiver/`): it links and runs, exit 0 — 0.0.2's PENDING unit on DEF-253, which flips at the adoption of a pin of 118, and not at a pin below it (the run then reddens to say its marker is stale, and the marker and its line in `harness/baseline/PENDING.txt` go); and nothing for DEF-254: no trait default calls a sibling on `self` (`tools/shapes.py`). *At the adoption:* probe 06 links and runs at `c9baa9e`, exit 0 at both legs, and its controls 5 and 1; it lands in `tests/probe/` with them, as probes 06b and 06c, by 0.0.0's own convention, so 0.0.2's pending unit is not made, and PD-131 says what the pin measures; DEF-254: none written; and DEF-255, which 118 registered open — a qualified trait call through a bound, `NITPICK-TYPE-019` — none written. |
 
 **Also ruled in landing 112's commit** (D-353 … D-359, the board's notice F54), each held to what the cycle writes:
 generic value parameters out until designed — 117 above; `NULL` legal only for `wild` pointers (D-355) — none written; a
@@ -120,7 +121,13 @@ and in no landing above; the day one carries it, 0.0.4's `Bytes` may offer a fro
 **At the re-pin, the adoption is:** 0.0.0's blocks 1 … 4 at the new pin (every verdict in its §6), the defect
 directories' verdicts (re-derived first: the pin flips each fix it carries), each subcycle's facts block, CI's pinned rows (the commit and the compiler's `npkc.ll` digest,
 `b79f89c5…` at `7e91730`), `harness/irscan.py`'s two lists re-classed against the new runtime object (the runner stops on
-a symbol neither list holds), and this table's "what it would move" column, row by row.
+a symbol neither list holds), and this table's "what it would move" column, row by row. **It was taken at `c9baa9e`
+on 2026-10-16, before any subcycle started**, and measured: the two defect directories' probes flipped, each to the
+verdict its row predicts — probe 06 runs, in `tests/probe/` with its controls, and probe 08h is refused, in
+`refused/`, as 0.0.0's three directories have it (its §3), so neither is a pending unit and no compiler defect is
+raised; CI's rows are `c9baa9e91c55…` and notice 118's `1f48a31a…`, 31 731 079 B; and `npkrt.o` is byte-identical at
+both pins (`c8e5033a…`), its 119 global symbols each a row of `runtime_symbols.tsv`, so neither of `irscan.py`'s lists
+moved.
 
 ## The shapes this cycle does not write
 
@@ -151,8 +158,9 @@ block counts the lexical ones over what its patches add, with a scanner proved o
 | B15 wide strings | not spelled |
 | B16 compiler documents its own tree contradicts (DEF-239), S-134 | the probes measure; no plan line rests on a reference sentence alone |
 | C — `fixed T[]` and `string_bytes`; `TYPE-072` on a clause-less `while`; the six-arm floor; the generic by-value refusals; the symbol scan's blindness to a syscall | 0.0.0's PD-132; every `while` states `decreases`; every program names the floor (0.0.0 §1.4); `Vec<T: Copy>` (0.0.4); a call-edge scan (0.0.2) |
-| a synchronous `Self->` method through a generic bound (0.0.0's first defect) | not written outside its defect directory (PD-131) |
-| a view re-seated by a callee into a place it was handed (0.0.0's second defect) | not written outside its defect directory (PD-132) |
+| a synchronous `Self->` method through a generic bound (0.0.0's first defect, DEF-253, fixed by landing 118) | written in probe 06 and its controls, which run at the pin (PD-131), and nowhere else |
+| a view re-seated by a callee into a place its caller owns (0.0.0's second defect, DEF-252, fixed by landing 116) | written only in probe 08h, which the pin refuses, `NITPICK-BORROW-002` (PD-132) |
+| a qualified trait call through a bound, `Src.step(f)` (DEF-255, which landing 118 registered open: `NITPICK-TYPE-019`) | none written: every trait method is called with the dotted form — read over every patch's added lines at the adoption |
 | a trait's default method calling a sibling on `self` (DEF-254, which links only from 118) | none written: `tools/shapes.py` counts it, with its own planted control (0.0.2 on) |
 | a module-level binding with no initialiser, or a plain one (DEF-250 at 114; D-211) | every one `fixed` with an initialiser but probe 12b's, refused on purpose: `tools/rulings.py` (0.0.2 on) |
 
@@ -221,7 +229,7 @@ past cycle 0.0.
 
 | # | Topic | Ends with |
 |---|---|---|
-| [0.0.0](0.0.0.md) | **The language probes** — the specification's shapes asked of the compiler at the pin, the flagship among them | a verdict per probe, the specifications amended by them, two compiler defects raised |
+| [0.0.0](0.0.0.md) | **The language probes** — the specification's shapes asked of the compiler at the pin, the flagship among them | a verdict per probe, the specifications amended by them; the two compiler defects of `7e91730` fixed in the pin |
 | [0.0.1](0.0.1.md) | **The skeleton** — the module layout, `src/lib.npk`, the manifest's toolchain rows and test table, CI, `CURRENCY.md` | `npkc` compiles an empty library and a program that imports it |
 | [0.0.2](0.0.2.md) | **The harness, part 1** — build, the `program` stage, the toolchain pin, `repro` | one test program builds, links, runs, and its exit code is judged |
 | [0.0.3](0.0.3.md) | **The harness, part 2** — the refusal and parse stages, the self-check, the tree checks | the self-check proves the harness can fail |
@@ -237,8 +245,8 @@ file states its own acceptance when it reaches the pin, and where the two differ
 - [ ] `tests/probe/probe01a_naive_accumulate.npk` traps `IntOverflow` (93) and `probe01b_checked_accumulate.npk` exits 0 — **the flagship**
 - [ ] `probe02_pod_event.npk`, `probe03_payload_enum.npk`, `probe04_arena_pod.npk` — the specification's `Event`, `Step` and `Node`, each probe's exit code its size: 32, 36, 64
 - [ ] `refused/probe05_arena_owning.npk` — refused at the make, `NITPICK-TYPE-007`
-- [ ] `probe07_trait_dyn.npk` — the `Format` shape through `dyn`; and `defect/bound_pointer_receiver/` — the same through a bound, a compiler defect
-- [ ] `probe08_view_edges.npk`, its six refusals, and `defect/view_reseat/` — the read-only view at every edge a reader uses
+- [ ] `probe07_trait_dyn.npk` — the `Format` shape through `dyn`; and `probe06_trait_bound.npk` with its two controls — the same through a bound, a compiler defect at `7e91730` that the pin fixes
+- [ ] `probe08_view_edges.npk` and its seven refusals, 08h's among them — the read-only view at every edge a reader uses
 - [ ] `probe09_generic_move.npk` and the capped pair `probe09b`/`probe09c` — owners in a generic `Vec`, and the free that must drop them
 - [ ] `probe10_explicit_stack.npk` exits 0 at 50 000 levels; `probe10b_native_recursion_traps.npk` traps `StackExhausted` (106)
 - [ ] `probe11_bytes_growth.npk` — a million appends, twenty reallocations
@@ -262,13 +270,13 @@ file states its own acceptance when it reaches the pin, and where the two differ
 - [ ] the undefined-symbol scan and the call-edge scan as build steps, over every module under `src/` and every program, the floor and the syscaller their controls on every run
 - [ ] the `program` stage at -O0 and again under `opt -O2`, same exit required; `expect-exit`, `stress` and `mem-cap-mib` honoured
 - [ ] the `repro` check: two builds from different working directories, each copy with its manifest — and **seen to fail** without it
-- [ ] 0.0.0's `tests/probe/` green as the first real `program` suite; probe 06 PENDING on DEF-253, listed, and every way the mechanism can be wrong seen red
+- [ ] 0.0.0's `tests/probe/` green as the first real `program` suite, probe 06 and its controls among it; the reviewed list naming no unit at the pin, and every way the pending mechanism can be wrong seen red
 - [ ] CI's harness step asserting the runner's unqualified green summary
 - [ ] `irscan.py`'s two lists class the runtime's global symbols whole, and each denied facet a source construct reaches seen red
 
 ### 0.0.3 — the harness, part 2
 - [ ] the parse sweep (`npkc` over every `.npk`, judged by the diagnostic's code family) and the refusal stage with the **exact-code** rule (B-7, a set at its sites); `accept` struck
-- [ ] 0.0.0's `refused/` judged by its codes; probe 08h PENDING on DEF-252, listed; the runner refusing a manifest with no sweep
+- [ ] 0.0.0's `refused/` judged by its codes, probe 08h among them; the runner refusing a manifest with no sweep
 - [ ] `--only`, and output that says twice that a filtered run concludes nothing and never the green summary
 - [ ] `harness/selfcheck.py`, its sixteen live cases each **seen red** and its four pending printed as pending; it runs before any judgment, and a live case not red stops the run
 - [ ] `check_layering`, `check_error_budget` (keyed by module and name), `check_constants_named`, `check_no_raw_accumulate`, `check_no_recursion` and `check_specs_current` live, each saying what it read; `check_no_owning_fields` from 0.2
@@ -299,8 +307,8 @@ written into the specifications.
 
 ## Watch for
 
-- **Probe 05 is expected to be refused, probe 01a and probe 10b to trap, and probe 06 and probe 08h to show a
-  compiler defect** — from 0.0.2 on, probe 06 a PENDING unit stating its right answer. All are *results*. A subcycle fails only on a verdict that is **undecided** — a compiler crash, a
+- **Probe 05 and probe 08h are expected to be refused, probe 01a and probe 10b to trap, and probe 06 to run** — at
+  `7e91730` probes 06 and 08h showed compiler defects, which the pin fixes. All are *results*. A subcycle fails only on a verdict that is **undecided** — a compiler crash, a
   hang, or output nobody can read — or one that differs from its plan's Expect.
 - **A probe that fails is a finding, not an obstacle.** Record the exact diagnostic, decide the design change, amend
   the specification, and only then continue. Working around a compiler refusal in library code is what the compiler's

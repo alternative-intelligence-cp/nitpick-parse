@@ -33,10 +33,10 @@ index a997a84..2251249 100644
  ## Licence
  
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index 7d64e69..39882a1 100644
+index 1b33a83..2242667 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
-@@ -908,3 +908,22 @@ again** — a table is the form a check can read without a second, hand-written
+@@ -911,3 +911,22 @@ again** — a table is the form a check can read without a second, hand-written
  
  *Reversal, for the author:* none needed; it changes no import, only how the rule is
  written.
@@ -60,7 +60,7 @@ index 7d64e69..39882a1 100644
 +`NITPICK_COMMIT` and the emission's digest in CI, and the LLVM row only if a landing
 +moves the compiler's D-349.
 diff --git a/nitpick.toml b/nitpick.toml
-index 1d10f98..1e4c66b 100644
+index 1d10f98..80a41fe 100644
 --- a/nitpick.toml
 +++ b/nitpick.toml
 @@ -1,9 +1,13 @@
@@ -126,9 +126,9 @@ index 1d10f98..1e4c66b 100644
 +
 +# Cycle 0.0.0's probes that compile, link and run, judged by their exit codes at
 +# -O0 and again through `opt -O2`. `path` is a directory, not recursive, so the
-+# probes refused on purpose (`tests/probe/refused/`) and the compiler defects'
-+# reproductions (`tests/probe/defect/`) are not in it: cycle 0.0.3 gives each
-+# its own entry, judged its own way.
++# probes refused on purpose (`tests/probe/refused/`) are not in it -- they have
++# their own entry, judged their own way, from cycle 0.0.3 -- and nor would a
++# compiler defect's reproduction be (`tests/probe/defect/`, none at the pin).
 +[[test]]
 +name  = "probe"
 +stage = "program"

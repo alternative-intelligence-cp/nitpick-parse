@@ -1,8 +1,8 @@
 diff --git a/meta/roadmap/ROADMAP.md b/meta/roadmap/ROADMAP.md
-index 04c170c..4d6a5f8 100644
+index 04c170c..1f1ce11 100644
 --- a/meta/roadmap/ROADMAP.md
 +++ b/meta/roadmap/ROADMAP.md
-@@ -93,13 +93,16 @@ Enough detail that a reader can tell whether a cycle is finished without
+@@ -93,13 +93,17 @@ Enough detail that a reader can tell whether a cycle is finished without
  opening it. The per-cycle README has the subcycle map and the checklist.
  
  ### 0.0 — Foundations
@@ -22,16 +22,17 @@ index 04c170c..4d6a5f8 100644
 +explicit stack, and — the one that matters most — **an accumulate-with-check
 +that provably does not trap where the naive one does.** A probe that fails
 +changes the design; cycle 0.0.0's verdicts moved numbers and reasons across the
-+specifications, and found two compiler defects.
++specifications, and the two compiler defects its planning found at `7e91730` were
++fixed by the compiler, at its landings 116 and 118, before its work began.
  
  Then the harness (`harness/run.py`, its self-check, the stages), the manifest's
  test table, CI, and `src/core/` — `Vec<T>`, `Bytes`, `SmallMap<K,V>` and
 diff --git a/tests/probe/README.md b/tests/probe/README.md
 new file mode 100644
-index 0000000..7a129e3
+index 0000000..873e4c5
 --- /dev/null
 +++ b/tests/probe/README.md
-@@ -0,0 +1,38 @@
+@@ -0,0 +1,43 @@
 +# `tests/probe/` — the language probes
 +
 +Small programs that ask the compiler whether a shape `meta/specs/` depends on is
@@ -53,7 +54,7 @@ index 0000000..7a129e3
 +|---|---|---|
 +| `tests/probe/` | a program that compiles, links and runs; judged by its exit code at `-O0` and again through `opt -O2` | `// expect-exit: N`, and `// mem-cap-mib: N` where it runs under an address-space cap |
 +| [`refused/`](refused/) | a program the compiler must refuse with exactly the codes it names | `// expect-error: CODE` and `// expect-error-at: L:C` |
-+| [`defect/`](defect/) | the reproduction of a compiler defect, with its controls and a README saying what it blocks | the verdict it was written against, as a comment |
++| `defect/` | the reproduction of a compiler defect, with its controls and a README saying what it blocks — none at the pin, so the directory is not made | the verdict it was written against, as a comment |
 +
 +A probe's header is a hypothesis; the verdict is the table in `0.0.0.md` §6. A
 +size probe exits with the `#size_of` of its subject — `Event` (02), `Step` (03),
@@ -61,12 +62,17 @@ index 0000000..7a129e3
 +reports is an assertion with its own exit code below 20 (02's `Span` and
 +`TextRef`, 03's `ParseError`).
 +
-+## The defects, at compiler `7e91730`
++## The two compiler defects these probes found, both fixed in the pin
 +
-+- [`defect/bound_pointer_receiver/`](defect/bound_pointer_receiver/README.md) —
-+  probe 06: a synchronous `Self->` method called through a generic bound is
-+  accepted by `npkc` and refused by `llc`. It blocks static dispatch through a
-+  bound (@@PD-131@@).
-+- [`defect/view_reseat/`](defect/view_reseat/README.md) — probe 08h: a view
-+  re-seated by a callee outlives a block's `string` and reads freed memory
-+  (@@PD-132@@).
++Both were found at compiler `7e91730`, where this cycle was planned, and both
++were fixed by the compiler before the cycle's work began, so each probe is an
++ordinary one here:
++
++- probe 06, `probe06_trait_bound.npk`, and its two controls,
++  `probe06b_bound_by_value.npk` and `probe06c_concrete_pointer.npk` — a
++  synchronous `Self->` method called through a generic bound, accepted by `npkc`
++  and refused by `llc` at `7e91730`: the compiler's DEF-253, fixed by its landing
++  118. At the pin it links and runs (@@PD-131@@).
++- probe 08h, [`refused/probe08h_view_reseated.npk`](refused/probe08h_view_reseated.npk) — a view
++  re-seated by a callee, which read freed memory at `7e91730`: the compiler's DEF-252,
++  refused from its landing 116, `NITPICK-BORROW-002` (@@PD-132@@).

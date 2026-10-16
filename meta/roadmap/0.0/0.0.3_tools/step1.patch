@@ -831,23 +831,25 @@ index 0000000..792105f
 +         ("check_codes_documented", "cycle 0.2"), ("check_failsafe_arms", "cycle 0.2"),
 +         ("check_corpus_provenance", "cycle 0.3")]
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index b177035..9386392 100644
+index 5193206..f86b987 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
-@@ -1040,3 +1040,59 @@ the name both sides use.
+@@ -1045,3 +1045,61 @@ the name both sides use.
  *Reversal, for the author:* none for the mechanism; each pending unit's marker and list line go
  when its fix is pinned, and a new observation form joins B-5b by a decision when a defect shows
  a failure this one cannot name.
 +
-+### @@PD-140@@ — the refusals and the sweep are judged by `npkc`; `accept` is struck; a refusal is a set of codes at their sites; the reseat's defect is a pending refusal
++### @@PD-140@@ — the refusals and the sweep are judged by `npkc`; `accept` is struck; a refusal is a set of codes at their sites; a refusal the pin does not give is a pending one
 +**2026-10-15, cycle 0.0.3.** `specs/BUILD.md` §3, B-5b and B-7. The `check` stage compiles each file with the pinned
 +`npkc` and requires exit 1 with exactly the set of codes the file names, each `expect-error-at` a site its code was
 +reported at; exit 0 is ACCEPTED and fails, and 2 or 3 is a broken run, printed with its code. The `parse` stage — the
 +sweep — compiles every `.npk` in the tree as a root and passes it unless a `NITPICK-LEX-` or `NITPICK-PARSE-` code is
 +reported or `npkc` could not proceed: a file refused for its types or its borrows parses. `accept` is struck, since
 +`tests/conformance/` is built, linked and run. And the second pending observation, `accepted`: a `check` unit whose
-+right answer is a refusal and which `npkc` accepts at the pin — probe 08h on DEF-252, whose right answer is
-+`NITPICK-BORROW-002`, the code of the same reseat done directly (probe 08g), and which flips at a pin of 116 or later.
++right answer is a refusal and which `npkc` accepts at the pin — probe 08h's, on DEF-252, at `7e91730`; the
++compiler's landing 116 fixed it before this subcycle, and at `c9baa9e` probe 08h is an ordinary refusal,
++`NITPICK-BORROW-002`, the code of the same reseat done directly (probe 08g), so no unit takes the observation
++at the pin.
 +
 +*Alternatives declined:* **the compiler's `tools/parse_check` and `tools/check`** — `.npk` sources a run would build
 +from the compiler's tree, which nothing here builds (`nitpick-regex` and `nitpick-time` struck them the same way); **a
@@ -895,7 +897,7 @@ index b177035..9386392 100644
 +*Reversal, for the author:* none for the key; a layer S-6 does not list, or a third name, is a change to `SAFETY.md` §3
 +by a decision, which the check then reads.
 diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md
-index 8d12b45..2737f88 100644
+index 9d2876f..699b571 100644
 --- a/meta/specs/BUILD.md
 +++ b/meta/specs/BUILD.md
 @@ -135,13 +135,17 @@ runner and not a change of suite, and adds two of its own.
@@ -923,9 +925,9 @@ index 8d12b45..2737f88 100644
  `expect-obligation:`, `explore:`, `npkc-flags:` and their kin — and this library's
  `expect-roundtrip:` and `expect-fault:` until their stages exist, make their file
  fail by name: an expectation nobody checks is the failure this rule exists to stop.
-+*(2026-10-15, cycle 0.0.3 — @@PD-140@@: a second observation, `// pending-until: DEF-<n> accepted`, for a `check`
-+unit whose right answer is a refusal and which `npkc` accepts at the pin, exit 0 with no diagnostic — probe 08h, on
-+DEF-252.)*
++*(2026-10-16, cycle 0.0.3 — @@PD-140@@: a second observation, `// pending-until: DEF-<n> accepted`, for a `check`
++unit whose right answer is a refusal and which `npkc` accepts at the pin, exit 0 with no diagnostic — probe 08h's
++shape on DEF-252 at `7e91730`, which the compiler's landing 116 fixed, so no unit takes it at `c9baa9e`.)*
  
  **Rule B-6 — assert on codes and exit codes, never on message text.**
  
@@ -983,13 +985,13 @@ index 19e0ac7..49f78a2 100644
 +*(2026-10-15, cycle 0.0.3 — @@PD-141@@: first after the toolchain check and the floor program its cases are built on,
 +and before every step that judges the library; a live case not red stops the run.)*
 diff --git a/nitpick.toml b/nitpick.toml
-index 7dd3932..40c5495 100644
+index 80a41fe..9deca7f 100644
 --- a/nitpick.toml
 +++ b/nitpick.toml
-@@ -102,3 +102,13 @@ path  = "tests/probe"
- name  = "defect-bound"
+@@ -92,3 +92,13 @@ path  = "tests/conformance"
+ name  = "probe"
  stage = "program"
- path  = "tests/probe/defect/bound_pointer_receiver"
+ path  = "tests/probe"
 +
 +# The parse sweep (cycle 0.0.3, @@PD-140@@): every `.npk` in the tree compiled as
 +# a root, none with a LEX- or PARSE- code. It comes last, so a file a suite

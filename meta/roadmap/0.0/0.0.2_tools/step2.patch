@@ -1,88 +1,14 @@
-diff --git a/harness/baseline/PENDING.txt b/harness/baseline/PENDING.txt
-index 0345d8d..b20185a 100644
---- a/harness/baseline/PENDING.txt
-+++ b/harness/baseline/PENDING.txt
-@@ -11,3 +11,4 @@
- # no pending unit matched is a failure -- so taking a unit out of the count is two edits in two
- # files, this one reviewed. A unit that MEETS its expectation reddens the run to say its marker is
- # stale, and the marker and its line here go together, by the adoption that carries the fix.
-+tests/probe/defect/bound_pointer_receiver/probe06_trait_bound.npk	DEF-253	undefined-value @npk.probe06_trait_bound.Count->:Src.step	the compiler registered it DEF-253 (2026-10-15); green when a sync Self-> method called through a generic bound links and runs, exit 0 -- landing 118's fix, so it flips at the re-pin at 118 and stays pending at a pin below it
-diff --git a/nitpick.toml b/nitpick.toml
-index 1e4c66b..7dd3932 100644
---- a/nitpick.toml
-+++ b/nitpick.toml
-@@ -86,9 +86,19 @@ path  = "tests/conformance"
- # Cycle 0.0.0's probes that compile, link and run, judged by their exit codes at
- # -O0 and again through `opt -O2`. `path` is a directory, not recursive, so the
- # probes refused on purpose (`tests/probe/refused/`) and the compiler defects'
--# reproductions (`tests/probe/defect/`) are not in it: cycle 0.0.3 gives each
--# its own entry, judged its own way.
-+# reproductions (`tests/probe/defect/`) are not in it: each has its own entry,
-+# judged its own way.
- [[test]]
- name  = "probe"
- stage = "program"
- path  = "tests/probe"
-+
-+# The bound path's compiler defect, DEF-253, and its two controls (cycle 0.0.2,
-+# @@PD-139@@): the controls are programs judged by their exits, and probe 06 is a
-+# PENDING unit -- its right answer, exit 0, and the one failure it is excused,
-+# in its header and in `harness/baseline/PENDING.txt`. The refusals and the
-+# reseat's defect are cycle 0.0.3's, which brings the stage that judges them.
-+[[test]]
-+name  = "defect-bound"
-+stage = "program"
-+path  = "tests/probe/defect/bound_pointer_receiver"
-diff --git a/tests/probe/defect/bound_pointer_receiver/README.md b/tests/probe/defect/bound_pointer_receiver/README.md
-index 333bd58..6a7558d 100644
---- a/tests/probe/defect/bound_pointer_receiver/README.md
-+++ b/tests/probe/defect/bound_pointer_receiver/README.md
-@@ -6,6 +6,14 @@ rule requires (`CLAUDE.md`: never work around a compiler defect — record it, s
- with the cycle's plan by path; the workbench registry numbers it, and nothing here does
- (`../../../../meta/DECISIONS.md`, @@PD-131@@).
- 
-+*(2026-10-15, cycle 0.0.2: the compiler seat registered it as **DEF-253**, and its fix is the
-+compiler's landing 118, which the libraries' one re-pin carries. Since this subcycle the harness
-+runs this directory — `nitpick.toml`'s `defect-bound` entry: the two controls as programs judged
-+by their exits, and probe 06 as a PENDING unit, its right answer exit 0 and its one excused
-+failure in its header and in `../../../../harness/baseline/PENDING.txt` (`BUILD.md` B-5b,
-+@@PD-139@@). It flips at the adoption of a pin of 118 or later; at a pin below 118 it stays
-+pending.)*
-+
- ## The program, and what each tool says
- 
- [`probe06_trait_bound.npk`](probe06_trait_bound.npk) is `PLUGIN_MODEL.md` §2's `Format` shape: a
-diff --git a/tests/probe/defect/bound_pointer_receiver/probe06_trait_bound.npk b/tests/probe/defect/bound_pointer_receiver/probe06_trait_bound.npk
-index 026074d..8f37e5d 100644
---- a/tests/probe/defect/bound_pointer_receiver/probe06_trait_bound.npk
-+++ b/tests/probe/defect/bound_pointer_receiver/probe06_trait_bound.npk
-@@ -1,5 +1,16 @@
--// npkc: 0
--// llc: refused -- use of undefined value '@npk.probe06_trait_bound.Count->:Src.step'
-+// expect-exit: 0
-+// pending-until: DEF-253 undefined-value @npk.probe06_trait_bound.Count->:Src.step
-+//
-+// PENDING UNTIL THE COMPILER FIXES DEF-253, its registration of this defect (2026-10-15). The two
-+// lines above are the harness's (`BUILD.md` B-5b, @@PD-139@@): the RIGHT ANSWER, exit 0, and the one
-+// failure this unit is excused, which is what `7e91730` gives -- `npkc` accepts the program and
-+// LLVM refuses the module, naming that undefined value, `llc` at -O0 and `opt` on the optimised
-+// leg. The fix is the compiler's landing 118, and the libraries' one re-pin is at 118, so this
-+// unit FLIPS AT THAT ADOPTION; a pin below 118 (the fallback, never below 115) does not carry
-+// the fix, and there it stays pending. The day it links and runs, the run reddens to say the
-+// marker is stale; the marker and its line in `harness/baseline/PENDING.txt` go, the unit is
-+// green, and this directory moves to `tests/probe/` by a later decision that says what it
-+// changes in @@PD-131@@ (`README.md`).
- //
- // PROBE 06 -- THE `Format` SHAPE THROUGH A GENERIC BOUND. A COMPILER DEFECT AT `7e91730`.
- //
-@@ -14,8 +25,8 @@
- // POINTER type in the implementation's symbol -- while the implementation is defined as
- // `@"npk.probe06_trait_bound.Count:Src.step"`. `llc` refuses the module: an accepted program the
- // compiler cannot emit. See this directory's `README.md` for the controls and what it blocks.
--// It is not a probe the harness runs; it is the reproduction (`CLAUDE.md`: never work around a
--// compiler defect).
-+// It is the reproduction (`CLAUDE.md`: never work around a compiler defect), and since cycle
-+// 0.0.2 the harness runs it as the pending unit above.
- mod:probe06_trait_bound;
- 
- enum:Step = { Ev(int32); Done; };
+diff --git a/tests/probe/README.md b/tests/probe/README.md
+index 873e4c5..610880a 100644
+--- a/tests/probe/README.md
++++ b/tests/probe/README.md
+@@ -37,7 +37,8 @@ ordinary one here:
+   `probe06b_bound_by_value.npk` and `probe06c_concrete_pointer.npk` — a
+   synchronous `Self->` method called through a generic bound, accepted by `npkc`
+   and refused by `llc` at `7e91730`: the compiler's DEF-253, fixed by its landing
+-  118. At the pin it links and runs (@@PD-131@@).
++  118. At the pin it links and runs (@@PD-131@@). Since cycle 0.0.2 the harness's
++  `probe` suite runs the three.
+ - probe 08h, [`refused/probe08h_view_reseated.npk`](refused/probe08h_view_reseated.npk) — a view
+   re-seated by a callee, which read freed memory at `7e91730`: the compiler's DEF-252,
+   refused from its landing 116, `NITPICK-BORROW-002` (@@PD-132@@).

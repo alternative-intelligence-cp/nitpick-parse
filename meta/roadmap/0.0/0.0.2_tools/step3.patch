@@ -93,25 +93,15 @@ index 9ef29ca..7219a2e 100644
  | JSON | RFC 8259 | not yet — cycle 0.3 | rfc-editor.org/rfc/rfc8259 | PA-050 |
  | TOML | v1.0.0, as `FORMATS.md` names it. **v1.1.0 is published** (the workbench's currency audit of 2026-10-09, which the second research item below read at the source before cycle 0.0's first probe), and that item's digest lists the five changes the project's changelog gives from v1.0.0 to v1.1.0 in what a parser accepts, the fifth, on integer and float sizes, one that may loosen the integer rule ([`security-guidance.md`](security-guidance.md)) | not yet — cycle 0.6.0 decides the version (PA-054 as @@PD-137@@ amends it) | toml.io; github.com/toml-lang/toml/releases | PA-054 |
 diff --git a/tests/probe/README.md b/tests/probe/README.md
-index 7a129e3..ef3614a 100644
+index 610880a..e7a6b31 100644
 --- a/tests/probe/README.md
 +++ b/tests/probe/README.md
 @@ -19,7 +19,7 @@ the three the library adds — 97 `DivByZero`, 98 `DivOverflow`, 110 `StaleHandl
  |---|---|---|
  | `tests/probe/` | a program that compiles, links and runs; judged by its exit code at `-O0` and again through `opt -O2` | `// expect-exit: N`, and `// mem-cap-mib: N` where it runs under an address-space cap |
  | [`refused/`](refused/) | a program the compiler must refuse with exactly the codes it names | `// expect-error: CODE` and `// expect-error-at: L:C` |
--| [`defect/`](defect/) | the reproduction of a compiler defect, with its controls and a README saying what it blocks | the verdict it was written against, as a comment |
-+| [`defect/`](defect/) | the reproduction of a compiler defect, with its controls and a README saying what it blocks | the verdict it was written against, as a comment — or, once the harness runs it, its RIGHT answer and the `// pending-until:` marker naming the one failure it is excused (`BUILD.md` B-5b) |
+-| `defect/` | the reproduction of a compiler defect, with its controls and a README saying what it blocks — none at the pin, so the directory is not made | the verdict it was written against, as a comment |
++| `defect/` | the reproduction of a compiler defect, with its controls and a README saying what it blocks — none at the pin, so the directory is not made | the verdict it was written against, as a comment — or, once the harness runs it, its RIGHT answer and the `// pending-until:` marker naming the one failure it is excused (`BUILD.md` B-5b) |
  
  A probe's header is a hypothesis; the verdict is the table in `0.0.0.md` §6. A
  size probe exits with the `#size_of` of its subject — `Event` (02), `Step` (03),
-@@ -32,7 +32,8 @@ reports is an assertion with its own exit code below 20 (02's `Span` and
- - [`defect/bound_pointer_receiver/`](defect/bound_pointer_receiver/README.md) —
-   probe 06: a synchronous `Self->` method called through a generic bound is
-   accepted by `npkc` and refused by `llc`. It blocks static dispatch through a
--  bound (@@PD-131@@).
-+  bound (@@PD-131@@). The compiler's DEF-253; since cycle 0.0.2 the harness runs the
-+  directory, probe 06 as a pending unit.
- - [`defect/view_reseat/`](defect/view_reseat/README.md) — probe 08h: a view
-   re-seated by a callee outlives a block's `string` and reads freed memory
-   (@@PD-132@@).

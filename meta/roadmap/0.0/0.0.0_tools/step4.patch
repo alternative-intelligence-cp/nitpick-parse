@@ -54,7 +54,7 @@ index db6c51e..a997a84 100644
  | **doc** | `Document` — an arena-backed tree of POD nodes with a side string pool, insertion-ordered maps, and a duplicate-key policy |
  | **diag** | `ParseError`: a closed code enum, a span, an expected set, and a renderer |
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index fa4368a..c279516 100644
+index 0301f26..92646bd 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
 @@ -268,6 +268,8 @@ reasons are restated by measurement — @@PD-129@@ and @@PD-130@@ supersede this
@@ -78,11 +78,10 @@ index fa4368a..c279516 100644
  ### PA-023 — a syntax error is a value in the success channel
  **2026-09-03.** `Step = { Ev(Event); Fault(ParseError); Done; }`. `Step.Fault`
  is not `Result.err`. See PA-008 for the full argument.
-@@ -787,3 +794,101 @@ nothing in it is generic over a trait.
- *Reversal, for the author:* if the compiler side rules the shape out rather than
- fixing it, a later decision moves G-4's intended path to `dyn` openly, and the
- blocked checklist items take `dyn Format`.
-+
+@@ -787,3 +794,104 @@ nothing in it is generic over a trait.
+ meets it, and a later decision either holds the path's uses on the defect, re-spelling nothing,
+ or moves G-4's intended path to `dyn` openly, the checklist items that build them taking
+ `dyn Format`.
 +### @@PD-132@@ — every slot a reader's bytes reach is the read-only view, and a view travels only as far as its bytes
 +**2026-10-15, cycle 0.0.0, on probe 08 and its refusals.** At compiler `7e91730`
 +`string_bytes` returns `fixed uint8[]` (the compiler's D-351) and no plain
@@ -95,16 +94,19 @@ index fa4368a..c279516 100644
 +`uint8[]` still converts in (probe 08), so the change widens every contract, and a
 +write through the view is refused (`NITPICK-TYPE-086`, probe 08e).
 +
-+What a view may travel to, measured (probe 08): a function handed the caller's
++What a view may travel to, measured at compiler `c9baa9e` (probe 08 and its
++refusals): a function handed the caller's
 +bytes may RETURN a range of them (`event_text`'s shape) or a struct holding them
 +(`json_reader`'s), while a view of a local is `NITPICK-BORROW-001` (probes 08b,
 +08c); a holder declared outside a block may not take a view of that block's
 +`string` (`NITPICK-BORROW-002`, probe 08g); and a struct field of type
-+`fixed uint8[]` is a `fixed` field, assigned once. **No function in this library
-+stores a view it was handed into a place it was handed**: at `7e91730` a callee
-+that does is accepted, and the view outlives a block's `string` and reads the free
-+poison (`tests/probe/defect/view_reseat/`, raised by its path) — the rule holds
-+until the compiler refuses it.
++`fixed uint8[]` is a `fixed` field, assigned once. **A callee may not store a view
++of a shorter-lived block into a place its caller owns**, and the compiler holds that
++at the call: at `c9baa9e` the store is `NITPICK-BORROW-002` (probe 08h, in
++`tests/probe/refused/`), from its landing 116, so this library needs no reseat rule
++of its own. At `7e91730`, where the cycle was planned, the store was accepted and
++the view read the free poison after the block — the compiler's DEF-252, which that
++landing fixed.
 +
 +*Alternatives declined:* **keep plain `uint8[]`** — `string_bytes` cannot fill it,
 +so no `string` caller could parse; **copy with `string_slice`** — an owned copy
@@ -115,9 +117,10 @@ index fa4368a..c279516 100644
 +and read-only is what the name promises.
 +
 +*Reversal, for the author:* none needed for the spelling — it is the compiler's
-+D-351 that decides it. The reseat rule is withdrawn by a later decision the day
-+the compiler refuses the callee's store and `defect/view_reseat/` moves to
-+`refused/`.
++D-351 that decides it; and none for the travel, which the compiler holds: were a
++later pin to accept a callee's store again, probe 08h's refusal would fail on that
++pin's first run, and a decision would make the rule this library's until the
++compiler's fix.
 +
 +### @@PD-133@@ — native recursion traps; PA-022 stands, and its reason is a whole-program stop
 +**2026-10-15, cycle 0.0.0, on probes 10 and 10b.** A recursive descent handed
@@ -237,7 +240,7 @@ index 97d117c..28096b5 100644
  - [ ] `Span { uint32:lo; uint32:hi; }`, half-open, with `lo <= hi` maintained
  - [ ] an input longer than `0xFFFFFFFF` refused at entry with `EParseState` (C-5) — a caller mistake, not an input's
 diff --git a/meta/roadmap/0.2/README.md b/meta/roadmap/0.2/README.md
-index cec38e4..8df38c5 100644
+index f7b1a15..fb3269d 100644
 --- a/meta/roadmap/0.2/README.md
 +++ b/meta/roadmap/0.2/README.md
 @@ -40,7 +40,7 @@ cycle freezes**.
@@ -384,7 +387,7 @@ index 6b7d420..00d4032 100644
  | **span** | a half-open pair of byte offsets into the input. Never a line/column pair. |
  | **event** | one item of the pull stream: a container boundary, a key, or a scalar. 32 bytes, no owning field (@@PD-129@@). |
 diff --git a/meta/specs/PLUGIN_MODEL.md b/meta/specs/PLUGIN_MODEL.md
-index b6624f2..6f931b5 100644
+index f034474..4743905 100644
 --- a/meta/specs/PLUGIN_MODEL.md
 +++ b/meta/specs/PLUGIN_MODEL.md
 @@ -49,7 +49,7 @@ and provides one bare constructor function, because **the language has no static
@@ -507,7 +510,7 @@ index 8e0dcee..a85ab40 100644
     the caller's bytes. The borrow rules enforce it within a call; across calls
     it is the caller's discipline and it is stated in `EVENT_MODEL.md` §5.
 diff --git a/meta/specs/SCAN_MODEL.md b/meta/specs/SCAN_MODEL.md
-index ff0f41f..64353b1 100644
+index ff0f41f..5c9e2d9 100644
 --- a/meta/specs/SCAN_MODEL.md
 +++ b/meta/specs/SCAN_MODEL.md
 @@ -10,7 +10,7 @@ was this. It declares **no errors** and performs **no I/O**.
@@ -519,7 +522,7 @@ index ff0f41f..64353b1 100644
      int64:pos;          // the read position, 0 <= pos <= src.len
  };
  ```
-@@ -21,12 +21,33 @@ prelude's `read_file` and hands the bytes over. This is what keeps the library
+@@ -21,12 +21,32 @@ prelude's `read_file` and hands the bytes over. This is what keeps the library
  free of syscalls (`SAFETY.md` §2), free of a descriptor lifetime, and testable
  from a byte literal.
  
@@ -531,7 +534,7 @@ index ff0f41f..64353b1 100644
 -the public API.
 +**Rule C-2 (@@PD-132@@).** `Cursor` holds a **read-only borrow** (`fixed uint8[]`,
 +D-004, D-351), so it is second class, and what that means was measured at
-+compiler `7e91730` (probe 08 and its refusals) — but for two clauses no probe
++compiler `c9baa9e` (probe 08 and its refusals) — but for two clauses no probe
 +asks: the `await` one, since this library has no `await`, and the `fixed`
 +field's code, which no probe provokes:
 +
@@ -543,11 +546,10 @@ index ff0f41f..64353b1 100644
 +  held across an `await`;
 +- `src` is a `fixed` field, so it is **assigned once**, at construction (a later
 +  write is `NITPICK-ASSIGN-002`); a `Cursor` moves `pos` and nothing else;
-+- and **no function stores a view it was handed into a place it was handed.** At
-+  `7e91730` the compiler accepts that store when a callee makes it, and the view
-+  then outlives a block's `string` and reads freed memory
-+  (`tests/probe/defect/view_reseat/`) — so the rule is this library's until the
-+  compiler refuses it.
++- and **a callee may not store a view of a shorter-lived block into a place its
++  caller owns**: that is `NITPICK-BORROW-002` at the call (probe 08h, the
++  compiler's landing 116). At `7e91730` the compiler accepted the store, and the
++  view then outlived the block's `string` and read freed memory — DEF-252.
 +
 +`EVENT_MODEL.md` §5 states the consequence for the public API.
 +
@@ -559,7 +561,7 @@ index ff0f41f..64353b1 100644
  
  **Rule C-3 — the operations, and all of them are total.**
  
-@@ -38,7 +59,7 @@ the public API.
+@@ -38,7 +58,7 @@ the public API.
  | `cur_take(c, n)` | advances `min(n, remaining)`; returns how many |
  | `cur_at_end(c)` | `pos >= src.len` |
  | `cur_remaining(c)` | `src.len - pos`, never negative |
@@ -569,7 +571,7 @@ index ff0f41f..64353b1 100644
  None of them fails, none of them traps, and none of them can be given an
  out-of-range position that produces anything but a clamp. **A total cursor is
 diff --git a/meta/specs/VALUE_MODEL.md b/meta/specs/VALUE_MODEL.md
-index 2841fbb..e2a41e6 100644
+index 22853b4..7c635e4 100644
 --- a/meta/specs/VALUE_MODEL.md
 +++ b/meta/specs/VALUE_MODEL.md
 @@ -90,8 +90,9 @@ document.
@@ -671,109 +673,9 @@ index d828417..c950fe2 100644
  validation, escape decoding into scratch, and **number scanning that cannot
  trap** — the rule that keeps an attacker-supplied numeric literal from stopping
  the program. Declares no errors. Governed by `meta/specs/SCAN_MODEL.md`. Built
-diff --git a/tests/probe/defect/view_reseat/README.md b/tests/probe/defect/view_reseat/README.md
-new file mode 100644
-index 0000000..bfd584b
---- /dev/null
-+++ b/tests/probe/defect/view_reseat/README.md
-@@ -0,0 +1,40 @@
-+# A view re-seated by a callee outlives the storage it views
-+
-+**A compiler defect at the pin `7e91730`, found by cycle 0.0.0's probe 08h on 2026-10-15 and
-+re-measured by its run.** A use-after-free in safe code. Raised with the cycle's plan by path; the
-+workbench registry numbers it, and nothing here does (`../../../../meta/DECISIONS.md`, @@PD-132@@).
-+
-+## The program, and its control
-+
-+| file | the reseat | at `7e91730` |
-+|---|---|---|
-+| [`probe08h_view_reseated.npk`](probe08h_view_reseated.npk) | a callee, `reset(@c, string_bytes(t))`, writes `<-c = Cursor{ src: src, … }` — `c` declared outside the block, `t` inside it | **accepted** (`npkc` exit 0); after the block `c.src[0]` reads the runtime's free poison, 0xAA: **exit 170** at -O0 and through `opt -O2` |
-+| `../../refused/probe08g_holder_outlives_view.npk` | the same reseat as a direct assignment in the block | **refused** `NITPICK-BORROW-002` (D-004 rule 3, the compiler's DEF-42) |
-+
-+Measured at planning with an allocation between the block and the read, the same read answers `z`
-+(122) — the freed body handed to the next string.
-+
-+## Why the compiler lets it through, as read
-+
-+DEF-42's fix checks a holder declared outside the referent's block at a DIRECT assignment. A store
-+done by a callee is judged by the compiler's D-325 summaries — the callee's body stores what it is
-+handed — which refuse a view of the CALLER'S FRAME stored into what a parameter points at, measured:
-+a view of a callee's local stored into its caller's holder is `NITPICK-BORROW-002` at the call. A
-+view of a shorter-lived BLOCK of the same frame is not asked about. A string's body is freed at its
-+block's end, so the summary's frame-level answer is too coarse for it.
-+
-+## What it means here
-+
-+No function in this library stores a view it was handed into a place it was handed (`SCAN_MODEL.md`
-+C-2, @@PD-132@@): a `Cursor` is built once, over the bytes its constructor was given, and only `pos`
-+moves. Until the compiler refuses the call, that is a rule the review holds, and the day it does,
-+this directory's program moves to `refused/` by a decision that says so.
-+
-+## How to re-measure
-+
-+From this directory, with `$NPKC` and `$NPKRT` the pinned toolchain:
-+
-+```
-+$NPKC probe08h_view_reseated.npk -o p.ll ; echo "npkc $?"
-+llc -O0 -filetype=obj -relocation-model=static p.ll -o p.o && ld.lld -static p.o "$NPKRT" -o p && ./p ; echo "run $?"
-+```
-diff --git a/tests/probe/defect/view_reseat/probe08h_view_reseated.npk b/tests/probe/defect/view_reseat/probe08h_view_reseated.npk
-new file mode 100644
-index 0000000..c242d9e
---- /dev/null
-+++ b/tests/probe/defect/view_reseat/probe08h_view_reseated.npk
-@@ -0,0 +1,48 @@
-+// npkc: 0
-+// run: 170 at -O0 and through opt -O2 -- the free poison, 0xAA
-+//
-+// PROBE 08h -- PROBE 08g's RESEAT, DONE BY A CALLEE. A COMPILER DEFECT AT `7e91730`.
-+//
-+// ASKS: `reset(@c, string_bytes(t))` where `reset` writes `<-c = Cursor{ src: src, ... }`, `c`
-+// declared outside the block and `t` inside it. The direct assignment is refused
-+// `NITPICK-BORROW-002` (`refused/probe08g_holder_outlives_view.npk`). Is the call?
-+//
-+// THE ANSWER AT `7e91730`, measured at planning: ACCEPTED (`npkc` exit 0), and after the block
-+// `c.src[0]` reads the runtime's free poison, 0xAA -- exit 170 at -O0 and through `opt -O2`. A
-+// use-after-free in safe code. The callee's store is read by the compiler's D-325 summary, which
-+// asks whether the view outlives the FRAME; DEF-42's block rule is asked of a direct assignment
-+// only. See this directory's `README.md`.
-+mod:probe08h_view_reseated;
-+
-+struct:Cursor = { fixed uint8[]:src; int64:pos; };
-+
-+func:reset = NIL(Cursor->:c, fixed uint8[]:src) never fails {
-+    <-c = Cursor{ src: src, pos: 0i64 };
-+    pass NIL;
-+};
-+
-+func:main = int32(cstring[]:_~argv) {
-+    string:s = string_concat("abc", "def");
-+    Cursor:c = Cursor{ src: string_bytes(s), pos: 0i64 };
-+    if (c.pos == 0i64) {
-+        string:t = string_concat("ghij", "klmn");
-+        drop reset(@c, string_bytes(t));
-+    }
-+    if (c.src.len != 8i64) { exit 10i32; }
-+    if (c.src[0i64] != 103u8) { exit (c.src[0i64] => int32); }
-+    exit 0i32;
-+};
-+
-+func:failsafe = int32(Error:e) {
-+    pick (e) {
-+        (HeapBadRequest)    { exit 91i32; },
-+        (HeapOom)           { exit 92i32; },
-+        (OutOfBounds)       { exit 94i32; },
-+        (Unreachable)       { exit 95i32; },
-+        (WildLeak)          { exit 96i32; },
-+        (StackExhausted)    { exit 106i32; },
-+        (MachineFault)      { exit 107i32; },
-+        (*)                 { exit 99i32; }
-+    }
-+    exit 9i32;
-+};
 diff --git a/tests/probe/probe08_view_edges.npk b/tests/probe/probe08_view_edges.npk
 new file mode 100644
-index 0000000..accce24
+index 0000000..d6fc998
 --- /dev/null
 +++ b/tests/probe/probe08_view_edges.npk
 @@ -0,0 +1,79 @@
@@ -796,8 +698,8 @@ index 0000000..accce24
 +//
 +// EXPECTED: exit 0 at -O0 and through `opt -O2`. A view of a PARAMETER's bytes may travel up --
 +// the caller's argument then holds it -- where a view of a LOCAL may not (`refused/probe08b`,
-+// `probe08c`). The refused edges are each their own file in `refused/`; a reseat through a
-+// callee that the compiler accepts and should not is in `defect/view_reseat/`.
++// `probe08c`). The refused edges are each their own file in `refused/`, the reseat through a
++// callee among them (`refused/probe08h_view_reseated.npk`, refused from the compiler's landing 116).
 +mod:probe08_view_edges;
 +
 +struct:Cursor = { fixed uint8[]:src; int64:pos; };
@@ -1405,7 +1307,7 @@ index 0000000..0587497
 +};
 diff --git a/tests/probe/refused/probe08g_holder_outlives_view.npk b/tests/probe/refused/probe08g_holder_outlives_view.npk
 new file mode 100644
-index 0000000..921cf28
+index 0000000..1eed918
 --- /dev/null
 +++ b/tests/probe/refused/probe08g_holder_outlives_view.npk
 @@ -0,0 +1,36 @@
@@ -1416,8 +1318,8 @@ index 0000000..921cf28
 +// EXPECTED REFUSED.
 +//
 +// The holder outlives the storage its new view names: `NITPICK-BORROW-002` at the assignment
-+// (D-004 rule 3, the compiler's DEF-42). The same reseat done by a CALLEE is accepted at
-+// `7e91730` and reads freed memory -- `defect/view_reseat/`.
++// (D-004 rule 3, the compiler's DEF-42). The same reseat done by a CALLEE is refused too, from the
++// compiler's landing 116 (`probe08h_view_reseated.npk`; at `7e91730` it read freed memory, DEF-252).
 +mod:probe08g_holder_outlives_view;
 +
 +struct:Cursor = { fixed uint8[]:src; int64:pos; };
@@ -1437,6 +1339,61 @@ index 0000000..921cf28
 +    pick (e) {
 +        (HeapBadRequest)    { exit 91i32; },
 +        (HeapOom)           { exit 92i32; },
++        (Unreachable)       { exit 95i32; },
++        (WildLeak)          { exit 96i32; },
++        (StackExhausted)    { exit 106i32; },
++        (MachineFault)      { exit 107i32; },
++        (*)                 { exit 99i32; }
++    }
++    exit 9i32;
++};
+diff --git a/tests/probe/refused/probe08h_view_reseated.npk b/tests/probe/refused/probe08h_view_reseated.npk
+new file mode 100644
+index 0000000..f7fea7f
+--- /dev/null
++++ b/tests/probe/refused/probe08h_view_reseated.npk
+@@ -0,0 +1,49 @@
++// expect-error: NITPICK-BORROW-002
++// expect-error-at: 30:20
++//
++// PROBE 08h -- PROBE 08g's RESEAT, DONE BY A CALLEE. EXPECTED REFUSED.
++//
++// ASKS: `reset(@c, string_bytes(t))` where `reset` writes `<-c = Cursor{ src: src, ... }`, `c`
++// declared outside the block and `t` inside it. The direct assignment is refused
++// `NITPICK-BORROW-002` (`probe08g_holder_outlives_view.npk`). Is the call?
++//
++// THE ANSWER AT `c9baa9e`: REFUSED, `NITPICK-BORROW-002` at the call -- the compiler's landing 116
++// asks DEF-42's holder-scope question of a callee's store into a place its caller owns. At
++// `7e91730`, where this cycle was planned, it was a compiler defect, a use-after-free in safe code:
++// `npkc` accepted it, and after the block `c.src[0]` read the runtime's free poison, 0xAA -- exit
++// 170 at -O0 and through `opt -O2`. The compiler registered it as DEF-252 and fixed it in that
++// landing, which the libraries' one re-pin carries.
++mod:probe08h_view_reseated;
++
++struct:Cursor = { fixed uint8[]:src; int64:pos; };
++
++func:reset = NIL(Cursor->:c, fixed uint8[]:src) never fails {
++    <-c = Cursor{ src: src, pos: 0i64 };
++    pass NIL;
++};
++
++func:main = int32(cstring[]:_~argv) {
++    string:s = string_concat("abc", "def");
++    Cursor:c = Cursor{ src: string_bytes(s), pos: 0i64 };
++    if (c.pos == 0i64) {
++        string:t = string_concat("ghij", "klmn");
++        drop reset(@c, string_bytes(t));
++    }
++    if (c.src.len != 8i64) { exit 10i32; }
++    if (c.src[0i64] != 103u8) { exit (c.src[0i64] => int32); }
++    exit 0i32;
++};
++
++func:failsafe = int32(Error:e) {
++    pick (e) {
++        (HeapBadRequest)    { exit 91i32; },
++        (HeapOom)           { exit 92i32; },
++        (OutOfBounds)       { exit 94i32; },
 +        (Unreachable)       { exit 95i32; },
 +        (WildLeak)          { exit 96i32; },
 +        (StackExhausted)    { exit 106i32; },

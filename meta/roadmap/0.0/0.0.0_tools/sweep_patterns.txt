@@ -12,7 +12,6 @@ a Vec of owners uncopyable | (vec|array)[^.]{0,30}(of them )?(could not|cannot) 
 a plain byte-view slot | (?<!fixed )\buint8\[\]
 what a consumer owes | owes nothing|at most EParseState
 every index bounds-checked | index(ing)? into a slice, array or buffer|indexing is bounds-checked and traps
-the static path, unqualified | statically through a bound|static dispatch through a bound|<F: Format>
 the compiler's cycle | at cycle 1\.5\b|compiler's commit for cycle 1\.5\.0
 a cursor never returned | cannot be returned from a function
 exit 0 sees every leak | leak on any path

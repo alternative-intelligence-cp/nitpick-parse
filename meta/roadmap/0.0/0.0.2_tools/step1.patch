@@ -1306,10 +1306,10 @@ index 0000000..dedd517
 +        out(f"ok    ${var} is a file")
 +    return got[0], got[1]
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index 39b80a2..b177035 100644
+index 2e96ec6..5193206 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
-@@ -962,3 +962,81 @@ the gate to cycle 0.1, through 0.0.5's close — 0.0.0's gate item 7 and block 0
+@@ -965,3 +965,83 @@ the gate to cycle 0.1, through 0.0.5's close — 0.0.0's gate item 7 and block 0
  research lines go, `CURRENCY.md`'s three research rows wait for their digests, and
  `0.1/0.1.0.md`'s gate names them; to count the library routine, strike `CURRENCY.md`'s
  research section and its three rows, and the gate with them.
@@ -1376,8 +1376,10 @@ index 39b80a2..b177035 100644
 +`harness/baseline/PENDING.txt` — path, label and observation exactly, and the reason — and
 +the runner holds the list both ways: a marker it does not name fails, and a line no pending
 +unit matched fails. At cycle 0.0.2 the observation is `undefined-value <symbol>` (`npkc`
-+accepts, and LLVM refuses the module naming that value); the first unit is probe 06, on
-+DEF-253. And `// mem-cap-mib: N` is the runner's other marker: the cap, after the floor
++accepts, and LLVM refuses the module naming that value) — probe 06's failure at `7e91730`,
++on DEF-253, which the compiler's landing 118 fixed before this subcycle, so at `c9baa9e`
++the list names no unit. And `// mem-cap-mib: N` is the runner's other marker: the cap,
++after the floor
 +program under it.
 +
 +*Alternatives declined:* **leave the defect directories out of the run** — a defect nobody's
@@ -1385,14 +1387,14 @@ index 39b80a2..b177035 100644
 +answer** — the suite would then defend the defect, and go red the day it is fixed with nothing
 +saying why; **a marker that excuses any failure** — `nitpick-regex`'s third audit measured that
 +shape absorbing a different failure, and a wrong expectation, into a green run (its RX-154);
-+**a commit as the label** — none is announced for either fix, and the compiler seat's DEF id is
++**a commit as the label** — a fix has no commit until it lands, and the compiler seat's DEF id is
 +the name both sides use.
 +
 +*Reversal, for the author:* none for the mechanism; each pending unit's marker and list line go
 +when its fix is pinned, and a new observation form joins B-5b by a decision when a defect shows
 +a failure this one cannot name.
 diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md
-index 1603419..8d12b45 100644
+index 1603419..9d2876f 100644
 --- a/meta/specs/BUILD.md
 +++ b/meta/specs/BUILD.md
 @@ -44,19 +44,34 @@ compiler's own harness is Python for the same reason.
@@ -1493,8 +1495,8 @@ index 1603419..8d12b45 100644
 +```
 +// mem-cap-mib: 64           run under a 64 MiB address-space cap, after the floor
 +                             program under the same cap, which must exit 0
-+// pending-until: DEF-253 undefined-value @npk.m.Count->:Src.step
-+                             CORRECT AND RED on the compiler defect DEF-253: the one
++// pending-until: DEF-<n> undefined-value @npk.m.Count->:Src.step
++                             CORRECT AND RED on the compiler defect DEF-<n>: the one
 +                             failure excused, on every leg; listed in
 +                             harness/baseline/PENDING.txt, both ways
 +```

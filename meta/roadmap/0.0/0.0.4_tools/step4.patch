@@ -12,10 +12,10 @@ index 5bedfed..cea15ed 100644
    event/      #   the event vocabulary, the Format trait, the depth stack
    doc/        #   the Document tree and the query API
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index 06eab13..38f48e2 100644
+index eb87d01..4198f91 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
-@@ -1152,3 +1152,20 @@ eight) — every format's consumer owes `DivByZero` and `DivOverflow` already, t
+@@ -1159,3 +1159,21 @@ eight) — every format's consumer owes `DivByZero` and `DivOverflow` already, t
  
  *Reversal, for the author:* when D-341 lands, `Bytes` may offer a frozen view by a decision; when a decision accepts
  the contracts' arms, the comments become clauses, a marker deleted per site.
@@ -28,8 +28,9 @@ index 06eab13..38f48e2 100644
 +comparison and a capacity no consumer has asked for. It is declared by the cycle whose specification first uses it;
 +cycle 0.0's gate asks a suite of `Vec` and of `Bytes`.
 +
-+*Alternatives declined:* **build it now, keyed through a bound** — a by-value comparison through a bound links and a
-+`Self->` one does not (DEF-253, @@PD-131@@), so the shape would be chosen by a defect; **an `int64` key** — a guess at a
++*Alternatives declined:* **build it now, keyed through a bound** — a key comparison through a bound links by value and,
++at `c9baa9e`, through `Self->` too (probes 06b and 06, @@PD-131@@), so which a key takes is a choice no consumer
++has asked for; **an `int64` key** — a guess at a
 +consumer; **its overflow as `EParseState`** — not reachable from `core`, and an overflow an input can drive must be a
 +value the caller turns into a `Fault`.
 +
@@ -37,11 +38,11 @@ index 06eab13..38f48e2 100644
 +`SmallMap<K: Copy, V: Copy>` over a by-value key comparison, its insert answering `false` when full; that step's suite
 +joins the gate, and the checklist and the cycle README move with it.
 diff --git a/meta/roadmap/ROADMAP.md b/meta/roadmap/ROADMAP.md
-index 006b31b..8c722fe 100644
+index 951ed22..6613da3 100644
 --- a/meta/roadmap/ROADMAP.md
 +++ b/meta/roadmap/ROADMAP.md
-@@ -106,8 +106,8 @@ changes the design; cycle 0.0.0's verdicts moved numbers and reasons across the
- specifications, and found two compiler defects.
+@@ -107,8 +107,8 @@ specifications, and the two compiler defects its planning found at `7e91730` wer
+ fixed by the compiler, at its landings 116 and 118, before its work began.
  
  Then the harness (`harness/run.py`, its self-check, the stages), the manifest's
 -test table, CI, and `src/core/` — `Vec<T>`, `Bytes`, `SmallMap<K,V>` and
@@ -52,7 +53,7 @@ index 006b31b..8c722fe 100644
  ### 0.1 — Scan
  `src/scan/`: the total cursor, `Span`, the generated 256-byte class table, the
 diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md
-index bb39c06..d87af8f 100644
+index d477a6a..a65e1d2 100644
 --- a/meta/specs/BUILD.md
 +++ b/meta/specs/BUILD.md
 @@ -264,6 +264,10 @@ accessors, because an index through a `wild` block does not trap, and a misuse t

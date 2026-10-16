@@ -109,7 +109,7 @@ index 94a2869..1e7defc 100644
  
  ### 1.0.4 — versioning
 diff --git a/meta/roadmap/ROADMAP.md b/meta/roadmap/ROADMAP.md
-index 8c722fe..6ce3628 100644
+index 6613da3..58cf21e 100644
 --- a/meta/roadmap/ROADMAP.md
 +++ b/meta/roadmap/ROADMAP.md
 @@ -3,12 +3,15 @@
@@ -134,7 +134,7 @@ index 8c722fe..6ce3628 100644
  
  ## How this is organised
  
-@@ -186,7 +189,7 @@ proportional to the input is copied" is a claim and a claim nobody measures is a
+@@ -187,7 +190,7 @@ proportional to the input is copied" is a claim and a claim nobody measures is a
  claim nobody has. O-P8's interning measurement lands here.
  
  ### 0.12 — The dogfood consumer
