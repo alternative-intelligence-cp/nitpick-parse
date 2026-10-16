@@ -38,7 +38,7 @@ index eb87d01..4198f91 100644
 +`SmallMap<K: Copy, V: Copy>` over a by-value key comparison, its insert answering `false` when full; that step's suite
 +joins the gate, and the checklist and the cycle README move with it.
 diff --git a/meta/roadmap/ROADMAP.md b/meta/roadmap/ROADMAP.md
-index 90fdf16..77a2096 100644
+index 1a62d91..89e42ef 100644
 --- a/meta/roadmap/ROADMAP.md
 +++ b/meta/roadmap/ROADMAP.md
 @@ -112,8 +112,8 @@ specifications, and the two compiler defects its planning found at `7e91730` wer

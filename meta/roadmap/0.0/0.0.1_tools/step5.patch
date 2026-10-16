@@ -50,7 +50,7 @@ index 2242667..2e96ec6 100644
 +research section and its three rows, and the gate with them.
 diff --git a/meta/research/CURRENCY.md b/meta/research/CURRENCY.md
 new file mode 100644
-index 0000000..f3b2e14
+index 0000000..74afb5f
 --- /dev/null
 +++ b/meta/research/CURRENCY.md
 @@ -0,0 +1,109 @@
@@ -143,8 +143,8 @@ index 0000000..f3b2e14
 +    0.4.0, which states nodes and pool bytes against the input's length and decides whether a per-parse
 +    total joins `SAFETY.md` §7's table, and each later format's cycle re-reads it;
 +  - an input over 4 GiB, which `SCAN_MODEL.md` C-5 refuses with `EParseState` while `SAFETY.md` §3 says no
-+    byte stream reaches either identity: the [0.1 roadmap](../roadmap/0.1/README.md), at 0.1.1, holds it
-+    open for the author's answer to the workbench's question 36 (2026-10-16).
++    byte stream reaches either identity: the workbench's question 36, answered by the author on 2026-10-16,
++    (A) — an ordinary `Fault` of its own kind — which cycle 0.1's decision records, at 0.1.1 of [its roadmap](../roadmap/0.1/README.md).
 +- **[`security-guidance.md`](security-guidance.md)** — no standards body clearly requires now what a rule
 +  here permits; its one open case is TOML's lossless-integer rule, which no rule here states. It
 +  contradicted the TOML row by listing what v1.1.0 changes:
@@ -176,7 +176,7 @@ index 17d2d93..6f5d659 100644
 +was checked (@@PD-137@@); a research digest is filed beside it as `<topic>.md` and cited by the row
 +it checks.
 diff --git a/meta/roadmap/0.1/README.md b/meta/roadmap/0.1/README.md
-index 28096b5..9464ec5 100644
+index 28096b5..f636511 100644
 --- a/meta/roadmap/0.1/README.md
 +++ b/meta/roadmap/0.1/README.md
 @@ -6,7 +6,7 @@ exists — what the prototype's five parsers each rewrote was not the grammar, i
@@ -193,8 +193,8 @@ index 28096b5..9464ec5 100644
  PA-010 … PA-014, and PA-004's `limits.npk`. All settled.
  
 -**Open questions to settle:** none. **Open by design:** O-P2
-+**Open questions to settle:** one, put to the author — what an input over 4 GiB answers, held at
-+0.1.1 below. **Open by design:** O-P2
++**Open questions to settle:** the one put to the author — what an input over 4 GiB answers — is
++answered (2026-10-16, (A)), and 0.1.1 below records it. **Open by design:** O-P2
  (`NPARSE_MAX_SCALAR`) is a *measurement*, taken at cycle 0.3 against the
  JSONTestSuite corpus, not here.
  
@@ -202,7 +202,7 @@ index 28096b5..9464ec5 100644
  - [ ] **every operation total**: an out-of-range position clamps, never traps, never returns garbage — asserted at `pos == 0`, `pos == len`, `pos > len`
  - [ ] `Span { uint32:lo; uint32:hi; }`, half-open, with `lo <= hi` maintained
  - [ ] an input longer than `0xFFFFFFFF` refused at entry with `EParseState` (C-5) — a caller mistake, not an input's
-+- [ ] **held open for the author's answer to the workbench's question 36** (asked 2026-10-16): C-5's refusal above and `SAFETY.md` §7's `NPARSE_MAX_INPUT` row — 2^47, `EParseState`, "a caller mistake, not an input", unreachable behind C-5 while a span is 32 bits — are one input-size path, and a hostile input over 4 GiB takes it to the consuming program's `failsafe` and stops it: C-5 answers it with `EParseState`, `SAFETY.md` §3 says no byte stream reaches either identity, §8 names no duty to cap an input's size, and S-1 exists to prevent exactly that stop. The defects digest records it as its own observation, not a source's claim — a hostile upload "could still reach it" ([`security-defects.md`](../../research/security-defects.md), its item 5). The two ways out: the oversize input answers a `Fault` of its own kind, the same for both (S-2), which the question recommends; or §8 states the duty and §3's "No" is qualified. The answer settles it here, by a decision of this cycle's, which amends C-5, the row and the comment cycle 0.0.4's `src/core/limits.npk` copies from it ("exceeding it is `EParseState` -- a caller mistake, not an input"); C-5 stands as written until then
++- [ ] **the workbench's question 36, answered by the author on 2026-10-16: (A)**: C-5's refusal above and `SAFETY.md` §7's `NPARSE_MAX_INPUT` row — 2^47, `EParseState`, "a caller mistake, not an input", unreachable behind C-5 while a span is 32 bits — are one input-size path, and a hostile input over 4 GiB takes it to the consuming program's `failsafe` and stops it: C-5 answers it with `EParseState`, `SAFETY.md` §3 says no byte stream reaches either identity, §8 names no duty to cap an input's size, and S-1 exists to prevent exactly that stop. The defects digest records it as its own observation, not a source's claim — a hostile upload "could still reach it" ([`security-defects.md`](../../research/security-defects.md), its item 5). The two ways out were: the oversize input answers a `Fault` of its own kind, the same for both (S-2), which the question recommended; or §8 states the duty and §3's "No" is qualified. The author chose the first: the first parse step over an oversize input answers an ordinary `Fault` of a new kind (the recommendation names it `InputTooLarge`), then `Done`; `EParseState` stays for API misuse alone, and §7's row answers the same `Fault`, so no input-size path reaches `EParseState`. This cycle's decision records the answer and amends C-5, the row and the comment cycle 0.0.4's `src/core/limits.npk` copies from it ("exceeding it is `EParseState` -- a caller mistake, not an input"); C-5 stands as written until then
  - [ ] `scan_line_col(src, offset)` counting from the start, one-based, and **the only place a one-based number exists**
  - [ ] the `Cursor`-holding-a-borrow shape from probe 08's fourth edge, exercised at every call depth the formats will use
  
@@ -288,17 +288,17 @@ index 07cf954..26ef560 100644
  - [ ] Q-1 confirmed: the actual proportion of the suite touching excluded constructs, measured and recorded
  
 diff --git a/meta/roadmap/ROADMAP.md b/meta/roadmap/ROADMAP.md
-index 1f1ce11..3afbce2 100644
+index 1f1ce11..e3d8608 100644
 --- a/meta/roadmap/ROADMAP.md
 +++ b/meta/roadmap/ROADMAP.md
 @@ -10,6 +10,11 @@ waiting for a consumer to ask, one gated on the compiler's tooling, four that
  are the compiler's rather than ours, and four for the project's author, none of
  which gates cycle 0.0. **No cycle in this plan is blocked on a decision.**
  
-+*(2026-10-16, cycle 0.0.1 — the research gate: one question is open for the project's author —
-+the workbench's question 36, what an input over 4 GiB answers, which is not an entry of
-+`../OPEN_QUESTIONS.md` — and [the 0.1 roadmap](0.1/README.md) holds it open, at 0.1.1, until
-+cycle 0.1 settles it; no cycle waits on it.)*
++*(2026-10-16, cycle 0.0.1 — the research gate put one question to the project's author, the
++workbench's question 36, what an input over 4 GiB answers, which is not an entry of
++`../OPEN_QUESTIONS.md`; the author answered it on 2026-10-16, (A), and cycle 0.1's decision
++records it, at 0.1.1 of [its roadmap](0.1/README.md); no cycle waits on it.)*
 +
  ## How this is organised
  
