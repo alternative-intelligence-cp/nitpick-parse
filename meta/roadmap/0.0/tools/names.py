@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """Cycle 0.0 -- every DECLARED NAME in `.npk` files, held to the compiler's keyword table: what the
-compiler's landing 113 (DEF-235) refuses, `NITPICK-PARSE-001` at the declaration, where the pin
-`7e91730` accepts some of them -- regex's field `stack` among them.
+compiler's landing 113 (DEF-235) refuses, `NITPICK-PARSE-001` at the declaration, where compiler
+`7e91730`, the cycle's first pin, accepted some of them -- regex's field `stack` among them. The pin
+`c9baa9e` carries 113, so its compiler refuses each, and this scanner is the plan's own count of them.
 
     python3 -B names.py <keywords.npk> <file>...            each declared name that is a keyword
     python3 -B names.py --count <keywords.npk> <file>...    and the count of declared names read
 
-The keyword table is the pin's own `src/frontend/keywords.npk` (`git show 7e91730:...`, which the
+The keyword table is the pin's own `src/frontend/keywords.npk` (`git show <pin>:...`, byte-identical at
+`7e91730` and `c9baa9e`, which the
 caller writes to a file): every word its `keyword_kind_of` compares against. The rule, as landing
 113's work states it in the compiler's `LEXICAL_REFERENCE.md` §4 note: "no keyword is a declared
 name of ANY kind -- a function, a type, a trait, a module, an error, a unit, a rule, a macro, a

@@ -1,10 +1,10 @@
 diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
-index f94fe0e..b4beef3 100644
+index fe49754..4fa78d2 100644
 --- a/.github/workflows/ci.yml
 +++ b/.github/workflows/ci.yml
 @@ -7,10 +7,12 @@
  # commit that bumps it is the one that runs the full suite. Modelled on
- # `nitpick-regex`'s workflow, which runs green at this pin.
+ # `nitpick-regex`'s workflow.
  #
 -# WHAT A GREEN RUN PROVES AT CYCLE 0.0.1: the pinned compiler builds from a clean
 +# WHAT A GREEN RUN PROVES SINCE CYCLE 0.0.2: the pinned compiler builds from a clean

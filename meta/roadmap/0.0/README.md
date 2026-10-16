@@ -15,7 +15,7 @@ research re-cut** (2026-10-16), after that gate fired on the three digests, held
 research section, in 0.0.1's step 5, says where each is held, or who decides it — and 0.0.0's gate item 7 now knows
 the three by their sha256.
 
-| File | At `7e91730` |
+| File | At `c9baa9e` |
 |---|---|
 | [0.0.0](0.0.0.md) | **yes** — probes measured, five patches, blocks with filled Expects |
 | [0.0.1](0.0.1.md) | **yes** — six patches over 0.0.0's record, blocks with filled Expects; CI's run is its worker's |
@@ -75,13 +75,14 @@ author.**
 
 ## The pin, and what each later landing would move
 
-**Plan at `7e91730`** — the workbench's pin, landings 83 … 103 — and **re-pin once, at landing 118**, by the
-author's word on the workbench's question 32 (2026-10-15 12:04), so that one adoption carries 104 … 118: the
-use-after-free fix (116), the refusal of generic value parameters (117) and the two link fixes (118). If 118 has not
-landed when the adoption round starts, the pin is the newest landing on the compiler's `main` then, never before 115,
-and **a pin below 118 flips only what it carries**. *(Corrected 2026-10-15 by the pass's continuation: this said
-"after landing 115", the author's word of 07:42, which question 32 superseded.)* The table names each place in this
-cycle's plan a landing would move, so that **the adoption is this list, not a search**. A re-pin is taken **between subcycles**, never inside
+**Planned at `7e91730`** — the workbench's pin then, landings 83 … 103 — and **re-pinned once, at landing 118**, by
+the author's word on the workbench's question 32 (2026-10-15 12:04), so that one adoption carries 104 … 118: the
+use-after-free fix (116), the refusal of generic value parameters (117) and the two link fixes (118). **The pin is
+`c9baa9e`**, landing 118's commit, taken by the workbench on 2026-10-16 at a quiet point with no claim in flight, and
+adopted here the same day, before any subcycle of the cycle started. *(Corrected 2026-10-15 by the pass's
+continuation: this said "after landing 115", the author's word of 07:42, which question 32 superseded.)* The table
+names each place in this cycle's plan a landing would move, so that **the adoption is this list, not a search**, and
+its last column says what the adoption measured, row by row. A re-pin is taken **between subcycles**, never inside
 one (the early ecosystem audit's EC9: the `7e91730` pin itself was taken mid-cycle elsewhere); a subcycle that has
 started finishes at the pin it started at.
 
@@ -123,9 +124,11 @@ a symbol neither list holds), and this table's "what it would move" column, row 
 
 ## The shapes this cycle does not write
 
-Open or silent at `7e91730`, from §2.2 of the workbench's planning brief for this cycle, of 2026-10-15 (A: the
-answer differs between `7e91730` and later landings; B: open or silent at the pin; C: already in the pin), and the two
-defects 0.0.0 found. Each subcycle's facts
+Open or silent at `7e91730`, the pin this cycle was planned at, from §2.2 of the workbench's planning brief for this
+cycle, of 2026-10-15 (A: the answer differs between `7e91730` and later landings, every one of which the pin `c9baa9e`
+carries; B: open or silent at `7e91730`, B9 … B12's defects fixed since, by landings 112, 113 and 117; C: already in
+it), and the two defects 0.0.0 found. The cycle keeps clear of all of them at `c9baa9e` as at `7e91730`. Each
+subcycle's facts
 block counts the lexical ones over what its patches add, with a scanner proved on planted and clean controls
 (`tools/shapes.py`).
 
@@ -189,7 +192,7 @@ past cycle 0.0.
 
 | # | Point | Answer |
 |---|---|---|
-| 1 | which compiler the plan targets | `7e91730`; the landing table above |
+| 1 | which compiler the plan targets | `c9baa9e`, the one re-pin, adopted by the landing table above; planned at `7e91730` |
 | 2 | probe 05's meaning | settled by 0.0.0: refused at `arena_make`, `NITPICK-TYPE-007` (PD-130) |
 | 3 | returned reader structs | settled by 0.0.0: a constructor returns its cursor over the bytes it was handed; over its own, `BORROW-001` (PD-132) |
 | 4 | `Bytes` and D-341 | settled: a `buffer` can be neither indexed nor ranged at the pin (0.0.0's probe 11), so `Bytes` offers no view and its `take` copies; D-341's landing reopens it (PD-144) |

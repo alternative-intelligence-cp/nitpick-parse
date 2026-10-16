@@ -8,7 +8,7 @@
 # workbench, `../BOARD.md` and `../WORKSTREAMS.md` -- so a block run in a relocated copy finds another workbench or
 # none (and, without those two files, two `broken-link` findings in every `refs`), and the blocks are run in the
 # checkout the dispatch names. `$NPK_TREE` is read with `git show` and `git rev-parse`
-# alone. The toolchain is the pin `7e91730`'s, whose LLVM, 20.1.8, is the machine's own: `llc`, `opt` and `ld.lld` are
+# alone. The toolchain is the pin `c9baa9e`'s, whose LLVM, 20.1.8, is the machine's own: `llc`, `opt` and `ld.lld` are
 # found on PATH, and every step 0 block prints what each reports -- anything but 20.1.8 is a stop. `$NPKC` and
 # `$NPKRT` come from the dispatch's TOOLCHAIN line when it sets them, and from the workbench's copy of the pin when it
 # does not. TMPDIR is this cycle's scratch, `$A/tmp`; every `rm` names its target through `${VAR:?}`; nothing printed
@@ -17,8 +17,8 @@
 REPO=$(realpath "$REPO")
 WB=$(realpath "$REPO/..")
 NPK_TREE=$(realpath "$WB/../nitpick")
-PIN=7e91730
-PIN_FULL=7e91730d19cffd35fcff25c36893cfaa2c01509e
+PIN=c9baa9e
+PIN_FULL=c9baa9e91c553d8db2a2a62f09c36b30a984b07f
 NPKC=${NPKC:-$WB/.internal/toolchain/$PIN/npkc}
 NPKRT=${NPKRT:-$WB/.internal/toolchain/$PIN/npkrt.o}
 TOOLS=$REPO/meta/roadmap/0.0/tools

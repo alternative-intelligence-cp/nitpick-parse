@@ -1,6 +1,6 @@
 diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
 new file mode 100644
-index 0000000..f94fe0e
+index 0000000..fe49754
 --- /dev/null
 +++ b/.github/workflows/ci.yml
 @@ -0,0 +1,174 @@
@@ -11,7 +11,7 @@ index 0000000..f94fe0e
 +# COMMIT, never a branch: a library whose CI tracks another repository's `main` goes
 +# red for reasons that are not its own. Bumping a pin is a deliberate commit, and the
 +# commit that bumps it is the one that runs the full suite. Modelled on
-+# `nitpick-regex`'s workflow, which runs green at this pin.
++# `nitpick-regex`'s workflow.
 +#
 +# WHAT A GREEN RUN PROVES AT CYCLE 0.0.1: the pinned compiler builds from a clean
 +# checkout of the pinned commit; its emission is the one the pin recorded; LLVM is
@@ -32,13 +32,13 @@ index 0000000..f94fe0e
 +  contents: read
 +
 +env:
-+  # The workbench's pinned compiler, by FULL sha (`7e91730` in the roadmap). @@PD-136@@.
-+  NITPICK_COMMIT: "7e91730d19cffd35fcff25c36893cfaa2c01509e"
-+  # THE EMISSION AT THAT COMMIT, as the compiler's own build recorded it -- notice 103's
++  # The workbench's pinned compiler, by FULL sha (`c9baa9e` in the roadmap). @@PD-136@@.
++  NITPICK_COMMIT: "c9baa9e91c553d8db2a2a62f09c36b30a984b07f"
++  # THE EMISSION AT THAT COMMIT, as the compiler's own build recorded it -- notice 118's
 +  # `npkc.ll` row. The emission step below ASSERTS it: the compiler's D-265 says the
 +  # emission, not the binary, is the cross-machine claim. Moved with every pin.
-+  NPKC_LL_SHA256: "b79f89c554ef83eeadca05d4e22929e70746483aec74e7b2f046f7a3933b66e7"
-+  NPKC_LL_BYTES: "31527001"
++  NPKC_LL_SHA256: "1f48a31a5c9b5b78053444c404b7b2dd7c8c470c354dd3b14d47b3e75585ee2a"
++  NPKC_LL_BYTES: "31731079"
 +  # nitpick.toml's [toolchain] llvm: an exact patch release. Upstream publishes
 +  # `LLVM-20.1.8-Linux-X64.tar.xz` at its `llvmorg-20.1.8` release.
 +  LLVM_VERSION: "20.1.8"
