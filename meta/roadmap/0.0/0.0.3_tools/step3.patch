@@ -123,10 +123,10 @@ index 186c83d..94a2869 100644
        than infer it
  
 diff --git a/meta/roadmap/ROADMAP.md b/meta/roadmap/ROADMAP.md
-index 1f1ce11..951ed22 100644
+index 3afbce2..90fdf16 100644
 --- a/meta/roadmap/ROADMAP.md
 +++ b/meta/roadmap/ROADMAP.md
-@@ -47,7 +47,8 @@ whether it kept them.**
+@@ -52,7 +52,8 @@ whether it kept them.**
  
  The second constraint is what shapes the *interface*:
  

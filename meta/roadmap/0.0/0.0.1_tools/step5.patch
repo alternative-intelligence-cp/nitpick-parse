@@ -50,10 +50,10 @@ index 2242667..2e96ec6 100644
 +research section and its three rows, and the gate with them.
 diff --git a/meta/research/CURRENCY.md b/meta/research/CURRENCY.md
 new file mode 100644
-index 0000000..9ef29ca
+index 0000000..f3b2e14
 --- /dev/null
 +++ b/meta/research/CURRENCY.md
-@@ -0,0 +1,107 @@
+@@ -0,0 +1,109 @@
 +# Currency — the facts from outside the compiler tree this plan rests on
 +
 +One row per standard, data release, corpus, reference implementation and outside tool the plan
@@ -121,8 +121,8 @@ index 0000000..9ef29ca
 +digest states its own confidence and gaps, among them claims that rest on one primary source where a
 +`security` request asks for two.
 +
-+- **[`security-defects.md`](security-defects.md)** — eleven defect classes with published records. Two have
-+  no full guard here:
++- **[`security-defects.md`](security-defects.md)** — eleven defect classes with published records, by its own
++  count: its table marks one of the eleven "Not a separate record class". Two have no full guard here:
 +  - CSV formula injection, a field that begins `=`, `+`, `-` or `@`, with no rule at all (`WRITER_MODEL.md`
 +    W-9 sets only JSON's escapes): the [0.7 roadmap](../roadmap/0.7/README.md), at 0.7.4;
 +  - the quadratic class, guarded in part: `VALUE_MODEL.md` D-16's index past 1024 pairs, if it takes D-13's
@@ -138,8 +138,10 @@ index 0000000..9ef29ca
 +  - `SAFETY.md` §7's `NPARSE_MAX_SCALAR` row, "a single JSON string", which leaves its reach to a TOML
 +    string, a CSV field and a YAML scalar unstated: cycle 0.0.4, whose `limits.npk` quotes the row and whose
 +    plan hands the reach on to cycles 0.6, 0.7 and 0.8. No row names a total for a document's nodes or its
-+    pool's bytes either: no line, since S-19 bounds a `Document` "by the node and pool growth its arena
-+    does";
++    pool's bytes either (its item 4), and S-19's bound for a `Document`, "by the node and pool growth its
++    arena does", states no function of the input: the [0.4 roadmap](../roadmap/0.4/README.md) holds it at
++    0.4.0, which states nodes and pool bytes against the input's length and decides whether a per-parse
++    total joins `SAFETY.md` §7's table, and each later format's cycle re-reads it;
 +  - an input over 4 GiB, which `SCAN_MODEL.md` C-5 refuses with `EParseState` while `SAFETY.md` §3 says no
 +    byte stream reaches either identity: the [0.1 roadmap](../roadmap/0.1/README.md), at 0.1.1, holds it
 +    open for the author's answer to the workbench's question 36 (2026-10-16).
@@ -174,9 +176,18 @@ index 17d2d93..6f5d659 100644
 +was checked (@@PD-137@@); a research digest is filed beside it as `<topic>.md` and cited by the row
 +it checks.
 diff --git a/meta/roadmap/0.1/README.md b/meta/roadmap/0.1/README.md
-index 28096b5..9bf6ca7 100644
+index 28096b5..9464ec5 100644
 --- a/meta/roadmap/0.1/README.md
 +++ b/meta/roadmap/0.1/README.md
+@@ -6,7 +6,7 @@ exists — what the prototype's five parsers each rewrote was not the grammar, i
+ was this.
+ 
+ > **`0.1.0.md` is written execution-grade at cycle 0.0's close** (0.0.5, step
+-> 4), so this cycle is openable by a session that was not present for the
++> 5), so this cycle is openable by a session that was not present for the
+ > probes. That is the convention for every cycle.
+ 
+ ## Why here, and why it is the riskiest cycle in the plan
 @@ -26,7 +26,8 @@ attention.
  
  PA-010 … PA-014, and PA-004's `limits.npk`. All settled.
@@ -191,7 +202,7 @@ index 28096b5..9bf6ca7 100644
  - [ ] **every operation total**: an out-of-range position clamps, never traps, never returns garbage — asserted at `pos == 0`, `pos == len`, `pos > len`
  - [ ] `Span { uint32:lo; uint32:hi; }`, half-open, with `lo <= hi` maintained
  - [ ] an input longer than `0xFFFFFFFF` refused at entry with `EParseState` (C-5) — a caller mistake, not an input's
-+- [ ] **held open for the author's answer to the workbench's question 36** (asked 2026-10-16): C-5's refusal above and `SAFETY.md` §7's `NPARSE_MAX_INPUT` row — 2^47, `EParseState`, "a caller mistake, not an input", unreachable behind C-5 while a span is 32 bits — are one input-size path, and a hostile input over 4 GiB takes it to the consuming program's `failsafe` and stops it, which S-1 exists to prevent: `SAFETY.md` §3 says no byte stream reaches either identity, and §8 names no duty to cap an input's size. The two ways out: the oversize input answers a `Fault` of its own kind, the same for both (S-2), which the question recommends; or §8 states the duty and §3's "No" is qualified. The answer settles it here, by a decision of this cycle's, and C-5 stands as written until then ([`security-defects.md`](../../research/security-defects.md), its item 5)
++- [ ] **held open for the author's answer to the workbench's question 36** (asked 2026-10-16): C-5's refusal above and `SAFETY.md` §7's `NPARSE_MAX_INPUT` row — 2^47, `EParseState`, "a caller mistake, not an input", unreachable behind C-5 while a span is 32 bits — are one input-size path, and a hostile input over 4 GiB takes it to the consuming program's `failsafe` and stops it: C-5 answers it with `EParseState`, `SAFETY.md` §3 says no byte stream reaches either identity, §8 names no duty to cap an input's size, and S-1 exists to prevent exactly that stop. The defects digest records it as its own observation, not a source's claim — a hostile upload "could still reach it" ([`security-defects.md`](../../research/security-defects.md), its item 5). The two ways out: the oversize input answers a `Fault` of its own kind, the same for both (S-2), which the question recommends; or §8 states the duty and §3's "No" is qualified. The answer settles it here, by a decision of this cycle's, which amends C-5, the row and the comment cycle 0.0.4's `src/core/limits.npk` copies from it ("exceeding it is `EParseState` -- a caller mistake, not an input"); C-5 stands as written until then
  - [ ] `scan_line_col(src, offset)` counting from the start, one-based, and **the only place a one-based number exists**
  - [ ] the `Cursor`-holding-a-borrow shape from probe 08's fourth edge, exercised at every call depth the formats will use
  
@@ -204,10 +215,18 @@ index 28096b5..9bf6ca7 100644
  - [ ] the codepoint accumulation goes through `arith.npk` like everything else (C-12), even though a four-byte sequence cannot overflow a `uint32` — because the rule admits no exceptions and an unchecked accumulation is something a reader has to reason about
  - [ ] a `prove` comment: the length is 1…4 and the codepoint is a scalar value
 diff --git a/meta/roadmap/0.4/README.md b/meta/roadmap/0.4/README.md
-index 5d2e3b1..250b241 100644
+index 5d2e3b1..e17489c 100644
 --- a/meta/roadmap/0.4/README.md
 +++ b/meta/roadmap/0.4/README.md
-@@ -48,6 +48,7 @@ duplicate key our default would now reject.
+@@ -41,6 +41,7 @@ duplicate key our default would now reject.
+ - [ ] **`doc_build` uses an explicit stack** (PA-034), and so do the walk, the compare, the print and the drop
+ - [ ] on `Fault`, the partial arena is destroyed and the fault returned — **a partial document is never handed back** (D-22)
+ - [ ] `doc_destroy` consuming the document, and every test exiting 0 so a missed destroy is a trap (D-151)
++- [ ] **S-19's bound for a `Document` made a stated function of the input**: "by the node and pool growth its arena does" names none, and a `Node` is 64 bytes (probe 04) where a JSON array element can cost two bytes of input and a CSV field one, so the arena can grow tens of times faster than its input — this cycle states nodes and pool bytes against the input's length, and decides whether a per-parse total joins `SAFETY.md` §7's table; each later format's cycle re-reads it ([`security-defects.md`](../../research/security-defects.md), its item 4)
+ 
+ ### 0.4.1 — order and duplicates
+ - [ ] a `Map` node's chain alternates key and value, `len` counting **pairs** (D-5's off-by-two, asserted)
+@@ -48,6 +49,7 @@ duplicate key our default would now reject.
  - [ ] `DupPolicy` — `Error` (default), `First`, `Last`
  - [ ] O-P1 confirmed: no JSONTestSuite `y_` case contains a duplicate key the default would reject; if one does, the decision is amended rather than the test skipped
  - [ ] duplicate detection switching to an incremental index beyond `NPARSE_DUP_SCAN_MAX`, **invisible to the answer** (D-16)
@@ -216,7 +235,7 @@ index 5d2e3b1..250b241 100644
  ### 0.4.2 — lookup
  - [ ] `doc_find` as a linear scan of the pair chain, comparing pool bytes
 diff --git a/meta/roadmap/0.6/README.md b/meta/roadmap/0.6/README.md
-index b77b380..0980322 100644
+index b77b380..0369446 100644
 --- a/meta/roadmap/0.6/README.md
 +++ b/meta/roadmap/0.6/README.md
 @@ -37,12 +37,15 @@ it.
@@ -228,7 +247,7 @@ index b77b380..0980322 100644
  - [ ] **the expected-JSON second oracle** (R-12): every `valid/` case's tree printed as JSON and compared to the corpus's own expected encoding — **the only check in the suite that does not go through our own reader**
 -- [ ] the specification version pinned in `meta/research/format-versions.md` (PA-054) — "TOML" without a version is three incompatible languages
 +- [ ] the specification version pinned as `meta/research/CURRENCY.md`'s TOML row (PA-054, @@PD-137@@) — "TOML" without a version is three incompatible languages; **v1.1.0 is published** and this cycle decides between it and v1.0.0, with the two compared — the research gate's [`security-guidance.md`](../../research/security-guidance.md) lists the five changes the project's changelog gives, and this cycle reads both texts at the source — and R-8 re-read against the one chosen
-+- [ ] what TOML's text requires and no rule here states yet, each stated with its case for the version chosen: the whole document valid UTF-8, comments included; no control character but tab, U+007F among them, in a comment or a string; bare keys of ASCII `A-Za-z0-9_-` only; an escape not listed reserved, and an error (v1.1.0's text, as [`security-guidance.md`](../../research/security-guidance.md) quotes it)
++- [ ] what TOML's text requires and no rule here states yet, each stated with its case for the version chosen: the whole document valid UTF-8, comments included; no control character but tab, U+007F among them, in a comment or a string; bare keys of ASCII `A-Za-z0-9_-` only; and an escape not listed reserved: "if they are used, TOML should produce an error" (v1.1.0's text, as [`security-guidance.md`](../../research/security-guidance.md) quotes it)
  
  ### 0.6.1 — scalars
  - [ ] integers in base 10, 16, 8 and 2, with underscores, through `arith.npk` (PA-012)
@@ -268,6 +287,22 @@ index 07cf954..26ef560 100644
  - [ ] the suite's expected event streams compared mechanically against ours — **the largest single reason to have adopted this event vocabulary** rather than inventing one
  - [ ] Q-1 confirmed: the actual proportion of the suite touching excluded constructs, measured and recorded
  
+diff --git a/meta/roadmap/ROADMAP.md b/meta/roadmap/ROADMAP.md
+index 1f1ce11..3afbce2 100644
+--- a/meta/roadmap/ROADMAP.md
++++ b/meta/roadmap/ROADMAP.md
+@@ -10,6 +10,11 @@ waiting for a consumer to ask, one gated on the compiler's tooling, four that
+ are the compiler's rather than ours, and four for the project's author, none of
+ which gates cycle 0.0. **No cycle in this plan is blocked on a decision.**
+ 
++*(2026-10-16, cycle 0.0.1 — the research gate: one question is open for the project's author —
++the workbench's question 36, what an input over 4 GiB answers, which is not an entry of
++`../OPEN_QUESTIONS.md` — and [the 0.1 roadmap](0.1/README.md) holds it open, at 0.1.1, until
++cycle 0.1 settles it; no cycle waits on it.)*
++
+ ## How this is organised
+ 
+ - **A cycle is a folder** — `0.0/`, `0.1/`, … — focused on **one topic**.
 diff --git a/meta/specs/FORMATS.md b/meta/specs/FORMATS.md
 index d8d1bc8..829ce77 100644
 --- a/meta/specs/FORMATS.md

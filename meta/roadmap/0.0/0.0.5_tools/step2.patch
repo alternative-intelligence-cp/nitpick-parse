@@ -12,10 +12,10 @@ index eb288f5..90edeba 100644
  sweeps every `.npk` in the tree, and runs the tree checks; `--only` concludes nothing.
  
 diff --git a/meta/roadmap/ROADMAP.md b/meta/roadmap/ROADMAP.md
-index 58cf21e..9ac3e9d 100644
+index a1734dd..842b1ab 100644
 --- a/meta/roadmap/ROADMAP.md
 +++ b/meta/roadmap/ROADMAP.md
-@@ -98,7 +98,7 @@ opening it. The per-cycle README has the subcycle map and the checklist.
+@@ -103,7 +103,7 @@ opening it. The per-cycle README has the subcycle map and the checklist.
  
  ### 0.0 — Foundations
  The **language probes** first — the programs in `tests/probe/`, every verdict in

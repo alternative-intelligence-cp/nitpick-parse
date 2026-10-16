@@ -38,10 +38,10 @@ index eb87d01..4198f91 100644
 +`SmallMap<K: Copy, V: Copy>` over a by-value key comparison, its insert answering `false` when full; that step's suite
 +joins the gate, and the checklist and the cycle README move with it.
 diff --git a/meta/roadmap/ROADMAP.md b/meta/roadmap/ROADMAP.md
-index 951ed22..6613da3 100644
+index 90fdf16..77a2096 100644
 --- a/meta/roadmap/ROADMAP.md
 +++ b/meta/roadmap/ROADMAP.md
-@@ -107,8 +107,8 @@ specifications, and the two compiler defects its planning found at `7e91730` wer
+@@ -112,8 +112,8 @@ specifications, and the two compiler defects its planning found at `7e91730` wer
  fixed by the compiler, at its landings 116 and 118, before its work began.
  
  Then the harness (`harness/run.py`, its self-check, the stages), the manifest's

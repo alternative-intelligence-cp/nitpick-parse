@@ -80,7 +80,7 @@ index 7733ba7..8585379 100644
  The compiler binary is the **pinned toolchain** the board names
  (`../BOARD.md`, W-18): `$NPKC` and `$NPKRT` are supplied to every session by the
 diff --git a/meta/research/CURRENCY.md b/meta/research/CURRENCY.md
-index 9ef29ca..7219a2e 100644
+index f3b2e14..2ea09c3 100644
 --- a/meta/research/CURRENCY.md
 +++ b/meta/research/CURRENCY.md
 @@ -13,7 +13,7 @@ says which.

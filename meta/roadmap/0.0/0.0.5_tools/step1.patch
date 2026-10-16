@@ -83,7 +83,7 @@ index 59a45c4..24b8701 100644
  ### 0.12.1 — triage
  - [ ] every finding classified: **defect** (the library is wrong), **gap** (a consumer reasonably needs something absent), or **cost** (the library is right and this is what the design costs)
 diff --git a/meta/roadmap/0.6/README.md b/meta/roadmap/0.6/README.md
-index 0980322..d432dcf 100644
+index 0369446..9d65463 100644
 --- a/meta/roadmap/0.6/README.md
 +++ b/meta/roadmap/0.6/README.md
 @@ -1,6 +1,7 @@
@@ -109,7 +109,7 @@ index 94a2869..1e7defc 100644
  
  ### 1.0.4 — versioning
 diff --git a/meta/roadmap/ROADMAP.md b/meta/roadmap/ROADMAP.md
-index 6613da3..58cf21e 100644
+index 77a2096..a1734dd 100644
 --- a/meta/roadmap/ROADMAP.md
 +++ b/meta/roadmap/ROADMAP.md
 @@ -3,12 +3,15 @@
@@ -132,9 +132,9 @@ index 6613da3..58cf21e 100644
 +`../OPEN_QUESTIONS.md` counted three measurements and its author's four are settled; a count copied from a set
 +drifts from it, so the set holds its own.)*
  
- ## How this is organised
- 
-@@ -187,7 +190,7 @@ proportional to the input is copied" is a claim and a claim nobody measures is a
+ *(2026-10-16, cycle 0.0.1 — the research gate: one question is open for the project's author —
+ the workbench's question 36, what an input over 4 GiB answers, which is not an entry of
+@@ -192,7 +195,7 @@ proportional to the input is copied" is a claim and a claim nobody measures is a
  claim nobody has. O-P8's interning measurement lands here.
  
  ### 0.12 — The dogfood consumer
