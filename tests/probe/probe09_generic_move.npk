@@ -1,0 +1,92 @@
+// expect-exit: 0
+//
+// PROBE 09 -- `move T:v` INTO A GENERIC CONTAINER, AT A SCALAR `T` AND AN OWNING ONE.
+//
+// ASKS: `vec_push<T>(v, move T:x)` for `T = int32` and for `T` a struct holding a `string`, read
+// back at the site that knows the element's shape, and freed -- the owning one by a free that
+// moves each element out and drops it.
+//
+// DEPENDS ON THE ANSWER: PA-004's `Vec<T>` and `0.0.4.md`'s claim that it must hold both shapes.
+//
+// EXPECTED: exit 0 at -O0 and through `opt -O2`. The container holds an owning `T`; but its free
+// must drop each element, and `exit 0` cannot see that it did not (`probe09b` and `probe09c`,
+// the pair under one memory cap). What the language gives a GENERIC by-value read, and which
+// bound the library's `Vec` therefore takes, is `0.0.4.md`'s question.
+mod:probe09_generic_move;
+
+// An UNBOUNDED generic container -- the question is whether one holds an owning `T` at all.
+struct:Vec<T> = { wild T->:items; int64:count; int64:cap; };
+
+func:vec_init<T> = Vec<T>(int64:cap) never fails {
+    int64:n = cap;
+    if (n < 1i64) { n = 1i64; }
+    wild int8->:mem = alloc(n * #size_of<T>());
+    pass Vec{ items: mem =>! wild T->, count: 0i64, cap: n };
+};
+
+func:vec_push<T> = NIL(Vec<T>->:v, move T:x) never fails {
+    if (v.count == v.cap) {
+        int64:nc = v.cap * 2i64;
+        wild int8->:bigger = ralloc(v.items =>! wild int8->, nc * #size_of<T>());
+        v.items = bigger =>! wild T->;
+        v.cap = nc;
+    }
+    v.items[v.count] = move(x);
+    v.count = v.count + 1i64;
+    pass NIL;
+};
+
+// Drops every element, then the block.
+func:vec_free_owning<T> = NIL(Vec<T>->:v) never fails {
+    for (int64:i in 0i64...v.count) {
+        T:x = move(v.items[i]);
+        discard(x);
+    }
+    dalloc(v.items =>! wild int8->);
+    v.count = 0i64;
+    v.cap = 0i64;
+    pass NIL;
+};
+
+// Frees the block and nothing else: an owning `T`'s bodies are left behind.
+func:vec_free<T> = NIL(Vec<T>->:v) never fails {
+    dalloc(v.items =>! wild int8->);
+    v.count = 0i64;
+    v.cap = 0i64;
+    pass NIL;
+};
+
+struct:Owning = { string:text; uint32:n; };
+
+func:main = int32(cstring[]:_~argv) {
+    Vec<int32>:a = raw vec_init::<int32>(1i64);
+    for (int64:i in 0i64...1000i64) { drop vec_push(@a, (i =>! int32)); }
+    if (a.count != 1000i64) { exit 10i32; }
+    if (a.items[999i64] != 999i32) { exit 11i32; }
+    drop vec_free(@a);
+    Vec<Owning>:b = raw vec_init::<Owning>(1i64);
+    for (int64:j in 0i64...1000i64) {
+        Owning:o = Owning{ text: string_concat("item ", int_to_string(j)), n: (j =>! uint32) };
+        drop vec_push(@b, move(o));
+    }
+    if (b.count != 1000i64) { exit 12i32; }
+    if (b.items[999i64].n != 999u32) { exit 13i32; }
+    if (b.items[999i64].text.len != 8i64) { exit 14i32; }
+    drop vec_free_owning(@b);
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest)    { exit 91i32; },
+        (HeapOom)           { exit 92i32; },
+        (IntOverflow)       { exit 93i32; },
+        (OutOfBounds)       { exit 94i32; },
+        (Unreachable)       { exit 95i32; },
+        (WildLeak)          { exit 96i32; },
+        (StackExhausted)    { exit 106i32; },
+        (MachineFault)      { exit 107i32; },
+        (*)                 { exit 99i32; }
+    }
+    exit 9i32;
+};

@@ -19,18 +19,21 @@ exhaustiveness makes the caller look at it.
 
 ```nitpick
 pub struct:ParseError = {
-    FaultCode:code;      // 2 bytes — the closed enum, §3
+    FaultCode:code;      // 4 bytes — the closed enum, §3; an int32 tag
     uint16:flags;        // 2 — FL_RECOVERABLE, FL_AT_END, FL_IN_KEY
     Span:span;           // 8 — where, in the input
     uint32:expected;     // 4 — a bitmask of TokenClass, §4
     uint32:found;        // 4 — the byte or token class actually present
     uint32:depth;        // 4 — the nesting depth at the fault
-};                       // 24 bytes, align 4
+};                       // 28 bytes, align 4 — measured (PA-104)
 ```
+
+*(2026-10-15, cycle 0.0.0, PA-104: the comments said `2 bytes` for the code and `24 bytes` for the
+whole. Measured at compiler `7e91730` by probe 03 it is **28**: `FaultCode` is an `int32` tag.)*
 
 **Rule F-1 — no owning field**, so it rides inside `Step.Fault(ParseError)`,
 sits in a `Vec` when recovery collects several, and copies freely.
-`#size_of<ParseError>()` is asserted at 24.
+`#size_of<ParseError>()` is asserted at 28 *(24 until cycle 0.0.0 measured 28 — PA-104)*.
 
 **Rule F-2 — the span is always valid and always within the input**, and
 `lo <= hi`. A fault at end of input has `lo == hi == src.len` and `FL_AT_END`.
@@ -39,7 +42,7 @@ a diagnostic pointing outside the document is worse than none.
 
 **Rule F-3 — no message text is stored.** Rendering is a function of the value
 (§6), so messages stay free to improve, translations become possible, and the
-struct stays 24 bytes with no owning field. This is the same reason the
+struct stays 28 bytes with no owning field *(it said 24; measured 28, PA-104)*. This is the same reason the
 compiler's own tests assert on codes and never on text.
 
 ---

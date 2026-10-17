@@ -54,8 +54,9 @@ The shared house rules for every library in this ecosystem are
   stated bounds. `[[[[[…` is the oldest trick there is and the language has no
   stack guard.
 - **`Event`, `Node` and every value stored in an array have no owning field.**
-  An owning field makes the type move-only (TYPE-046) and an arena `get`
-  returns a *copy*, so a node holding a `string` cannot be read back at all.
+  An arena refuses an owning element at `arena_make` (`NITPICK-TYPE-007`,
+  probe 05), so a node holding a `string` cannot be stored at all; and an owning
+  field costs a type `Copy`, which every container read here is (PA-105).
   Text lives in a side pool addressed by offset and length.
 - **No dependencies** (PA-005). Not the compiler's `src/`, not its `lib/`, not
   `nregex`, not `ntime`. Adding one is a decision that has to be argued.
@@ -75,8 +76,8 @@ that bite hardest here:
 - **Plain integer `+ - *` traps on overflow** (D-210).
 - **There are no closures** (D-018), which is most of why the parser is *pull*
   rather than push.
-- **Owning values are move-only** and **an arena `get` returns a copy**, so an
-  arena element that owns anything cannot be read back.
+- **Owning values are move-only**, and **an arena refuses an owning element
+  at its make**, so an arena element that owns anything cannot be stored.
 - **`string_slice` allocates an owned copy** (D-186); `string_bytes` is the
   borrowed view. A parser that took a `string_slice` per token would allocate
   per token.

@@ -1,0 +1,129 @@
+// expect-exit: 36
+//
+// PROBE 03 -- `Step`, THE WHOLE INTERFACE: A PAYLOAD ENUM OVER TWO STRUCTS.
+//
+// ASKS: `Step` exactly as `EVENT_MODEL.md` §1 declares it -- `Ev(Event)`, `Fault(ParseError)`,
+// `Done` -- with `#[derive(Eq, Debug, Copy)]`; both payload arms destructured in a `pick`; `Step`
+// stored in a `Vec` and read back; and its size, which is the exit code.
+//
+// DEPENDS ON THE ANSWER: PA-023 (the interface), and the argument for it -- that `pick`
+// exhaustiveness forces a caller to handle a fault -- which needs the shape to exist; and
+// `DIAGNOSTIC_MODEL.md` F-1, which asserts `ParseError` at 24.
+//
+// EXPECTED: 36 -- a four-byte tag and a payload slot for the larger payload, `Event`'s 32. And
+// `ParseError` measures 28, not 24: its `FaultCode` is a four-byte tag where the specification
+// counted two (code 19 below). Every derive name is spelled exactly: at `7e91730` an unknown
+// attribute name is accepted and ignored (the compiler's DEF-236 (d)), so a misspelling would
+// pass in silence.
+//
+// A NEGATIVE VERDICT -- refused -- costs the interface: a `Step` struct with a kind tag and both
+// payloads inline, which is bigger and loses the exhaustiveness argument.
+mod:probe03_payload_enum;
+
+// The shapes as `meta/specs/` declares them -- copied, since a probe imports nothing from `src/`
+// (`0.0.0.md` §3) and `src/` holds none yet.
+#[derive(Eq, Debug, Copy)]
+enum:EventKind = { StartMap; EndMap; StartSeq; EndSeq; Key; Scalar; Comment; DocStart; DocEnd; };
+#[derive(Eq, Debug, Copy)]
+enum:ScalarKind = { Null; Bool; Int; Float; Str; Date; Time; DateTime; Raw; };
+#[derive(Eq, Debug, Copy)]
+enum:TextSrc = { Input; Scratch; };
+#[derive(Eq, Debug, Copy)]
+struct:Span = { uint32:lo; uint32:hi; };
+#[derive(Eq, Debug, Copy)]
+struct:TextRef = { TextSrc:src; uint32:lo; uint32:hi; };
+#[derive(Eq, Debug, Copy)]
+struct:Event = { EventKind:kind; ScalarKind:scalar; uint8:flags; uint8:_pad; TextRef:text; Span:span; };
+#[derive(Eq, Debug, Copy)]
+enum:FaultCode = { UnexpectedByte; UnexpectedEnd; DepthExceeded; };
+#[derive(Eq, Debug, Copy)]
+struct:ParseError = { FaultCode:code; uint16:flags; Span:span; uint32:expected; uint32:found; uint32:depth; };
+#[derive(Eq, Debug, Copy)]
+enum:Step = { Ev(Event); Fault(ParseError); Done; };
+
+// The container, as small as the question needs: `Vec<T: Copy>`, the bound both sibling
+// libraries' `Vec` carries.
+struct:Vec<T: Copy> = { wild T->:items; int64:count; int64:cap; };
+
+func:vec_init<T: Copy> = Vec<T>(int64:cap) never fails {
+    int64:n = cap;
+    if (n < 1i64) { n = 1i64; }
+    wild int8->:mem = alloc(n * #size_of<T>());
+    pass Vec{ items: mem =>! wild T->, count: 0i64, cap: n };
+};
+
+func:vec_push<T: Copy> = NIL(Vec<T>->:v, T:x) never fails {
+    if (v.count == v.cap) {
+        int64:nc = v.cap * 2i64;
+        wild int8->:bigger = ralloc(v.items =>! wild int8->, nc * #size_of<T>());
+        v.items = bigger =>! wild T->;
+        v.cap = nc;
+    }
+    v.items[v.count] = x;
+    v.count = v.count + 1i64;
+    pass NIL;
+};
+
+func:vec_free<T: Copy> = NIL(Vec<T>->:v) never fails {
+    dalloc(v.items =>! wild int8->);
+    v.count = 0i64;
+    v.cap = 0i64;
+    pass NIL;
+};
+
+func:weigh = int64(Step:s) never fails {
+    int64:w = 0i64;
+    pick (s) {
+        (Step.Ev(e))    { w = 1000i64 + (e.text.lo => int64); },
+        (Step.Fault(f)) { w = 2000i64 + (f.depth => int64); },
+        (Step.Done)     { w = 3000i64; }
+    }
+    pass w;
+};
+
+func:main = int32(cstring[]:_~argv) {
+    Event:e = Event{ kind: EventKind.Scalar, scalar: ScalarKind.Int, flags: 0u8, _pad: 0u8,
+                     text: TextRef{ src: TextSrc.Input, lo: 7u32, hi: 9u32 },
+                     span: Span{ lo: 0u32, hi: 9u32 } };
+    ParseError:f = ParseError{ code: FaultCode.DepthExceeded, flags: 0u16,
+                               span: Span{ lo: 1u32, hi: 2u32 },
+                               expected: 0u32, found: 0u32, depth: 5u32 };
+    if (raw weigh(Step.Ev(e)) != 1007i64) { exit 10i32; }
+    if (raw weigh(Step.Fault(f)) != 2005i64) { exit 11i32; }
+    if (raw weigh(Step.Done) != 3000i64) { exit 12i32; }
+    // in a Vec, read back through the pick
+    Vec<Step>:v = raw vec_init::<Step>(4i64);
+    drop vec_push(@v, Step.Ev(e));
+    drop vec_push(@v, Step.Fault(f));
+    drop vec_push(@v, Step.Done);
+    int64:total = 0i64;
+    for (int64:i in 0i64...v.count) { total = total + raw weigh(v.items[i]); }
+    if (total != 6012i64) { exit 13i32; }
+    // the derived Eq reads the tag and then the payload
+    Result<bool>:same = v.items[1i64].eq(Step.Fault(f));
+    if (same.is_error) { exit 14i32; }
+    if (!same.value) { exit 15i32; }
+    Result<bool>:diff = v.items[0i64].eq(v.items[1i64]);
+    if (diff.is_error) { exit 16i32; }
+    if (diff.value) { exit 17i32; }
+    Result<string>:shown = v.items[2i64].debug();
+    if (shown.is_error) { exit 18i32; }
+    drop vec_free(@v);
+    if (#size_of<ParseError>() != 28i64) { exit 19i32; }
+    exit (#size_of<Step>() =>! int32);
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest)    { exit 91i32; },
+        (HeapOom)           { exit 92i32; },
+        (IntOverflow)       { exit 93i32; },
+        (OutOfBounds)       { exit 94i32; },
+        (Unreachable)       { exit 95i32; },
+        (WildLeak)          { exit 96i32; },
+        (StackExhausted)    { exit 106i32; },
+        (MachineFault)      { exit 107i32; },
+        (*)                 { exit 99i32; }
+    }
+    exit 9i32;
+};

@@ -116,8 +116,8 @@ boundary — and **exits 0**, proving no path traps. Plus `check_no_raw_accumula
 live and *seen to fail* against a planted violation.
 
 ### 0.2 — The event contract
-`src/event/` and `src/diag/`: `Event` (24 bytes, POD, asserted), `Step`,
-`ParseError` (24 bytes, POD, asserted), `TextRef`, `Options`, the `Format`
+`src/event/` and `src/diag/`: `Event` (32 bytes, POD, asserted), `Step`,
+`ParseError` (28 bytes, POD, asserted) — measured by cycle 0.0.0, PA-104 — `TextRef`, `Options`, the `Format`
 trait, the preallocated depth stack, and **`event_validate`** — the wrapper
 `Format` that asserts the stream grammar and is what every plugin is developed
 against.

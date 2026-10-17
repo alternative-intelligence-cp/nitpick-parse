@@ -42,10 +42,10 @@ never for concluding; nothing is committed on the strength of a filtered run.
    Range-check before the multiply, every time, and return a `Fault`. There is
    a gate for this and it is not negotiable.
 
-3. **Nothing in a cell, node or event may own anything.** An owning field makes
-   the type move-only, and an arena `get` returns a copy — so a node holding a
-   `string` cannot be read back at all. Text is an offset and a length into a
-   pool.
+3. **Nothing in a cell, node or event may own anything.** An arena refuses an
+   owning element at `arena_make`, so a node holding a `string` cannot be stored
+   at all; and an owning field costs a type `Copy`. Text is an offset and a
+   length into a pool.
 
 4. **The parser is pull, not push.** The caller asks for the next event. This
    is not a taste question: Nitpick has no closures, so a push parser's visitor

@@ -1,0 +1,44 @@
+// expect-error: NITPICK-TYPE-007
+// expect-error-at: 25:34
+//
+// PROBE 05 -- AN ARENA WHOSE ELEMENT OWNS A `string`. EXPECTED REFUSED.
+//
+// ASKS: is `arena<Owning>` with a `string` field refused, and WHERE? The plan asked whether the
+// copy `get` makes collides with TYPE-046's refusal of a copy of an owner.
+//
+// DEPENDS ON THE ANSWER: PA-030 and `VALUE_MODEL.md` D-1, which say a node holding a `string`
+// "would not compile" -- the forcing rule behind the side pool.
+//
+// EXPECTED: refused at the MAKE, not at the copy: `NITPICK-TYPE-007` at `arena_make`, "this
+// element type OWNS heap storage, and `get`/`put` copy bytes ... owning elements await the
+// generated deep-view accessors (D-183)". So the pool is a necessity at `7e91730` for the reason
+// the compiler gives -- and the day the compiler's deep-view accessors land, this probe stops
+// being refused and the pool's necessity is re-decided.
+//
+// A NEGATIVE VERDICT -- accepted -- makes the pool an optimisation rather than a necessity, and
+// PA-030 is superseded.
+mod:probe05_arena_owning;
+
+struct:Owning = { string:text; uint32:n; };
+
+func:main = int32(cstring[]:_~argv) {
+    arena<Owning>:ar = arena_make(16i64);
+    Handle<Owning>:h = ar.alloc();
+    Owning:back = ar.get(h) ?| Owning{ text: "", n: 0u32 };
+    if (back.n != 0u32) { exit 10i32; }
+    ar.destroy();
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest)    { exit 91i32; },
+        (HeapOom)           { exit 92i32; },
+        (Unreachable)       { exit 95i32; },
+        (WildLeak)          { exit 96i32; },
+        (StackExhausted)    { exit 106i32; },
+        (MachineFault)      { exit 107i32; },
+        (*)                 { exit 99i32; }
+    }
+    exit 9i32;
+};

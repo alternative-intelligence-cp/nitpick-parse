@@ -27,8 +27,8 @@ cycle freezes**.
 
 | # | Topic | Ends with |
 |---|---|---|
-| 0.2.0 | **The vocabulary** — `Event`, `EventKind`, `ScalarKind`, `TextRef`, the flags | 24 bytes, POD, asserted; the closed enums |
-| 0.2.1 | **`Step` and `ParseError`** — the fault value, the code enum, the `expected` masks | 24 bytes, POD, asserted; `pick` exhaustiveness demonstrated |
+| 0.2.0 | **The vocabulary** — `Event`, `EventKind`, `ScalarKind`, `TextRef`, the flags | 32 bytes, POD, asserted (PA-104); the closed enums |
+| 0.2.1 | **`Step` and `ParseError`** — the fault value, the code enum, the `expected` masks | 28 bytes, POD, asserted (PA-104); `pick` exhaustiveness demonstrated |
 | 0.2.2 | **The `Format` trait and `Options`** — the pull interface, the option checks | a trivial format implementing it, statically and through `dyn` |
 | 0.2.3 | **The depth stack** — `Frame`, preallocation, the bound | 50 000 nesting handled, `DepthExceeded` at the bound |
 | 0.2.4 | **`event_validate`** — the grammar wrapper | each of the six grammar violations caught |
@@ -37,7 +37,7 @@ cycle freezes**.
 ## Checklist
 
 ### 0.2.0 — the vocabulary
-- [ ] `Event` is exactly 24 bytes; `#size_of` asserted (probe 02's shape made permanent)
+- [ ] `Event` is exactly 32 bytes; `#size_of` asserted (probe 02's shape made permanent; 24 until cycle 0.0.0 measured 32, PA-104)
 - [ ] **no owning field** — `check_no_owning_fields` goes live here
 - [ ] `EventKind`'s nine and `ScalarKind`'s nine, both closed (PA-025), with a comment saying adding one is a major version
 - [ ] `TextRef { src, lo, hi }` and `event_text(p, e) -> uint8[]`, returning a borrow
@@ -46,7 +46,7 @@ cycle freezes**.
 
 ### 0.2.1 — `Step` and `ParseError`
 - [ ] `Step = { Ev(Event); Fault(ParseError); Done; }` (probe 03's shape)
-- [ ] `ParseError` exactly 24 bytes, POD, `#size_of` asserted
+- [ ] `ParseError` exactly 28 bytes, POD, `#size_of` asserted (24 until cycle 0.0.0 measured 28, PA-104; and whether PA-040's one-field `found` compromise still earns its keep at 28 is settled here)
 - [ ] the `FaultCode` enum, every variant in `specs/DIAGNOSTIC_MODEL.md` §3
 - [ ] `check_codes_documented` live: every variant in the spec table, every one with a test that produces it (most pending until their format lands, and **pending must print as pending**)
 - [ ] the `expected` bitmask over `TokenClass`
@@ -87,8 +87,8 @@ demonstrated rather than asserted.
   (`GLOSSARY.md`). The distinction between a *fault* (a value, from input) and
   an *error* (an identity, from misuse) is the library's central design
   decision, and letting the vocabulary blur is how it gets eroded.
-- **`Event` having no owning field is not negotiable.** If the 24 bytes turn out
-  too tight, the answer is a wider `Event` or a narrower `TextRef` — never a
+- **`Event` having no owning field is not negotiable.** If the 32 bytes
+  (PA-104 — 24 until cycle 0.0.0 measured them) turn out too tight, the answer is a wider `Event` or a narrower `TextRef` — never a
   `string`.
 - **Design the ring for push-back now.** The capability probe pattern (a
   consumer reading events until a sentinel and pushing the rest back) is not

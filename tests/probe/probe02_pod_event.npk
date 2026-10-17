@@ -1,0 +1,119 @@
+// expect-exit: 32
+//
+// PROBE 02 -- `Event` AS `EVENT_MODEL.md` §2 DECLARES IT, IN A `Vec`, AND ITS SIZE.
+//
+// ASKS: `#size_of<Event>()` for the specification's own fields -- `EventKind` and `ScalarKind`
+// are payload-free enums -- and a `Vec<Event>` of 100 000: fill, read back, copy whole, compare,
+// clear, free. The exit code IS the size (`PLAYBOOK.md` §6: a measured number nobody can
+// transcribe), narrowed by `=>!` to the `int32` `exit` takes.
+//
+// DEPENDS ON THE ANSWER: E-5 and E-6 (`#size_of<Event>()` asserted at 24) and PA-021 ("a plain
+// 24-byte value"), and the event ring's memory budget.
+//
+// EXPECTED: 32, not 24. A payload-free enum is an `int32` tag, four bytes (the compiler's
+// `TYPE_REFERENCE.md` §9.3), so the two kind fields are eight bytes where the specification
+// counted two. The plan's earlier shape -- `uint8` fields standing in for the enums -- measures
+// 24 and asks a different question. Every assertion has its own code, 10 … 19.
+//
+// A DIFFERENT SIZE re-derives `EVENT_MODEL.md` §2's table from this measurement.
+mod:probe02_pod_event;
+
+// The shapes as `meta/specs/` declares them -- copied, since a probe imports nothing from `src/`
+// (`0.0.0.md` §3) and `src/` holds none yet.
+#[derive(Eq, Debug, Copy)]
+enum:EventKind = { StartMap; EndMap; StartSeq; EndSeq; Key; Scalar; Comment; DocStart; DocEnd; };
+#[derive(Eq, Debug, Copy)]
+enum:ScalarKind = { Null; Bool; Int; Float; Str; Date; Time; DateTime; Raw; };
+#[derive(Eq, Debug, Copy)]
+enum:TextSrc = { Input; Scratch; };
+#[derive(Eq, Debug, Copy)]
+struct:Span = { uint32:lo; uint32:hi; };
+#[derive(Eq, Debug, Copy)]
+struct:TextRef = { TextSrc:src; uint32:lo; uint32:hi; };
+#[derive(Eq, Debug, Copy)]
+struct:Event = { EventKind:kind; ScalarKind:scalar; uint8:flags; uint8:_pad; TextRef:text; Span:span; };
+
+// The container, as small as the question needs: `Vec<T: Copy>`, the bound both sibling
+// libraries' `Vec` carries.
+struct:Vec<T: Copy> = { wild T->:items; int64:count; int64:cap; };
+
+func:vec_init<T: Copy> = Vec<T>(int64:cap) never fails {
+    int64:n = cap;
+    if (n < 1i64) { n = 1i64; }
+    wild int8->:mem = alloc(n * #size_of<T>());
+    pass Vec{ items: mem =>! wild T->, count: 0i64, cap: n };
+};
+
+func:vec_push<T: Copy> = NIL(Vec<T>->:v, T:x) never fails {
+    if (v.count == v.cap) {
+        int64:nc = v.cap * 2i64;
+        wild int8->:bigger = ralloc(v.items =>! wild int8->, nc * #size_of<T>());
+        v.items = bigger =>! wild T->;
+        v.cap = nc;
+    }
+    v.items[v.count] = x;
+    v.count = v.count + 1i64;
+    pass NIL;
+};
+
+func:vec_free<T: Copy> = NIL(Vec<T>->:v) never fails {
+    dalloc(v.items =>! wild int8->);
+    v.count = 0i64;
+    v.cap = 0i64;
+    pass NIL;
+};
+
+func:make = Event(int64:i) never fails {
+    pass Event{ kind: EventKind.Scalar, scalar: ScalarKind.Int, flags: 1u8, _pad: 0u8,
+                text: TextRef{ src: TextSrc.Input, lo: (i =>! uint32), hi: ((i + 3i64) =>! uint32) },
+                span: Span{ lo: (i =>! uint32), hi: ((i + 5i64) =>! uint32) } };
+};
+
+func:main = int32(cstring[]:_~argv) {
+    Vec<Event>:v = raw vec_init::<Event>(16i64);
+    for (int64:i in 0i64...100000i64) { drop vec_push(@v, raw make(i)); }
+    if (v.count != 100000i64) { exit 10i32; }
+    // read back: every element is the one written
+    for (int64:i in 0i64...100000i64) {
+        Event:e = v.items[i];
+        if (e.text.lo != (i =>! uint32)) { exit 11i32; }
+        if (e.span.hi != ((i + 5i64) =>! uint32)) { exit 12i32; }
+    }
+    // copy the whole vector, element by element, and compare with the derived `Eq`
+    Vec<Event>:w = raw vec_init::<Event>(v.count);
+    for (int64:i in 0i64...v.count) { drop vec_push(@w, v.items[i]); }
+    for (int64:i in 0i64...v.count) {
+        Result<bool>:same = v.items[i].eq(w.items[i]);
+        if (same.is_error) { exit 13i32; }
+        if (!same.value) { exit 14i32; }
+    }
+    // a changed copy is not equal
+    Event:x = w.items[7i64];
+    x.flags = 2u8;
+    Result<bool>:diff = x.eq(v.items[7i64]);
+    if (diff.is_error) { exit 15i32; }
+    if (diff.value) { exit 16i32; }
+    // clear, then free both
+    v.count = 0i64;
+    if (v.count != 0i64) { exit 17i32; }
+    drop vec_free(@v);
+    drop vec_free(@w);
+    if (#size_of<Span>() != 8i64) { exit 18i32; }
+    if (#size_of<TextRef>() != 12i64) { exit 19i32; }
+    exit (#size_of<Event>() =>! int32);
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest)    { exit 91i32; },
+        (HeapOom)           { exit 92i32; },
+        (IntOverflow)       { exit 93i32; },
+        (OutOfBounds)       { exit 94i32; },
+        (Unreachable)       { exit 95i32; },
+        (WildLeak)          { exit 96i32; },
+        (StackExhausted)    { exit 106i32; },
+        (MachineFault)      { exit 107i32; },
+        (*)                 { exit 99i32; }
+    }
+    exit 9i32;
+};

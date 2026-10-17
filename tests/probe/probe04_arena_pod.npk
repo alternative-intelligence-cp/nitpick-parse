@@ -1,0 +1,69 @@
+// expect-exit: 64
+//
+// PROBE 04 -- AN ARENA OF POD NODES, AND THE COPYING `get`.
+//
+// ASKS: `arena<Node>` with `Node` as `VALUE_MODEL.md` §2 declares it: `alloc`, `put`, `get` --
+// and that `get` returns a COPY, so writing the copy leaves the slot as it was -- `free`, a
+// handle used after `free` answering `StaleHandle` (-4106) through `Result.err` rather than
+// trapping, `put` through a stale handle refused the same way, `reset` retiring every handle,
+// and `destroy`. The exit code is `#size_of<Node>()`.
+//
+// DEPENDS ON THE ANSWER: PA-030 (`Document` is exactly this) and D-3, which asserts `Node` at 56;
+// the generation-checked handle is the use-after-free guarantee the value model rests on.
+//
+// EXPECTED: 64, not 56 -- `NodeKind` is a four-byte tag where the specification counted one byte,
+// which moves `a` to offset 16. And an arena program owes `StaleHandle` beyond the six floor arms
+// (`NITPICK-REACH-003` names it), so a consumer of `src/doc/` will too.
+mod:probe04_arena_pod;
+
+enum:NodeKind = { Null; Bool; Int; Float; Str; Seq; Map; Date; Time; DateTime; };
+struct:Span = { uint32:lo; uint32:hi; };
+struct:Node = { NodeKind:kind; uint8:flags; uint16:_pad; uint32:len; uint64:a;
+                Handle<Node>:first; Handle<Node>:next; Span:span; };
+
+func:main = int32(cstring[]:_~argv) {
+    arena<Node>:ar = arena_make(4096i64);
+    Handle<Node>:h = ar.alloc();
+    Handle<Node>:h2 = ar.alloc();
+    Node:n = Node{ kind: NodeKind.Int, flags: 0u8, _pad: 0u16, len: 0u32, a: 42u64,
+                   first: h2, next: h2, span: Span{ lo: 1u32, hi: 3u32 } };
+    Result<NIL>:p = ar.put(h, n);
+    if (p.is_error) { exit 10i32; }
+    Result<Node>:g = ar.get(h);
+    if (g.is_error) { exit 11i32; }
+    Node:copy = g.value;
+    if (copy.a != 42u64) { exit 12i32; }
+    // the copy is a copy: writing it does not write the slot
+    copy.a = 7u64;
+    Result<Node>:g2 = ar.get(h);
+    if (g2.is_error) { exit 13i32; }
+    if (g2.value.a != 42u64) { exit 14i32; }
+    // a freed handle is stale: an answer, never a trap
+    Result<NIL>:fr = ar.free(h);
+    if (fr.is_error) { exit 15i32; }
+    Result<Node>:stale = ar.get(h);
+    if (!stale.is_error) { exit 16i32; }
+    if (stale.err != StaleHandle) { exit 17i32; }
+    Result<NIL>:sp = ar.put(h, n);
+    if (!sp.is_error) { exit 18i32; }
+    // reset retires every handle
+    ar.reset();
+    Result<Node>:after = ar.get(h2);
+    if (!after.is_error) { exit 19i32; }
+    ar.destroy();
+    exit (#size_of<Node>() =>! int32);
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest)    { exit 91i32; },
+        (HeapOom)           { exit 92i32; },
+        (Unreachable)       { exit 95i32; },
+        (WildLeak)          { exit 96i32; },
+        (StackExhausted)    { exit 106i32; },
+        (MachineFault)      { exit 107i32; },
+        (StaleHandle)       { exit 110i32; },
+        (*)                 { exit 99i32; }
+    }
+    exit 9i32;
+};

@@ -1,0 +1,91 @@
+// expect-exit: 92
+// mem-cap-mib: 64
+//
+// PROBE 09b -- A GENERIC FREE THAT DOES NOT DROP ITS OWNING ELEMENTS, UNDER A 64 MiB CAP.
+//
+// ASKS: two thousand rounds, each filling a `Vec<Owning>` with 256 elements of 512-byte strings
+// and freeing it with `vec_free` -- the block only. About 262 MB of bodies are left behind. Does
+// anything notice?
+//
+// EXPECTED: `HeapOom`, 92, at -O0 and through `opt -O2`, under the cap; uncapped it exits 0,
+// because D-151's leak check counts `wild` blocks and a `string`'s body is managed (`PLAYBOOK.md`
+// §2, "Freeing a generic container's block does NOT drop its elements"). `probe09c` is the same
+// program with the dropping free, and must exit 0 under the same cap: the pair's two outcomes are
+// the gate, and a program that allocates nothing runs under 64 MiB (the harness's control).
+mod:probe09b_owning_free_leaks;
+
+// An UNBOUNDED generic container -- the question is whether one holds an owning `T` at all.
+struct:Vec<T> = { wild T->:items; int64:count; int64:cap; };
+
+func:vec_init<T> = Vec<T>(int64:cap) never fails {
+    int64:n = cap;
+    if (n < 1i64) { n = 1i64; }
+    wild int8->:mem = alloc(n * #size_of<T>());
+    pass Vec{ items: mem =>! wild T->, count: 0i64, cap: n };
+};
+
+func:vec_push<T> = NIL(Vec<T>->:v, move T:x) never fails {
+    if (v.count == v.cap) {
+        int64:nc = v.cap * 2i64;
+        wild int8->:bigger = ralloc(v.items =>! wild int8->, nc * #size_of<T>());
+        v.items = bigger =>! wild T->;
+        v.cap = nc;
+    }
+    v.items[v.count] = move(x);
+    v.count = v.count + 1i64;
+    pass NIL;
+};
+
+// Drops every element, then the block.
+func:vec_free_owning<T> = NIL(Vec<T>->:v) never fails {
+    for (int64:i in 0i64...v.count) {
+        T:x = move(v.items[i]);
+        discard(x);
+    }
+    dalloc(v.items =>! wild int8->);
+    v.count = 0i64;
+    v.cap = 0i64;
+    pass NIL;
+};
+
+// Frees the block and nothing else: an owning `T`'s bodies are left behind.
+func:vec_free<T> = NIL(Vec<T>->:v) never fails {
+    dalloc(v.items =>! wild int8->);
+    v.count = 0i64;
+    v.cap = 0i64;
+    pass NIL;
+};
+
+struct:Owning = { string:text; uint32:n; };
+
+func:main = int32(cstring[]:_~argv) {
+    string:pad = string_concat("0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef", "");
+    for (int64:round in 0i64...2000i64) {
+        Vec<Owning>:b = raw vec_init::<Owning>(1i64);
+        for (int64:j in 0i64...256i64) {
+            string:t = string_concat(pad, pad);
+            t = string_concat(t, t);
+            t = string_concat(t, t);
+            Owning:o = Owning{ text: move(t), n: (j =>! uint32) };
+            drop vec_push(@b, move(o));
+        }
+        if (b.count != 256i64) { exit 12i32; }
+        drop vec_free(@b);
+    }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest)    { exit 91i32; },
+        (HeapOom)           { exit 92i32; },
+        (IntOverflow)       { exit 93i32; },
+        (OutOfBounds)       { exit 94i32; },
+        (Unreachable)       { exit 95i32; },
+        (WildLeak)          { exit 96i32; },
+        (StackExhausted)    { exit 106i32; },
+        (MachineFault)      { exit 107i32; },
+        (*)                 { exit 99i32; }
+    }
+    exit 9i32;
+};

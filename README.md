@@ -53,7 +53,7 @@ it is one of the library's gates.
 stack-depth guard, and `[[[[[…` is the oldest trick there is. Both the parser
 and the tree builder use an explicit stack with a stated, tested bound.
 
-**Zero-copy by construction.** An `Event` is a plain 24-byte value with no
+**Zero-copy by construction.** An `Event` is a plain 32-byte value with no
 owning field; scalar text is a `TextRef` into the caller's input, or into the
 parser's scratch when an escape had to be decoded. Parsing a 1 GB file
 allocates nothing proportional to the file.

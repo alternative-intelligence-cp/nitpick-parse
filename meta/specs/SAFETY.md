@@ -22,8 +22,8 @@ costs a library that reads bytes somebody else controls.
 | Indexing is bounds-checked and traps | D-070 | An index derived from input is a *crash*, not a smear. §4. |
 | There is **no stack-depth guard**, and `stack-depth` is a 1.5.8 obligation kind | VERIFICATION_REFERENCE §365 | Native recursion on input-controlled depth is a stack overflow. §5. |
 | **A mutable module-level binding is refused** | D-211 | All parser state is a value the caller holds. §6. |
-| Owning values are **move-only** | TYPE-046 | No value stored in an array or an arena may own anything. §6. |
-| An arena `get` returns a **copy** | D-152, MEMORY_REFERENCE §4.2 | A `Document` node holding a `string` could not be read back **at all**. §6. |
+| Owning values are **move-only** | TYPE-046 | A copy of an owner is refused, not where an owner is stored: a `Vec` holds one, and its free must drop each element, which `exit 0` cannot see. §6. |
+| An arena refuses an **owning element** at its make | D-183, MEMORY_REFERENCE §4.2 | A `Document` node holding a `string` could not be stored **at all** (`NITPICK-TYPE-007`, probe 05). §6. |
 | `string_slice` allocates an **owned copy** | D-186 | A parser that sliced per token would allocate per token. §6. |
 | Borrows are second class | D-004 | A `uint8[]` view of the input cannot be returned, stored past the call, or held across `await`. §6. |
 | There are **no closures** | D-018 | A push parser's visitor would be a trait object plus hand-carried context. EVENT_MODEL.md §2. |
@@ -83,7 +83,7 @@ Both are **caller mistakes**. Neither is reachable from any byte stream.
 pub enum:Step = { Ev(Event); Fault(ParseError); Done; };
 ```
 
-`ParseError` is a plain 24-byte value (`DIAGNOSTIC_MODEL.md` §2) carrying a
+`ParseError` is a plain 28-byte value (`DIAGNOSTIC_MODEL.md` §2; PA-104) carrying a
 closed code enum, a span, an expected set and what was found. It travels in the
 **success** channel.
 
@@ -210,14 +210,24 @@ a program with a genuine reason raises it and owns the consequence.
 
 **Rule S-15 — nothing stored in an array or an arena owns anything.** `Event`,
 `Node`, `ParseError`, `Frame` and every value in a `Vec` or an arena declare no
-owning field. Two separate language rules force this and the second is the
-sharper one:
+owning field (PA-105). One language rule forces it for the arena, and a design
+rule for the rest:
 
-- an owning field makes the type move-only (TYPE-046), so a `Vec` of them
-  cannot be copied, cleared or compared; and
-- **an arena `get` returns a copy** (D-152), and a copy of an owning value is
-  *refused* — so a `Document` node holding a `string` could not be read back at
-  all.
+- **an arena refuses an owning element type at its make** (`NITPICK-TYPE-007`,
+  the compiler's D-183; probe 05) — so a `Document` node holding a `string`
+  could not be stored at all; and
+- an owning field would cost the type `Copy`, and every by-value read of a
+  container element here is a copy (`Vec<T: Copy>`, the sibling libraries'
+  bound). A `Vec` CAN hold owners — probe 09 — but then its free must move each
+  element out and drop it, and nothing but a memory cap sees a free that does
+  not (S-18; probes 09b and 09c).
+
+*(2026-10-15, cycle 0.0.0, PA-105: until this subcycle the first bullet said an
+owning field made a `Vec` of them impossible to copy, clear or compare, and the
+second that the arena's copying `get` was refused TYPE-046. Measured at
+`7e91730`, neither is the mechanism: `PLAYBOOK.md` §2's row on move-only values
+records the first as false at every kept pin, and probe 05 is refused at the
+make.)*
 
 Text therefore lives in a side pool and is addressed by offset and length
 (`VALUE_MODEL.md` §3).
@@ -235,7 +245,13 @@ them is portable to the current language.
 
 **Rule S-18 — every `wild` byte is paired on every path.** `Vec<T>`'s block is
 `wild`; a scope that made one frees it, so `exit 0` never trips D-151. The test
-programs exit 0 on purpose, so a leak on any path turns a pass into a trap.
+programs exit 0 on purpose, so a leak of a `wild` block on any path turns a pass
+into a trap. **A managed body is not `wild`, and `exit 0` cannot see it leak**: a
+container whose free drops the block and not the owning elements in it exits 0
+uncapped, and `HeapOom` (92) under a 64 MiB cap where the dropping free exits 0
+under the same cap (probes 09b and 09c, measured at `7e91730`). That pair, run by
+the harness under its `mem-cap-mib:` marker, is the gate on the managed half
+(PA-105).
 
 **Rule S-19 — allocation is bounded by a stated function of the input.** The
 parser's scratch is bounded by `NPARSE_MAX_SCALAR`; the depth stack by

@@ -8,7 +8,7 @@ rather than a stream.
 
 Because a value model designed before anything produced values is a value model
 designed against imagination. JSON's corpus is what tells us whether the node
-layout works, whether 56 bytes is right, and whether the sibling chain is
+layout works, whether 64 bytes is right (56 until cycle 0.0.0 measured 64, PA-104), and whether the sibling chain is
 comfortable to walk — and it exists now.
 
 ## Decisions in
@@ -23,7 +23,7 @@ duplicate key our default would now reject.
 
 | # | Topic | Ends with |
 |---|---|---|
-| 0.4.0 | **`Node` and the arena** — the layout, the pool, `doc_build` | 56 bytes asserted, a tree built from JSON |
+| 0.4.0 | **`Node` and the arena** — the layout, the pool, `doc_build` | 64 bytes asserted (PA-104), a tree built from JSON |
 | 0.4.1 | **Order and duplicates** — the sibling chain, the pair alternation, `DupPolicy` | insertion order preserved and asserted |
 | 0.4.2 | **Lookup** — `doc_find`, `doc_index` | a 10 000-key map, both paths, measured |
 | 0.4.3 | **The accessors** — the six numeric, `doc_text`, `doc_string`, `doc_eq` | every accessor total |
@@ -34,7 +34,7 @@ duplicate key our default would now reject.
 ## Checklist
 
 ### 0.4.0 — `Node` and the arena
-- [ ] `Node` exactly 56 bytes, POD, `#size_of` asserted; `check_no_owning_fields` covers it
+- [ ] `Node` exactly 64 bytes, POD, `#size_of` asserted (56 until cycle 0.0.0 measured 64, PA-104); `check_no_owning_fields` covers it
 - [ ] the arena of nodes with `Handle<Node>`, and a **stale handle answering `StaleHandle`** rather than reading freed memory (probe 04's shape made permanent)
 - [ ] the pool: every scalar copied in exactly once, so a `Document`'s text is its own (D-6)
 - [ ] `doc_build<F: Format>(p)` driving any format to `Done` — including the trivial fifth format from 0.3.3

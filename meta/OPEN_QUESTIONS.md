@@ -94,6 +94,16 @@ element type may not own anything**, because `get` copies and a copy of an owner
 is refused. It would have saved this library a design iteration and it will save
 the next one.
 
+*(2026-10-15, cycle 0.0.0 — probe 05's evidence, measured at `7e91730`: the refusal
+is at `arena_make`, `NITPICK-TYPE-007`, whose own sentence says the element "OWNS
+heap storage, and `get`/`put` copy bytes" and names the answer the compiler plans,
+deep-view accessors (D-183). The diagnostic now says what this ask wanted the
+reference to say; the reference still does not (`MEMORY_REFERENCE.md` §4.2 at
+`7e91730`). PA-105. **This entry's id is this repository's own**: the workbench
+registry's `O-N4` is a different question, and no registry id has been issued for
+this one (the early ecosystem audit's ED2) — the orchestrator assigns one if it is
+raised, and nothing here numbers it.)*
+
 ---
 
 ## O-x — ours

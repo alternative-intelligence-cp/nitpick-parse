@@ -17,14 +17,22 @@ pub struct:Document = {
 };
 ```
 
-**Rule D-1 (PA-030) — the tree is an arena of POD nodes with a side string
-pool.** Not a linked structure of owning values, and the reason is a language
-rule rather than a preference:
+**Rule D-1 (PA-030, PA-105) — the tree is an arena of POD nodes with a side
+string pool.** Not a linked structure of owning values, and the reason is a
+language rule rather than a preference:
 
-> **An arena `get` returns a copy** (D-152, `MEMORY_REFERENCE.md` §4.2), and a
-> copy of an owning value is *refused* (TYPE-046). A node holding a `string`
-> could therefore not be read back **at all** — not "would be slow", not "would
-> allocate": `doc.nodes.get(h)` would not compile.
+> **An arena refuses an owning element type at its make** — `arena_make` is
+> `NITPICK-TYPE-007`, "this element type OWNS heap storage, and `get`/`put` copy
+> bytes" (the compiler's D-183; measured at `7e91730` by probe 05,
+> `tests/probe/refused/probe05_arena_owning.npk`). A node holding a `string` could
+> therefore not be stored **at all** — not "would be slow", not "would allocate":
+> `arena<Node>` would not compile.
+
+*(2026-10-15, cycle 0.0.0, PA-105: until this subcycle the quotation said the
+refusal was TYPE-046's, of the copy `doc.nodes.get(h)` makes. The arena refuses
+earlier, at the make; and the compiler names its answer for owning elements —
+generated deep-view accessors — so the day those land, probe 05 stops being refused
+and the pool's necessity is re-decided, as PA-105 says.)*
 
 So text lives in the pool and a node addresses it by offset and length.
 `SAFETY.md` §6 states the rule; this is where it bites hardest.
@@ -41,20 +49,21 @@ a `Vec` of indices.
 
 ```nitpick
 pub struct:Node = {
-    NodeKind:kind;      // 1
+    NodeKind:kind;      // 4 — an int32 tag
     uint8:flags;        // 1 — ND_BIG, ND_NEG, ND_ESCAPED
-    uint16:_pad;        // 2
+    uint16:_pad;        // 2, after 1 of padding
     uint32:len;         // 4 — pool byte length, or member count
-    uint64:a;           // 8 — pool offset, or int64 value, or flt64 bits
+    uint64:a;           // 8, after 4 of padding — pool offset, or int64 value, or flt64 bits
     Handle<Node>:first; // 16 — first child, or the vacant handle
     Handle<Node>:next;  // 16 — next sibling, or the vacant handle
     Span:span;          // 8
-};                      // 56 bytes
+};                      // 64 bytes — measured, not summed (PA-104)
 
 pub enum:NodeKind = { Null; Bool; Int; Float; Str; Seq; Map; Date; Time; DateTime; };
 ```
 
-**Rule D-3 — no owning field, asserted.** `#size_of<Node>()` is checked by a
+**Rule D-3 — no owning field, asserted.** `#size_of<Node>()` — 64, measured by
+probe 04 at `7e91730` where this table had summed 56 (PA-104) — is checked by a
 test, and `check_no_owning_fields` (`TESTING.md` §3) covers `Node`, `Event` and
 every value stored in a `Vec` or an arena.
 

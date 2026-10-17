@@ -252,6 +252,8 @@ a push parser must be given a recording visitor before it can be observed at
 all.
 
 ### PA-021 — `Event` is POD; scalar text is a `TextRef`, never an owned string
+> **SUPERSEDED IN PART by PA-104 and PA-105 (2026-10-15)** — measured by cycle 0.0.0's probes; the rule stands.
+
 **2026-09-03.** A plain 24-byte value with no owning field, so it returns by
 value, sits in a `Vec`, compares and copies.
 
@@ -260,6 +262,10 @@ field makes the type move-only (TYPE-046), so a `Vec` of them could not be
 copied or cleared; and **an arena `get` returns a copy** (D-152), and a copy of
 an owning value is *refused* — so the same shape in a `Node` could not be read
 back at all.
+
+*(2026-10-15, cycle 0.0.0: "24-byte" is 32, measured by probe 02, and both forcing
+reasons are restated by measurement — PA-104 and PA-105 supersede this
+decision in part. The rule, no owning field, stands.)*
 
 ### PA-022 — nesting is an explicit stack; there is no native recursion
 **2026-09-03.** Not in the parsers, not in the tree builder, not in the writers,
@@ -300,6 +306,8 @@ avoid one.
 ## The document model
 
 ### PA-030 — the tree is an arena of POD nodes with a side string pool
+> **SUPERSEDED IN PART by PA-105 (2026-10-15)** — measured by cycle 0.0.0's probes; the rule stands.
+
 **2026-09-03.** Not a linked structure of owning values.
 
 *The forcing rule, stated precisely because it surprises people:* an arena
@@ -311,6 +319,10 @@ compile. Text lives in the pool and a node addresses it by offset and length.
 *What the arena buys:* a `Handle<Node>` carries a generation, so a handle that
 outlived its slot fails `get` with `StaleHandle` (−4106) rather than reading
 freed memory — the use-after-free class closed structurally.
+
+*(2026-10-15, cycle 0.0.0: the refusal is at `arena_make`, `NITPICK-TYPE-007`,
+measured by probe 05 — not TYPE-046 at the `get`. PA-105 supersedes the stated
+reason in part; the tree, the pool and the stale-handle answer (probe 04) stand.)*
 
 ### PA-031 — maps preserve insertion order
 **2026-09-03.** A `Map` node's chain is in the order the input presented the
@@ -367,6 +379,8 @@ they forget.
 ## Diagnostics
 
 ### PA-040 — one `ParseError` value with a closed code enum
+> **SUPERSEDED IN PART by PA-104 (2026-10-15)** — measured by cycle 0.0.0's probes; the rule stands.
+
 **2026-09-03.** A plain 24-byte value: a `FaultCode`, flags, a span, an
 `expected` bitmask, what was found, and the depth. No owning field, so it rides
 inside `Step.Fault`, sits in a `Vec` when recovery collects several, and copies
@@ -381,6 +395,11 @@ removed from `Result`, so the accessor pair `fault_found_byte` /
 `fault_found_class` is the only way to read it — which is what the D-069
 objection was actually about. The alternative is two fields and 28 bytes.
 
+*(2026-10-15, cycle 0.0.0: "a plain 24-byte value" is 28, measured by probe 03 —
+`FaultCode` is an `int32` tag — so the one `found` field already costs what this
+paragraph priced two at. PA-104 supersedes the number; whether the compromise
+still earns its keep is cycle 0.2.1's, where `ParseError` is built.)*
+
 ### PA-041 — rendering is a function, not a format string
 **2026-09-03.** No message text is stored in `ParseError`.
 
@@ -390,6 +409,10 @@ interpreted by. Rendering as a function keeps messages free to improve, makes
 translation possible, and keeps the struct at 24 bytes with no owning field.
 The code `NPARSE-nnnn` is stable and the prose after it is not — the compiler's
 own rule, for the same reason.
+
+*(2026-10-15, cycle 0.0.0: the struct is 28 bytes, measured by probe 03; PA-104.
+The reasoning stands — no stored text is still what keeps it free of an owning
+field.)*
 
 *One limitation stated rather than mitigated:* the caret line counts
 **codepoints, not display columns**, because `nparse` carries no Unicode width
@@ -671,3 +694,65 @@ A config linter is not a POSIX utility, so it takes a repository of its own —
 **created at cycle 0.12, when it is needed, and not before**, which is the
 compiler's own rule about not creating directories in anticipation. It is
 registered in that workbench's `APPS.md` now so the name is claimed.
+
+---
+
+# The third batch — cycle 0.0's, at compiler `7e91730`
+
+Proposed by cycle 0.0's plan and accepted at its review; each lands with the
+subcycle step that first needs it, and each says what it was measured on.
+
+### PA-104 — the specification's types keep their enum fields, at their measured sizes
+**2026-10-15, cycle 0.0.0, on probes 02, 03 and 04.** `Event` is **32** bytes,
+`Step` **36** and `Node` **64**, each the exit code of the probe that measures it
+(02, 03 and 04 exit with its `#size_of`), so none of the three was transcribed; and
+`ParseError` is **28**, an assertion in probe 03, which exits 19 at any other size.
+The specifications had `Event` and `ParseError` at 24 and `Node` at 56, summed from
+field widths that gave a payload-free enum one or two bytes; it is an `int32` tag,
+four (the compiler's `TYPE_REFERENCE.md` §9.3). `EventKind`, `ScalarKind`,
+`NodeKind`, `TextSrc` and `FaultCode` stay enum-typed fields, and the rules that
+assert a size (E-6, F-1, D-3) assert these.
+
+It supersedes in part PA-021's "24-byte", and PA-040's; neither rule moves.
+
+*Alternatives declined:* **`uint8` fields with the enum read by `=>!`** — 24 bytes
+again, but `=>!` manufactures a tag without checking it (the compiler's D-140), so a
+forged or corrupted event would carry a tag no variant has and every `pick` over it
+would be wrong in silence; **reordering the fields** — no order beats the measured
+sizes, because the four-byte tags and the `uint32` spans fix the alignment; **one
+packed `uint16` for both kinds** — a bit-field the language has no type for, read by
+hand at every site.
+
+*Reversal, for the author:* if cycle 0.2's event ring proves the eight extra bytes
+an event are the budget that binds, the kinds move to `uint8` storage behind
+checked accessors that answer a `Fault` for a byte no variant has — E-6 returns to
+24, probe 02 keeps measuring this shape and a sibling probe measures that one, and
+every `Event` literal in 0.2's plan changes.
+
+### PA-105 — what an owning value may be stored in, measured
+**2026-10-15, cycle 0.0.0, on probes 05 and 09.** **An arena refuses an owning
+element type at `arena_make`** — `NITPICK-TYPE-007`, "this element type OWNS heap
+storage, and `get`/`put` copy bytes … owning elements await the generated
+deep-view accessors (D-183)" (probe 05). **A generic `Vec<T>` holds one** — `move
+T:x` in, read at the site that knows the shape, and freed by moving each element out
+and dropping it (probe 09) — **and a free that drops only the block exits 0
+uncapped and `HeapOom` under 64 MiB**, where the dropping free exits 0 under the
+same cap (probes 09b and 09c). So: the tree stays an arena of POD nodes with a side
+pool (PA-030), now for the reason the compiler gives; `Event`, `Node`,
+`ParseError` and `Frame` own nothing as a design rule — they derive `Copy`, which
+every container read here is — rather than as a language one; and the managed half
+of any container's obligations is gated by a capped pair, not by `exit 0`.
+
+It supersedes in part PA-030's stated reason, and PA-021's ("a copy of an owning
+value is refused"), which named the copy `get` makes; the rules stand.
+
+*Alternatives declined:* **keep the old reason** — it names a refusal that does not
+happen where it says, and the day the compiler's deep-view accessors land, a reader
+of the old text would not know the pool's necessity had changed; **text in the
+node, now** — refused at the make; **a `Vec` of owning nodes instead of an arena** —
+it gives up the generation-checked handle (PA-030's use-after-free answer, probe 04)
+for a container whose element drops `exit 0` cannot see.
+
+*Reversal, for the author:* when the compiler lands deep-view accessors for owning
+arena elements, probe 05 is accepted; re-decide then whether the pool stays a
+necessity or becomes an optimisation (`meta/roadmap/0.4/README.md`'s watch-for).

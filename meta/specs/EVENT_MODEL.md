@@ -63,14 +63,19 @@ has so little left to do.
 
 ```nitpick
 pub struct:Event = {
-    EventKind:kind;     // 1 byte
-    ScalarKind:scalar;  // 1 byte — meaningful only when kind is Scalar or Key
+    EventKind:kind;     // 4 bytes — a payload-free enum is an int32 tag
+    ScalarKind:scalar;  // 4 bytes — meaningful only when kind is Scalar or Key
     uint8:flags;        // 1 byte — EV_ESCAPED, EV_BIG, EV_NEG, EV_EMPTY
-    uint8:_pad;
+    uint8:_pad;         // 1 byte, then 2 of padding
     TextRef:text;       // 12 bytes — SCAN_MODEL.md §7
     Span:span;          // 8 bytes — the whole construct, for diagnostics
-};                      // 24 bytes, align 4
+};                      // 32 bytes, align 4 — measured, not summed (PA-104)
 ```
+
+*(2026-10-15, cycle 0.0.0, PA-104: the comments said `1 byte` for each kind and `24 bytes` for the
+whole, which is the field widths added up. Measured at compiler `7e91730` by probe 02 —
+`tests/probe/probe02_pod_event.npk`, whose exit code is `#size_of<Event>()` — it is **32**: a payload-free
+enum is an `int32` tag, four bytes (the compiler's `TYPE_REFERENCE.md` §9.3).)*
 
 ```nitpick
 pub enum:EventKind = {
@@ -85,16 +90,22 @@ pub enum:EventKind = {
 pub enum:ScalarKind = { Null; Bool; Int; Float; Str; Date; Time; DateTime; Raw; };
 ```
 
-**Rule E-5 (PA-021) — `Event` has no owning field.** It is a plain 24-byte
-value: it can be returned by value, stored in a `Vec`, compared, and copied.
-`SAFETY.md` §6 has the two language rules that force this, and the second —
-an arena `get` returns a *copy*, and a copy of an owning value is refused — is
-the one that would bite hardest if it were ignored.
+**Rule E-5 (PA-021, PA-105) — `Event` has no owning field.** It is a plain
+32-byte value that derives `Copy`: it can be returned by value, stored in a
+`Vec<T: Copy>`, compared, and copied. `SAFETY.md` §6 says what forces this —
+a design rule, not a language one: an owning field would cost `Copy`, and with
+it the by-value reads every container here makes.
+
+*(2026-10-15, cycle 0.0.0, PA-105: this rule said "a plain 24-byte value" — 32
+measured, PA-104 — and gave as its forcing reason that "an arena `get` returns a
+*copy*, and a copy of an owning value is refused". Measured at `7e91730`, the arena
+refuses an owning element at `arena_make`, `NITPICK-TYPE-007` (probe 05), and a `Vec`
+holds one (probe 09).)*
 
 Scalar text is therefore a `TextRef`, never a `string`.
 
-**Rule E-6 — `#size_of<Event>()` is asserted to be 24** by a probe and by a
-unit test. A padding surprise changes the ring's memory budget and the
+**Rule E-6 — `#size_of<Event>()` is asserted to be 32** by a probe and by a
+unit test *(24 until cycle 0.0.0, which measured 32 — PA-104)*. A padding surprise changes the ring's memory budget and the
 specification's number, and finding that out from a benchmark rather than from
 a test is the wrong order.
 

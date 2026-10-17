@@ -8,7 +8,7 @@ two ways, this table says which one `nparse` means.
 | **input** | the `uint8[]` the caller owns and hands over. Never copied, never read from a file by this library. |
 | **cursor** | the read position over the input, with its total operations. Never a lexer. |
 | **span** | a half-open pair of byte offsets into the input. Never a line/column pair. |
-| **event** | one item of the pull stream: a container boundary, a key, or a scalar. 24 bytes, no owning field. |
+| **event** | one item of the pull stream: a container boundary, a key, or a scalar. 32 bytes, no owning field (PA-104). |
 | **step** | one call's answer: `Ev`, `Fault` or `Done`. |
 | **fault** | a `ParseError` **value** — what a malformed input produces. **Never** an `error:` identity. |
 | **error** | one of the two `error:` identities, `EParseState` and `EParseEncode`. Only a *caller* can cause one. |
@@ -18,7 +18,7 @@ two ways, this table says which one `nparse` means.
 | **format** | an implementation of the `Format` trait. What every other ecosystem would call a plugin. |
 | **plugin** | the same thing. There is no other kind: no dynamic loading, no registry. |
 | **document** | the arena-backed tree a caller gets when they want one instead of a stream. |
-| **node** | one element of a document. 56 bytes, POD, addressing its text by offset into the pool. |
+| **node** | one element of a document. 64 bytes, POD (PA-104), addressing its text by offset into the pool. |
 | **pool** | the document's byte store, holding every scalar's text exactly once. |
 | **frame** | one entry of the explicit depth stack. |
 | **depth** | container nesting, bounded by `NPARSE_MAX_DEPTH` and never held on the machine stack. |
