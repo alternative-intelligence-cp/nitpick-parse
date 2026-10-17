@@ -1,0 +1,70 @@
+// expect-exit: 0
+//
+// PROBE 11 -- A MILLION SINGLE-BYTE APPENDS INTO A DOUBLING `buffer`-BACKED SINK.
+//
+// ASKS: the sink `Bytes` will be -- a managed `buffer` and a length -- grown by doubling: a new
+// `buffer_new` twice the size, the old bytes copied with `mcpy`, the old buffer dropped by the
+// assignment. The reallocations are counted. Is growth amortised linear?
+//
+// DEPENDS ON THE ANSWER: P-23 and P-24 (`0.0.4.md`) -- every writer and every escaped scalar
+// goes through this sink -- and the compiler's own measurement that this shape went quadratic in
+// `npkg`'s first full run.
+//
+// EXPECTED: exit 0 at -O0 and through `opt -O2`, with exactly twenty reallocations (1 -> 2 -> ...
+// -> 2^20), inside `log2(10^6) + 2`. Two facts the shape rests on at `7e91730`: a `buffer` cannot
+// be indexed or ranged (`NITPICK-TYPE-007` -- the compiler's D-341 plans it, unbuilt), so bytes
+// are written through `.ptr[i]`, a pointer index the language does not bounds-check; and nothing
+// here takes a view of the buffer.
+mod:probe11_bytes_growth;
+
+fixed int64:APPENDS = 1000000i64;
+
+struct:Sink = { buffer:buf; int64:len; int64:reallocs; };
+
+func:sink_init = Sink(int64:cap) never fails {
+    int64:n = cap;
+    if (n < 1i64) { n = 1i64; }
+    pass Sink{ buf: buffer_new(n), len: 0i64, reallocs: 0i64 };
+};
+
+func:sink_push = NIL(Sink->:s, uint8:x) never fails {
+    if (s.len == s.buf.len) {
+        buffer:bigger = buffer_new(s.buf.len * 2i64);
+        discard(mcpy(bigger.ptr, s.buf.ptr, s.len));
+        s.buf = move(bigger);
+        s.reallocs = s.reallocs + 1i64;
+    }
+    s.buf.ptr[s.len] = x;
+    s.len = s.len + 1i64;
+    pass NIL;
+};
+
+func:main = int32(cstring[]:_~argv) {
+    Sink:s = raw sink_init(1i64);
+    for (int64:i in 0i64...APPENDS) {
+        drop sink_push(@s, ((i % 251i64) =>! uint8));
+    }
+    if (s.len != APPENDS) { exit 10i32; }
+    if (s.reallocs > 21i64) { exit 11i32; }
+    if (s.reallocs != 20i64) { exit 12i32; }
+    if (s.buf.ptr[999999i64] != ((999999i64 % 251i64) =>! uint8)) { exit 13i32; }
+    if (s.buf.ptr[0i64] != 0u8) { exit 14i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest)    { exit 91i32; },
+        (HeapOom)           { exit 92i32; },
+        (IntOverflow)       { exit 93i32; },
+        (OutOfBounds)       { exit 94i32; },
+        (Unreachable)       { exit 95i32; },
+        (WildLeak)          { exit 96i32; },
+        (DivByZero)         { exit 97i32; },
+        (DivOverflow)       { exit 98i32; },
+        (StackExhausted)    { exit 106i32; },
+        (MachineFault)      { exit 107i32; },
+        (*)                 { exit 99i32; }
+    }
+    exit 9i32;
+};

@@ -268,6 +268,8 @@ reasons are restated by measurement — PA-104 and PA-105 supersede this
 decision in part. The rule, no owning field, stands.)*
 
 ### PA-022 — nesting is an explicit stack; there is no native recursion
+> **SUPERSEDED IN PART by PA-108 (2026-10-15)** — its stated reason, measured by probe 10b; the rule stands.
+
 **2026-09-03.** Not in the parsers, not in the tree builder, not in the writers,
 not in the comparison, not in the walk, not in the drop.
 
@@ -281,6 +283,11 @@ so the overflow is a raw fault, not a controlled stop.
 a *recursive drop* is a stack overflow at the end of a **successful** parse.
 That is the form of this bug most likely to survive review, which is why the
 rule names the walk, the compare, the print and the drop explicitly.
+
+*(2026-10-15, cycle 0.0.0: "no stack-depth guard … a raw fault, not a controlled
+stop" is false at compiler `7e91730` — a stack overflow traps `StackExhausted`
+(the compiler's D-305), measured by probe 10b. PA-108 supersedes the reason in
+part; the rule stands, because a trap stops the whole program.)*
 
 ### PA-023 — a syntax error is a value in the success channel
 **2026-09-03.** `Step = { Ev(Event); Fault(ParseError); Done; }`. `Step.Fault`
@@ -787,3 +794,104 @@ nothing in it is generic over a trait.
 meets it, and a later decision either holds the path's uses on the defect, re-spelling nothing,
 or moves G-4's intended path to `dyn` openly, the checklist items that build them taking
 `dyn Format`.
+### PA-107 — every slot a reader's bytes reach is the read-only view, and a view travels only as far as its bytes
+**2026-10-15, cycle 0.0.0, on probe 08 and its refusals.** At compiler `7e91730`
+`string_bytes` returns `fixed uint8[]` (the compiler's D-351) and no plain
+`uint8[]` slot accepts it (`NITPICK-TYPE-007`, probe 08d). So every input, cursor,
+text and document slot the specifications declare is `fixed uint8[]` — the
+readers' `src`, `Cursor.src`, `cur_slice`, `event_text`, `doc_text`,
+`doc_num_text`, `fault_render`'s `src` — and so is `EventSink::put`'s `text`, as
+the compiler's own `Writer.write` takes it, because an implementation must spell
+the slot exactly as its trait does (`NITPICK-TYPE-014`, probe 08f). A plain
+`uint8[]` still converts in (probe 08), so the change widens every contract, and a
+write through the view is refused (`NITPICK-TYPE-086`, probe 08e).
+
+What a view may travel to, measured at compiler `c9baa9e` (probe 08 and its
+refusals): a function handed the caller's
+bytes may RETURN a range of them (`event_text`'s shape) or a struct holding them
+(`json_reader`'s), while a view of a local is `NITPICK-BORROW-001` (probes 08b,
+08c); a holder declared outside a block may not take a view of that block's
+`string` (`NITPICK-BORROW-002`, probe 08g); and a struct field of type
+`fixed uint8[]` is a `fixed` field, assigned once. **A callee may not store a view
+of a shorter-lived block into a place its caller owns**, and the compiler holds that
+at the call: at `c9baa9e` the store is `NITPICK-BORROW-002` (probe 08h, in
+`tests/probe/refused/`), from its landing 116, so this library needs no reseat rule
+of its own. At `7e91730`, where the cycle was planned, the store was accepted and
+the view read the free poison after the block — the compiler's DEF-252, which that
+landing fixed.
+
+*Alternatives declined:* **keep plain `uint8[]`** — `string_bytes` cannot fill it,
+so no `string` caller could parse; **copy with `string_slice`** — an owned copy
+per call (the compiler's D-186), the allocation PA-014 exists to avoid; **a
+wrapper struct over both** — needless, since a plain view already converts into
+the `fixed` one; **`doc_text` returning plain** — it would type-check, the pool
+being the library's own storage, but a caller has no business writing the pool,
+and read-only is what the name promises.
+
+*Reversal, for the author:* none needed for the spelling — it is the compiler's
+D-351 that decides it; and none for the travel, which the compiler holds: were a
+later pin to accept a callee's store again, probe 08h's refusal would fail on that
+pin's first run: the store is then a memory-safety defect, raised to the compiler;
+what rests on it waits for the fix (the workbench's rule); a decision adds a belt.
+
+### PA-108 — native recursion traps; PA-022 stands, and its reason is a whole-program stop
+**2026-10-15, cycle 0.0.0, on probes 10 and 10b.** A recursive descent handed
+1 048 576 nested `[` stops with `StackExhausted`, through `failsafe`, at `-O0` and
+through `opt -O2` (probe 10b) — every function the compiler emits checks its
+frame in its prologue (the compiler's D-305) — and the same depth held on an
+explicit `Vec<Frame>` runs to the end (probe 10, at 50 000, with `Frame` the 16
+bytes `EVENT_MODEL.md` E-16 prices it at). So PA-022's rule stands, and its
+reason is not that the overflow is "a raw fault": it is that a trap stops the
+**whole program**, which a hostile document must never do. And the depth at which
+a recursion traps is not this library's to know: probe 10b's frame completes
+65 534 levels and traps at 65 535 at `-O0`, and completes 131 062 and traps at
+131 063 through `opt -O2` — so the plan's first recursive probe, at 50 000, would
+have run to the end at both legs and demonstrated nothing.
+
+It supersedes in part PA-022's stated reason; strikes `OPEN_QUESTIONS.md` O-N2 as
+answered (the early ecosystem audit's ES1); and keeps `check_no_recursion` as the
+instrument, because the compiler's `stack-depth` rows — derived from `terminate`
+rows and discharged by a `decreases` — say whether a recursion ends, not whether
+an input controls its depth.
+
+*Alternatives declined:* **allow recursion bounded by `NPARSE_MAX_DEPTH`** — the
+bound is a per-parse option and the frame is the optimiser's, so the depth that
+traps moves under the library; **keep the old reason** — five documents would go
+on telling a reader the overflow is uncontrolled, the stale-note shape this
+ecosystem keeps meeting.
+
+*Reversal, for the author:* none — the rule does not move. If the language ever
+returns a recoverable error for stack exhaustion instead of trapping, this
+decision is re-read.
+
+### PA-109 — what a consuming program owes, measured; the exit codes the tests use
+**2026-10-15, cycle 0.0.0, measured with the compiler's own oracle.**
+`NITPICK-REACH-003` — a root that imports one module and declares no `failsafe`
+— names every identity a consumer of that module owes. At `7e91730`, for modules
+of the shapes cycle 0.1 and 0.4 will write: a byte-class module owes the floor's
+six (`HeapBadRequest`, `HeapOom`, `Unreachable`, `WildLeak`, `StackExhausted`,
+`MachineFault`); the checked accumulator adds `IntOverflow`, `DivByZero` and
+`DivOverflow` — its multiply and divide are reachable to the compiler, guards or
+no guards; a cursor that indexes its view adds `OutOfBounds`; and a module that
+uses an `arena<T>` adds `StaleHandle`. So `SAFETY.md` S-6's "a program that
+imports the scanner … owes nothing" is false of every importer, and §8's "at most
+`EParseState` and `EParseEncode`" is true only of this library's OWN identities.
+PA-008's budget — two declared identities, neither reachable from input — is
+untouched; what a consumer owes beyond it is the machinery's, and S-7's generated
+list, held to `NITPICK-REACH-003` by `check_failsafe_arms` from cycle 0.2, is
+where it is stated per module.
+
+The tests' arm codes follow `PLAYBOOK.md` §3 item 8, plus three it does not
+assign, taken as the sibling libraries take them where they do: 97
+`DivByZero`, 98 `DivOverflow`, and 110 `StaleHandle`, which none of them has
+needed; every assertion's own code stays below 91.
+
+*Alternatives declined:* **leave S-6 as written** — a sentence about what the
+consumer owes that the compiler contradicts on the first import; **count the
+system identities in PA-008's budget** — they are not this library's to declare
+or to remove, and a budget that moved with the compiler's floor would not be a
+budget.
+
+*Reversal, for the author:* none for the measurement. The three codes are offered
+to the workbench for `PLAYBOOK.md` §3 item 8; if it assigns others, the probes and
+units change their arm lines to match, and nothing else moves.

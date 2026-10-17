@@ -1,0 +1,68 @@
+// expect-exit: 106
+//
+// PROBE 10b -- NATIVE RECURSION OVER NESTED `[`, DEEPER THAN ANY STACK.
+//
+// ASKS: a recursive descent -- one native frame per `[` -- handed 1 048 576 of them. Does the
+// program die of a signal, or stop under control?
+//
+// DEPENDS ON THE ANSWER: PA-022's reason. Its text says the language has no stack-depth guard and
+// the overflow is "a raw fault, not a controlled stop"; `SAFETY.md` §5, `OPEN_QUESTIONS.md` O-N2
+// and five other documents say the same.
+//
+// EXPECTED: a CONTROLLED TRAP, `StackExhausted`, 106, at -O0 and through `opt -O2`: every
+// function the compiler emits checks its frame against the thread's limit in its prologue (the
+// compiler's D-305; the main thread runs on the floor's 8 MiB). So PA-022's rule stands -- a trap
+// stops the WHOLE program, which a hostile document must never do -- and its reason changes.
+// WHERE it traps is not the library's to know: measured at planning, this frame completes 65 534
+// levels and traps at 65 535 at -O0, and completes 131 062 and traps at 131 063 through `opt -O2`.
+// So fifty thousand levels -- the plan's first depth -- complete at both legs, and this probe
+// goes to 2^20.
+mod:probe10b_native_recursion_traps;
+
+fixed int64:LEVELS = 1048576i64;
+
+func:rd = int64(fixed uint8[]:src, int64:i) never fails {
+    int64:j = i + 1i64;
+    while (j < src.len) decreases src.len - j {
+        if (src[j] == 91u8) {
+            int64:k = raw rd(src, j);
+            if (k < 0i64) { pass k; }
+            j = k;
+        }
+        else if (src[j] == 93u8) { pass j + 1i64; }
+        else { j = j + 1i64; }
+    }
+    pass 0i64 - 1i64;
+};
+
+func:main = int32(cstring[]:_~argv) {
+    string:t = string_concat("[", "");
+    int64:n = 1i64;
+    int64:k = 0i64;
+    while (n < LEVELS) decreases 64i64 - k {
+        t = string_concat(t, t);
+        n = n * 2i64;
+        k = k + 1i64;
+    }
+    fixed uint8[]:all = string_bytes(t);
+    int64:r = raw rd(all[0i64...LEVELS], 0i64);
+    // reached only if every level held: no `]`, so the answer is -1
+    if (r < 0i64) { exit 1i32; }
+    exit 2i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest)    { exit 91i32; },
+        (HeapOom)           { exit 92i32; },
+        (IntOverflow)       { exit 93i32; },
+        (OutOfBounds)       { exit 94i32; },
+        (Unreachable)       { exit 95i32; },
+        (WildLeak)          { exit 96i32; },
+        (StackExhausted)    { exit 106i32; },
+        (MachineFault)      { exit 107i32; },
+        (DecreasesViolated) { exit 108i32; },
+        (*)                 { exit 99i32; }
+    }
+    exit 9i32;
+};

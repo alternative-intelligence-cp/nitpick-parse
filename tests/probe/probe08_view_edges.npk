@@ -1,0 +1,79 @@
+// expect-exit: 0
+//
+// PROBE 08 -- THE READ-ONLY VIEW AT THE EDGES THE DESIGN USES, ACCEPTED.
+//
+// ASKS: at `7e91730` `string_bytes` returns `fixed uint8[]`, the read-only view (the compiler's
+// D-351, landing 103). Five shapes the library's readers take, each built from a `string`'s
+// bytes or from a plain array:
+//   1. a view passed down two call levels;
+//   2. a `Cursor` holding one (`SCAN_MODEL.md` C-2), built by literal and passed down;
+//   3. `event_text`'s shape -- a function RETURNING a range of a view it was handed;
+//   4. `json_reader`'s shape -- a function RETURNING a struct that holds a view it was handed;
+//   5. a plain `uint8[]` passed where `fixed uint8[]` is declared.
+//
+// DEPENDS ON THE ANSWER: `SCAN_MODEL.md` C-2 and §1's `Cursor`, `EVENT_MODEL.md` §5's
+// `event_text`, `PLUGIN_MODEL.md` §2's constructors, and every reader slot the specifications
+// spell `uint8[]` -- which `string_bytes` cannot fill (`refused/probe08d_bridge_into_plain.npk`).
+//
+// EXPECTED: exit 0 at -O0 and through `opt -O2`. A view of a PARAMETER's bytes may travel up --
+// the caller's argument then holds it -- where a view of a LOCAL may not (`refused/probe08b`,
+// `probe08c`). The refused edges are each their own file in `refused/`, the reseat through a
+// callee among them (`refused/probe08h_view_reseated.npk`, refused from the compiler's landing 116).
+mod:probe08_view_edges;
+
+struct:Cursor = { fixed uint8[]:src; int64:pos; };
+struct:TextRef = { uint32:lo; uint32:hi; };
+
+// 1. two call levels down
+func:count_a = int64(fixed uint8[]:v) never fails {
+    int64:n = 0i64;
+    for (uint8:b in v) { if (b == 97u8) { n = n + 1i64; } }
+    pass n;
+};
+func:outer = int64(fixed uint8[]:v) never fails { pass raw count_a(v); };
+
+// 2. a Cursor built by literal, passed down
+func:cur_remaining = int64(Cursor->:c) never fails { pass c.src.len - c.pos; };
+
+// 3. event_text's shape: a range of a PARAMETER's view, returned
+func:text_of = fixed uint8[](fixed uint8[]:src, TextRef:t) never fails {
+    pass src[(t.lo => int64)...(t.hi => int64)];
+};
+
+// 4. json_reader's shape: a struct holding a PARAMETER's view, returned
+func:cursor_init = Cursor(fixed uint8[]:src) never fails {
+    pass Cursor{ src: src, pos: 0i64 };
+};
+
+func:main = int32(cstring[]:_~argv) {
+    string:s = string_concat("banana", "");
+    fixed uint8[]:v = string_bytes(s);
+    if (raw outer(v) != 3i64) { exit 10i32; }
+    Cursor:c = Cursor{ src: v, pos: 2i64 };
+    if (raw cur_remaining(@c) != 4i64) { exit 11i32; }
+    fixed uint8[]:t = raw text_of(v, TextRef{ lo: 1u32, hi: 4u32 });
+    if (t.len != 3i64) { exit 12i32; }
+    if (t[0i64] != 97u8) { exit 13i32; }
+    Cursor:d = raw cursor_init(v);
+    if (d.src.len != 6i64) { exit 14i32; }
+    // 5. a plain view converts INTO a fixed slot
+    uint8[6]:arr = [98u8, 97u8, 110u8, 97u8, 110u8, 97u8];
+    uint8[]:plain = arr[0i64...6i64];
+    if (raw outer(plain) != 3i64) { exit 15i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest)    { exit 91i32; },
+        (HeapOom)           { exit 92i32; },
+        (IntOverflow)       { exit 93i32; },
+        (OutOfBounds)       { exit 94i32; },
+        (Unreachable)       { exit 95i32; },
+        (WildLeak)          { exit 96i32; },
+        (StackExhausted)    { exit 106i32; },
+        (MachineFault)      { exit 107i32; },
+        (*)                 { exit 99i32; }
+    }
+    exit 9i32;
+};

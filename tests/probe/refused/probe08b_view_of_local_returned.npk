@@ -1,0 +1,33 @@
+// expect-error: NITPICK-BORROW-001
+// expect-error-at: 13:22
+//
+// PROBE 08b -- A VIEW OF A LOCAL `string`, RETURNED. EXPECTED REFUSED.
+//
+// The edge D-004 rule 2 forbids, and the compiler enforces for views since its `94874ce`
+// (D-249): `NITPICK-BORROW-001`, "a borrow cannot travel up", at the `pass`. Probe 08's third
+// shape is the legal twin -- a view of a PARAMETER's bytes.
+mod:probe08b_view_of_local_returned;
+
+func:leak = fixed uint8[]() never fails {
+    string:s = string_concat("abc", "def");
+    pass string_bytes(s);
+};
+
+func:main = int32(cstring[]:_~argv) {
+    fixed uint8[]:v = raw leak();
+    if (v.len != 6i64) { exit 10i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest)    { exit 91i32; },
+        (HeapOom)           { exit 92i32; },
+        (Unreachable)       { exit 95i32; },
+        (WildLeak)          { exit 96i32; },
+        (StackExhausted)    { exit 106i32; },
+        (MachineFault)      { exit 107i32; },
+        (*)                 { exit 99i32; }
+    }
+    exit 9i32;
+};

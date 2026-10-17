@@ -122,9 +122,12 @@ depth stack, mirroring the reader:
 
 ```nitpick
 pub trait:EventSink = {
-    func:put = NIL(Self->:self, Event:e, uint8[]:text);
+    func:put = NIL(Self->:self, Event:e, fixed uint8[]:text);
     func:finish = NIL(Self->:self);
 };
+// `text` is `fixed`, as the compiler's own `Writer.write` takes it: `event_text`
+// and `string_bytes` both answer the read-only view, and an implementation must
+// spell the slot exactly as the trait does (NITPICK-TYPE-014; probe 08f).
 ```
 
 `text` is passed alongside because an `Event`'s `TextRef` is resolved against

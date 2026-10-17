@@ -19,13 +19,13 @@ costs a library that reads bytes somebody else controls.
 | Reachability is **import-scoped** | 1.4.8's `nsys` note | Module decomposition decides what a consumer's `failsafe` owes. §3. |
 | Plain integer `+ - *` **traps** on overflow | D-210 | `acc = acc * 10 + d` is a **remote crash**. §4 — this is the biggest one. |
 | `/` and `%` by zero trap | D-007, D-142 | A divisor from input is checked before use. §4. |
-| Indexing is bounds-checked and traps | D-070 | An index derived from input is a *crash*, not a smear. §4. |
-| There is **no stack-depth guard**, and `stack-depth` is a 1.5.8 obligation kind | VERIFICATION_REFERENCE §365 | Native recursion on input-controlled depth is a stack overflow. §5. |
+| A slice, fixed-array or `List` index is bounds-checked and traps — a bare-pointer index is not | D-070 | An input-derived index into a slice is a *crash*, not a smear; one into a `wild` block or a `buffer`'s `.ptr` reads whatever is there, so every such index goes through one checked accessor pair. §4. |
+| A native recursion deeper than its stack **traps** `StackExhausted` | D-305 | A trap stops the whole program, so native recursion on input-controlled depth is a remote denial of service. §5. |
 | **A mutable module-level binding is refused** | D-211 | All parser state is a value the caller holds. §6. |
 | Owning values are **move-only** | TYPE-046 | A copy of an owner is refused, not where an owner is stored: a `Vec` holds one, and its free must drop each element, which `exit 0` cannot see. §6. |
 | An arena refuses an **owning element** at its make | D-183, MEMORY_REFERENCE §4.2 | A `Document` node holding a `string` could not be stored **at all** (`NITPICK-TYPE-007`, probe 05). §6. |
 | `string_slice` allocates an **owned copy** | D-186 | A parser that sliced per token would allocate per token. §6. |
-| Borrows are second class | D-004 | A `uint8[]` view of the input cannot be returned, stored past the call, or held across `await`. §6. |
+| Borrows are second class, and a read-only view is `fixed uint8[]` | D-004, D-351 | `string_bytes` returns the read-only view, which no plain `uint8[]` accepts; a view of the input travels up only as far as the bytes it views, never past a block that owns them, and never across `await`. §6, `SCAN_MODEL.md` C-2. |
 | There are **no closures** | D-018 | A push parser's visitor would be a trait object plus hand-carried context. EVENT_MODEL.md §2. |
 | There are **no static methods** | D-185 | Construction is a bare function: `json_reader(input)`, never `JsonReader.new(…)`. |
 | There is **no map or hash container** | measured; nothing in TYPE_REFERENCE or the prelude | We scan a small ordered array, or build an index deliberately. VALUE_MODEL.md §5. |
@@ -105,14 +105,22 @@ identity is the wrong answer and the design is what needs changing.
 **Rule S-5 — forwarded codes cost no arm.** Where a prelude error reaches a
 caller — a stale arena handle is `StaleHandle` (−4106), a writer's sink returns
 an errno — it is forwarded verbatim (`fail r.err`). A dynamic operand does not
-enlarge the reachable set, so it costs no `failsafe` arm.
+enlarge the reachable set, so it costs no `failsafe` arm. **The arena itself
+does:** a program that uses an `arena<T>` owes `StaleHandle` whether or not it
+forwards one (measured at `7e91730`, PA-109), so a consumer of `src/doc/`
+carries that arm.
 
 **Rule S-6 — module decomposition is part of the budget**, because REACH is
 import-scoped:
 
 - `nparse/scan.npk`, `nparse/event.npk` and `nparse/diag.npk` declare **no
-  errors at all**. A program that imports the scanner to tokenize its own
-  format owes nothing.
+  errors at all**. A program that imports the scanner owes no arm this library
+  declares — but it owes what the scanner's machinery can reach, which the
+  compiler names (`NITPICK-REACH-003`): measured at `7e91730` on modules of the
+  shapes cycle 0.1 will write, every program's floor of six, plus `IntOverflow`,
+  `DivByZero` and `DivOverflow` for the checked arithmetic (its multiply and
+  divide are reachable to the compiler, guards or no guards), and `OutOfBounds`
+  for a cursor that indexes its view (PA-109).
 - `nparse/doc.npk` and every `nparse/format/*.npk` declare **`EParseState`**
   only.
 - `nparse/emit/*.npk` additionally declares **`EParseEncode`**.
@@ -186,13 +194,24 @@ bound one obligation to discharge in cycle 1.5 rather than several hundred.
 depth an input controls.** Not in the parsers, not in the tree builder, not in
 the writers, not in the equality comparison, not in the drop.
 
-**The failure this exists to prevent.** `[[[[[[[[…` repeated fifty thousand
-times is eight bytes of shell and a stack overflow in a recursive-descent
-parser. The language has no stack-depth guard — `stack-depth` is an obligation
-kind scheduled for the compiler's 1.5.8 (`VERIFICATION_REFERENCE.md` §365) and
-does not exist today — so the overflow is a raw fault, not a controlled stop.
-That is the one failure mode this ecosystem exists to make impossible, arriving
-through the front door.
+**The failure this exists to prevent.** `[[[[[[[[…` repeated a million times is
+a few bytes of shell and a stack overflow in a recursive-descent parser. The
+overflow is a **controlled trap**: every function the compiler emits checks its
+frame against the thread's limit in its prologue, and crossing it enters the
+trap route as `StackExhausted` (the compiler's D-305). But a trap stops the
+**whole program** — `failsafe` does not return — so a hostile document would
+still stop the program that parses it. That is the one failure mode this
+ecosystem exists to make impossible, arriving through the front door. **Where**
+the trap comes is not this library's to know: a recursive descent with a small
+frame completes 65 534 levels and traps at 65 535 at `-O0`, and completes
+131 062 and traps at 131 063 through `opt -O2` (probe 10b's shape, measured at
+`7e91730`), so a depth a test passes is a statement about one frame and one
+optimiser.
+
+*(2026-10-15, cycle 0.0.0, PA-108: this paragraph said the language had no
+stack-depth guard and the overflow was "a raw fault, not a controlled stop", which
+was true before the compiler's 1.5.8. Probe 10b, 1 048 576 levels: `StackExhausted`,
+106, at both legs. The rule above it stands; its reason changed.)*
 
 **The rule.** Nesting is a `Vec<Frame>` the parser owns, `NPARSE_MAX_DEPTH`
 deep. Exceeding it is a `Fault` with code `DepthExceeded`. The **writers** and
@@ -233,7 +252,7 @@ Text therefore lives in a side pool and is addressed by offset and length
 (`VALUE_MODEL.md` §3).
 
 **Rule S-16 — the caller owns the input and it is never copied.** The input is
-a `uint8[]` borrow (PA-010). Scalar text is a `TextRef` into it. The only bytes
+a read-only `fixed uint8[]` borrow (PA-010, PA-107). Scalar text is a `TextRef` into it. The only bytes
 `nparse` copies are the ones an escape sequence forced it to rewrite, and those
 go into a scratch `Bytes` the parser owns.
 
@@ -290,8 +309,10 @@ Stated once, here, and repeated in the public documentation:
    handling it by discarding is still a decision — a malformed document that
    silently becomes an empty one is the vulnerability this library's shape was
    chosen to prevent.
-2. **Carry the `failsafe` arms your imports require** — at most `EParseState`
-   and `EParseEncode`, and §7's generated list says exactly which per module.
+2. **Carry the `failsafe` arms your imports require** — of this library's own
+   identities at most `EParseState` and `EParseEncode`, plus the system
+   identities its modules' machinery reaches (§3, S-6), and S-7's generated list
+   says exactly which per module.
 3. **Keep the input alive while the events are alive.** A `TextRef` points into
    the caller's bytes. The borrow rules enforce it within a call; across calls
    it is the caller's discipline and it is stated in `EVENT_MODEL.md` §5.

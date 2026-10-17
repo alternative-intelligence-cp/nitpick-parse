@@ -5,7 +5,7 @@ two ways, this table says which one `nparse` means.
 
 | Term | Means, in `nparse` |
 |---|---|
-| **input** | the `uint8[]` the caller owns and hands over. Never copied, never read from a file by this library. |
+| **input** | the bytes the caller owns and hands over, as a read-only view — `fixed uint8[]` in every slot this library declares (PA-107). Never copied, never read from a file by this library. |
 | **cursor** | the read position over the input, with its total operations. Never a lexer. |
 | **span** | a half-open pair of byte offsets into the input. Never a line/column pair. |
 | **event** | one item of the pull stream: a container boundary, a key, or a scalar. 32 bytes, no owning field (PA-104). |

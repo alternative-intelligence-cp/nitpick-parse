@@ -34,8 +34,9 @@ moving between the two reads one thing.
 **A parser in this language has one central hazard, and it wears two hats.**
 
 > **Plain integer overflow traps** (D-210), so `acc = acc * 10 + d` is a remote
-> denial of service on a twenty-three digit number. **There is no stack-depth
-> guard** (O-N2), so `[[[[[…` is an uncontrolled fault.
+> denial of service on a twenty-three digit number. **A native recursion
+> deeper than its stack traps** (`StackExhausted`, the compiler's D-305), so
+> `[[[[[…` handed to a recursive parser stops the whole program (PA-108).
 
 Both are *input* causing a *program stop*, which is the one thing this
 ecosystem exists to prevent. PA-012 and PA-022 are the answers — checked

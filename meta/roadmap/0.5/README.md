@@ -42,7 +42,7 @@ PA-060, PA-061, PA-062, PA-080. All settled.
 - [ ] the writer is deterministic: the same document printed twice is byte-identical, asserted
 
 ### 0.5.1 — the `EventSink` trait
-- [ ] `trait:EventSink = { func:put = NIL(Self->:self, Event:e, uint8[]:text); func:finish = NIL(Self->:self); };`
+- [ ] `trait:EventSink = { func:put = NIL(Self->:self, Event:e, fixed uint8[]:text); func:finish = NIL(Self->:self); };`
 - [ ] `text` passed alongside because a sink has no parser to resolve a `TextRef` against (W-14) — the caller's one obligation, one line
 - [ ] the sink maintains its own depth stack, mirroring the reader
 - [ ] **the transcode loop** from `specs/WRITER_MODEL.md` W-15, as a working example in `examples/`: ten lines, constant memory, any format to any format

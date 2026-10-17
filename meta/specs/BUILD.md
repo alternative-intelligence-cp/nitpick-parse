@@ -7,7 +7,11 @@ and the file-and-import conventions everything in `src/` follows.
 
 ## 1. What cannot build this yet, measured
 
-Read at the compiler's commit for cycle 1.5.0 (2026-09-03):
+Read at the compiler's commit for cycle 1.5.0 (2026-09-03), and re-read against
+the pin `7e91730` by cycle 0.0.0 (2026-10-15): the compiler's `BUILD_REFERENCE.md`
+§1 says `target` is read by nothing and §3 that the dependency-root form is planned,
+`rootlist_add` having no caller outside a unit test — the three bullets below still
+hold.
 
 - **`npkg build` is the compiler's own bootstrap ladder.** It assembles
   `runtime/npkrt.ll` and `bootstrap/seed/stage1.ll` into a builder, has that
@@ -146,7 +150,9 @@ otherwise. That includes, specifically and deliberately:
 **Rule B-11.** The prelude is fair game: `Ordering`, the derivable traits,
 `string_bytes`, `string_concat`, `string_equals`, `int_to_string`,
 `buffer_new`, the named errnos, and `Result`/`Optional`. Every module has it
-bound with no import.
+bound with no import. **`string_bytes(s)` is a `fixed uint8[]`, always** (the
+compiler's D-351): a reader's slot is `fixed uint8[]`, a plain `uint8[]` converts
+into it and nothing converts back (`NITPICK-TYPE-007`; PA-107).
 
 ---
 

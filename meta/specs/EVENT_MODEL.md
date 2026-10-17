@@ -176,9 +176,10 @@ tree walk, not in comparison, not in the drop.
 pub struct:Frame = { EventKind:kind; uint32:count; Span:span; };
 ```
 
-`SAFETY.md` §5 has the reasoning: the language has no stack-depth guard, so a
-recursive descent on `[[[[[…` is an uncontrolled fault, which is the one failure
-mode this ecosystem exists to make impossible.
+`SAFETY.md` §5 has the reasoning: a recursive descent on `[[[[[…` deeper than
+its stack traps `StackExhausted`, and a trap stops the whole program, which is
+the one failure mode this ecosystem exists to make impossible (PA-108; until
+cycle 0.0.0 this said the language had no stack-depth guard).
 
 **Rule E-15.** Exceeding `NPARSE_MAX_DEPTH` is `Fault(DepthExceeded)` with the
 span of the container that would have been opened. The default is 128
@@ -200,7 +201,7 @@ the scratch.
 - When `text.src` is `Scratch`, it points into the parser's scratch, which the
   next `step` clears.
 
-`event_text(p, e) -> uint8[]` resolves a `TextRef` against a parser and returns
+`event_text(p, e) -> fixed uint8[]` resolves a `TextRef` against a parser and returns
 a borrow. Because it is a borrow (D-004), the compiler will not let a caller
 store it past the call — so the hazard is confined to a caller who *copies* the
 bytes out into their own storage and then keeps the parser alive, which is
@@ -251,7 +252,7 @@ binding, and a `fixed` one could not be changed anyway.
 ## 7. Streaming
 
 **Rule E-23 — the whole input is present.** At 1.0 a parser is constructed over
-a complete `uint8[]`. It does not consume a `Reader` and does not ask for more
+a complete `fixed uint8[]` (a plain `uint8[]` converts in). It does not consume a `Reader` and does not ask for more
 bytes.
 
 *Reasoning.* A chunked parser must be able to suspend mid-token, which means

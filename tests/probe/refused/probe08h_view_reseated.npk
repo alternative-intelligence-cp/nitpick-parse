@@ -1,0 +1,49 @@
+// expect-error: NITPICK-BORROW-002
+// expect-error-at: 30:20
+//
+// PROBE 08h -- PROBE 08g's RESEAT, DONE BY A CALLEE. EXPECTED REFUSED.
+//
+// ASKS: `reset(@c, string_bytes(t))` where `reset` writes `<-c = Cursor{ src: src, ... }`, `c`
+// declared outside the block and `t` inside it. The direct assignment is refused
+// `NITPICK-BORROW-002` (`probe08g_holder_outlives_view.npk`). Is the call?
+//
+// THE ANSWER AT `c9baa9e`: REFUSED, `NITPICK-BORROW-002` at the call -- the compiler's landing 116
+// asks DEF-42's holder-scope question of a callee's store into a place its caller owns. At
+// `7e91730`, where this cycle was planned, it was a compiler defect, a use-after-free in safe code:
+// `npkc` accepted it, and after the block `c.src[0]` read the runtime's free poison, 0xAA -- exit
+// 170 at -O0 and through `opt -O2`. The compiler registered it as DEF-252 and fixed it in that
+// landing, which the libraries' one re-pin carries.
+mod:probe08h_view_reseated;
+
+struct:Cursor = { fixed uint8[]:src; int64:pos; };
+
+func:reset = NIL(Cursor->:c, fixed uint8[]:src) never fails {
+    <-c = Cursor{ src: src, pos: 0i64 };
+    pass NIL;
+};
+
+func:main = int32(cstring[]:_~argv) {
+    string:s = string_concat("abc", "def");
+    Cursor:c = Cursor{ src: string_bytes(s), pos: 0i64 };
+    if (c.pos == 0i64) {
+        string:t = string_concat("ghij", "klmn");
+        drop reset(@c, string_bytes(t));
+    }
+    if (c.src.len != 8i64) { exit 10i32; }
+    if (c.src[0i64] != 103u8) { exit (c.src[0i64] => int32); }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest)    { exit 91i32; },
+        (HeapOom)           { exit 92i32; },
+        (OutOfBounds)       { exit 94i32; },
+        (Unreachable)       { exit 95i32; },
+        (WildLeak)          { exit 96i32; },
+        (StackExhausted)    { exit 106i32; },
+        (MachineFault)      { exit 107i32; },
+        (*)                 { exit 99i32; }
+    }
+    exit 9i32;
+};

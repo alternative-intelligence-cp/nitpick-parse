@@ -51,8 +51,9 @@ The shared house rules for every library in this ecosystem are
   range-checked *before* the multiply and the overflow answer is a `Fault`.
   This is the single most likely place to write a remote crash.
 - **No native recursion on input-controlled depth** (PA-022). Explicit stacks,
-  stated bounds. `[[[[[…` is the oldest trick there is and the language has no
-  stack guard.
+  stated bounds. `[[[[[…` is the oldest trick there is, and a native recursion
+  deeper than its stack traps `StackExhausted` — a controlled stop, but of the
+  whole program (PA-108).
 - **`Event`, `Node` and every value stored in an array have no owning field.**
   An arena refuses an owning element at `arena_make` (`NITPICK-TYPE-007`,
   probe 05), so a node holding a `string` cannot be stored at all; and an owning

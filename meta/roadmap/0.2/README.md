@@ -40,7 +40,7 @@ cycle freezes**.
 - [ ] `Event` is exactly 32 bytes; `#size_of` asserted (probe 02's shape made permanent; 24 until cycle 0.0.0 measured 32, PA-104)
 - [ ] **no owning field** — `check_no_owning_fields` goes live here
 - [ ] `EventKind`'s nine and `ScalarKind`'s nine, both closed (PA-025), with a comment saying adding one is a major version
-- [ ] `TextRef { src, lo, hi }` and `event_text(p, e) -> uint8[]`, returning a borrow
+- [ ] `TextRef { src, lo, hi }` and `event_text(p, e) -> fixed uint8[]`, returning a read-only borrow (PA-107; probe 08's third shape)
 - [ ] the four flags: `EV_ESCAPED`, `EV_BIG`, `EV_NEG`, `EV_EMPTY`
 - [ ] `-0` survives: `EV_NEG` with a zero magnitude, asserted through a round trip in 0.5
 

@@ -10,8 +10,8 @@ caller hands it.
 > [`meta/specs/`](meta/specs/) and the plan in [`meta/roadmap/`](meta/roadmap/),
 > in the same order and by the same discipline the compiler used — specs first,
 > then a cycle map, then execution-grade subcycles, then code. The compiler
-> itself is at cycle 1.5 (verification); this library is planned now so that
-> implementation can start the day the language stops moving.
+> is past its cycle 1.5 (verification), and this library is built against the
+> commit the workbench pins.
 
 ---
 
@@ -49,9 +49,11 @@ accumulation in `nparse` is range-checked *before* the multiply, and the
 overflow answer is a `Fault`, not a trap. There is a test for exactly this and
 it is one of the library's gates.
 
-**Recursion cannot blow the stack**, because there is none. Nitpick has no
-stack-depth guard, and `[[[[[…` is the oldest trick there is. Both the parser
-and the tree builder use an explicit stack with a stated, tested bound.
+**Recursion cannot stop your program**, because there is none. In Nitpick a
+native recursion deeper than its stack is a controlled trap, `StackExhausted` —
+but a trap stops the whole program, and `[[[[[…` is the oldest trick there is.
+Both the parser and the tree builder use an explicit stack with a stated, tested
+bound.
 
 **Zero-copy by construction.** An `Event` is a plain 32-byte value with no
 owning field; scalar text is a `TextRef` into the caller's input, or into the
@@ -69,7 +71,7 @@ printer you wanted anyway.
 
 | Layer | Contents |
 |---|---|
-| **scan** | a cursor over `uint8[]`, byte offsets and on-demand line/column, UTF-8 validation, escape decoding, and number scanning that cannot trap |
+| **scan** | a cursor over a read-only byte view (`fixed uint8[]`), byte offsets and on-demand line/column, UTF-8 validation, escape decoding, and number scanning that cannot trap |
 | **event** | the format-neutral event vocabulary, the `Format` trait, the pull driver, the depth stack |
 | **doc** | `Document` — an arena-backed tree of POD nodes with a side string pool, insertion-ordered maps, and a duplicate-key policy |
 | **diag** | `ParseError`: a closed code enum, a span, an expected set, and a renderer |

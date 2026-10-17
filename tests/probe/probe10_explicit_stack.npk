@@ -1,0 +1,119 @@
+// expect-exit: 0
+//
+// PROBE 10 -- FIFTY THOUSAND LEVELS OF NESTING ON AN EXPLICIT STACK.
+//
+// ASKS: a document of 50 000 `[` and 50 000 `]`, its depth tracked on a `Vec<Frame>` -- `[` pushes
+// a frame, `]` pops one -- rather than by native recursion. Does the explicit stack hold the whole
+// depth, balance, and free?
+//
+// DEPENDS ON THE ANSWER: PA-022 and `SAFETY.md` §5 -- no native recursion on input-controlled
+// depth -- and `EVENT_MODEL.md` §4's frame stack. `probe10b` is the other half.
+//
+// EXPECTED: exit 0 at -O0 and through `opt -O2`, and `Frame` -- `EVENT_MODEL.md` §4's own shape --
+// measuring the 16 bytes E-16 prices it at (code 11). A local named `stack` would be refused
+// (`stack` is a memory qualifier, `PLAYBOOK.md` §10), so the frames are `frames`.
+mod:probe10_explicit_stack;
+
+fixed int64:DEPTH = 50000i64;
+
+// The container, as small as the question needs: `Vec<T: Copy>`, the bound both sibling
+// libraries' `Vec` carries.
+struct:Vec<T: Copy> = { wild T->:items; int64:count; int64:cap; };
+
+func:vec_init<T: Copy> = Vec<T>(int64:cap) never fails {
+    int64:n = cap;
+    if (n < 1i64) { n = 1i64; }
+    wild int8->:mem = alloc(n * #size_of<T>());
+    pass Vec{ items: mem =>! wild T->, count: 0i64, cap: n };
+};
+
+func:vec_push<T: Copy> = NIL(Vec<T>->:v, T:x) never fails {
+    if (v.count == v.cap) {
+        int64:nc = v.cap * 2i64;
+        wild int8->:bigger = ralloc(v.items =>! wild int8->, nc * #size_of<T>());
+        v.items = bigger =>! wild T->;
+        v.cap = nc;
+    }
+    v.items[v.count] = x;
+    v.count = v.count + 1i64;
+    pass NIL;
+};
+
+func:vec_free<T: Copy> = NIL(Vec<T>->:v) never fails {
+    dalloc(v.items =>! wild int8->);
+    v.count = 0i64;
+    v.cap = 0i64;
+    pass NIL;
+};
+
+// The frame as `EVENT_MODEL.md` §4 declares it; E-16 prices it at 16 bytes, asserted below.
+#[derive(Copy)]
+enum:EventKind = { StartMap; EndMap; StartSeq; EndSeq; Key; Scalar; Comment; DocStart; DocEnd; };
+#[derive(Copy)]
+struct:Span = { uint32:lo; uint32:hi; };
+#[derive(Copy)]
+struct:Frame = { EventKind:kind; uint32:count; Span:span; };
+
+// One half of the document, walked on the caller's stack of frames.
+func:walk = NIL(fixed uint8[]:src, Vec<Frame>->:frames, int64->:deepest, int64->:bad) never fails {
+    for (int64:i in 0i64...src.len) {
+        if (src[i] == 91u8) {
+            drop vec_push(frames, Frame{ kind: EventKind.StartSeq, count: 0u32,
+                                         span: Span{ lo: (i =>! uint32), hi: (i =>! uint32) } });
+            if (frames.count > <-deepest) { <-deepest = frames.count; }
+        }
+        else if (src[i] == 93u8) {
+            if (frames.count == 0i64) { <-bad = 1i64; }
+            else { frames.count = frames.count - 1i64; }
+        }
+    }
+    pass NIL;
+};
+
+// The deepest nesting of DEPTH `[` then DEPTH `]`, or -1 if they do not balance.
+func:max_depth = int64(fixed uint8[]:opens, fixed uint8[]:closes) never fails {
+    Vec<Frame>:frames = raw vec_init::<Frame>(16i64);
+    int64:deepest = 0i64;
+    int64:bad = 0i64;
+    drop walk(opens, @frames, @deepest, @bad);
+    drop walk(closes, @frames, @deepest, @bad);
+    int64:left = frames.count;
+    drop vec_free(@frames);
+    if (bad != 0i64 || left != 0i64) { pass 0i64 - 1i64; }
+    pass deepest;
+};
+
+func:main = int32(cstring[]:_~argv) {
+    string:brackets = string_concat("[", "");
+    string:shut = string_concat("]", "");
+    int64:n = 1i64;
+    int64:k = 0i64;
+    while (n < 65536i64) decreases 64i64 - k {
+        brackets = string_concat(brackets, brackets);
+        shut = string_concat(shut, shut);
+        n = n * 2i64;
+        k = k + 1i64;
+    }
+    fixed uint8[]:o = string_bytes(brackets);
+    fixed uint8[]:c = string_bytes(shut);
+    int64:d = raw max_depth(o[0i64...DEPTH], c[0i64...DEPTH]);
+    if (d != DEPTH) { exit 10i32; }
+    if (#size_of<Frame>() != 16i64) { exit 11i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest)    { exit 91i32; },
+        (HeapOom)           { exit 92i32; },
+        (IntOverflow)       { exit 93i32; },
+        (OutOfBounds)       { exit 94i32; },
+        (Unreachable)       { exit 95i32; },
+        (WildLeak)          { exit 96i32; },
+        (StackExhausted)    { exit 106i32; },
+        (MachineFault)      { exit 107i32; },
+        (DecreasesViolated) { exit 108i32; },
+        (*)                 { exit 99i32; }
+    }
+    exit 9i32;
+};

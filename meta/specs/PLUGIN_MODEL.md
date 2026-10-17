@@ -49,7 +49,7 @@ and provides one bare constructor function, because **the language has no static
 methods** (D-185):
 
 ```nitpick
-pub func:json_reader = JsonReader(uint8[]:src, Options:opt);
+pub func:json_reader = JsonReader(fixed uint8[]:src, Options:opt);
 ```
 
 That is the whole required surface. Everything else the library offers —
@@ -134,7 +134,7 @@ pub struct:MiniReader = {
     uint8:state;
 };
 
-pub func:mini_reader = MiniReader(uint8[]:src, Options:opt) { … };
+pub func:mini_reader = MiniReader(fixed uint8[]:src, Options:opt) { … };
 
 impl:MiniReader:Format = {
     func:step = Step(MiniReader->:self) { … };

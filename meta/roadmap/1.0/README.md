@@ -36,7 +36,9 @@ decide it.
       either** — every condition a byte stream can cause is a `Fault` value the
       compiler makes you handle
 - [ ] the modules that declare **no** errors named explicitly (`scan`, `event`,
-      `diag`), because a consumer importing only those owes nothing
+      `diag`), because a consumer importing only those owes no identity of this
+      library's — only the floor's and what their machinery reaches, stated per
+      module (`specs/SAFETY.md` S-6, PA-109)
 
 ### 1.0.2 — the guide
 - [ ] getting started: parse a JSON file and read a value, in under twenty lines

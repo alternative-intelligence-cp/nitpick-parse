@@ -1,0 +1,37 @@
+// expect-error: NITPICK-TYPE-014
+// expect-error-at: 16:5
+//
+// PROBE 08f -- AN IMPL WHOSE SLICE PARAMETER DROPS THE TRAIT'S `fixed`. EXPECTED REFUSED.
+//
+// `EventSink::put` (`WRITER_MODEL.md` §4) takes the event's text; an implementation must spell the
+// slot exactly as the trait does: `NITPICK-TYPE-014` at the method, "a slice parameter is `fixed`
+// in the impl exactly where the trait declares it `fixed`". So the trait's spelling decides every
+// implementation's, and the trait is fixed before the first implementation (cycle 0.5).
+mod:probe08f_impl_drops_fixed;
+
+trait:Sink = { func:put = NIL(Self->:self, fixed uint8[]:text); };
+
+struct:Counter = { int64:n; };
+impl:Counter:Sink = {
+    func:put = NIL(Counter->:self, uint8[]:text) {
+        self.n = self.n + text.len;
+        pass NIL;
+    };
+};
+
+func:main = int32(cstring[]:_~argv) {
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest)    { exit 91i32; },
+        (HeapOom)           { exit 92i32; },
+        (Unreachable)       { exit 95i32; },
+        (WildLeak)          { exit 96i32; },
+        (StackExhausted)    { exit 106i32; },
+        (MachineFault)      { exit 107i32; },
+        (*)                 { exit 99i32; }
+    }
+    exit 9i32;
+};

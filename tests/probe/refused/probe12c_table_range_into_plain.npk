@@ -1,0 +1,63 @@
+// expect-error: NITPICK-TYPE-007
+// expect-error-at: 47:5
+//
+// PROBE 12c -- PROBE 12's RANGE, BOUND TO A PLAIN `uint8[]`. EXPECTED REFUSED.
+//
+// A range of `fixed` storage is the read-only view, which converts to no plain view.
+mod:probe12c_table_range_into_plain;
+
+// The class table's shape (`SCAN_MODEL.md` C-8): one byte per input byte -- 1 for an ASCII digit,
+// 2 for an ASCII letter, 4 for white space, 0 otherwise. A literal: a table initialised by naming
+// another is refused at `7e91730` and accepted from the compiler's landing 108.
+fixed uint8[256]:CLASS = [
+    0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 4u8, 4u8, 0u8, 0u8, 4u8, 0u8, 0u8,
+    0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+    4u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+    1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 1u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+    0u8, 2u8, 2u8, 2u8, 2u8, 2u8, 2u8, 2u8, 2u8, 2u8, 2u8, 2u8, 2u8, 2u8, 2u8, 2u8,
+    2u8, 2u8, 2u8, 2u8, 2u8, 2u8, 2u8, 2u8, 2u8, 2u8, 2u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+    0u8, 2u8, 2u8, 2u8, 2u8, 2u8, 2u8, 2u8, 2u8, 2u8, 2u8, 2u8, 2u8, 2u8, 2u8, 2u8,
+    2u8, 2u8, 2u8, 2u8, 2u8, 2u8, 2u8, 2u8, 2u8, 2u8, 2u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+    0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+    0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+    0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+    0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+    0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+    0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+    0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+    0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8
+];
+
+func:class_of = uint8(uint8:b) never fails {
+    pass CLASS[(b => int64)];
+};
+
+func:digits = int64(fixed uint8[]:v) never fails {
+    int64:n = 0i64;
+    for (uint8:c in v) { if (c == 1u8) { n = n + 1i64; } }
+    pass n;
+};
+
+func:main = int32(cstring[]:_~argv) {
+    if (raw class_of(48u8) != 1u8) { exit 10i32; }
+    if (raw class_of(97u8) != 2u8) { exit 11i32; }
+    if (raw class_of(32u8) != 4u8) { exit 12i32; }
+    if (raw class_of(255u8) != 0u8) { exit 13i32; }
+    // a range over the `fixed` table is a `fixed uint8[]`
+    uint8[]:digit_rows = CLASS[48i64...58i64];
+    if (raw digits(digit_rows) != 10i64) { exit 14i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest)    { exit 91i32; },
+        (HeapOom)           { exit 92i32; },
+        (Unreachable)       { exit 95i32; },
+        (WildLeak)          { exit 96i32; },
+        (StackExhausted)    { exit 106i32; },
+        (MachineFault)      { exit 107i32; },
+        (*)                 { exit 99i32; }
+    }
+    exit 9i32;
+};

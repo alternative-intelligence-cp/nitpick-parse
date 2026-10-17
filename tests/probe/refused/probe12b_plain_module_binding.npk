@@ -1,0 +1,26 @@
+// expect-error: NITPICK-TYPE-055
+// expect-error-at: 9:1
+//
+// PROBE 12b -- A PLAIN, REASSIGNABLE MODULE BINDING. EXPECTED REFUSED (D-211).
+//
+// `NITPICK-TYPE-055`: "module state is `fixed`". All parser state is a value the caller holds.
+mod:probe12b_plain_module_binding;
+
+int64:COUNTER = 0i64;
+
+func:main = int32(cstring[]:_~argv) {
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest)    { exit 91i32; },
+        (HeapOom)           { exit 92i32; },
+        (Unreachable)       { exit 95i32; },
+        (WildLeak)          { exit 96i32; },
+        (StackExhausted)    { exit 106i32; },
+        (MachineFault)      { exit 107i32; },
+        (*)                 { exit 99i32; }
+    }
+    exit 9i32;
+};

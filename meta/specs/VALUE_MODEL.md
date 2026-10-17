@@ -90,8 +90,9 @@ document.
 There is no interning at 1.0 (§8's open item), no reference counting, and no
 deduplication.
 
-**Rule D-8 — `doc_text(d, h) -> uint8[]` is a borrow into the pool**, second
-class like every borrow. A caller who needs an owned `string` calls
+**Rule D-8 — `doc_text(d, h) -> fixed uint8[]` is a borrow into the pool**, second
+class like every borrow, and read-only: the pool is the document's, and a caller
+reads it (PA-107). A caller who needs an owned `string` calls
 `doc_string(d, h)`, which allocates and says so in its name.
 
 ---
@@ -187,7 +188,7 @@ caller converts.**
 | `doc_uint64(d, h)` | `uint64?` |
 | `doc_flt64(d, h)` | `flt64?` — exact for `Float`, nearest for a `Int` too large |
 | `doc_int256(d, h)` | `int256?` — the reason `ND_BIG` keeps the text |
-| `doc_num_text(d, h)` | `uint8[]` — the literal, always available |
+| `doc_num_text(d, h)` | `fixed uint8[]` — the literal, always available |
 
 **Rule D-19 — `ND_BIG` is not an error.** A 40-digit integer is a well-formed
 JSON number and a well-formed TOML integer is not, so the *format* decides

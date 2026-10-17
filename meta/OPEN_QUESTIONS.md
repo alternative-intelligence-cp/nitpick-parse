@@ -58,7 +58,17 @@ every import is relative until this closes.
 the resolver's roots from `[dependencies]`. Neither is on the compiler's 1.5 or
 1.6 map, so this is a request, not a date.
 
-### O-N2 — there is no stack-depth guard, and `stack-depth` obligations are 1.5.8
+### ~~O-N2 — there is no stack-depth guard, and `stack-depth` obligations are 1.5.8~~ — **ANSWERED by the compiler, PA-108**
+
+*(2026-10-15, cycle 0.0.0: both halves landed. A stack overflow traps
+`StackExhausted` — the compiler's D-305, 1.5.8 — measured by probe 10b at `7e91730`:
+1 048 576 levels, exit 106 at both legs. And the `stack-depth` rows exist, derived by
+the compiler's runners from `terminate` rows (its `VERIFICATION_REFERENCE.md`'s row
+for the kind). "Nothing exists today" was false from 1.5.8 (the early ecosystem
+audit's ES1). The consequence below stands with its reason changed: a trap is a
+whole-program stop. **This entry's id is this repository's own**: the workbench
+registry's `O-N2` is the library-build question, not this one (the early ecosystem
+audit's ED2), and nothing here takes a registry id.)*
 `VERIFICATION_REFERENCE.md` §365 lists `stack-depth` as an obligation kind
 scheduled for 1.5.8; nothing exists today. A recursive descent on
 `[[[[[[[[…` is therefore an **uncontrolled** fault rather than a controlled
@@ -81,6 +91,10 @@ index (`VALUE_MODEL.md` §5), and `SmallMap<K,V>` is ours (PA-004).
 **Ask:** none — this is a deliberate language decision and the library's answer
 is fine. Recorded only so that the question "why is there no hash map here" has
 a written answer, because it is asked every time somebody meets the value model.
+
+*(2026-10-15, cycle 0.0.0: **this entry's id is this repository's own**; the workbench
+registry's `O-N3` is a different question (the early ecosystem audit's ED2), and
+nothing here takes a registry id.)*
 
 ### O-N4 — `arena.get` returning a copy is load-bearing and easy to miss
 Not a defect — D-152 argues it correctly (a borrow-returning `get` would be a
@@ -145,7 +159,7 @@ raised, and nothing here numbers it.)*
   gives the span, and a formatter can derive the relation from spans it already
   has. Revisit if a formatter is written against the library.
 - **O-P6 — incremental feeding.** At 1.0 a parser is constructed over a
-  complete `uint8[]`; a chunked parser must suspend mid-token, which turns every
+  complete byte view; a chunked parser must suspend mid-token, which turns every
   scanning function into a resumable state machine. **Open by design:** a
   *measurement*, taken at cycle 0.10, and the **contract does not depend on the
   answer** — a chunked parser produces the same events, so this is an

@@ -54,7 +54,7 @@ JSONTestSuite corpus, not here.
 - [ ] a property test standing in for each, over a swept input space
 
 ### 0.1.1 — the cursor and spans
-- [ ] `Cursor { uint8[]:src; int64:pos; }` and the seven total operations from `specs/SCAN_MODEL.md` C-3
+- [ ] `Cursor { fixed uint8[]:src; int64:pos; }` (PA-107: the read-only view, assigned once) and the seven total operations from `specs/SCAN_MODEL.md` C-3
 - [ ] **every operation total**: an out-of-range position clamps, never traps, never returns garbage — asserted at `pos == 0`, `pos == len`, `pos > len`
 - [ ] `Span { uint32:lo; uint32:hi; }`, half-open, with `lo <= hi` maintained
 - [ ] an input longer than `0xFFFFFFFF` refused at entry with `EParseState` (C-5) — a caller mistake, not an input's

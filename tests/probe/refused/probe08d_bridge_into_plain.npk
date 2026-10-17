@@ -1,0 +1,29 @@
+// expect-error: NITPICK-TYPE-007
+// expect-error-at: 13:5
+//
+// PROBE 08d -- `string_bytes` INTO A PLAIN `uint8[]`. EXPECTED REFUSED.
+//
+// `string_bytes` returns the read-only view (the compiler's D-351), which converts to no plain
+// view: `NITPICK-TYPE-007`. Every reader slot `meta/specs/` spelled `uint8[]` until cycle 0.0.0
+// is this shape the moment a caller hands it a `string`'s bytes.
+mod:probe08d_bridge_into_plain;
+
+func:main = int32(cstring[]:_~argv) {
+    string:s = string_concat("abc", "def");
+    uint8[]:v = string_bytes(s);
+    if (v.len != 6i64) { exit 10i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest)    { exit 91i32; },
+        (HeapOom)           { exit 92i32; },
+        (Unreachable)       { exit 95i32; },
+        (WildLeak)          { exit 96i32; },
+        (StackExhausted)    { exit 106i32; },
+        (MachineFault)      { exit 107i32; },
+        (*)                 { exit 99i32; }
+    }
+    exit 9i32;
+};

@@ -144,7 +144,7 @@ has no format-specifier language (D-053): `printf` and its relatives do not
 exist, and there is nothing for a message template to be interpreted by.
 
 ```nitpick
-pub func:fault_render = NIL(ParseError:f, uint8[]:src, string:name, Bytes->:sink);
+pub func:fault_render = NIL(ParseError:f, fixed uint8[]:src, string:name, Bytes->:sink);
 ```
 
 writes a diagnostic in the compiler's own shape:

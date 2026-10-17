@@ -22,7 +22,7 @@ obligation manifest when the verified build reaches libraries.
 | 1.5.2 | `limit<Rules>` live | §6 lands |
 | 1.5.3 | contracts live | §§3–4's `requires`/`ensures` land |
 | 1.5.4 | `prove` / `assert_static` | §5's inline proofs land |
-| 1.5.8 | `stack-depth` obligations | §7 — the one this library most wants |
+| 1.5.8 | `stack-depth` obligations | §7 — the one this library most wants *(landed: the compiler's runners derive a `stack-depth` row from its `terminate` rows, and an overflow traps `StackExhausted`, D-305; PA-108)* |
 
 **Rule P-1.** Until a construct is live, its obligation is stated **as a comment
 beside the code in the exact syntax it will take**, and is enforced by a
@@ -34,9 +34,17 @@ so a premature `ensures` is a build failure, not a silent no-op.
 
 ## 2. What the language discharges for free
 
-- **Every index into a slice, array or `buffer` is bounds-checked** and traps
+- **Every index into a slice or a fixed array is bounds-checked** and traps
   (D-070). The question is only whether a *reachable* index is out of range,
-  which is §3.
+  which is §3. **A `buffer` cannot be indexed at all** at compiler `7e91730`
+  (`NITPICK-TYPE-007`; the compiler's D-341 plans it, unbuilt), and its bytes
+  are reached through `.ptr`, a pointer, whose index is **not** checked — nor is
+  a `Vec`'s `wild` block's. Those indexes are checked by this library's own
+  accessors, or by nothing.
+
+*(2026-10-15, cycle 0.0.0, probe 11 and the early ecosystem audit's EC2: this
+bullet said "every index into a slice, array or `buffer`", which `PLAYBOOK.md`
+§2's index row corrects for the pointer.)*
 - **Every plain integer `+ - *` traps on overflow** (D-210) — which for this
   library is not a gift but the hazard itself (§4).
 - **Division by zero traps** (D-007).
@@ -170,6 +178,14 @@ native recursion on an input-controlled path") is currently held by a **grep**
 (`check_no_recursion`) rather than by a proof. When 1.5.8 lands, that check
 becomes a discharged obligation and the exceptions table becomes provably
 empty.
+
+*(2026-10-15, cycle 0.0.0, PA-108: 1.5.8 has landed, and it is not what this rule
+waited for. The compiler's runners DERIVE a `stack-depth` row from a recursion's
+`terminate` rows — discharged when every member states `decreases`, open otherwise —
+and the trap is D-305's prologue check. Neither says "no recursion on an
+input-controlled path", which is a property of the call graph: `check_no_recursion`
+stays the instrument, and a recursion with a `decreases` would discharge its row and
+still be refused here.)*
 
 ---
 

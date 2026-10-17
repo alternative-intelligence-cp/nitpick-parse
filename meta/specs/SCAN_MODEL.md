@@ -10,7 +10,7 @@ was this. It declares **no errors** and performs **no I/O**.
 
 ```nitpick
 pub struct:Cursor = {
-    uint8[]:src;        // the caller's bytes — a borrow, never copied
+    fixed uint8[]:src;  // the caller's bytes — a read-only borrow, never copied, assigned once
     int64:pos;          // the read position, 0 <= pos <= src.len
 };
 ```
@@ -21,12 +21,32 @@ prelude's `read_file` and hands the bytes over. This is what keeps the library
 free of syscalls (`SAFETY.md` §2), free of a descriptor lifetime, and testable
 from a byte literal.
 
-**Rule C-2.** `Cursor` holds a **borrow** (`uint8[]`, D-070), so it is second
-class: it cannot be returned from a function, stored in something that outlives
-the call, or held across an `await`. Every parser therefore takes its cursor as
-a field of a value the *caller* holds, and the borrow is re-derived from the
-caller's input at each entry. `EVENT_MODEL.md` §5 states the consequence for
-the public API.
+**Rule C-2 (PA-107).** `Cursor` holds a **read-only borrow** (`fixed uint8[]`,
+D-004, D-351), so it is second class, and what that means was measured at
+compiler `c9baa9e` (probe 08 and its refusals) — but for two clauses no probe
+asks: the `await` one, since this library has no `await`, and the `fixed`
+field's code, which no probe provokes:
+
+- a function handed the caller's bytes **may return** a `Cursor` over them, or a
+  reader holding one — `json_reader`'s shape compiles and runs; a `Cursor` over
+  bytes the function made is refused, `NITPICK-BORROW-001`;
+- it cannot outlive the storage it views — a holder declared outside a block,
+  re-built over that block's `string`, is `NITPICK-BORROW-002` — and it cannot be
+  held across an `await`;
+- `src` is a `fixed` field, so it is **assigned once**, at construction (a later
+  write is `NITPICK-ASSIGN-002`); a `Cursor` moves `pos` and nothing else;
+- and **a callee may not store a view of a shorter-lived block into a place its
+  caller owns**: that is `NITPICK-BORROW-002` at the call (probe 08h, the
+  compiler's landing 116). At `7e91730` the compiler accepted the store, and the
+  view then outlived the block's `string` and read freed memory — DEF-252.
+
+`EVENT_MODEL.md` §5 states the consequence for the public API.
+
+*(2026-10-15, cycle 0.0.0, PA-107: this rule said the borrow was `uint8[]` under
+D-070, and that a `Cursor` "cannot be returned from a function, stored in something
+that outlives the call". At `7e91730` `string_bytes` returns `fixed uint8[]`, which
+no plain slot accepts (`NITPICK-TYPE-007`), and a `Cursor` over a parameter's bytes
+is returned in silence — the edge the design needs, measured rather than assumed.)*
 
 **Rule C-3 — the operations, and all of them are total.**
 
@@ -38,7 +58,7 @@ the public API.
 | `cur_take(c, n)` | advances `min(n, remaining)`; returns how many |
 | `cur_at_end(c)` | `pos >= src.len` |
 | `cur_remaining(c)` | `src.len - pos`, never negative |
-| `cur_slice(c, lo, hi)` | the borrowed `uint8[]` between two positions, clamped |
+| `cur_slice(c, lo, hi)` | the borrowed `fixed uint8[]` between two positions, clamped |
 
 None of them fails, none of them traps, and none of them can be given an
 out-of-range position that produces anything but a clamp. **A total cursor is
