@@ -242,18 +242,18 @@ The 0.0.2 … 0.0.5 items are the re-derivation's targets, drawn from the audits
 file states its own acceptance when it reaches the pin, and where the two differ, the file at the pin governs.
 
 ### 0.0.0 — the probes
-- [ ] `tests/probe/probe01a_naive_accumulate.npk` traps `IntOverflow` (93) and `probe01b_checked_accumulate.npk` exits 0 — **the flagship**
-- [ ] `probe02_pod_event.npk`, `probe03_payload_enum.npk`, `probe04_arena_pod.npk` — the specification's `Event`, `Step` and `Node`, each probe's exit code its size: 32, 36, 64
-- [ ] `refused/probe05_arena_owning.npk` — refused at the make, `NITPICK-TYPE-007`
-- [ ] `probe07_trait_dyn.npk` — the `Format` shape through `dyn`; and `probe06_trait_bound.npk` with its two controls — the same through a bound, a compiler defect at `7e91730` that the pin fixes
-- [ ] `probe08_view_edges.npk` and its seven refusals, 08h's among them — the read-only view at every edge a reader uses
-- [ ] `probe09_generic_move.npk` and the capped pair `probe09b`/`probe09c` — owners in a generic `Vec`, and the free that must drop them
-- [ ] `probe10_explicit_stack.npk` exits 0 at 50 000 levels; `probe10b_native_recursion_traps.npk` traps `StackExhausted` (106)
-- [ ] `probe11_bytes_growth.npk` — a million appends, twenty reallocations
-- [ ] `probe12_module_fixed.npk` and its three refusals — a `fixed` table read and ranged; a plain module binding `NITPICK-TYPE-055`
-- [ ] every verdict in `0.0.0.md` §6 re-measured, SAME, and every consequence in `meta/specs/` and `meta/DECISIONS.md` in the commit of its verdict
-- [ ] `tests/probe/README.md`; block 6's sweep read
-- [ ] the three research digests filed before any probe runs, each printed by block 0a with its sha256, the three this plan holds (PD-137)
+- [x] `tests/probe/probe01a_naive_accumulate.npk` traps `IntOverflow` (93) and `probe01b_checked_accumulate.npk` exits 0 — **the flagship**
+- [x] `probe02_pod_event.npk`, `probe03_payload_enum.npk`, `probe04_arena_pod.npk` — the specification's `Event`, `Step` and `Node`, each probe's exit code its size: 32, 36, 64
+- [x] `refused/probe05_arena_owning.npk` — refused at the make, `NITPICK-TYPE-007`
+- [x] `probe07_trait_dyn.npk` — the `Format` shape through `dyn`; and `probe06_trait_bound.npk` with its two controls — the same through a bound, a compiler defect at `7e91730` that the pin fixes
+- [x] `probe08_view_edges.npk` and its seven refusals, 08h's among them — the read-only view at every edge a reader uses
+- [x] `probe09_generic_move.npk` and the capped pair `probe09b`/`probe09c` — owners in a generic `Vec`, and the free that must drop them
+- [x] `probe10_explicit_stack.npk` exits 0 at 50 000 levels; `probe10b_native_recursion_traps.npk` traps `StackExhausted` (106)
+- [x] `probe11_bytes_growth.npk` — a million appends, twenty reallocations
+- [x] `probe12_module_fixed.npk` and its three refusals — a `fixed` table read and ranged; a plain module binding `NITPICK-TYPE-055`
+- [x] every verdict in `0.0.0.md` §6 re-measured, SAME, and every consequence in `meta/specs/` and `meta/DECISIONS.md` in the commit of its verdict
+- [x] `tests/probe/README.md`; block 6's sweep read
+- [x] the three research digests filed before any probe runs, each printed by block 0a with its sha256, the three this plan holds (PD-137)
 
 ### 0.0.1 — the skeleton
 - [ ] `src/lib.npk` exists and `pub use`s nothing yet (`use` is not transitive, so the surface is a deliberate list)
