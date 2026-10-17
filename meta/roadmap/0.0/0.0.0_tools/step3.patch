@@ -22,7 +22,7 @@ index c60989b..0301f26 100644
 +**2026-10-15, cycle 0.0.0, on probes 06 and 07; measured again 2026-10-16 at compiler `c9baa9e`.**
 +At compiler `c9baa9e` a generic `drive<F: Src>(F->:f)` calling a synchronous `Self->` method,
 +`f.step()`, links and runs, exit 0 at `-O0` and through `opt -O2` (probe 06), and so do its
-+controls: a by-value method through the same bound (probe 06b) and the `Self->` call with no
++controls, at exits 5 and 1: a by-value method through the bound (probe 06b) and the `Self->` call with no
 +bound (probe 06c). The same trait through `dyn` runs at both legs, an owning implementation
 +behind an explicit `=> dyn` cast included (probe 07). PA-071 stands — `Format` is object-safe,
 +measured — and so does its choice of the bound as the intended path, measured too:
@@ -78,7 +78,7 @@ index 0000000..f8fe753
 +// is the intended path and what every example uses" is the consumer's whole road.
 +//
 +// THE ANSWER AT `c9baa9e`: it links and runs, exit 0 at -O0 and through `opt -O2`; so do its two
-+// controls, `probe06b_bound_by_value.npk` (a by-value `Self` method through the same bound) and
++// controls, at exits 5 and 1, `probe06b_bound_by_value.npk` (a by-value `Self` method, same bound) and
 +// `probe06c_concrete_pointer.npk` (the `Self->` call with no bound), and so does the same trait
 +// through `dyn` (`probe07_trait_dyn.npk`). At `7e91730`, where this cycle was planned, it was a
 +// compiler defect: `npkc` accepted it and emitted, in `drive<Count>`, a call to
