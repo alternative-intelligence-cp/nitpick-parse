@@ -71,6 +71,12 @@ intended path and is what every example uses. `dyn` costs an indirect call per
 event and exists so that "choose at run time" does not require a hand-written
 `pick` in every consumer.
 
+*(2026-10-16, cycle 0.0.0, PA-106: both paths measured at compiler `c9baa9e` — a
+generic `consume<F: Format>(F->:p)` calling `p.step()` links and runs (probe 06), and
+so does the `dyn` path (probe 07). At `7e91730` the static path was a compiler
+defect, DEF-253, accepted by `npkc` and refused by `llc`; the compiler's landing 118
+fixed it, and nothing was re-spelled through `dyn` while it stood.)*
+
 **Rule G-5 — format dispatch is the application's `pick`, and the library ships
 one convenience.** `builtin_open(kind, src, opt) -> dyn Format` covers the four
 shipped formats over a `BuiltinFormat` enum. A third-party format is not in it

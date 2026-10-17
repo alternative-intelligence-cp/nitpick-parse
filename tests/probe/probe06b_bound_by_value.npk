@@ -1,0 +1,36 @@
+// expect-exit: 5
+//
+// PROBE 06b -- PROBE 06's FIRST CONTROL: THE SAME BOUND, A BY-VALUE RECEIVER. `drive<F: Src>(F:f)`
+// calling a `Self` method compiles, links and runs, at -O0 and through `opt -O2`, at `c9baa9e` as
+// at `7e91730`: the defect probe 06 met at `7e91730`, DEF-253, was the pointer receiver's, not the
+// bound's.
+mod:probe06b_bound_by_value;
+
+trait:Src = { func:val = int32(Self:self) never fails; };
+
+struct:Count = { int32:n; };
+impl:Count:Src = {
+    func:val = int32(Count:self) never fails { pass self.n; };
+};
+
+func:drive<F: Src> = int32(F:f) never fails {
+    pass (raw f.val());
+};
+
+func:main = int32(cstring[]:_~argv) {
+    Count:c = Count{ n: 5i32 };
+    exit (raw drive(c));
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest)    { exit 91i32; },
+        (HeapOom)           { exit 92i32; },
+        (Unreachable)       { exit 95i32; },
+        (WildLeak)          { exit 96i32; },
+        (StackExhausted)    { exit 106i32; },
+        (MachineFault)      { exit 107i32; },
+        (*)                 { exit 99i32; }
+    }
+    exit 9i32;
+};

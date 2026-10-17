@@ -1,0 +1,116 @@
+// expect-exit: 0
+//
+// PROBE 07 -- THE `Format` SHAPE THROUGH `dyn`.
+//
+// ASKS: a trait with one method taking a `Self->` receiver -- `Format`'s `step`, `PLUGIN_MODEL.md`
+// §2 -- built into `dyn Src` from two implementations and driven through it: by the implicit
+// coercion into a `dyn` slot, by the explicit cast `move(x) => dyn Src` returned from a function
+// (the shape `builtin_open` takes), and over an implementation that OWNS a `string`, cast, driven
+// and dropped -- the drop being the question landing 94 (the compiler's DEF-227) answered: the
+// cast's cell is owned exactly once.
+//
+// DEPENDS ON THE ANSWER: PA-071, that `Format` is object-safe and `dyn Format` the runtime-choice
+// path. Probe 06 asks the same of static dispatch through a bound, and at `c9baa9e` that path runs
+// too; at `7e91730` it was a compiler defect, DEF-253, fixed by the compiler's landing 118.
+//
+// EXPECTED: exit 0 at -O0 and through `opt -O2`. Codes 10 … 15 are the assertions; a cell owned
+// twice would read the free poison (`Loud`'s length would be 0xAA-shaped) or free it twice
+// (`Unreachable`, 95).
+mod:probe07_trait_dyn;
+
+enum:Step = { Ev(int32); Done; };
+
+trait:Src = { func:step = Step(Self->:self); };
+
+struct:Count = { int32:n; int32:hi; };
+impl:Count:Src = {
+    func:step = Step(Count->:self) {
+        if (self.n >= self.hi) { pass Step.Done; }
+        self.n = self.n + 1i32;
+        pass Step.Ev(self.n);
+    };
+};
+
+struct:Twice = { int32:n; };
+impl:Twice:Src = {
+    func:step = Step(Twice->:self) {
+        if (self.n >= 4i32) { pass Step.Done; }
+        self.n = self.n + 2i32;
+        pass Step.Ev(self.n);
+    };
+};
+
+// An implementation that owns heap storage, as a reader holding its scratch `Bytes` does.
+struct:Loud = { string:name; int32:n; };
+impl:Loud:Src = {
+    func:step = Step(Loud->:self) {
+        if (self.n >= 1i32) { pass Step.Done; }
+        self.n = self.n + 1i32;
+        pass Step.Ev((self.name.len =>! int32));
+    };
+};
+
+func:drain = int32(dyn Src:d) {
+    int32:sum = 0i32;
+    int32:guard = 0i32;
+    while (guard < 100i32) decreases 100i32 - guard {
+        guard = guard + 1i32;
+        Step:s = relay d.step();
+        pick (s) {
+            (Step.Ev(v)) { sum = sum + v; },
+            (Step.Done)  { pass sum; }
+        }
+    }
+    pass 0i32 - 1i32;
+};
+
+func:choose = dyn Src(int32:which) never fails {
+    if (which == 1i32) {
+        Twice:t = Twice{ n: 0i32 };
+        pass (move(t) => dyn Src);
+    }
+    if (which == 2i32) {
+        Loud:l = Loud{ name: string_concat("abcdefg", ""), n: 0i32 };
+        pass (move(l) => dyn Src);
+    }
+    Count:c = Count{ n: 0i32, hi: 3i32 };
+    pass (move(c) => dyn Src);
+};
+
+func:run = int32() {
+    dyn Src:a = raw choose(0i32);
+    dyn Src:b = raw choose(1i32);
+    dyn Src:c = raw choose(2i32);
+    int32:x = relay drain(a);
+    int32:y = relay drain(b);
+    int32:z = relay drain(c);
+    if (x != 6i32) { pass 10i32; }
+    if (y != 6i32) { pass 11i32; }
+    if (z != 7i32) { pass 12i32; }
+    Count:k = Count{ n: 0i32, hi: 2i32 };
+    dyn Src:d = k;
+    int32:w = relay drain(d);
+    if (w != 3i32) { pass 13i32; }
+    pass 0i32;
+};
+
+func:main = int32(cstring[]:_~argv) {
+    Result<int32>:r = run();
+    if (r.is_error) { exit 15i32; }
+    exit r.value;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest)    { exit 91i32; },
+        (HeapOom)           { exit 92i32; },
+        (IntOverflow)       { exit 93i32; },
+        (Unreachable)       { exit 95i32; },
+        (WildLeak)          { exit 96i32; },
+        (StackExhausted)    { exit 106i32; },
+        (MachineFault)      { exit 107i32; },
+        (DecreasesViolated) { exit 108i32; },
+        (*)                 { exit 99i32; }
+    }
+    exit 9i32;
+};

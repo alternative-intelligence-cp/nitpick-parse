@@ -559,6 +559,10 @@ bound is the intended path and what every example uses; `dyn` costs an indirect
 call per event and exists so that "choose the format from the file extension"
 does not require a hand-written `pick` in every consumer.
 
+*(2026-10-16, cycle 0.0.0: object safety measured — `dyn` over a `Self->` method runs,
+probe 07 — and at compiler `c9baa9e` so does the static path through a bound, probe 06, a
+compiler defect at `7e91730` until the compiler's landing 118; PA-106.)*
+
 ### PA-072 — the plugin contract is enumerated and mechanically checked
 **2026-09-03.** Eight obligations — grammar, never traps, never fails but
 `EParseState`, idempotent, consumes every byte once, bounded allocation,
@@ -756,3 +760,30 @@ for a container whose element drops `exit 0` cannot see.
 *Reversal, for the author:* when the compiler lands deep-view accessors for owning
 arena elements, probe 05 is accepted; re-decide then whether the pool stays a
 necessity or becomes an optimisation (`meta/roadmap/0.4/README.md`'s watch-for).
+
+### PA-106 — static dispatch through a bound is the intended path, measured; nothing was re-spelled around the defect that held it
+**2026-10-15, cycle 0.0.0, on probes 06 and 07; measured again 2026-10-16 at compiler `c9baa9e`.**
+At compiler `c9baa9e` a generic `drive<F: Src>(F->:f)` calling a synchronous `Self->` method,
+`f.step()`, links and runs, exit 0 at `-O0` and through `opt -O2` (probe 06), and so do its
+controls, at exits 5 and 1: a by-value method through the bound (probe 06b) and the `Self->` call with no
+bound (probe 06c). The same trait through `dyn` runs at both legs, an owning implementation
+behind an explicit `=> dyn` cast included (probe 07). PA-071 stands — `Format` is object-safe,
+measured — and so does its choice of the bound as the intended path, measured too:
+`PLUGIN_MODEL.md` G-4's consumer, G-9's `plugin_conform` and `VALUE_MODEL.md` D-22's
+`doc_build` take it as written. At `7e91730`, where the cycle was planned, probe 06 was a
+compiler defect — `npkc` emitted a call to `Count->:Src.step`, the receiver's POINTER type in
+the implementation's symbol, where `Count:Src.step` is defined, so `llc` refused the module —
+which the compiler registered as DEF-253 and fixed in its landing 118, which the libraries' one
+re-pin carries; nothing was re-spelled around it while it stood.
+
+*Alternatives declined:* **re-spell the bound path through `dyn`** — a workaround
+buried in library code, which `CLAUDE.md` forbids, and an indirect call per event
+PA-071 chose not to pay; **make `step` take `Self` by value** — the control shows a
+by-value method runs through a bound, but `PLUGIN_MODEL.md` G-3 refuses a by-value
+receiver because it would consume the parser per call; **hold all of cycle 0.0** —
+nothing in it is generic over a trait.
+
+*Reversal, for the author:* if a later pin breaks the bound path, probe 06 reddens the run that
+meets it, and a later decision either holds the path's uses on the defect, re-spelling nothing,
+or moves G-4's intended path to `dyn` openly, the checklist items that build them taking
+`dyn Format`.

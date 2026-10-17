@@ -1,0 +1,88 @@
+// expect-exit: 0
+//
+// PROBE 06 -- THE `Format` SHAPE THROUGH A GENERIC BOUND.
+//
+// ASKS: a trait with one method taking a `Self->` receiver -- `Format`'s `step` -- with two
+// implementations, called statically through a bound: `drive<F: Src>(F->:f)` calling `f.step()`.
+//
+// DEPENDS ON THE ANSWER: `PLUGIN_MODEL.md` §2 and PA-071, whose "static dispatch through a bound
+// is the intended path and what every example uses" is the consumer's whole road.
+//
+// THE ANSWER AT `c9baa9e`: it links and runs, exit 0 at -O0 and through `opt -O2`; so do its two
+// controls, at exits 5 and 1, `probe06b_bound_by_value.npk` (a by-value `Self` method, same bound) and
+// `probe06c_concrete_pointer.npk` (the `Self->` call with no bound), and so does the same trait
+// through `dyn` (`probe07_trait_dyn.npk`). At `7e91730`, where this cycle was planned, it was a
+// compiler defect: `npkc` accepted it and emitted, in `drive<Count>`, a call to
+// `@"npk.probe06_trait_bound.Count->:Src.step"` -- the receiver's POINTER type in the
+// implementation's symbol -- where `@"npk.probe06_trait_bound.Count:Src.step"` is defined, so `llc`
+// refused the module. The compiler registered it as DEF-253 and fixed it in its landing 118, which
+// the libraries' one re-pin carries; nothing was re-spelled around it (`CLAUDE.md`: never work
+// around a compiler defect).
+mod:probe06_trait_bound;
+
+enum:Step = { Ev(int32); Done; };
+
+trait:Src = { func:step = Step(Self->:self); };
+
+struct:Count = { int32:n; int32:hi; };
+impl:Count:Src = {
+    func:step = Step(Count->:self) {
+        if (self.n >= self.hi) { pass Step.Done; }
+        self.n = self.n + 1i32;
+        pass Step.Ev(self.n);
+    };
+};
+
+struct:Twice = { int32:n; };
+impl:Twice:Src = {
+    func:step = Step(Twice->:self) {
+        if (self.n >= 4i32) { pass Step.Done; }
+        self.n = self.n + 2i32;
+        pass Step.Ev(self.n);
+    };
+};
+
+func:drive<F: Src> = int32(F->:f) {
+    int32:sum = 0i32;
+    int32:guard = 0i32;
+    while (guard < 100i32) decreases 100i32 - guard {
+        guard = guard + 1i32;
+        Step:s = relay f.step();
+        pick (s) {
+            (Step.Ev(v)) { sum = sum + v; },
+            (Step.Done)  { pass sum; }
+        }
+    }
+    pass 0i32 - 1i32;
+};
+
+func:run = int32() {
+    Count:c = Count{ n: 0i32, hi: 3i32 };
+    Twice:t = Twice{ n: 0i32 };
+    int32:a = relay drive(@c);
+    int32:b = relay drive(@t);
+    if (a != 6i32) { pass 10i32; }
+    if (b != 6i32) { pass 11i32; }
+    pass 0i32;
+};
+
+func:main = int32(cstring[]:_~argv) {
+    Result<int32>:r = run();
+    if (r.is_error) { exit 15i32; }
+    exit r.value;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest)    { exit 91i32; },
+        (HeapOom)           { exit 92i32; },
+        (IntOverflow)       { exit 93i32; },
+        (Unreachable)       { exit 95i32; },
+        (WildLeak)          { exit 96i32; },
+        (StackExhausted)    { exit 106i32; },
+        (MachineFault)      { exit 107i32; },
+        (DecreasesViolated) { exit 108i32; },
+        (*)                 { exit 99i32; }
+    }
+    exit 9i32;
+};
