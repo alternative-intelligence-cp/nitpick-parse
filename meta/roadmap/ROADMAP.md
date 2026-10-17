@@ -93,13 +93,17 @@ Enough detail that a reader can tell whether a cycle is finished without
 opening it. The per-cycle README has the subcycle map and the checklist.
 
 ### 0.0 — Foundations
-The **language probes** first: twelve small programs asking the compiler whether
-the shapes the design depends on are spellable — a 24-byte POD in a `Vec`, a
-tagged enum with payloads in a `pick`, an arena of POD nodes with a `get` that
-copies, a trait with a `Self->` receiver through a bound **and** through `dyn`,
-a `uint8[]` borrow at every escape-analysis edge, and — the one that matters
-most — **an accumulate-with-check that provably does not trap where the naive
-one does.** A probe that fails changes the design.
+The **language probes** first — the programs in `tests/probe/`, every verdict in
+`0.0/0.0.0.md` §6 — asking the compiler whether the shapes the design depends on are
+spellable: the specification's own `Event`, `Step` and `Node` with their sizes
+measured, an arena whose `get` copies and which refuses an owning element, a
+trait with a `Self->` receiver through a bound **and** through `dyn`, the
+read-only view at every edge the readers use, native recursion against an
+explicit stack, and — the one that matters most — **an accumulate-with-check
+that provably does not trap where the naive one does.** A probe that fails
+changes the design; cycle 0.0.0's verdicts moved numbers and reasons across the
+specifications, and the two compiler defects its planning found at `7e91730` were
+fixed by the compiler, at its landings 116 and 118, before its work began.
 
 Then the harness (`harness/run.py`, its self-check, the stages), the manifest's
 test table, CI, and `src/core/` — `Vec<T>`, `Bytes`, `SmallMap<K,V>` and
