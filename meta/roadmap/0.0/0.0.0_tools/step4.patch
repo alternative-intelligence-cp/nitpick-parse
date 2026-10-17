@@ -119,8 +119,8 @@ index 0301f26..92646bd 100644
 +*Reversal, for the author:* none needed for the spelling — it is the compiler's
 +D-351 that decides it; and none for the travel, which the compiler holds: were a
 +later pin to accept a callee's store again, probe 08h's refusal would fail on that
-+pin's first run, and a decision would make the rule this library's until the
-+compiler's fix.
++pin's first run: the store is then a memory-safety defect, raised to the compiler;
++what rests on it waits for the fix (the workbench's rule); a decision adds a belt.
 +
 +### @@PD-133@@ — native recursion traps; PA-022 stands, and its reason is a whole-program stop
 +**2026-10-15, cycle 0.0.0, on probes 10 and 10b.** A recursive descent handed
