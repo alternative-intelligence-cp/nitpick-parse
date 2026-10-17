@@ -1,0 +1,42 @@
+// expect-exit: 93
+//
+// PROBE 01a -- THE NAIVE DECIMAL ACCUMULATOR, AND WHETHER IT TRAPS. The flagship's first half
+// (`meta/roadmap/0.0/0.0.0.md` §4).
+//
+// ASKS: twenty-three nines fed to `acc = acc * 10 + d` in an `int64` -- the accumulator every
+// parser in every other language writes. Does plain overflow trap here (the compiler's D-210),
+// and through which `failsafe` arm?
+//
+// DEPENDS ON THE ANSWER: `SAFETY.md` §4 and PA-012, the library's central correctness claim --
+// no arithmetic on input may trap -- and `SCAN_MODEL.md` §5's helpers, which exist because this
+// does. A long number in a document would stop the program that parses it.
+//
+// EXPECTED: the multiply traps `IntOverflow` on the nineteenth digit, and the program leaves
+// through that arm, 93 (`PLAYBOOK.md` §3 item 8), at -O0 and through `opt -O2` alike. `exit
+// 0i32` below is never reached.
+//
+// A NEGATIVE VERDICT -- exit 0 -- would mean D-210 does not apply as read, and `SAFETY.md` §4 is
+// re-framed before anything else is written.
+mod:probe01a_naive_accumulate;
+
+func:main = int32(cstring[]:_~argv) {
+    int64:acc = 0i64;
+    for (int64:i in 0i64...23i64) {
+        acc = acc * 10i64 + 9i64;
+    }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest)    { exit 91i32; },
+        (HeapOom)           { exit 92i32; },
+        (IntOverflow)       { exit 93i32; },
+        (Unreachable)       { exit 95i32; },
+        (WildLeak)          { exit 96i32; },
+        (StackExhausted)    { exit 106i32; },
+        (MachineFault)      { exit 107i32; },
+        (*)                 { exit 99i32; }
+    }
+    exit 9i32;
+};

@@ -1,0 +1,113 @@
+// expect-exit: 0
+//
+// PROBE 01b -- THE CHECKED ACCUMULATOR, AND THAT IT NEVER TRAPS. The flagship's second half.
+//
+// ASKS: `mul_add` -- the guard order `SCAN_MODEL.md` §5 prescribes, checked BEFORE the multiply --
+// driven with probe 01a's twenty-three nines, with five thousand of them, with `bound` at
+// `UINT64_MAX`, `INT64_MAX` and 0, with `base` at 2, 8, 10 and 16, at the exact edge, and with a
+// zero base. It answers `NIL` where the value would not fit and the value where it does. Does any
+// input make it trap?
+//
+// DEPENDS ON THE ANSWER: PA-012, and cycle 0.1's `src/scan/arith.npk`, which inherits this
+// function's shape.
+//
+// EXPECTED: exit 0 at -O0 and through `opt -O2`. Each assertion has its own code, 10 … 29, all
+// below the `failsafe` arms' 91 and up.
+//
+// TWO FACTS IT RESTS ON: `UINT64_MAX` is outside the literal envelope (`NITPICK-LEX-004`, the
+// compiler's D-148; so is every `uint64` literal above `INT64_MAX`), so it is built from
+// `INT64_MAX`; and a `never fails` function is called `raw`, or its call is a `Result`.
+//
+// A NEGATIVE VERDICT -- a trap code, 93 or 97 -- means the guard order is wrong, and the fix is
+// found here rather than in cycle 0.1 with five formats built on it.
+mod:probe01b_checked_accumulate;
+
+fixed uint64:I64_MAX = 9223372036854775807u64;
+fixed uint64:U64_MAX = I64_MAX * 2u64 + 1u64;
+
+func:mul_add = uint64?(uint64:acc, uint64:base, uint64:digit, uint64:bound)
+        never fails {
+    if (base == 0u64)   { pass NIL; }
+    if (digit > bound)  { pass NIL; }
+    uint64:room = (bound - digit) / base;
+    if (acc > room)     { pass NIL; }
+    pass (acc * base + digit);
+};
+
+// `n` copies of `digit` in `base` under `bound`: how many steps succeeded before the first NIL,
+// the value then, and how many steps answered NIL.
+struct:Run = { int64:ok; uint64:value; int64:nils; };
+
+func:feed = Run(int64:n, uint64:base, uint64:digit, uint64:bound) never fails {
+    uint64:acc = 0u64;
+    int64:ok = 0i64;
+    int64:nils = 0i64;
+    for (int64:i in 0i64...n) {
+        uint64?:r = raw mul_add(acc, base, digit, bound);
+        if (r == NIL) { nils = nils + 1i64; }
+        else {
+            if (nils == 0i64) { acc = r ?? 0u64; ok = ok + 1i64; }
+        }
+    }
+    pass Run{ ok: ok, value: acc, nils: nils };
+};
+
+func:main = int32(cstring[]:_~argv) {
+    // 23 nines, base 10, under UINT64_MAX: nineteen fit, the twentieth is NIL.
+    Run:a = raw feed(23i64, 10u64, 9u64, U64_MAX);
+    if (a.ok != 19i64) { exit 10i32; }
+    if (a.value != 999999999999999999u64 * 10u64 + 9u64) { exit 11i32; }
+    if (a.nils != 4i64) { exit 12i32; }
+    // 5000 nines: no trap, and every step after the nineteenth answers NIL.
+    Run:b = raw feed(5000i64, 10u64, 9u64, U64_MAX);
+    if (b.ok != 19i64) { exit 13i32; }
+    if (b.nils != 4981i64) { exit 14i32; }
+    // Under INT64_MAX: eighteen fit.
+    Run:c = raw feed(23i64, 10u64, 9u64, I64_MAX);
+    if (c.ok != 18i64) { exit 15i32; }
+    if (c.value != 999999999999999999u64) { exit 16i32; }
+    // Under 0: a digit above the bound is NIL at once, and zero digits stay 0.
+    Run:d = raw feed(3i64, 10u64, 9u64, 0u64);
+    if (d.ok != 0i64) { exit 17i32; }
+    Run:e = raw feed(3i64, 10u64, 0u64, 0u64);
+    if (e.ok != 3i64) { exit 18i32; }
+    if (e.value != 0u64) { exit 19i32; }
+    // Base 2, ones: sixty-four fit (2^64 - 1), the sixty-fifth is NIL.
+    Run:f = raw feed(70i64, 2u64, 1u64, U64_MAX);
+    if (f.ok != 64i64) { exit 20i32; }
+    if (f.value != U64_MAX) { exit 21i32; }
+    // Base 8, sevens: twenty-one fit (2^63 - 1), the twenty-second is NIL.
+    Run:g = raw feed(25i64, 8u64, 7u64, U64_MAX);
+    if (g.ok != 21i64) { exit 22i32; }
+    if (g.value != I64_MAX) { exit 23i32; }
+    // Base 16, fifteens: sixteen fit, the seventeenth is NIL.
+    Run:h = raw feed(20i64, 16u64, 15u64, U64_MAX);
+    if (h.ok != 16i64) { exit 24i32; }
+    if (h.value != U64_MAX) { exit 25i32; }
+    // The edge itself: 1844674407370955161 * 10 + 5 is UINT64_MAX, and + 6 is not.
+    uint64?:edge = raw mul_add(1844674407370955161u64, 10u64, 5u64, U64_MAX);
+    if (edge == NIL) { exit 26i32; }
+    if ((edge ?? 0u64) != U64_MAX) { exit 27i32; }
+    uint64?:over = raw mul_add(1844674407370955161u64, 10u64, 6u64, U64_MAX);
+    if (over != NIL) { exit 28i32; }
+    // A zero base is NIL, not a division by zero.
+    uint64?:zb = raw mul_add(5u64, 0u64, 1u64, U64_MAX);
+    if (zb != NIL) { exit 29i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest)    { exit 91i32; },
+        (HeapOom)           { exit 92i32; },
+        (IntOverflow)       { exit 93i32; },
+        (Unreachable)       { exit 95i32; },
+        (WildLeak)          { exit 96i32; },
+        (DivByZero)         { exit 97i32; },
+        (DivOverflow)       { exit 98i32; },
+        (StackExhausted)    { exit 106i32; },
+        (MachineFault)      { exit 107i32; },
+        (*)                 { exit 99i32; }
+    }
+    exit 9i32;
+};
