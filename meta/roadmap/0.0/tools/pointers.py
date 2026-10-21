@@ -12,6 +12,15 @@ Reads the `+` lines of every `step*.patch` in the tools dir, and reports:
   * every section they cite as `` `<FILE>.md` §<n> `` with the file it resolves to and whether that file has a
     heading `## <n>.`, or `NO SUCH SECTION`. A section of a document outside this repository (the compiler's, the
     workbench's) is listed as such, unresolved here and read by the plan's §1.
+
+(2026-10-21, cycle 0.0's text round, found by its sweep for twins of 0.0.1's block 4 name pattern:) SECTION reads a
+pointer only where its file is a bare upper-case name, and RULE an id only with no letter suffix. Over the patches of
+0.0.1 ... 0.0.5, none of 0.0.1's added lines writes either form; 0.0.2 ... 0.0.5's write 8 section pointers naming a
+path or a plan file (`specs/BUILD.md` §3, `0.0.0.md` §2 ...) and 23 citations of 5 suffixed ids (B-1a, B-2a, B-5b and
+P-1a, and `nitpick-regex`'s P-1b), which their §1 lines do not list. Each was resolved by hand at the round, and
+resolves. The widening -- a path read against its file's directory and the root, an archived `done/0.0/` name against
+the live one, a suffixed id, an id another repository owns, and a planted control for each -- is owed to the next
+change to this tool.
 """
 import glob
 import os
