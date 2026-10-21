@@ -1,9 +1,13 @@
 # nparse — the manifest.
 #
-# The schema is the compiler's (BUILD_REFERENCE.md §1, D-077): four tables plus
-# the `[[test]]` array, and `npkg`'s parser refuses a key the schema lacks. It
-# is written in full now, ahead of the tool that reads it, because a manifest
-# that appears when the tooling arrives is a manifest nobody reviewed.
+# The schema is the compiler's (BUILD_REFERENCE.md §1, D-077): six tables and
+# the `[[test]]` array. This manifest carries four of the tables -- `[verify]`
+# configures the compiler's verified build and `[limits]` the compiler's own
+# runners, and no tool of this library runs either. It is written in full
+# ahead of the tool that reads it, because a manifest that appears when the
+# tooling arrives is a manifest nobody reviewed.
+# *(Corrected 2026-10-15, cycle 0.0.1 -- PA-111: this said "four tables plus the
+# `[[test]]` array", and the compiler's schema has six.)*
 #
 # WHAT CANNOT READ THIS YET. `npkg build` is the compiler's own bootstrap
 # ladder — it assembles `runtime/npkrt.ll` and `bootstrap/seed/stage1.ll`, has
@@ -36,8 +40,20 @@ opt-level = 0
 # compiler pins, because a patch release may change instruction selection. These
 # lists are READ by every `llc`/`opt`/`ld.lld` invocation the harness makes; a
 # stated flag nothing consumes is the next stale document.
+# *(20.1.8 since cycle 0.0.1, 2026-10-15 -- PA-111: the compiler's D-349 moved its pin from
+# 20.1.2 at its landing 99, and compiler `7e91730` carries it.)*
 [toolchain]
-llvm          = "20.1.2"
+llvm          = "20.1.8"
+# THE TARGET EVERY MODULE STATES (the compiler's E-8, D-322 (5), its landing 71).
+# Every emission opens with a `target datalayout` and a `target triple` line, and
+# these two rows are what the runner holds them to: `datalayout` to what the
+# pinned `opt` derives from `triple`, and every linked program's two lines to
+# both (cycle 0.0.2's harness). Pins, not settings -- the compiler's runners
+# refuse a manifest without either, by name (its BUILD_REFERENCE.md §1) -- and
+# the layout is the FULL string: `llvm-as` completes a partial one, which then
+# fails the belt.
+triple        = "x86_64-unknown-linux-gnu"
+datalayout    = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-i128:128-f80:128-n8:16:32:64-S128"
 llc-flags     = ["-O0", "-filetype=obj", "-relocation-model=static"]
 llc-opt-flags = ["-O2", "-filetype=obj", "-relocation-model=static"]
 opt-flags     = ["-O2", "-S"]
@@ -57,10 +73,22 @@ lld-flags     = ["-static"]
 # while checking nothing, which is the failure this table exists to prevent.
 # The stages are the compiler's (BUILD_REFERENCE §7.1) plus this library's own
 # `roundtrip` and `corpus`, and the expectation grammar lives inside each test
-# file.
-#
-# [[test]]
-# name = "conformance"
-# stage = "compile"
-# kind = "positive"
-# path = "tests/conformance"
+# file. Suites run in the order written here.
+
+# Cycle 0.0.1's two entries. `compile`/`positive` means "compiles, links, runs,
+# and exits with the expected code": the consumer of the public surface.
+[[test]]
+name  = "conformance"
+stage = "compile"
+kind  = "positive"
+path  = "tests/conformance"
+
+# Cycle 0.0.0's probes that compile, link and run, judged by their exit codes at
+# -O0 and again through `opt -O2`. `path` is a directory, not recursive, so the
+# probes refused on purpose (`tests/probe/refused/`) are not in it -- they have
+# their own entry, judged their own way, from cycle 0.0.3 -- and nor would a
+# compiler defect's reproduction be (`tests/probe/defect/`, none at the pin).
+[[test]]
+name  = "probe"
+stage = "program"
+path  = "tests/probe"

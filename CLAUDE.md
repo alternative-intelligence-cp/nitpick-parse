@@ -116,8 +116,9 @@ The compiler binary is the **pinned toolchain** the board names
 (`../BOARD.md`, W-18): `$NPKC` and `$NPKRT` are supplied to every session by the
 orchestrator, or set by hand from `../.internal/toolchain/<commit>/`. Never build the
 compiler from here and never read its `build/` directly — the guard refuses
-the first, and the second is rebuilt under you. LLVM 20.1.2 exactly, pinned;
-`llvm-config --version` to check.
+the first, and the second is rebuilt under you. LLVM 20.1.8 exactly — the
+manifest's `[toolchain]` pin, the compiler's since its D-349 (PA-111) — asked of
+the tools themselves: `llc --version`, `opt --version`, `ld.lld --version`.
 
 ## Where things go
 

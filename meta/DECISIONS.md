@@ -911,3 +911,22 @@ again** — a table is the form a check can read without a second, hand-written 
 
 *Reversal, for the author:* none needed; it changes no import, only how the rule is
 written.
+
+### PA-111 — the toolchain is LLVM 20.1.8, with the compiler's target rows, in the manifest and in CI
+**2026-10-15, cycle 0.0.1.** `nitpick.toml`'s `[toolchain]` pins `llvm = "20.1.8"` and
+carries `triple` and `datalayout` exactly as the compiler's own manifest and its
+`BUILD_REFERENCE.md` §1 give them at the pin `7e91730`, worded as `nitpick-regex`'s
+manifest words them; CI installs that release and asserts it, builds the compiler
+at the pinned commit and asserts its emission against the pin's recorded digest;
+and the documents that named 20.1.2 name 20.1.8. The compiler moved its pin at its
+landing 99 (D-349), and its runners refuse a manifest without the two target rows
+(`BUILD_REFERENCE.md` §1). The pin audit's PL-4 and the early ecosystem audit's E2-4.
+
+*Alternatives declined:* **write the version and no target rows** — the compiler's
+runners refuse that manifest by name, and the rows are what a reader of an emission
+lays it out by; **say "the compiler's pin" and no number** — a manifest row is a
+number, and the harness asserts the tools against it.
+
+*Reversal, for the author:* none for the rows; the one re-pin, at landing 118, moves
+`NITPICK_COMMIT` and the emission's digest in CI, and the LLVM row only if a landing
+moves the compiler's D-349.

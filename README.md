@@ -121,9 +121,10 @@ a folder, a subcycle is a file inside it, and a finished cycle moves to
 
 ## Requirements
 
-The Nitpick compiler and LLVM 20.1.2 — the same toolchain the compiler pins.
-Nothing else, at build time or at run time. `nparse` makes no syscall, so
-unlike most of the ecosystem it is not tied to Linux or to x86-64.
+The Nitpick compiler and LLVM 20.1.8 — the same toolchain the compiler pins.
+Nothing else, at build time or at run time. `nparse` makes no syscall, so its
+source is tied to no platform; the toolchain is: the compiler's pinned target is
+x86-64 Linux, whose triple and data layout `nitpick.toml` carries.
 
 ## Licence
 
