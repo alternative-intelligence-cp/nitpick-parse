@@ -1,0 +1,8 @@
+mod:format;
+
+// `src/format/` — the four readers — JSON, TOML, CSV, the YAML subset — each a `Format`.
+// Specified by `meta/specs/FORMATS.md` and `PLUGIN_MODEL.md`; built from cycle 0.3, 0.6, 0.7, 0.8. A placeholder until then, by cycle 0.0.1's plan:
+// it compiles, so the parse sweep has this directory to sweep, and it is replaced, not deleted.
+//
+// MAY IMPORT: `event`, `diag`, `scan` and `core` — **never `doc`** (B-18) (`meta/specs/BUILD.md` B-17's table). Every import is a relative path
+// (B-16) until the workbench's dependency roots exist (`meta/OPEN_QUESTIONS.md` O-N1).

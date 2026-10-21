@@ -1,0 +1,8 @@
+mod:event;
+
+// `src/event/` — `Event`, `Step`, `TextRef`, `Options`, the `Format` trait, the depth stack, `event_validate`.
+// Specified by `meta/specs/EVENT_MODEL.md` and `PLUGIN_MODEL.md`; built from cycle 0.2. A placeholder until then, by cycle 0.0.1's plan:
+// it compiles, so the parse sweep has this directory to sweep, and it is replaced, not deleted.
+//
+// MAY IMPORT: `diag`, `scan` and `core` (`meta/specs/BUILD.md` B-17's table). Every import is a relative path
+// (B-16) until the workbench's dependency roots exist (`meta/OPEN_QUESTIONS.md` O-N1).

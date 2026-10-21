@@ -1,0 +1,8 @@
+mod:core;
+
+// `src/core/` — the storage primitives — `Vec<T>`, `Bytes`, `SmallMap<K,V>` — and `limits.npk`, every named bound.
+// Specified by `meta/specs/BUILD.md` §5 and `SAFETY.md` §7; built from cycle 0.0.4. A placeholder until then, by cycle 0.0.1's plan:
+// it compiles, so the parse sweep has this directory to sweep, and it is replaced, not deleted.
+//
+// MAY IMPORT: nothing (`meta/specs/BUILD.md` B-17's table). Every import is a relative path
+// (B-16) until the workbench's dependency roots exist (`meta/OPEN_QUESTIONS.md` O-N1).

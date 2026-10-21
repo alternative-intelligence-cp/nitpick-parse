@@ -203,24 +203,32 @@ carries a comment naming O-N1 so the day it lands the change is greppable.
 > deliberately, which is a feature — the public surface is a list in one file
 > that a reviewer can read.
 
-**Rule B-17 — the layering, and the direction of every arrow.**
+**Rule B-17 (PA-110) — the layering, as a table.** A module imports only the modules its
+row names:
 
-```
-   emit ──────────────┐
-     │                ▼
-  format ──►  doc ──► event ──► diag ──► scan ──► core
-     │                 │                   ▲        ▲
-     └─────────────────┴───────────────────┘        │
-                                                    │
-                       (core depends on nothing) ───┘
-```
+| Module | May import |
+|---|---|
+| `core` | nothing |
+| `scan` | `core` |
+| `diag` | `scan`, `core` |
+| `event` | `diag`, `scan`, `core` |
+| `doc` | `event`, `diag`, `scan`, `core` |
+| `format` | `event`, `diag`, `scan`, `core` — **never `doc`** (B-18) |
+| `emit` | `doc`, `event`, `diag`, `scan`, `core` |
 
 `core` depends on nothing. `scan` depends on `core`. `diag` depends on `scan`
 (for `Span`) and `core`. `event` depends on `diag`, `scan`, `core`. `doc`
 depends on `event` and below. `format` depends on `event` and below — **never
 on `doc`**, because a streaming consumer must be able to import a format
 without pulling in the tree. `emit` depends on `doc` (it prints a tree) and on
-`event` (it can also print a stream). A module may not import one to its right.
+`event` (it can also print a stream).
+
+*(2026-10-15, cycle 0.0.1, PA-110: until this subcycle the rule was a drawing —
+`format ──► doc ──► event ──► …` on one line, the first arrow the one B-18 forbids —
+and the sentence "a module may not import one to its right", where every arrow in
+the drawing pointed right, at what the module imports: the reverse of what it meant,
+and of `src/README.md`'s "to its left". A table states each module's imports once,
+and it is what the harness's `check_layering` reads.)*
 
 **Rule B-18 — `format` may not import `doc`.** Stated separately because it is
 the arrow most likely to be drawn by accident, and drawing it would make every

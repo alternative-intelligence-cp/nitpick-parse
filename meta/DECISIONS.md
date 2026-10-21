@@ -895,3 +895,19 @@ budget.
 *Reversal, for the author:* none for the measurement. The three codes are offered
 to the workbench for `PLAYBOOK.md` §3 item 8; if it assigns others, the probes and
 units change their arm lines to match, and nothing else moves.
+
+### PA-110 — the layering is a table of what each module imports
+**2026-10-15, cycle 0.0.1.** `BUILD.md` B-17 states the layering as a table, one row
+per module, and the drawing goes. The drawing put `format ──► doc` on its main line,
+the one arrow B-18 forbids, and its sentence said a module "may not import one to its
+right" when every arrow pointed right at what a module imports — so the rule, read
+literally, forbade every import it drew. `src/README.md` had the direction right. The
+seven placeholder modules each state their row in their header (cycle 0.0.1's plan),
+and the harness's `check_layering` (cycle 0.0.3) reads the table.
+
+*Alternatives declined:* **correct the sentence and keep the drawing** — the drawing
+would still show the forbidden arrow, and a drawing is what a reader copies; **draw it
+again** — a table is the form a check can read without a second, hand-written copy.
+
+*Reversal, for the author:* none needed; it changes no import, only how the rule is
+written.

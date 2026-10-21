@@ -1,0 +1,8 @@
+mod:scan;
+
+// `src/scan/` — the cursor, spans, the class table, UTF-8, escapes, and the checked arithmetic (`arith.npk`).
+// Specified by `meta/specs/SCAN_MODEL.md`; built from cycle 0.1. A placeholder until then, by cycle 0.0.1's plan:
+// it compiles, so the parse sweep has this directory to sweep, and it is replaced, not deleted.
+//
+// MAY IMPORT: `core` (`meta/specs/BUILD.md` B-17's table). Every import is a relative path
+// (B-16) until the workbench's dependency roots exist (`meta/OPEN_QUESTIONS.md` O-N1).

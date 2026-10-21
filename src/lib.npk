@@ -1,0 +1,9 @@
+mod:lib;
+
+// `nparse` — the umbrella. A consumer imports this file by a relative path (`meta/specs/BUILD.md`
+// B-16) and reaches the public surface through it.
+//
+// IT RE-EXPORTS NOTHING YET, AND THAT IS DELIBERATE (cycle 0.0.1's plan). `use` is not transitive
+// (the compiler's `MODULE_REFERENCE.md` §2.3), so the public surface is a list in this one file, one
+// `pub use` per name, written by the cycle that makes the name public — cycle 0.1's cursor first.
+// A list a reviewer reads in one place is the reason the library has an umbrella at all.
