@@ -6,7 +6,7 @@ exists — what the prototype's five parsers each rewrote was not the grammar, i
 was this.
 
 > **`0.1.0.md` is written execution-grade at cycle 0.0's close** (0.0.5, step
-> 4), so this cycle is openable by a session that was not present for the
+> 5), so this cycle is openable by a session that was not present for the
 > probes. That is the convention for every cycle.
 
 ## Why here, and why it is the riskiest cycle in the plan
@@ -26,7 +26,8 @@ attention.
 
 PA-010 … PA-014, and PA-004's `limits.npk`. All settled.
 
-**Open questions to settle:** none. **Open by design:** O-P2
+**Open questions to settle:** the one put to the author — what an input over 4 GiB answers — is
+answered (2026-10-16, (A)), and 0.1.1 below records it. **Open by design:** O-P2
 (`NPARSE_MAX_SCALAR`) is a *measurement*, taken at cycle 0.3 against the
 JSONTestSuite corpus, not here.
 
@@ -58,6 +59,7 @@ JSONTestSuite corpus, not here.
 - [ ] **every operation total**: an out-of-range position clamps, never traps, never returns garbage — asserted at `pos == 0`, `pos == len`, `pos > len`
 - [ ] `Span { uint32:lo; uint32:hi; }`, half-open, with `lo <= hi` maintained
 - [ ] an input longer than `0xFFFFFFFF` refused at entry with `EParseState` (C-5) — a caller mistake, not an input's
+- [ ] **the workbench's question 36, answered by the author on 2026-10-16: (A)**: C-5's refusal above and `SAFETY.md` §7's `NPARSE_MAX_INPUT` row — 2^47, `EParseState`, "a caller mistake, not an input", unreachable behind C-5 while a span is 32 bits — are one input-size path, and a hostile input over 4 GiB takes it to the consuming program's `failsafe` and stops it: C-5 answers it with `EParseState`, `SAFETY.md` §3 says no byte stream reaches either identity, §8 names no duty to cap an input's size, and S-1 exists to prevent exactly that stop. The defects digest records it as its own observation, not a source's claim — a hostile upload "could still reach it" ([`security-defects.md`](../../research/security-defects.md), its item 5). The two ways out were: the oversize input answers a `Fault` of its own kind, the same for both (S-2), which the question recommended; or §8 states the duty and §3's "No" is qualified. The author chose the first: the first parse step over an oversize input answers an ordinary `Fault` of a new kind (the recommendation names it `InputTooLarge`), then `Done`; `EParseState` stays for API misuse alone, and §7's row answers the same `Fault`, so no input-size path reaches `EParseState`. This cycle's decision records the answer and amends C-5, the row and the comment cycle 0.0.4's `src/core/limits.npk` copies from it ("exceeding it is `EParseState` -- a caller mistake, not an input"); C-5 stands as written until then
 - [ ] `scan_line_col(src, offset)` counting from the start, one-based, and **the only place a one-based number exists**
 - [ ] the `Cursor`-holding-a-borrow shape from probe 08's fourth edge, exercised at every call depth the formats will use
 
@@ -69,6 +71,7 @@ JSONTestSuite corpus, not here.
 ### 0.1.3 — UTF-8
 - [ ] the decoder accepts exactly Unicode Table 3-7: no overlongs, no surrogates, nothing above `U+10FFFF`, per-lead-byte continuation ranges
 - [ ] `scan_utf8(c) -> Optional<Utf8Step>` returning `NIL` on ill-formed input, with **no policy** — reject-or-substitute is the format's (C-11)
+- [ ] C-9's clause that TOML requires UTF-8 "for strings and keys", read against TOML's own sentence, "A TOML file must be a valid UTF-8 encoded Unicode document" (v1.1.0's text, as [`security-guidance.md`](../../research/security-guidance.md) quotes it), and C-9's TOML policy stated from TOML's text at the source, for the version `FORMATS.md` pins
 - [ ] a corpus test over every boundary of every sequence length, including the four overlong forms and both surrogate halves
 - [ ] the codepoint accumulation goes through `arith.npk` like everything else (C-12), even though a four-byte sequence cannot overflow a `uint32` — because the rule admits no exceptions and an unchecked accumulation is something a reader has to reason about
 - [ ] a `prove` comment: the length is 1…4 and the codepoint is a scalar value

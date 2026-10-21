@@ -37,12 +37,15 @@ it.
 
 ### 0.6.0 — the corpus
 - [ ] toml-test vendored with `PROVENANCE.md`, both `valid/` and `invalid/`
+- [ ] that `PROVENANCE.md` naming the TOML version the gate runs, never the runner's default (`CURRENCY.md`'s corpora row); and the two leading-BOM valid cases toml-test withdrew on 2026-09-15 (`0d1c92e`, which leaves a leading BOM to the implementation) read against `allow_bom`: TOML's answer to a leading BOM stated, and the exact pass count taken from the vendored commit, before or after `0d1c92e` ([`security-vectors.md`](../../research/security-vectors.md))
 - [ ] the `corpus` stage judging `valid/` as accepted and `invalid/` as faulted, with an **exact** pass count
 - [ ] **the expected-JSON second oracle** (R-12): every `valid/` case's tree printed as JSON and compared to the corpus's own expected encoding — **the only check in the suite that does not go through our own reader**
-- [ ] the specification version pinned in `meta/research/format-versions.md` (PA-054) — "TOML" without a version is three incompatible languages
+- [ ] the specification version pinned as `meta/research/CURRENCY.md`'s TOML row (PA-054, PA-112) — "TOML" without a version is three incompatible languages; **v1.1.0 is published** and this cycle decides between it and v1.0.0, with the two compared — the research gate's [`security-guidance.md`](../../research/security-guidance.md) lists the five changes the project's changelog gives, and this cycle reads both texts at the source — and R-8 re-read against the one chosen
+- [ ] what TOML's text requires and no rule here states yet, each stated with its case for the version chosen: the whole document valid UTF-8, comments included; no control character but tab, U+007F among them, in a comment or a string; bare keys of ASCII `A-Za-z0-9_-` only; and an escape not listed reserved: "if they are used, TOML should produce an error" (v1.1.0's text, as [`security-guidance.md`](../../research/security-guidance.md) quotes it)
 
 ### 0.6.1 — scalars
 - [ ] integers in base 10, 16, 8 and 2, with underscores, through `arith.npk` (PA-012)
+- [ ] an integer that cannot be represented losslessly: v1.1.0's text says "an error must be thrown", and its changelog that parsers are "free to support any int or float size" (#1058), which may loosen that; `VALUE_MODEL.md` D-19 leaves the `Fault` over `ND_BIG` to the format, and no TOML rule states it yet — stated here, with its `toml-test` case ([`security-guidance.md`](../../research/security-guidance.md))
 - [ ] floats including `inf`, `-inf`, `nan`, exponents, and the underscore rules
 - [ ] basic strings, multi-line basic, literal strings, multi-line literal — with the line-ending-backslash and leading-newline trimming rules
 - [ ] `\U0001F600`-style eight-digit escapes through `scan_hex8`
@@ -56,6 +59,7 @@ it.
 - [ ] a key in a table closed by a later header as `Fault(BadTable)`
 - [ ] a dotted key that would escape an inline table refused
 - [ ] every `toml-test` table case green, and the ones that are subtle listed in the record with what they taught
+- [ ] the cost of R-11's header and dotted-key resolution bounded under hostile input: no rule bounds it, and the research gate's defects digest, by its own reading, counts it among the quadratic class's unguarded costs ([`security-defects.md`](../../research/security-defects.md))
 
 ### 0.6.3 — arrays of tables and inline tables
 - [ ] `[[x]]` appending; mixing `[[x]]` with `[x]` refused

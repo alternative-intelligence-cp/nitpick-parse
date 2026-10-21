@@ -493,6 +493,8 @@ specification, and that is stated rather than hidden; its hand-built corpus is
 correspondingly larger.
 
 ### PA-054 — the specification version is pinned and recorded
+> **SUPERSEDED IN PART by PA-112 (2026-10-15)** — where the version is recorded; the rule stands.
+
 **2026-09-03.** In `meta/research/format-versions.md`, with the document's own
 version string and the date it was read. "TOML" without a version is three
 incompatible languages.
@@ -930,3 +932,36 @@ number, and the harness asserts the tools against it.
 *Reversal, for the author:* none for the rows; the one re-pin, at landing 118, moves
 `NITPICK_COMMIT` and the emission's digest in CI, and the LLVM row only if a landing
 moves the compiler's D-349.
+
+### PA-112 — one currency table; the library is security-sensitive, and its three research items gate cycle 0.0's work
+**2026-10-15, cycle 0.0.1.** Every outside fact the plan rests on is a row of
+`meta/research/CURRENCY.md` (the workbench research skill's §7, and `PLAYBOOK.md`
+§12), the formats' versions included: it supersedes in part PA-054, whose
+`meta/research/format-versions.md` held only the versions; a research digest is filed
+beside the table and cited by its row. **`nparse` is security-sensitive** — its input
+is hostile by design, and PA-008, PA-012 and PA-022 exist for that reason — so the
+three research items the workbench plan skill requires for such a library are owed:
+known defects in the prior art and the reference implementations, the standards bodies'
+current guidance, and the current test vectors (`CURRENCY.md` states each). **They
+gate cycle 0.0's work**: its first work dispatch, cycle 0.0.0's, carries their three
+digests, and its worker files them in `meta/research/` before any probe runs, so that a finding that asks
+the language a question becomes a cycle-0.0 probe before it is anything else, as the workbench plan skill
+asks; `CURRENCY.md`'s research section says where every other finding is held and who decides it. Each is
+a `security` digest, stale ninety days after its date (the research skill's §6), so a later cycle reads the
+three dates before it starts, and all three are re-run at hardening (its §8). TOML's row records that v1.1.0
+is published and that the version is cycle 0.6.0's to decide. The early ecosystem audit's E2-13.
+
+*Alternatives declined:* **keep `format-versions.md` beside `CURRENCY.md`** — two
+tables of outside facts, and the workbench's checks read one; **name the file
+`format-versions.md` and put every row in it** — the workbench's rule, its audit and
+its research skill name `CURRENCY.md`; **count the library routine** — its threat is
+the input, and the research would be skipped where it matters most; **gate cycle 0.1
+on them, through cycle 0.0.5's close** — the plan skill puts the three before the
+cycle map, and a finding that arrives after cycle 0.0 is archived has no cycle 0.0 to
+become a probe in (the plan verification of 2026-10-15, its finding 16).
+
+*Reversal, for the author:* to let cycle 0.0's probes run before the research, move
+the gate to cycle 0.1, through 0.0.5's close — 0.0.0's gate item 7 and block 0a's three
+research lines go, `CURRENCY.md`'s three research rows wait for their digests, and
+`0.1/0.1.0.md`'s gate names them; to count the library routine, strike `CURRENCY.md`'s
+research section and its three rows, and the gate with them.

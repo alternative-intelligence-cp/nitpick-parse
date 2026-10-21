@@ -51,6 +51,7 @@ writer) is decided here too.
 - [ ] yaml-test-suite vendored with `PROVENANCE.md`
 - [ ] **the filter is a committed list of case identifiers with the excluded construct named per case** (V-11) — not a regex, not a count
 - [ ] **every excluded case must produce `Fault(Unsupported)`**, so the exclusions are *tested* rather than skipped — this is the difference between a stated subset and an unstated gap
+- [ ] anchors and aliases refused by name, every case, while the expansion budget R-14 promises is unwritten: alias expansion is a published class (CVE-2017-18640, CVE-2019-11253, CVE-2026-45304), R-13's refusal is its only guard here, and no alias ships before that budget ([`security-defects.md`](../../research/security-defects.md))
 - [ ] the suite's expected event streams compared mechanically against ours — **the largest single reason to have adopted this event vocabulary** rather than inventing one
 - [ ] Q-1 confirmed: the actual proportion of the suite touching excluded constructs, measured and recorded
 

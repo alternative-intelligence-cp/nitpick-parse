@@ -57,6 +57,7 @@ PA-050, PA-053, PA-060. All settled.
 
 ### 0.7.4 — the writer
 - [ ] the canonical form: the dialect's delimiter and line ending, a field quoted **iff** it contains the delimiter, the quote, `\r` or `\n`, no trailing delimiter
+- [ ] **formula injection**, a published class with no rule here (CVE-2021-41270, CVE-2023-51763; `WRITER_MODEL.md` W-9 sets only JSON's escapes): a writer rule beside W-9 says whether the writer neutralises a field that begins `=`, `+`, `-` or `@` or the duty is the caller's, before the writer ships ([`security-defects.md`](../../research/security-defects.md))
 - [ ] `EParseEncode` for what CSV cannot represent: a nested container, a map value that is not a scalar
 - [ ] the round trip green over the corpus, per dialect
 

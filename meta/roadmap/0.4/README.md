@@ -41,6 +41,7 @@ duplicate key our default would now reject.
 - [ ] **`doc_build` uses an explicit stack** (PA-034), and so do the walk, the compare, the print and the drop
 - [ ] on `Fault`, the partial arena is destroyed and the fault returned — **a partial document is never handed back** (D-22)
 - [ ] `doc_destroy` consuming the document, and every test exiting 0 so a missed destroy is a trap (D-151)
+- [ ] **S-19's bound for a `Document` made a stated function of the input**: "by the node and pool growth its arena does" names none, and a `Node` is 64 bytes (probe 04) where a JSON array element can cost two bytes of input and a CSV field one, so the arena can grow tens of times faster than its input — this cycle states nodes and pool bytes against the input's length, and decides whether a per-parse total joins `SAFETY.md` §7's table; each later format's cycle re-reads it ([`security-defects.md`](../../research/security-defects.md), its item 4)
 
 ### 0.4.1 — order and duplicates
 - [ ] a `Map` node's chain alternates key and value, `len` counting **pairs** (D-5's off-by-two, asserted)
@@ -48,6 +49,7 @@ duplicate key our default would now reject.
 - [ ] `DupPolicy` — `Error` (default), `First`, `Last`
 - [ ] O-P1 confirmed: no JSONTestSuite `y_` case contains a duplicate key the default would reject; if one does, the decision is amended rather than the test skipped
 - [ ] duplicate detection switching to an incremental index beyond `NPARSE_DUP_SCAN_MAX`, **invisible to the answer** (D-16)
+- [ ] that index's worst case under hostile keys bounded, or the index ordered by key bytes, before it ships: if it takes D-13's order, an unkeyed FNV-1a hash, keys built to share one hash fall in one equal-hash run and are scanned there, and the quadratic case D-16's switch exists to end returns ([`security-defects.md`](../../research/security-defects.md): its residual on D-13's index, which the same keys degrade to a scan)
 
 ### 0.4.2 — lookup
 - [ ] `doc_find` as a linear scan of the pair chain, comparing pool bytes

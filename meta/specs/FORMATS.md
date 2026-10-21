@@ -16,9 +16,14 @@ behind it rather than a claim.
 | **CSV** | RFC 4180 + dialects | **complete**, plus the dialects §6 names | hand-built + the W3C CSVW cases | 0.7 |
 | **YAML** | 1.2 core schema | **a stated subset**, §4 | yaml-test-suite, filtered to the subset | 0.8 |
 
-**Rule R-1 (PA-054) — the specification version is pinned and recorded**, in
-`meta/research/format-versions.md`, with the document's own version string and
-the date it was read. "TOML" without a version is three incompatible languages.
+**Rule R-1 (PA-054, PA-112) — the specification version is pinned and recorded**,
+as a row of `meta/research/CURRENCY.md`, with the document's own version string and
+the date it was read, and the digest that read it beside it. "TOML" without a
+version is three incompatible languages.
+
+*(2026-10-15, cycle 0.0.1, PA-112: this rule named `meta/research/format-versions.md`,
+and the workbench's rule names `CURRENCY.md` for every outside fact; one table holds
+them all.)*
 
 **Rule R-2 (PA-050) — four formats at 1.0, and the set is closed for that
 release.** Each is a cycle, each has a corpus gate, and adding a fifth before
