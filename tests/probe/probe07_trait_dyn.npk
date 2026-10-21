@@ -13,9 +13,9 @@
 // path. Probe 06 asks the same of static dispatch through a bound, and at `c9baa9e` that path runs
 // too; at `7e91730` it was a compiler defect, DEF-253, fixed by the compiler's landing 118.
 //
-// EXPECTED: exit 0 at -O0 and through `opt -O2`. Codes 10 … 15 are the assertions; a cell owned
-// twice would read the free poison (`Loud`'s length would be 0xAA-shaped) or free it twice
-// (`Unreachable`, 95).
+// EXPECTED: exit 0 at -O0 and through `opt -O2`. Codes 10 … 13 and 15 are the assertions; a
+// cell owned twice would read the free poison (`Loud`'s length would be 0xAA-shaped) or free it
+// twice (`Unreachable`, 95).
 mod:probe07_trait_dyn;
 
 enum:Step = { Ev(int32); Done; };

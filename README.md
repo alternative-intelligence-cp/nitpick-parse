@@ -6,10 +6,12 @@ set of scanning primitives, and formats as plugins over them. No dependencies,
 no libc, and **no syscall of any kind**: it is pure computation over bytes the
 caller hands it.
 
-> **Status: planning.** No code yet. The specification set is being written in
-> [`meta/specs/`](meta/specs/) and the plan in [`meta/roadmap/`](meta/roadmap/),
-> in the same order and by the same discipline the compiler used — specs first,
-> then a cycle map, then execution-grade subcycles, then code. The compiler
+> **Status: cycle 0.0, the foundations.** The language probes are in
+> [`tests/probe/`](tests/probe/) and the module skeleton in [`src/`](src/); no
+> parsing code yet. The specification set is in [`meta/specs/`](meta/specs/)
+> and the plan in [`meta/roadmap/`](meta/roadmap/), written in the order and by
+> the discipline the compiler used — specs first, then a cycle map, then
+> execution-grade subcycles, then code. The compiler
 > is past its cycle 1.5 (verification), and this library is built against the
 > commit the workbench pins.
 

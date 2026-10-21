@@ -262,13 +262,15 @@ these reads like an ordinary local name and is not:
 | `on` | a keyword — `Node?:on = …` does not parse |
 | `Self`, `Result`, `Optional`, `Handle`, `arena` | type keywords |
 | `trit`, `nit`, `oflags`, `prot`, `mflags`, `fmode` | type keywords |
+| `stack` | a memory qualifier — and every explicit-stack parser wants it; refused at the declaration with a misleading brace error after it (measured by cycle 0.0.0) |
+| `fixed`, `sealed`, `hidden`, `decreases`, `unbounded`, `shared_arena`, `acquire` | keywords (`PLAYBOOK.md` §10's list at the compiler's 1.5 re-pin) |
 
 The names this library therefore uses instead, fixed here so they are used
 consistently: **`hi`** for a range's upper bound (never `end`), **`src`** for a
 byte origin (never `in`), **`sink`** for a byte destination, **`fault`** for a
 parse failure value (never `error`), **`bound`** for a limit, **`kind`** for a
 discriminant, **`depth`** for nesting, **`tok`** for a token, **`lit`** for a
-literal's text.
+literal's text, **`frames`** for an explicit stack (never `stack`).
 
 ---
 

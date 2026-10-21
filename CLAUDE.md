@@ -4,6 +4,11 @@ Guidance for Claude Code sessions working in this repository.
 
 ## What this is
 
+`nparse` — a multi-format parsing library for **Nitpick**, the safety-critical
+systems language at `../../nitpick`. **Status: cycle 0.0** — the language probes
+are in `tests/probe/`, and the skeleton in `src/`; the specifications and the
+plan are in `meta/`.
+
 ## Before starting a session here
 
 Check **[`../BOARD.md`](../BOARD.md)** — it says whether this repository
@@ -11,10 +16,6 @@ is claimed by a stream, and by which. **One writer per repository, always.**
 [`../WORKSTREAMS.md`](../WORKSTREAMS.md) is the dependency graph and the
 stream partition: what gates this repository, what this repository gates, and
 what to do when a cross-stream gate is not ready yet.
-
-`nparse` — a multi-format parsing library for **Nitpick**, the safety-critical
-systems language at `../../nitpick`. **Status: planning.** No library code
-exists yet. The specifications and the plan do.
 
 The shared house rules for every library in this ecosystem are
 `../PLAYBOOK.md`; this file is what is specific to `nparse`.
@@ -93,12 +94,14 @@ that bite hardest here:
 `end` (every range wants it), `in` (every byte source wants it), `error`,
 `limit`, `any`, `buffer`, `raw`, `move`, `pick`, `fall`, `give`, `pass`,
 `fail`, `relay`, `is`, `is_err`, `where`, `with`, `as`, `on`, `never`, `fails`,
-`mod`, `unit`, `Self`, `Result`, `Optional`.
+`mod`, `unit`, `Self`, `Result`, `Optional` — and **`stack`**, a memory qualifier,
+which cost cycle 0.0.0 a build: `Vec<Frame>:stack` is `NITPICK-PARSE-002` at the
+declaration and a claim that a brace is never closed, far from the cause.
 
 The substitutes this library uses, so they are used consistently: `hi` for an
 upper bound, `src` for a byte origin, `sink` for a byte destination, `kind` for
 a discriminant, `fault` for a parse failure value, `bound` for a limit, `depth`
-for nesting, `tok` for a token.
+for nesting, `tok` for a token, `frames` for an explicit stack.
 
 Three shapes that surprise a C or Rust habit: adjacent string literals do not
 concatenate; `discard(x);` takes parentheses and `defer { … }` takes no
