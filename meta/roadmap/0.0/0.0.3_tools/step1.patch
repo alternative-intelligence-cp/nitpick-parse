@@ -831,7 +831,7 @@ index 0000000..792105f
 +         ("check_codes_documented", "cycle 0.2"), ("check_failsafe_arms", "cycle 0.2"),
 +         ("check_corpus_provenance", "cycle 0.3")]
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index 5193206..f86b987 100644
+index 4013cdd..0a5d03d 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
 @@ -1045,3 +1045,61 @@ the name both sides use.

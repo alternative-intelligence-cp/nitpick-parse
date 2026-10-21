@@ -61,7 +61,7 @@ index 787ca4a..5bedfed 100644
  **Parsing a number cannot stop your program.** Plain integer overflow *traps*
  in Nitpick (D-210), so the ordinary `acc = acc * 10 + d` accumulator crashes the
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index f86b987..91930f6 100644
+index 0a5d03d..2f653a8 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
 @@ -149,6 +149,9 @@ cycle 0.12's application; semantic versioning thereafter.

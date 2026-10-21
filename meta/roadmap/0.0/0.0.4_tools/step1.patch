@@ -1,5 +1,5 @@
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index 91930f6..e2cca4b 100644
+index 2f653a8..47d494b 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
 @@ -1106,3 +1106,26 @@ checks written now** — their inputs do not exist, and a check over nothing is
