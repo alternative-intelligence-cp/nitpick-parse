@@ -1,0 +1,174 @@
+# nparse CI.
+#
+# EVERY INPUT IS PINNED, AND THE PIN IS ENFORCED RATHER THAN REQUESTED (cycle 0.0.1's
+# plan; the compiler's D-204: the toolchain is a build input). The compiler is a
+# COMMIT, never a branch: a library whose CI tracks another repository's `main` goes
+# red for reasons that are not its own. Bumping a pin is a deliberate commit, and the
+# commit that bumps it is the one that runs the full suite. Modelled on
+# `nitpick-regex`'s workflow.
+#
+# WHAT A GREEN RUN PROVES AT CYCLE 0.0.1: the pinned compiler builds from a clean
+# checkout of the pinned commit; its emission is the one the pin recorded; LLVM is
+# exactly 20.1.8; and the conformance consumer compiles, links, runs and exits 0.
+# `harness/run.py` is a stub that judges nothing until cycle 0.0.2, and says so.
+#
+# EVERY HEX VALUE IS QUOTED. GitHub reads a workflow as YAML 1.2, where a bare run of
+# digits, one `e` and digits is a NUMBER -- `7e91730` is infinity -- so a commit, a
+# short commit and a digest are each a quoted string (`PLAYBOOK.md` §6).
+
+name: nparse
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  # The workbench's pinned compiler, by FULL sha (`c9baa9e` in the roadmap). PA-111.
+  NITPICK_COMMIT: "c9baa9e91c553d8db2a2a62f09c36b30a984b07f"
+  # THE EMISSION AT THAT COMMIT, as the compiler's own build recorded it -- notice 118's
+  # `npkc.ll` row. The emission step below ASSERTS it: the compiler's D-265 says the
+  # emission, not the binary, is the cross-machine claim. Moved with every pin.
+  NPKC_LL_SHA256: "1f48a31a5c9b5b78053444c404b7b2dd7c8c470c354dd3b14d47b3e75585ee2a"
+  NPKC_LL_BYTES: "31731079"
+  # nitpick.toml's [toolchain] llvm: an exact patch release. Upstream publishes
+  # `LLVM-20.1.8-Linux-X64.tar.xz` at its `llvmorg-20.1.8` release.
+  LLVM_VERSION: "20.1.8"
+
+jobs:
+  build:
+    # Pinned, not `ubuntu-latest`: a runner image that rolls forward is an unpinned input.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+
+    steps:
+      - name: Check out nparse
+        uses: actions/checkout@v4
+
+      - name: Check out the pinned compiler
+        uses: actions/checkout@v4
+        with:
+          repository: alternative-intelligence-cp/nitpick
+          ref: ${{ env.NITPICK_COMMIT }}
+          path: .nitpick
+
+      # `actions/checkout` with an explicit `ref` should make this redundant. It is the
+      # one fact every claim below rests on, so it is measured, not promised.
+      - name: Assert the compiler is AT the pinned commit
+        run: |
+          set -euo pipefail
+          have="$(git -C .nitpick rev-parse HEAD)"
+          if [ "$have" != "$NITPICK_COMMIT" ]; then
+            echo "compiler checkout is at $have; the pin is $NITPICK_COMMIT" >&2
+            exit 1
+          fi
+          if [ -n "$(git -C .nitpick status --porcelain)" ]; then
+            echo "the compiler checkout is dirty; the pin names a commit" >&2
+            exit 1
+          fi
+          echo "compiler HEAD == $have (clean)"
+
+      # The upstream release tarball: apt.llvm.org packages by MAJOR version and would
+      # give whatever 20.1.x is current. Cached on the version, an immutable asset.
+      - name: Cache LLVM ${{ env.LLVM_VERSION }}
+        id: llvm-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/llvm
+          key: llvm-${{ env.LLVM_VERSION }}-linux-x64
+
+      - name: Install LLVM ${{ env.LLVM_VERSION }}
+        if: steps.llvm-cache.outputs.cache-hit != 'true'
+        run: |
+          set -euo pipefail
+          mkdir -p ~/llvm
+          url="https://github.com/llvm/llvm-project/releases/download/llvmorg-${LLVM_VERSION}/LLVM-${LLVM_VERSION}-Linux-X64.tar.xz"
+          curl -fsSL "$url" | tar -xJ --strip-components=1 -C ~/llvm
+
+      - name: Put LLVM on PATH and assert the pin
+        run: |
+          set -euo pipefail
+          echo "$HOME/llvm/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/llvm/bin:$PATH"
+          for t in llc opt ld.lld; do
+            have="$("$t" --version | sed -nE 's/.*(LLVM version|LLD) ([0-9.]+).*/\2/p' | sed -n 1p)"
+            if [ "$have" != "$LLVM_VERSION" ]; then
+              echo "$t is $have; nitpick.toml pins $LLVM_VERSION exactly." >&2
+              exit 1
+            fi
+            echo "$t --version == $have"
+          done
+
+      # Keyed on the compiler's commit and the LLVM release, so a hit is by construction
+      # the right binary. The compiler's bootstrap harness, `quickemit.py`, leaves the
+      # two artefacts this library needs -- `npkc` and `npkrt.o` -- in `.internal/quickemit/`.
+      - name: Cache the built compiler
+        id: npkc-cache
+        uses: actions/cache@v4
+        with:
+          path: .nitpick/.internal/quickemit
+          key: npkc-${{ env.NITPICK_COMMIT }}-llvm-${{ env.LLVM_VERSION }}
+
+      - name: Build the compiler from the pinned commit
+        if: steps.npkc-cache.outputs.cache-hit != 'true'
+        working-directory: .nitpick
+        run: |
+          set -euo pipefail
+          python3 bootstrap/harness/quickemit.py --keep npkg/main.npk
+
+      - name: Check the toolchain artefacts exist
+        run: |
+          set -euo pipefail
+          test -f .nitpick/.internal/quickemit/npkc
+          test -f .nitpick/.internal/quickemit/npkrt.o
+          echo "NPKC=$GITHUB_WORKSPACE/.nitpick/.internal/quickemit/npkc"   >> "$GITHUB_ENV"
+          echo "NPKRT=$GITHUB_WORKSPACE/.nitpick/.internal/quickemit/npkrt.o" >> "$GITHUB_ENV"
+
+      # THE EMISSION, PRINTED AND ASSERTED. Every artefact the ladder leaves is printed with
+      # its size and digest, so the first that differs names the stage; the emission alone is
+      # asserted, because a binary's bytes may differ by machine and the emission may not.
+      - name: The compiler's emission, asserted against the pin's row
+        working-directory: .nitpick/.internal/quickemit
+        run: |
+          set -euo pipefail
+          echo "compiler pin: $NITPICK_COMMIT"
+          for f in builder.o builder npkrt.o npkc.ll npkc.o npkc; do
+            if [ -f "$f" ]; then
+              printf '%-12s %10s bytes  %s\n' "$f" "$(stat -c '%s' "$f")" "$(sha256sum "$f" | cut -d' ' -f1)"
+            else
+              printf '%-12s %s\n' "$f" "absent"
+            fi
+          done
+          have="$(sha256sum npkc.ll | cut -d' ' -f1)"
+          size="$(stat -c '%s' npkc.ll)"
+          if [ "$have" != "$NPKC_LL_SHA256" ] || [ "$size" != "$NPKC_LL_BYTES" ]; then
+            echo "npkc.ll is $size B / $have; the pin's emission is $NPKC_LL_BYTES B / $NPKC_LL_SHA256." >&2
+            echo "The emission is the cross-machine claim (the compiler's D-265): a compiler defect to raise." >&2
+            exit 1
+          fi
+          echo "npkc.ll == the pin's emission, $size B / $have"
+
+      # A STUB UNTIL CYCLE 0.0.2, and it says so in its output. 0.0.2 replaces this step's
+      # body with one that asserts the runner's unqualified green summary.
+      - name: Run the harness
+        run: python3 -B harness/run.py
+
+      # Until the harness judges it (cycle 0.0.2), the one thing 0.0.1 establishes is run
+      # here in full: the consumer compiles, links, RUNS and exits 0. `npkc` exiting 0
+      # does not mean `llc` accepts the module, so all four steps run and the last is judged.
+      - name: The conformance consumer, all four steps
+        run: |
+          set -euo pipefail
+          work="$RUNNER_TEMP/conformance"
+          mkdir -p "$work"
+          ( cd tests/conformance && "$NPKC" import.npk -o "$work/import.ll" )
+          llc -O0 -filetype=obj -relocation-model=static "$work/import.ll" -o "$work/import.o"
+          ld.lld -static "$work/import.o" "$NPKRT" -o "$work/import"
+          set +e
+          "$work/import"
+          status=$?
+          set -e
+          echo "tests/conformance/import.npk exits $status"
+          test "$status" -eq 0
