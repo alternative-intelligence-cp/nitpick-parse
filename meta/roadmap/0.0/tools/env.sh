@@ -126,6 +126,25 @@ refs() {
   sed -E 's/  +/ /g' "$A/refs.out"
 }
 
+# A workflow's top-level `env:` rows, read two ways -- as YAML reads them, and by the row pattern the counts use,
+# `^  [A-Z][A-Z0-9_]*: `, a capital and then capitals, digits and `_` -- then how many are quoted; and the pattern's
+# positive control: each row YAML names, planted unquoted in a copy in turn, must move one row from quoted to
+# unquoted. The control takes its rows from YAML, not from the pattern, so a row the pattern misses shows. (Cycle
+# 0.0's text round, 2026-10-21: the counts' first pattern, `[A-Z_]+`, could not match `NPKC_LL_SHA256`.)
+#     envrows <workflow>
+envrows() {
+  local ci=$1 row='^  [A-Z][A-Z0-9_]*: ' k names
+  names=$(python3 -B -c 'import sys, yaml; print(" ".join(yaml.safe_load(open(sys.argv[1]))["env"]))' "$ci")
+  echo "env rows as YAML reads them: $names"
+  echo "env rows as the pattern reads them: $(grep -oE "$row" "$ci" | sed -E 's/^  //; s/: $//' | tr '\n' ' ' | sed 's/ $//')"
+  echo "quoted: $(grep -cE "$row\"" "$ci") env row(s); unquoted env rows: $(grep -cE "$row[^\"]" "$ci")"
+  for k in $names; do
+    sed -E "s/^(  $k: )\"(.*)\"\$/\1\2/" "$ci" > "$A/tmp/envrows.yml"
+    echo "planted, $k unquoted: quoted $(grep -cE "$row\"" "$A/tmp/envrows.yml"), unquoted $(grep -cE "$row[^\"]" "$A/tmp/envrows.yml")"
+  done
+  rm -f "${A:?}/tmp/envrows.yml"
+}
+
 # `apply.py`'s label checks, each seen to STOP on a mutated copy of this plan's folder: a bare PD-131 in an added line
 # of 0.0.4's step 4 (the plan verification of 2026-10-15, its finding 1), and @@PD-144@@ cited in 0.0.4's step 1,
 # which step 2 declares (its finding 5); and, planted in 0.0.0's step 1, which carries no label, a number past the

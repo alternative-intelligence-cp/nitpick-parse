@@ -186,7 +186,7 @@ past cycle 0.0.
 | E2-6, where the dogfood consumer lives | 0.0.5's patch 1 | fixes: six lines made PA-103's — the cycle map's, three of the 0.12 roadmap's, and two the claim's subject found (`examples/README.md`, the 1.0 roadmap); its own repository's runner runs it |
 | E2-10, counts against sets | 0.0.5's patch 1 | fixes: `ROADMAP.md`'s and `OPEN_QUESTIONS.md`'s copied counts dropped, the entries their own count; the workbench's `LIBRARIES.md` is the orchestrator's (W-16) |
 | E2-13, no `CURRENCY.md` | 0.0.1 | `meta/research/CURRENCY.md` created; the library counted security-sensitive and its three research items named, answered at cycle 0.0's first dispatch, before any probe (0.0.0's gate item 7) |
-| E2-15, `CLAUDE.md`'s empty heading | 0.0.1 step 5 | the paragraph moved under "What this is" |
+| E2-15, `CLAUDE.md`'s empty heading | 0.0.1 step 6 | the paragraph moved under "What this is" |
 | EC2, what an index does | 0.0.0 step 4; 0.0.4 | `SAFETY.md`'s row and `VERIFICATION.md` §2 with probe 11's measurement; every accessor of `Vec` and `Bytes` checks its own index, measured not to trap through a pointer (PD-144) |
 | EC3, "every public `error:`" | 0.0.3 | `check_error_budget` keyed by module and name, private identities included (measured: a private identity a reachable `fail` raises is owed as `<module>.<name>`); EC3's sentences and twins, and six more found by the claim's subject (PD-142) |
 | ED2, local `O-N` ids | 0.0.0 steps 2 and 4 | O-N2, O-N3 and O-N4 each say their id is this repository's own; nothing takes a registry id |
