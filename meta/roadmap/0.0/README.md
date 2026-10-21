@@ -256,13 +256,13 @@ file states its own acceptance when it reaches the pin, and where the two differ
 - [x] the three research digests filed before any probe runs, each printed by block 0a with its sha256, the three this plan holds (PD-137)
 
 ### 0.0.1 — the skeleton
-- [ ] `src/lib.npk` exists and `pub use`s nothing yet (`use` is not transitive, so the surface is a deliberate list)
-- [ ] every `src/` subdirectory has a placeholder module that compiles, so the parse sweep has something to sweep
-- [ ] `nitpick.toml`'s `[toolchain]` pinned to LLVM 20.1.8 with the `triple` and `datalayout` rows, and its `[[test]]` table's first entries
-- [ ] a consumer program under `tests/conformance/` imports `src/lib.npk` by relative path and compiles, links, runs and exits 0, with a comment naming O-N1
-- [ ] CI: a workflow running `harness/run.py` on push, with LLVM 20.1.8 and the compiler built from the pinned commit, every hex value quoted
-- [ ] `meta/research/CURRENCY.md`, its three research rows each linking its digest, and its research section saying what each digest found and where each finding is held
-- [ ] `CLAUDE.md` and `CONTRIBUTING.md` re-read against 0.0.0's verdicts and extended
+- [x] `src/lib.npk` exists and `pub use`s nothing yet (`use` is not transitive, so the surface is a deliberate list)
+- [x] every `src/` subdirectory has a placeholder module that compiles, so the parse sweep has something to sweep
+- [x] `nitpick.toml`'s `[toolchain]` pinned to LLVM 20.1.8 with the `triple` and `datalayout` rows, and its `[[test]]` table's first entries
+- [x] a consumer program under `tests/conformance/` imports `src/lib.npk` by relative path and compiles, links, runs and exits 0, with a comment naming O-N1
+- [x] CI: a workflow running `harness/run.py` on push, with LLVM 20.1.8 and the compiler built from the pinned commit, every hex value quoted
+- [x] `meta/research/CURRENCY.md`, its three research rows each linking its digest, and its research section saying what each digest found and where each finding is held
+- [x] `CLAUDE.md` and `CONTRIBUTING.md` re-read against 0.0.0's verdicts and extended
 
 ### 0.0.2 — the harness, part 1
 - [ ] `harness/run.py`, `manifest.py`, `toolchain.py`, `expect.py`, `build.py`, `irscan.py`, `elf.py`, `stages.py`, and `baseline/`
