@@ -1,0 +1,304 @@
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index beb6143..e26fa68 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -1,11 +1,15 @@
+ # nparse CI.
+ #
+-# EVERY INPUT IS PINNED, AND THE PIN IS ENFORCED RATHER THAN REQUESTED (cycle 0.0.1's
+-# plan; the compiler's D-204: the toolchain is a build input). The compiler is a
+-# COMMIT, never a branch: a library whose CI tracks another repository's `main` goes
+-# red for reasons that are not its own. Bumping a pin is a deliberate commit, and the
+-# commit that bumps it is the one that runs the full suite. Modelled on
+-# `nitpick-regex`'s workflow.
++# EVERY INPUT BUT THE RUNNER'S IMAGE IS PINNED, AND THE PIN IS ENFORCED RATHER THAN
++# REQUESTED (cycle 0.0.1's plan; the compiler's D-204: the toolchain is a build input).
++# The compiler is a COMMIT, never a branch: a library whose CI tracks another
++# repository's `main` goes red for reasons that are not its own. Bumping a pin is a
++# deliberate commit, and the commit that bumps it is the one that runs the full suite.
++# Each action is pinned by the full commit sha that cycle 0.0.1's four runs each
++# resolved its `@v4` to, the tag kept as a comment. The runner is a LABEL,
++# `runs-on: ubuntu-24.04`, under which GitHub rolls the image: those four runs got
++# 20261018.339.1 twice and then 20261012.334.1 twice, the second version the older,
++# so the record quotes each run's image. Modelled on `nitpick-regex`'s workflow.
+ #
+ # WHAT A GREEN RUN PROVES SINCE CYCLE 0.0.2: the compiler's checkout is the pinned
+ # commit, clean; its emission, `npkc.ll`, is the one the pin recorded, built by a run
+@@ -42,16 +46,17 @@ env:
+ 
+ jobs:
+   build:
+-    # Pinned, not `ubuntu-latest`: a runner image that rolls forward is an unpinned input.
++    # A release's label, not `ubuntu-latest` -- but GitHub still rolls the image under it,
++    # the one input not pinned (the header).
+     runs-on: ubuntu-24.04
+     timeout-minutes: 60
+ 
+     steps:
+       - name: Check out nparse
+-        uses: actions/checkout@v4
++        uses: "actions/checkout@11d5960a326750d5838078e36cf38b85af677262" # v4
+ 
+       - name: Check out the pinned compiler
+-        uses: actions/checkout@v4
++        uses: "actions/checkout@11d5960a326750d5838078e36cf38b85af677262" # v4
+         with:
+           repository: alternative-intelligence-cp/nitpick
+           ref: ${{ env.NITPICK_COMMIT }}
+@@ -77,7 +82,7 @@ jobs:
+       # give whatever 20.1.x is current. Cached on the version, an immutable asset.
+       - name: Cache LLVM ${{ env.LLVM_VERSION }}
+         id: llvm-cache
+-        uses: actions/cache@v4
++        uses: "actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830" # v4
+         with:
+           path: ~/llvm
+           key: llvm-${{ env.LLVM_VERSION }}-linux-x64
+@@ -104,12 +109,15 @@ jobs:
+             echo "$t --version == $have"
+           done
+ 
+-      # Keyed on the compiler's commit and the LLVM release, so a hit is by construction
+-      # the right binary. The compiler's bootstrap harness, `quickemit.py`, leaves the
+-      # two artefacts this library needs -- `npkc` and `npkrt.o` -- in `.internal/quickemit/`.
++      # Keyed on the compiler's commit and the LLVM release. A hit rebuilds nothing, and of
++      # the restored build the emission step asserts only `npkc.ll`'s digest and size:
++      # `npkc` and `npkrt.o` are printed, not asserted. The fresh-build proof is the first,
++      # uncached run's (cycle 0.0.1's run 39634141608). The compiler's bootstrap harness,
++      # `quickemit.py`, leaves the two artefacts this library needs -- `npkc` and
++      # `npkrt.o` -- in `.internal/quickemit/`.
+       - name: Cache the built compiler
+         id: npkc-cache
+-        uses: actions/cache@v4
++        uses: "actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830" # v4
+         with:
+           path: .nitpick/.internal/quickemit
+           key: npkc-${{ env.NITPICK_COMMIT }}-llvm-${{ env.LLVM_VERSION }}
+diff --git a/CLAUDE.md b/CLAUDE.md
+index 8585379..e8090ec 100644
+--- a/CLAUDE.md
++++ b/CLAUDE.md
+@@ -95,8 +95,12 @@ that bite hardest here:
+ `limit`, `any`, `buffer`, `raw`, `move`, `pick`, `fall`, `give`, `pass`,
+ `fail`, `relay`, `is`, `is_err`, `where`, `with`, `as`, `on`, `never`, `fails`,
+ `mod`, `unit`, `Self`, `Result`, `Optional` — and **`stack`**, a memory qualifier,
+-which cost cycle 0.0.0 a build: `Vec<Frame>:stack` is `NITPICK-PARSE-002` at the
+-declaration and a claim that a brace is never closed, far from the cause.
++which cost `nitpick-regex`'s cycle 0.0.0 about an hour bisecting a brace imbalance
++that did not exist (its `meta/roadmap/done/0.0/0.0.0.md`, lines 524 and 599). At
++the pin `c9baa9e` a local named `stack` is `NITPICK-PARSE-002`, "expected an
++expression", at its declaration and is refused again at each later use, and a
++parameter so named is `NITPICK-PARSE-001`, which names the keyword; no brace error
++follows (six shapes, measured by cycle 0.0.1's step 6).
+ 
+ The substitutes this library uses, so they are used consistently: `hi` for an
+ upper bound, `src` for a byte origin, `sink` for a byte destination, `kind` for
+diff --git a/harness/README.md b/harness/README.md
+index d769ac3..da6632a 100644
+--- a/harness/README.md
++++ b/harness/README.md
+@@ -6,7 +6,7 @@ workbench. It retires into `npkg` the way `bootstrap/harness/` does in the
+ compiler repository, with both running side by side and a parity check first.
+ Built in cycles 0.0.2 and 0.0.3.
+ 
+-*(2026-10-15, cycle 0.0.1:)* until cycle 0.0.2, `run.py` is a stub that builds and judges nothing
++*(2026-10-21, cycle 0.0.1:)* until cycle 0.0.2, `run.py` is a stub that builds and judges nothing
+ and says so; CI runs it so that the workflow's last step exists before the runner does.
+ *(@@DATE@@, cycle 0.0.2: the stub is replaced by the runner below; cycle 0.0.3 adds the
+ refusal and parse stages, the self-check and the tree checks.)*
+diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
+index ecead42..ad8f9aa 100644
+--- a/meta/DECISIONS.md
++++ b/meta/DECISIONS.md
+@@ -494,6 +494,8 @@ correspondingly larger.
+ 
+ ### PA-054 — the specification version is pinned and recorded
+ > **SUPERSEDED IN PART by @@PD-137@@ (2026-10-15)** — where the version is recorded; the rule stands.
++> *(@@DATE@@, cycle 0.0.2:)* this marker landed on 2026-10-21, at cycle 0.0.1; its date is
++> the plan's drafting date.
+ 
+ **2026-09-03.** In `meta/research/format-versions.md`, with the document's own
+ version string and the date it was read. "TOML" without a version is three
+@@ -907,6 +909,9 @@ literally, forbade every import it drew. `src/README.md` had the direction right
+ seven placeholder modules each state their row in their header (cycle 0.0.1's plan),
+ and the harness's `check_layering` (cycle 0.0.3) reads the table.
+ 
++*(@@DATE@@, cycle 0.0.2:)* this decision landed on 2026-10-21, at cycle 0.0.1; the date that
++opens it is the plan's drafting date.
++
+ *Alternatives declined:* **correct the sentence and keep the drawing** — the drawing
+ would still show the forbidden arrow, and a drawing is what a reader copies; **draw it
+ again** — a table is the form a check can read without a second, hand-written copy.
+@@ -924,6 +929,9 @@ and the documents that named 20.1.2 name 20.1.8. The compiler moved its pin at i
+ landing 99 (D-349), and its runners refuse a manifest without the two target rows
+ (`BUILD_REFERENCE.md` §1). The pin audit's PL-4 and the early ecosystem audit's E2-4.
+ 
++*(@@DATE@@, cycle 0.0.2:)* this decision landed on 2026-10-21, at cycle 0.0.1; the date that
++opens it is the plan's drafting date.
++
+ *Alternatives declined:* **write the version and no target rows** — the compiler's
+ runners refuse that manifest by name, and the rows are what a reader of an emission
+ lays it out by; **say "the compiler's pin" and no number** — a manifest row is a
+@@ -951,6 +959,9 @@ a `security` digest, stale ninety days after its date (the research skill's §6)
+ three dates before it starts, and all three are re-run at hardening (its §8). TOML's row records that v1.1.0
+ is published and that the version is cycle 0.6.0's to decide. The early ecosystem audit's E2-13.
+ 
++*(@@DATE@@, cycle 0.0.2:)* this decision landed on 2026-10-21, at cycle 0.0.1; the date that
++opens it is the plan's drafting date.
++
+ *Alternatives declined:* **keep `format-versions.md` beside `CURRENCY.md`** — two
+ tables of outside facts, and the workbench's checks read one; **name the file
+ `format-versions.md` and put every row in it** — the workbench's rule, its audit and
+diff --git a/meta/research/CURRENCY.md b/meta/research/CURRENCY.md
+index 21fc9e0..0d4c710 100644
+--- a/meta/research/CURRENCY.md
++++ b/meta/research/CURRENCY.md
+@@ -10,11 +10,11 @@ says which.
+ 
+ | Depends on | Pinned | Checked | Source | Decision |
+ |---|---|---|---|---|
+-| GitHub Actions' runner image — CI's `runs-on` | `ubuntu-24.04` | by cycle 0.0.1's first CI run, whose log the record quotes | github.com/actions/runner-images | @@PD-136@@ |
+-| GitHub's `actions/checkout` and `actions/cache` | `@v4` each, as `nitpick-regex`'s and `nitpick-time`'s workflows | by the same run; the early ecosystem audit's EK2 recorded their Node 20 runtime as deprecated, and the run's log says whether GitHub still warns | github.com/actions/checkout, github.com/actions/cache | @@PD-136@@ |
++| GitHub Actions' runner image — CI's `runs-on` | the label `ubuntu-24.04`, under which GitHub rolls the image: cycle 0.0.1's four runs got 20261018.339.1 twice, then 20261012.334.1 twice, and each run's log names its version | by cycle 0.0.1's first CI run, whose log the record quotes | github.com/actions/runner-images | @@PD-136@@ |
++| GitHub's `actions/checkout` and `actions/cache` | each by full commit sha since cycle 0.0.2, checkout `11d5960a326750d5838078e36cf38b85af677262` and cache `0057852bfaa89a56745cba8c7296529d2fc39830`, which `@v4` resolved to in each of cycle 0.0.1's four runs | by the same run; the early ecosystem audit's EK2 recorded their Node 20 runtime as deprecated, and the run's log says whether GitHub still warns | github.com/actions/checkout, github.com/actions/cache | @@PD-136@@ |
+ | LLVM's release asset — what CI installs | `LLVM-20.1.8-Linux-X64.tar.xz` at `llvmorg-20.1.8` (the version is the compiler's D-349, read in its tree) | by the same run's install step, which downloads it | github.com/llvm/llvm-project/releases | @@PD-136@@ |
+ | Python — the harness's interpreter | 3.12.3, the version on the workbench and on `ubuntu-24.04` | @@DATE@@, cycle 0.0.2: `python3 --version` on the workbench, 3.12.3, by its block 3; on `ubuntu-24.04` by the run on its step 3's push, the first whose harness step prints the version, which its record quotes | python.org | @@PD-137@@ |
+-| UTF-8 — what a JSON, TOML or YAML input must be (`SCAN_MODEL.md` §3) | RFC 3629 (STD 63) and the Unicode Standard's Table 3-7, the edition to be named | **not yet** — cycle 0.1, whose decoder reads it, checks it before it starts | rfc-editor.org/rfc/rfc3629; unicode.org | PA-013 |
++| UTF-8 — what a JSON, TOML or YAML input must be (`SCAN_MODEL.md` §4) | RFC 3629 (STD 63) and the Unicode Standard's Table 3-7, the edition to be named | **not yet** — cycle 0.1, whose decoder reads it, checks it before it starts | rfc-editor.org/rfc/rfc3629; unicode.org | PA-013 |
+ | JSON | RFC 8259 | not yet — cycle 0.3 | rfc-editor.org/rfc/rfc8259 | PA-050 |
+ | TOML | v1.0.0, as `FORMATS.md` names it. **v1.1.0 is published** (the workbench's currency audit of 2026-10-09, which the second research item below read at the source before cycle 0.0's first probe), and that item's digest lists the five changes the project's changelog gives from v1.0.0 to v1.1.0 in what a parser accepts, the fifth, on integer and float sizes, one that may loosen the integer rule ([`security-guidance.md`](security-guidance.md)) | not yet — cycle 0.6.0 decides the version (PA-054 as @@PD-137@@ amends it) | toml.io; github.com/toml-lang/toml/releases | PA-054 |
+ | CSV | RFC 4180, and the dialects `FORMATS.md` §6 names | not yet — cycle 0.7 | rfc-editor.org/rfc/rfc4180 | PA-050 |
+diff --git a/meta/roadmap/0.0/0.0.0.md b/meta/roadmap/0.0/0.0.0.md
+index 293ba48..e8f4d61 100644
+--- a/meta/roadmap/0.0/0.0.0.md
++++ b/meta/roadmap/0.0/0.0.0.md
+@@ -855,6 +855,9 @@ item", below, gives each item's verdict, every one held.
+ 
+ - **`stack` is a memory qualifier**, and a local of that name is `NITPICK-PARSE-002` followed by a claim that a brace
+   is never closed, far from the cause (`PLAYBOOK.md` §10). The explicit stack's local is `frames`.
++  *(@@DATE@@, cycle 0.0.2:)* not at `c9baa9e`: a local named `stack` is `NITPICK-PARSE-002` at its declaration and
++  refused again at each later use, a parameter so named `NITPICK-PARSE-001`, and no brace error follows, in the six
++  shapes cycle 0.0.1's step 6 measured; the brace account is `nitpick-regex`'s cycle 0.0.0's, at an earlier compiler.
+ - **A `never fails` function's call is a `Result` unless it is called `raw`.** A size probe's `#size_of` is an
+   `int64`: narrow it with `=>! int32` for `exit`, which landing 104 holds to `int32`.
+ - **A probe that compiles is not a probe that runs**: at `7e91730` probe 06 was accepted by `npkc` and refused by
+diff --git a/meta/roadmap/0.0/0.0.1.md b/meta/roadmap/0.0/0.0.1.md
+index 954227a..ba6d711 100644
+--- a/meta/roadmap/0.0/0.0.1.md
++++ b/meta/roadmap/0.0/0.0.1.md
+@@ -1150,6 +1150,17 @@ last entry.)*
+   record is committed before them; `check_record` reads this commit. The subcycle closes `DONE`, not
+   `READY-TO-CLOSE`: 0.0.1 is cycle 0.0's second subcycle, and 0.0.5 closes the cycle.
+ 
++*(@@DATE@@, cycle 0.0.2, for the libraries' seat's review of this record:)* six lines above say more than was
++measured. Line 135 lists section 3 of `SCAN_MODEL.md` among the sections the patches cite, and block 0b's Expect
++prints it "(ok)" (line 253): the UTF-8 row means C-9, which is in §4, while section 3 is "Byte classification";
++cycle 0.0.2's step 4 corrects `CURRENCY.md` line 17. Step 3's entry puts @@PD-136@@'s date on its heading (line
++792): the heading carries none, and the date opens the decision's first line. Step 5's entry counts one
++placeholder for @@PD-136@@ in its patch (line 910): `step5.patch` carries three, on three lines, one in each CI
++row. And the preamble's "cost 0.0.0 a build" (line 29) and §4's "measured (`stack`, 0.0.0)" (line 527) have no
++record in this repository: such a cost is recorded only by `nitpick-regex`'s cycle 0.0.0, about an hour
++bisecting a brace imbalance that did not exist (its record's lines 524 and 599), and step 6 measured the
++account at `c9baa9e`, where no brace error follows.
++
+ #### The REPORT block
+ 
+ ```
+diff --git a/meta/roadmap/ROADMAP.md b/meta/roadmap/ROADMAP.md
+index e3d8608..673fc39 100644
+--- a/meta/roadmap/ROADMAP.md
++++ b/meta/roadmap/ROADMAP.md
+@@ -10,7 +10,7 @@ waiting for a consumer to ask, one gated on the compiler's tooling, four that
+ are the compiler's rather than ours, and four for the project's author, none of
+ which gates cycle 0.0. **No cycle in this plan is blocked on a decision.**
+ 
+-*(2026-10-16, cycle 0.0.1 — the research gate put one question to the project's author, the
++*(2026-10-21, cycle 0.0.1 — the research gate put one question to the project's author, the
+ workbench's question 36, what an input over 4 GiB answers, which is not an entry of
+ `../OPEN_QUESTIONS.md`; the author answered it on 2026-10-16, (A), and cycle 0.1's decision
+ records it, at 0.1.1 of [its roadmap](0.1/README.md); no cycle waits on it.)*
+diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md
+index 617cc34..7b7c367 100644
+--- a/meta/specs/BUILD.md
++++ b/meta/specs/BUILD.md
+@@ -290,7 +290,7 @@ on `doc`**, because a streaming consumer must be able to import a format
+ without pulling in the tree. `emit` depends on `doc` (it prints a tree) and on
+ `event` (it can also print a stream).
+ 
+-*(2026-10-15, cycle 0.0.1, @@PD-135@@: until this subcycle the rule was a drawing —
++*(2026-10-21, cycle 0.0.1, @@PD-135@@: until this subcycle the rule was a drawing —
+ `format ──► doc ──► event ──► …` on one line, the first arrow the one B-18 forbids —
+ and the sentence "a module may not import one to its right", where every arrow in
+ the drawing pointed right, at what the module imports: the reverse of what it meant,
+@@ -302,10 +302,13 @@ the arrow most likely to be drawn by accident, and drawing it would make every
+ streaming consumer link the arena and the tree.
+ 
+ **Rule B-19 — a `use` cycle is legal** (D-086) and is still a decomposition
+-mistake. The harness checks the layering against this diagram on every run,
++mistake. The harness checks the layering against B-17's table on every run,
+ because the compiler's experience is that a layering violation arrives as a
+ cycle six months after somebody moved one function.
+ 
++*(@@DATE@@, cycle 0.0.2, @@PD-135@@: this rule named B-17's drawing, which @@PD-135@@
++replaced with the table at cycle 0.0.1.)*
++
+ ---
+ 
+ ## 7. Reserved words that will bite
+@@ -329,7 +332,7 @@ these reads like an ordinary local name and is not:
+ | `on` | a keyword — `Node?:on = …` does not parse |
+ | `Self`, `Result`, `Optional`, `Handle`, `arena` | type keywords |
+ | `trit`, `nit`, `oflags`, `prot`, `mflags`, `fmode` | type keywords |
+-| `stack` | a memory qualifier — and every explicit-stack parser wants it; refused at the declaration with a misleading brace error after it (measured by cycle 0.0.0) |
++| `stack` | a memory qualifier — and every explicit-stack parser wants it; a local so named is `NITPICK-PARSE-002` at its declaration and refused again at each later use, a parameter so named `NITPICK-PARSE-001`, and no brace error follows (measured at `c9baa9e` in six shapes, cycle 0.0.1's step 6) |
+ | `fixed`, `sealed`, `hidden`, `decreases`, `unbounded`, `shared_arena`, `acquire` | keywords (`PLAYBOOK.md` §10's list at the compiler's 1.5 re-pin) |
+ 
+ The names this library therefore uses instead, fixed here so they are used
+diff --git a/meta/specs/FORMATS.md b/meta/specs/FORMATS.md
+index 829ce77..1eaebba 100644
+--- a/meta/specs/FORMATS.md
++++ b/meta/specs/FORMATS.md
+@@ -21,7 +21,7 @@ as a row of `meta/research/CURRENCY.md`, with the document's own version string
+ the date it was read, and the digest that read it beside it. "TOML" without a
+ version is three incompatible languages.
+ 
+-*(2026-10-15, cycle 0.0.1, @@PD-137@@: this rule named `meta/research/format-versions.md`,
++*(2026-10-21, cycle 0.0.1, @@PD-137@@: this rule named `meta/research/format-versions.md`,
+ and the workbench's rule names `CURRENCY.md` for every outside fact; one table holds
+ them all.)*
+ 
+diff --git a/nitpick.toml b/nitpick.toml
+index 80a41fe..856353a 100644
+--- a/nitpick.toml
++++ b/nitpick.toml
+@@ -6,7 +6,7 @@
+ # runners, and no tool of this library runs either. It is written in full
+ # ahead of the tool that reads it, because a manifest that appears when the
+ # tooling arrives is a manifest nobody reviewed.
+-# *(Corrected 2026-10-15, cycle 0.0.1 -- @@PD-136@@: this said "four tables plus the
++# *(Corrected 2026-10-21, cycle 0.0.1 -- @@PD-136@@: this said "four tables plus the
+ # `[[test]]` array", and the compiler's schema has six.)*
+ #
+ # WHAT CANNOT READ THIS YET. `npkg build` is the compiler's own bootstrap
+@@ -40,7 +40,7 @@ opt-level = 0
+ # compiler pins, because a patch release may change instruction selection. These
+ # lists are READ by every `llc`/`opt`/`ld.lld` invocation the harness makes; a
+ # stated flag nothing consumes is the next stale document.
+-# *(20.1.8 since cycle 0.0.1, 2026-10-15 -- @@PD-136@@: the compiler's D-349 moved its pin from
++# *(20.1.8 since cycle 0.0.1, 2026-10-21 -- @@PD-136@@: the compiler's D-349 moved its pin from
+ # 20.1.2 at its landing 99, and compiler `7e91730` carries it.)*
+ [toolchain]
+ llvm          = "20.1.8"
+diff --git a/src/emit/emit.npk b/src/emit/emit.npk
+index 7c1002f..80b15d6 100644
+--- a/src/emit/emit.npk
++++ b/src/emit/emit.npk
+@@ -1,7 +1,7 @@
+ mod:emit;
+ 
+ // `src/emit/` — the writers, from a `Document` or from a stream.
+-// Specified by `meta/specs/WRITER_MODEL.md`; built from cycle 0.5, 0.7. A placeholder until then, by cycle 0.0.1's plan:
++// Specified by `meta/specs/WRITER_MODEL.md`; built from cycle 0.5, 0.6, 0.7, 0.8. A placeholder until then, by cycle 0.0.1's plan:
+ // it compiles, so the parse sweep has this directory to sweep, and it is replaced, not deleted.
+ //
+ // MAY IMPORT: `doc`, `event`, `diag`, `scan` and `core` (`meta/specs/BUILD.md` B-17's table). Every import is a relative path

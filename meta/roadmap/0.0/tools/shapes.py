@@ -19,7 +19,7 @@ The shapes, each with the landing or the row that moves it:
   `exit` operands, by form       104 (DEF-249: the operand is held to `int32`)
   `#wild_slice`                  the read-only view rule (no untied view of a managed header, D-341)
   a plain `uint8[]`              the read-only view rule -- listed, because a probe may need one on purpose
-  `stack` as a name              `PLAYBOOK.md` §10 (a memory qualifier: PARSE-002 far from the cause)
+  `stack` as a name              `PLAYBOOK.md` §10 (a memory qualifier: a local's PARSE-002 at its declaration, at `c9baa9e`)
   `.is_error ||` and its mirror  `PLAYBOOK.md` §2 (`if (a.is_error || b.is_error)` clears neither taint)
   a `failsafe` whose first statement is not its `pick`   109 (DEF-224 finds a nested pick; `7e91730` did not)
   a trait default calling a sibling on `self`   118 (DEF-254: it never links before) -- added by cycle 0.0.2's

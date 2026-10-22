@@ -1,12 +1,12 @@
 diff --git a/harness/README.md b/harness/README.md
-index 182809a..fc84361 100644
+index 182809a..d769ac3 100644
 --- a/harness/README.md
 +++ b/harness/README.md
 @@ -8,3 +8,43 @@ Built in cycles 0.0.2 and 0.0.3.
  
  *(2026-10-15, cycle 0.0.1:)* until cycle 0.0.2, `run.py` is a stub that builds and judges nothing
  and says so; CI runs it so that the workflow's last step exists before the runner does.
-+*(2026-10-15, cycle 0.0.2: the stub is replaced by the runner below; cycle 0.0.3 adds the
++*(@@DATE@@, cycle 0.0.2: the stub is replaced by the runner below; cycle 0.0.3 adds the
 +refusal and parse stages, the self-check and the tree checks.)*
 +
 +```
@@ -1306,7 +1306,7 @@ index 0000000..dedd517
 +        out(f"ok    ${var} is a file")
 +    return got[0], got[1]
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index d66235c..4013cdd 100644
+index d66235c..ecead42 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
 @@ -965,3 +965,83 @@ the gate to cycle 0.1, through 0.0.5's close — 0.0.0's gate item 7 and block 0
@@ -1315,7 +1315,7 @@ index d66235c..4013cdd 100644
  research section and its three rows, and the gate with them.
 +
 +### @@PD-138@@ — the build is one module per root, held to the target rows, scanned two ways on both legs, and reproducible from two directories
-+**2026-10-15, cycle 0.0.2.** Measured at the pin `7e91730`, and each a rule of `specs/BUILD.md`:
++**@@DATE@@, cycle 0.0.2.** Measured at the pin `7e91730`, and each a rule of `specs/BUILD.md`:
 +
 +- **One module per root** (§2's drawing). `npkc` emits a root and every module it imports as
 +  one module — a function of an imported module is DEFINED in the root's emission — so a
@@ -1365,7 +1365,7 @@ index d66235c..4013cdd 100644
 +function classed by these facets.
 +
 +### @@PD-139@@ — a unit red on a compiler defect is pending: its right answer, the one failure it is excused, and a reviewed list
-+**2026-10-15, cycle 0.0.2.** `specs/BUILD.md` B-5b. A test that is CORRECT AND RED because a
++**@@DATE@@, cycle 0.0.2.** `specs/BUILD.md` B-5b. A test that is CORRECT AND RED because a
 +defect it meets is in the pinned compiler carries its RIGHT ANSWER as its ordinary markers,
 +and one more: `// pending-until: DEF-<n> <observation> <argument>` — the compiler seat's
 +registration of the defect, a label nothing resolves, and the one failure the unit is excused,
@@ -1394,7 +1394,7 @@ index d66235c..4013cdd 100644
 +when its fix is pinned, and a new observation form joins B-5b by a decision when a defect shows
 +a failure this one cannot name.
 diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md
-index 1603419..9d2876f 100644
+index 1603419..617cc34 100644
 --- a/meta/specs/BUILD.md
 +++ b/meta/specs/BUILD.md
 @@ -44,19 +44,34 @@ compiler's own harness is Python for the same reason.
@@ -1416,7 +1416,7 @@ index 1603419..9d2876f 100644
 +and the check leg, every program: the same <root>.ll → opt → llc -O2 → the scans → ld.lld (B-3)
  ```
  
-+*(Corrected 2026-10-15, cycle 0.0.2 — @@PD-138@@: the drawing compiled `src/lib.npk` into
++*(Corrected @@DATE@@, cycle 0.0.2 — @@PD-138@@: the drawing compiled `src/lib.npk` into
 +`build/nparse.ll` and `build/nparse.o` and then linked "one program object + npkrt.o", as if
 +a library object sat between them. Measured at the pin `7e91730`, `npkc` emits a root and
 +everything it imports as one module — an imported module's function is DEFINED in the
@@ -1442,7 +1442,7 @@ index 1603419..9d2876f 100644
  (`SAFETY.md` §2) — and **a symbol appearing here is therefore a finding**, not
  a routine pass: it means something reached for the floor that had no business
  doing so.
-+*(Re-read 2026-10-15, cycle 0.0.2 — @@PD-138@@: the allowlist is the pinned
++*(Re-read @@DATE@@, cycle 0.0.2 — @@PD-138@@: the allowlist is the pinned
 +`npkrt.o`'s own defined symbols, the runtime the link uses, and the scan runs on
 +both legs' objects. Measured at the pin: the floor program's object has five
 +undefined symbols, all the runtime's, and the runtime defines `memcpy`, `memmove`
@@ -1476,7 +1476,7 @@ index 1603419..9d2876f 100644
  working directories produce byte-identical IR. `nparse` inherits this from the
  compiler (D-078, D-204, D-236) and the harness has a `repro` stage that
  measures it, because a property nobody measures is a property nobody has.
-+*(Re-read 2026-10-15, cycle 0.0.2 — @@PD-138@@: each copy carries its manifest.
++*(Re-read @@DATE@@, cycle 0.0.2 — @@PD-138@@: each copy carries its manifest.
 +The compiler records source paths relative to the manifest root (D-236), so a copy
 +made without one — inside this repository, under its manifest — renders its paths
 +by where it sits: measured at the pin, the conformance consumer copied twice without

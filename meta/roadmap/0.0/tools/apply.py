@@ -27,7 +27,22 @@ added lines hold any of these is a STOP, by name, and nothing is written:
   * a placeholder CITED BEFORE THE STEP THAT DECLARES IT -- its `### @@PD-n@@` heading is added by a later patch,
     in plan order (every `<subcycle>_tools/step<k>.patch` beside this plan, subcycle by subcycle, step by step),
     so at this step's commit it would name a decision the log does not hold yet; or one that no step declares.
+
+THE RUN'S DATE (from cycle 0.0.2, the libraries' seat's ruling of 2026-10-21 on 0.0.1's dates: a dated note says when
+the tree began to say it, so it carries the day it lands, not the day the plan drafted it). Every `@@DATE@@` in a
+patch becomes ONE date for the whole run of its subcycle: the day the run's first step that carries the placeholder
+applied, which that step records in `.internal/w00/<subcycle>.date` of the tree it applies to. Every later step of the
+run reads it there, so a run that crosses midnight, or spans days, writes one date everywhere: `nitpick-regex`'s
+0.1.4 tool took each step's own day, and a run past midnight STOPPED at the first step whose context held an earlier
+step's date (its `done/0.2/0.2.1_tools/apply.py` tells it). The file is the hand-off from one step's worker to the
+next, kept between steps; the subcycle's last step removes it. A re-run reports ALREADY on any day while the file holds
+the run's date. A file the patches touch must not hold `@@DATE@@` before they are applied -- a placeholder in a
+patch's context would be replaced too, and the context would no longer match (the same file: `nitpick-regex` 0.2.0's
+rehearsal STOPPED twice on that) -- and a later subcycle's patch must not hold an earlier run's dated line in its
+context, since that date is known only when the earlier run lands. The patches' `index` lines are the raw chain's
+blobs, every placeholder unsubstituted.
 """
+import datetime
 import glob
 import os
 import re
@@ -37,6 +52,24 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 PLACEHOLDER = re.compile(r"@@(PD-\d+)@@")
 DECLARES = re.compile(r"^\+### @@(PD-\d+)@@")
+DATE_PLACEHOLDER = "@@DATE@@"
+
+
+def date_file(root, sub):
+    """The run's one date for a subcycle whose patches carry `@@DATE@@`: the file its first applying step writes."""
+    return os.path.join(root, ".internal", "w00", sub + ".date")
+
+
+def run_date(root, sub):
+    """(the run's date, whether a step has recorded it): the recorded day, or today's when none has yet."""
+    p = date_file(root, sub)
+    if not os.path.isfile(p):
+        return datetime.date.today().isoformat(), False
+    with open(p, encoding="utf-8") as fh:
+        day = fh.read().strip()
+    if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", day):
+        raise SystemExit("STOP %s: .internal/w00/%s.date holds %r, not a date" % (sub, sub, day))
+    return day, True
 
 
 def numbers():
@@ -137,6 +170,10 @@ def main(argv):
         return 2
     root, sub, step = os.path.realpath(argv[1]), argv[2], argv[3]
     text = text_of(sub, step)
+    day, recorded = None, False
+    if DATE_PLACEHOLDER in text:
+        day, recorded = run_date(root, sub)
+        text = text.replace(DATE_PLACEHOLDER, day)
 
     def git(*args):
         return subprocess.run(["git", "-C", root, "apply", "--index", *args, "-"],
@@ -151,6 +188,10 @@ def main(argv):
     if r.returncode != 0:
         print("STOP %s step%s: %s" % (sub, step, " | ".join(r.stderr.strip().splitlines()[:6])))
         return 1
+    if day and not recorded:
+        os.makedirs(os.path.dirname(date_file(root, sub)), exist_ok=True)
+        with open(date_file(root, sub), "w", encoding="utf-8") as fh:
+            fh.write(day + "\n")
     files = len(re.findall(r"^diff --git ", text, re.M))
     print("APPLY %s step%s: %d file(s)" % (sub, step, files))
     return 0
