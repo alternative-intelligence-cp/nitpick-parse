@@ -6,7 +6,7 @@ rm -rf "${F:?}"; mkdir -p "$F"
 T2=$REPO/meta/roadmap/0.0/0.0.2_tools
 TL=$REPO/meta/roadmap/0.0/tools
 d=$F/tree; git clone -q --shared "$REPO" "$d"
-for s in 1 2 3; do python3 -B "$TL/apply.py" "$d" 0.0.2 $s > /dev/null; done
+for s in 1 2 3 4; do python3 -B "$TL/apply.py" "$d" 0.0.2 $s > /dev/null; done
 cut_paths() { sed -e "s|$d/||g" -e "s|$F/||g" -e "s|$REPO/||g"; }
 
 # §1.1 -- the tree it starts from: cycle 0.0.1's record
@@ -177,6 +177,11 @@ echo "§1.13 placeholders in the patches: $(grep -ohE '@@PD-[0-9]+@@' "$T2"/step
 echo "§1.13 decisions.txt numbers them: $(python3 -B -c "
 import sys; sys.path.insert(0, sys.argv[1]); import apply
 t = apply.numbers(); print(' '.join('%s=base+%d' % (k, int(t[k].split('-')[1]) - apply.base_number()) for k in ('PD-138', 'PD-139') if k in t) or 'NEITHER')" "$TL")"
+# §1.13, continued -- the run's date (`../tools/apply.py`): the lines each patch adds with the placeholder, and no file
+# the patches touch holding it already, which would make a context line stop matching once replaced
+echo "§1.13 added lines carrying @@DATE@@, by step:$(for p in "$T2"/step*.patch; do printf ' %s %s' "$(basename "$p" .patch)" "$(grep -E '^\+[^+]' "$p" | grep -c '@@DATE@@')"; done)"
+held=$(grep -h '^+++ b/' "$T2"/step*.patch | sed 's|^+++ b/||' | sort -u | while read -r f; do [ -f "$REPO/$f" ] && grep -q '@@DATE@@' "$REPO/$f" && echo "$f"; done | tr '\n' ' ')
+echo "§1.13 files the patches touch that hold @@DATE@@ as the tree stands: ${held:-none}"
 python3 -B "$TL/pointers.py" "$d" "$T2" | sed 's/^§1\.8 /§1.14 /'
 
 # §1.15 -- the workflow, read as GitHub reads it, and its harness step's logic run against two logs
@@ -189,6 +194,7 @@ hexq = [k for k, v in re.findall(r'^\s*([A-Z0-9_]+): \"([^\"]*)\"', t, re.M) if 
 print('§1.15 the workflow parses; %d steps; runs-on %s; quoted hex values: %s' % (len(steps), d['jobs']['build']['runs-on'], ', '.join(hexq)))
 open(sys.argv[2], 'w').write(next(s['run'] for s in steps if s.get('name') == 'Run the harness'))
 " "$d/.github/workflows/ci.yml" "$F/step.sh"
+echo "§1.15 uses: $(grep -cE '^ +uses: ' "$d/.github/workflows/ci.yml") line(s), a quoted owner/name@ and a full 40-hex sha: $(grep -cE '^ +uses: "[a-z-]+/[a-z-]+@[0-9a-f]{40}" # v[0-9]+$' "$d/.github/workflows/ci.yml")"
 bash -n "$F/step.sh" && echo "§1.15 the harness step's script: bash -n accepts it"
 for k in green short; do
   mkdir -p "$F/ci-$k/harness"
@@ -197,5 +203,39 @@ for k in green short; do
   ( cd "$F/ci-$k" && RUNNER_TEMP="$F/ci-$k" bash "$F/step.sh" > "$F/ci-$k.out" 2>&1 ); rc=$?
   echo "§1.15 the step over a runner that prints $( [ $k = green ] && echo 'the green summary last' || echo 'no summary' ): exit $rc -- $(tail -n 1 "$F/ci-$k.out" | cut_paths)"
 done
+
+# §1.16 -- what step 4 writes of a `stack` name, re-measured at the pin: cycle 0.0.1's step 6's six shapes, built on
+# probe 10's container and frame types and its failsafe, and the control with the local named `frames`
+mkdir -p "$F/stack"
+python3 -B - "$F/stack" "$REPO/tests/probe/probe10_explicit_stack.npk" <<'PY'
+import os, sys
+d, src = sys.argv[1], open(sys.argv[2], encoding="utf-8").read().split("\n")
+prelude, failsafe = "\n".join(src[16:56]), "\n".join(src[104:119])
+fr = "Frame{ kind: EventKind.StartSeq, count: 0u32, span: Span{ lo: 0u32, hi: 0u32 } }"
+main = lambda body, k="0i64": ("func:main = int32(cstring[]:_~argv) {\n" + body +
+                               "    if (k != %s) { exit 1i32; }\n    exit 0i32;\n};" % k)
+shapes = [
+    ("s1", "func:use_it = int64() never fails {\n    Vec<Frame>:stack = raw vec_init::<Frame>(16i64);\n"
+           "    int64:n = stack.count;\n    drop vec_free(@stack);\n    pass n;\n};\n\n" + main("    int64:k = raw use_it();\n")),
+    ("s2", main("    Vec<Frame>:stack = raw vec_init::<Frame>(16i64);\n    int64:k = stack.count;\n    drop vec_free(@stack);\n")),
+    ("s3", "func:fill = int64() never fails {\n    Vec<Frame>:stack = raw vec_init::<Frame>(16i64);\n"
+           "    for (int64:i in 0i64...4i64) {\n        drop vec_push(@stack, %s);\n    }\n"
+           "    int64:n = stack.count;\n    drop vec_free(@stack);\n    pass n;\n};\n\n" % fr + main("    int64:k = raw fill();\n", "4i64")),
+    ("s4", main("    int64:stack = 3i64;\n    int64:k = stack + 1i64;\n", "4i64")),
+    ("s5", "func:depth_of = int64(int64:stack) never fails {\n    pass stack;\n};\n\n" + main("    int64:k = raw depth_of(3i64);\n", "3i64")),
+    ("s6", "func:count_of = int64(Vec<Frame>->:stack) never fails {\n    pass stack.count;\n};\n\n"
+           + main("    Vec<Frame>:frames = raw vec_init::<Frame>(16i64);\n    int64:k = raw count_of(@frames);\n    drop vec_free(@frames);\n")),
+    ("control", main("    Vec<Frame>:frames = raw vec_init::<Frame>(16i64);\n    int64:k = frames.count;\n    drop vec_free(@frames);\n")),
+]
+for name, body in shapes:
+    with open(os.path.join(d, "%s.npk" % name), "w", encoding="utf-8") as fh:
+        fh.write("mod:%s;\n\n%s\n\n%s\n\n%s\n" % (name, prelude, body, failsafe))
+PY
+for s in s1:"a Vec<Frame> local in a helper" s2:"a Vec<Frame> local in main" s3:"a Vec<Frame> local before a braced loop" \
+         s4:"an int64 local in main" s5:"a by-value parameter" s6:"a ->: parameter" control:"the control, the local named frames"; do
+  echo "§1.16 stack, ${s#*:}: $(codes "$F/stack/${s%%:*}.npk" | sed 's/^[^:]*: //')"
+done
+echo "§1.16 messages naming a brace or \"never closed\": $(cd "$F/stack" && for f in s1 s2 s3 s4 s5 s6; do "$NPKC" $f.npk -o /dev/null 2>&1; done | grep -ciE 'brace|never closed')"
+echo "§1.16 a parameter's message: $(cd "$F/stack" && "$NPKC" s5.npk -o /dev/null 2>&1 | grep -m1 -oE '`stack` is a keyword and cannot name a binding, a parameter')"
 
 rm -rf "${F:?}"

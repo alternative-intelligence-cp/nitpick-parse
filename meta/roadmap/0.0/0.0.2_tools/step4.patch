@@ -183,7 +183,7 @@ index 293ba48..e8f4d61 100644
    `int64`: narrow it with `=>! int32` for `exit`, which landing 104 holds to `int32`.
  - **A probe that compiles is not a probe that runs**: at `7e91730` probe 06 was accepted by `npkc` and refused by
 diff --git a/meta/roadmap/0.0/0.0.1.md b/meta/roadmap/0.0/0.0.1.md
-index 954227a..ba6d711 100644
+index 954227a..2b7a108 100644
 --- a/meta/roadmap/0.0/0.0.1.md
 +++ b/meta/roadmap/0.0/0.0.1.md
 @@ -1150,6 +1150,17 @@ last entry.)*
@@ -197,9 +197,9 @@ index 954227a..ba6d711 100644
 +792): the heading carries none, and the date opens the decision's first line. Step 5's entry counts one
 +placeholder for @@PD-136@@ in its patch (line 910): `step5.patch` carries three, on three lines, one in each CI
 +row. And the preamble's "cost 0.0.0 a build" (line 29) and §4's "measured (`stack`, 0.0.0)" (line 527) have no
-+record in this repository: such a cost is recorded only by `nitpick-regex`'s cycle 0.0.0, about an hour
-+bisecting a brace imbalance that did not exist (its record's lines 524 and 599), and step 6 measured the
-+account at `c9baa9e`, where no brace error follows.
++record in this repository: the cost was `nitpick-regex`'s cycle 0.0.0's, about an hour bisecting a brace
++imbalance that did not exist (its record's lines 524 and 599), and step 6 measured the account at
++`c9baa9e`, where no brace error follows.
 +
  #### The REPORT block
  

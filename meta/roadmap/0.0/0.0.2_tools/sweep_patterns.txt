@@ -10,3 +10,15 @@ the Python row unchecked | by cycle 0\.0\.2, which writes the harness
 the verdicts' section | 0\.0\.0\.md\)*,? (whose )?§7|table in 0\.0\.0\.md §7
 the plan's P-1 in a probe's README | from src/\s*\(P-1\)
 the re-pin after 115 | re-?pin[^.]{0,30}\b115\b|104 … 115|104 \.\.\. 115|after landing 115
+# Step 4's subjects, cycle 0.0.1's items as the libraries' seat ruled them (T11, 2026-10-22). Each pattern was matched
+# against its step's own removed text, a twin phrased in other words and a near miss; `src/emit/emit.npk`'s list,
+# item 1, is a source the sweep does not read (`.npk`), and block 4 prints its line.
+B-19's drawing | (against|per|by) (this|the) (layering )?(diagram|drawing)|layering (diagram|drawing)
+every input pinned | (every|each) input (is |was )?pinned|all (the )?inputs (are|were) pinned
+the runner's label as a pin | pinned, not ubuntu-latest|image that rolls forward is an unpinned|(?<!but the runner's )image (is |was )?pinned
+the actions at a moving tag | actions/(checkout|cache)@v\d|@v4 each|\bv4 tag
+C-9's section as 3 | SCAN_MODEL\.md('s)?\W{0,3}(§|section) ?3\b
+a brace claim for a stack local | brace (is )?never closed|misleading brace|never closed, far from the cause|unclosed brace
+the cost credited to this cycle 0.0.0 | cost cycle 0\.0\.0|cycle 0\.0\.0 (a build|lost)|measured by cycle 0\.0\.0\)|\(stack, 0\.0\.0\)
+a cache hit as a fresh build | by construction (the )?right binary|hit is (by construction|guaranteed|always)|builds from a clean checkout
+0.0.1's notes at the plan's date | 2026-10-1[56],? (by |in )?cycle 0\.0\.1\b|cycle 0\.0\.1\W{1,4}(on )?2026-10-1[56]
