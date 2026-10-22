@@ -109,7 +109,7 @@ index 94a2869..1e7defc 100644
  
  ### 1.0.4 — versioning
 diff --git a/meta/roadmap/ROADMAP.md b/meta/roadmap/ROADMAP.md
-index 89e42ef..f0e042b 100644
+index 262cf3f..b5fae37 100644
 --- a/meta/roadmap/ROADMAP.md
 +++ b/meta/roadmap/ROADMAP.md
 @@ -3,12 +3,15 @@
@@ -132,7 +132,7 @@ index 89e42ef..f0e042b 100644
 +`../OPEN_QUESTIONS.md` counted three measurements and its author's four are settled; a count copied from a set
 +drifts from it, so the set holds its own.)*
  
- *(2026-10-16, cycle 0.0.1 — the research gate put one question to the project's author, the
+ *(2026-10-21, cycle 0.0.1 — the research gate put one question to the project's author, the
  workbench's question 36, what an input over 4 GiB answers, which is not an entry of
 @@ -192,7 +195,7 @@ proportional to the input is copied" is a claim and a claim nobody measures is a
  claim nobody has. O-P8's interning measurement lands here.
@@ -144,7 +144,7 @@ index 89e42ef..f0e042b 100644
  things nothing else in the plan exercises hard. Written **without changing the
  library**, so every friction is recorded rather than smoothed over, then
 diff --git a/meta/specs/FORMATS.md b/meta/specs/FORMATS.md
-index 829ce77..8d4cbdd 100644
+index 1eaebba..48e62d6 100644
 --- a/meta/specs/FORMATS.md
 +++ b/meta/specs/FORMATS.md
 @@ -12,7 +12,7 @@ behind it rather than a claim.

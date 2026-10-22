@@ -1,8 +1,8 @@
 diff --git a/CLAUDE.md b/CLAUDE.md
-index eb288f5..90edeba 100644
+index 55c4c9a..7a4db0d 100644
 --- a/CLAUDE.md
 +++ b/CLAUDE.md
-@@ -117,7 +117,7 @@ compiler's own bootstrap ladder, and `[dependencies]` resolves to nothing.
+@@ -121,7 +121,7 @@ compiler's own bootstrap ladder, and `[dependencies]` resolves to nothing.
  `NPKC=… NPKRT=… python3 -B harness/run.py` builds and scans every module under
  `src/`, runs every suite `nitpick.toml` declares at −O0 and through `opt -O2`,
  and prints its verdict last (`harness/README.md`). *(Until cycle 0.0.2 the probes
@@ -12,7 +12,7 @@ index eb288f5..90edeba 100644
  sweeps every `.npk` in the tree, and runs the tree checks; `--only` concludes nothing.
  
 diff --git a/meta/roadmap/ROADMAP.md b/meta/roadmap/ROADMAP.md
-index f0e042b..73d968f 100644
+index b5fae37..6a4e2b1 100644
 --- a/meta/roadmap/ROADMAP.md
 +++ b/meta/roadmap/ROADMAP.md
 @@ -103,7 +103,7 @@ opening it. The per-cycle README has the subcycle map and the checklist.

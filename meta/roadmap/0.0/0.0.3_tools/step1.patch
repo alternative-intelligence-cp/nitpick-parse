@@ -1,10 +1,8 @@
 diff --git a/harness/README.md b/harness/README.md
-index fc84361..82e20ee 100644
+index da6632a..1d563b8 100644
 --- a/harness/README.md
 +++ b/harness/README.md
-@@ -10,9 +10,12 @@ Built in cycles 0.0.2 and 0.0.3.
- and says so; CI runs it so that the workflow's last step exists before the runner does.
- *(2026-10-15, cycle 0.0.2: the stub is replaced by the runner below; cycle 0.0.3 adds the
+@@ -12,5 +12,8 @@ and says so; CI runs it so that the workflow's last step exists before the runne
  refusal and parse stages, the self-check and the tree checks.)*
 +*(2026-10-15, cycle 0.0.3: added. A run is now the toolchain, the floor program, the self-check, the other two build
 +steps, the suites, the tree checks and the reviewed list's other direction, in that order; `--only SUBSTR` runs the
@@ -14,11 +12,7 @@ index fc84361..82e20ee 100644
 -NPKC=<pinned npkc> NPKRT=<pinned npkrt.o> python3 -B harness/run.py [--verdicts PATH]
 +NPKC=<pinned npkc> NPKRT=<pinned npkrt.o> python3 -B harness/run.py [--verdicts PATH] [--only SUBSTR]
  ```
- 
- `$NPKC` and `$NPKRT` are the pinned toolchain the board names (`../../BOARD.md`), and
-@@ -31,12 +34,16 @@ prints is its verdict — `harness: GREEN -- …` or `harness: RED -- …` — a
- | `build.py` | one root to one module, both legs, the undefined-symbol scan (B-2), and `npkc`'s exit alphabet |
- | `irscan.py` | the call-edge scan, and its two lists that class the runtime's global symbols: DENIED by facet, and FLOOR (B-2a) |
+@@ -33,3 +36,6 @@ prints is its verdict — `harness: GREEN -- …` or `harness: RED -- …` — a
  | `elf.py` | an ELF64 symbol table, read with `struct` |
 -| `stages.py` | the `program` stage and `compile`/`positive`: both legs, `stress`, the cap, and the pending units (B-5b) |
 +| `stages.py` | the `program` stage and `compile`/`positive`: both legs, `stress`, the cap, and the pending units (B-5b); the `check` stage, a refusal judged as the set of its codes at their sites (B-7); and the `parse` sweep |
@@ -26,17 +20,11 @@ index fc84361..82e20ee 100644
 +| `treecheck.py` | the tree checks, each reading its authority document (`TESTING.md` §3) |
 +| `lexical.py` | the one reading of `.npk` text the checks share: bytes, comments and strings blanked |
  | `baseline/` | the floor program and the syscaller (build step 1, and the cap's control), and `PENDING.txt`, the reviewed list of pending units |
- 
- ## What a green run asserts
- 
+@@ -39,2 +45,3 @@ prints is its verdict — `harness: GREEN -- …` or `harness: RED -- …` — a
  - the manifest names no entry this runner cannot judge, and the toolchain is the pin's;
 +- every live case of the self-check was red, and its pending ones were printed as pending;
  - the two scans see a syscall — the floor and the syscaller differ by `npk_sys6` alone, and the
-   syscaller's `main` is flagged — on this run, at this compiler;
- - every module under `src/` compiles as a root with no diagnostic, and none needs a symbol the
-@@ -47,4 +54,6 @@ prints is its verdict — `harness: GREEN -- …` or `harness: RED -- …` — a
-   manifest's target rows, scanned, linked with `npkrt.o` alone, run `stress` times on each leg —
-   under its cap after the floor program under the same cap — and exited as it expects; and every
+@@ -49,2 +56,4 @@ prints is its verdict — `harness: GREEN -- …` or `harness: RED -- …` — a
    pending unit showed the one failure its marker names, on every leg, and is a line of
 -  `baseline/PENDING.txt`, which names no unit that is not pending.
 +  `baseline/PENDING.txt`, which names no unit that is not pending;
@@ -831,10 +819,10 @@ index 0000000..792105f
 +         ("check_codes_documented", "cycle 0.2"), ("check_failsafe_arms", "cycle 0.2"),
 +         ("check_corpus_provenance", "cycle 0.3")]
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index 4013cdd..0a5d03d 100644
+index ad8f9aa..ef7e204 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
-@@ -1045,3 +1045,61 @@ the name both sides use.
+@@ -1056,3 +1056,61 @@ the name both sides use.
  *Reversal, for the author:* none for the mechanism; each pending unit's marker and list line go
  when its fix is pinned, and a new observation form joins B-5b by a decision when a defect shows
  a failure this one cannot name.
@@ -897,7 +885,7 @@ index 4013cdd..0a5d03d 100644
 +*Reversal, for the author:* none for the key; a layer S-6 does not list, or a third name, is a change to `SAFETY.md` §3
 +by a decision, which the check then reads.
 diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md
-index 9d2876f..699b571 100644
+index 7b7c367..94fa8b9 100644
 --- a/meta/specs/BUILD.md
 +++ b/meta/specs/BUILD.md
 @@ -135,13 +135,17 @@ runner and not a change of suite, and adds two of its own.
@@ -985,7 +973,7 @@ index 19e0ac7..49f78a2 100644
 +*(2026-10-15, cycle 0.0.3 — @@PD-141@@: first after the toolchain check and the floor program its cases are built on,
 +and before every step that judges the library; a live case not red stops the run.)*
 diff --git a/nitpick.toml b/nitpick.toml
-index 80a41fe..9deca7f 100644
+index 856353a..81218e6 100644
 --- a/nitpick.toml
 +++ b/nitpick.toml
 @@ -92,3 +92,13 @@ path  = "tests/conformance"

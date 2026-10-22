@@ -20,7 +20,7 @@ before any subcycle started, by the landing table below, row by row.
 |---|---|
 | [0.0.0](0.0.0.md) | **yes** — probes measured, five patches, blocks with filled Expects |
 | [0.0.1](0.0.1.md) | **yes** — six patches over 0.0.0's record, blocks with filled Expects; CI's run is its worker's |
-| [0.0.2](0.0.2.md) | **yes** — four patches over 0.0.1's record, the fourth carrying out cycle 0.0.1's twelve items as ruled; blocks with filled Expects, the mutants' table; cut into fresh-worker steps, each pushed and its CI run read |
+| [0.0.2](0.0.2.md) | **yes** — four patches over 0.0.1's record, the fourth carrying out ten of cycle 0.0.1's twelve items as ruled; blocks with filled Expects, the mutants' table; cut into fresh-worker steps, each pushed and its CI run read |
 | [0.0.3](0.0.3.md) | **yes** — three patches over 0.0.2's record, blocks with filled Expects, the mutants' table; CI's run is its worker's |
 | [0.0.4](0.0.4.md) | **yes** — four patches over 0.0.3's record, blocks with filled Expects, the mutants' table; CI's run is its worker's |
 | [0.0.5](0.0.5.md) | **yes** — two patches over 0.0.4's record, blocks with filled Expects, the archive its last block; its execution, the close, is the libraries' seat's |
@@ -273,7 +273,7 @@ file states its own acceptance when it reaches the pin, and where the two differ
 - [ ] 0.0.0's `tests/probe/` green as the first real `program` suite, probe 06 and its controls among it; the reviewed list naming no unit at the pin, and every way the pending mechanism can be wrong seen red
 - [ ] CI's harness step asserting the runner's unqualified green summary
 - [ ] `irscan.py`'s two lists class the runtime's global symbols whole, and each denied facet a source construct reaches seen red
-- [ ] cycle 0.0.1's twelve items carried out as the libraries' seat ruled them, each at its source (step 4)
+- [ ] cycle 0.0.1's twelve items carried out as the libraries' seat ruled them (steps 3 and 4)
 
 ### 0.0.3 — the harness, part 2
 - [ ] the parse sweep (`npkc` over every `.npk`, judged by the diagnostic's code family) and the refusal stage with the **exact-code** rule (B-7, a set at its sites); `accept` struck

@@ -1,5 +1,5 @@
 diff --git a/nitpick.toml b/nitpick.toml
-index 9deca7f..7425898 100644
+index 81218e6..a97925b 100644
 --- a/nitpick.toml
 +++ b/nitpick.toml
 @@ -93,6 +93,15 @@ name  = "probe"

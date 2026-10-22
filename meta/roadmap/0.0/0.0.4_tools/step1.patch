@@ -1,8 +1,8 @@
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index 2f653a8..47d494b 100644
+index 65610db..b694ebe 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
-@@ -1106,3 +1106,26 @@ checks written now** — their inputs do not exist, and a check over nothing is
+@@ -1117,3 +1117,26 @@ checks written now** — their inputs do not exist, and a check over nothing is
  
  *Reversal, for the author:* none for the key; a layer S-6 does not list, or a third name, is a change to `SAFETY.md` §3
  by a decision, which the check then reads.
@@ -46,7 +46,7 @@ index 7712438..eb2a7eb 100644
  which is a property of the cursor's arithmetic proof and is not adjustable.
  
 diff --git a/nitpick.toml b/nitpick.toml
-index 7425898..deb6434 100644
+index a97925b..5b267be 100644
 --- a/nitpick.toml
 +++ b/nitpick.toml
 @@ -102,6 +102,13 @@ name  = "refused"

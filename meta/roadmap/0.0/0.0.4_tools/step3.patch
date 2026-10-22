@@ -1,5 +1,5 @@
 diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md
-index af07870..d477a6a 100644
+index e96945b..4fc0e6d 100644
 --- a/meta/specs/BUILD.md
 +++ b/meta/specs/BUILD.md
 @@ -259,6 +259,11 @@ header — a second handle on its block — is `NITPICK-TYPE-046`; every index a

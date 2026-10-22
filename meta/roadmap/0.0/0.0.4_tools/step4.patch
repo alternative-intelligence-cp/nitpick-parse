@@ -12,10 +12,10 @@ index 5bedfed..cea15ed 100644
    event/      #   the event vocabulary, the Format trait, the depth stack
    doc/        #   the Document tree and the query API
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index 47e6ab1..05ac1c1 100644
+index b0760d0..2501f03 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
-@@ -1159,3 +1159,21 @@ eight) — every format's consumer owes `DivByZero` and `DivOverflow` already, t
+@@ -1170,3 +1170,21 @@ eight) — every format's consumer owes `DivByZero` and `DivOverflow` already, t
  
  *Reversal, for the author:* when D-341 lands, `Bytes` may offer a frozen view by a decision; when a decision accepts
  the contracts' arms, the comments become clauses, a marker deleted per site.
@@ -38,7 +38,7 @@ index 47e6ab1..05ac1c1 100644
 +`SmallMap<K: Copy, V: Copy>` over a by-value key comparison, its insert answering `false` when full; that step's suite
 +joins the gate, and the checklist and the cycle README move with it.
 diff --git a/meta/roadmap/ROADMAP.md b/meta/roadmap/ROADMAP.md
-index 1a62d91..89e42ef 100644
+index 898c181..262cf3f 100644
 --- a/meta/roadmap/ROADMAP.md
 +++ b/meta/roadmap/ROADMAP.md
 @@ -112,8 +112,8 @@ specifications, and the two compiler defects its planning found at `7e91730` wer
@@ -53,7 +53,7 @@ index 1a62d91..89e42ef 100644
  ### 0.1 — Scan
  `src/scan/`: the total cursor, `Span`, the generated 256-byte class table, the
 diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md
-index d477a6a..a65e1d2 100644
+index 4fc0e6d..788a2fe 100644
 --- a/meta/specs/BUILD.md
 +++ b/meta/specs/BUILD.md
 @@ -264,6 +264,10 @@ accessors, because an index through a `wild` block does not trap, and a misuse t
