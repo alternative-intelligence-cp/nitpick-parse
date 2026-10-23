@@ -8,7 +8,7 @@ so a plan can say which it writes. Added by cycle 0.0.2's plan.
   a module-level binding, by kind    landing 114 (DEF-250): one with NO initialiser is `NITPICK-TYPE-055` at its
                                      declaration, as a plain one with an initialiser already is at the pin
                                      (D-211); a `fixed` one with an initialiser is the kind that stays
-  `NULL`                             D-355: legal only for a `wild` pointer, by a landing of its own
+  `NULL`                             D-355: legal only for a `wild` pointer, by its landing 119, in the pin `2e1cb4a`
   `comptime`                         D-353: a value parameter is RESERVED (landing 117); a `comptime func:` is
                                      compile-time only
   an impl declared away from both    the orphan rule (S-37): an `impl:<Type>:<Trait>` lives in the module of its

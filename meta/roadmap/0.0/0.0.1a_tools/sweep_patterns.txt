@@ -1,0 +1,13 @@
+# 0.0.1a's stale-claim sweep: one subject per claim the two steps change, `<subject> | <regex>`, matched
+# case-insensitively over joined text (`../tools/sweep.py`). A candidate is not a finding: 0.0.1a.md §5 gives each one's
+# class.
+the kept pin as CI's commit | c9baa9e91c553d8db2a2a62f09c36b30a984b07f|FULL sha \(c9baa9e in the roadmap
+notice 118's emission | notice 118's|1f48a31a|31731079|31 731 079
+an immutable asset | immutable asset|asset is immutable
+the download piped into tar | piped into tar|\| tar -xJ
+a cache keyed on the version alone | cached on the version
+the asset checked by its download alone | install step, which downloads it
+0.0.0's notes at the plan's date | 2026-10-1[56], cycle 0\.0\.0
+0.0.0's markers at the plan's date | SUPERSEDED IN PART by [^()]{0,60}\(2026-10-1[56]\)
+the libraries' one re-pin | one re-pin
+D-341 unbuilt | D-341[^.]{0,30}unbuilt|plans it, unbuilt

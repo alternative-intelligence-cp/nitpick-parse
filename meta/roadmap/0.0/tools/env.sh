@@ -8,25 +8,31 @@
 # workbench, `../BOARD.md` and `../WORKSTREAMS.md` -- so a block run in a relocated copy finds another workbench or
 # none (and, without those two files, two `broken-link` findings in every `refs`), and the blocks are run in the
 # checkout the dispatch names. `$NPK_TREE` is read with `git show` and `git rev-parse`
-# alone. The toolchain is the pin `c9baa9e`'s, whose LLVM, 20.1.8, is the machine's own: `llc`, `opt` and `ld.lld` are
-# found on PATH, and every step 0 block prints what each reports -- anything but 20.1.8 is a stop. `$NPKC` and
-# `$NPKRT` come from the dispatch's TOOLCHAIN line when it sets them, and from the workbench's copy of the pin when it
-# does not. TMPDIR is this cycle's scratch, `$A/tmp`; every `rm` names its target through `${VAR:?}`; nothing printed
+# alone. The toolchain is the pin `2e1cb4a`'s from cycle 0.0.1a, the adoption of the libraries' second re-pin (0.0.0
+# and 0.0.1 ran at `c9baa9e`, as their records say), whose LLVM, 20.1.8, is the machine's own: `llc`, `opt` and
+# `ld.lld` are found on PATH, and every step 0 block prints what each reports -- anything but 20.1.8 is a stop. `$NPKC`
+# and `$NPKRT` come from the dispatch's TOOLCHAIN line when it sets them, and from the workbench's copy of the pin when
+# it does not; `$NPKC_OLD` and `$NPKRT_OLD`, the kept pin `c9baa9e`'s, the same way, and only 0.0.1a's old-pin leg
+# reads them. TMPDIR is this cycle's scratch, `$A/tmp`; every `rm` names its target through `${VAR:?}`; nothing printed
 # carries a path above the repository, so no output carries a home directory into a record.
 : "${REPO:?set REPO to the REPO line of the dispatch, first}"
 REPO=$(realpath "$REPO")
 WB=$(realpath "$REPO/..")
 NPK_TREE=$(realpath "$WB/../nitpick")
-PIN=c9baa9e
-PIN_FULL=c9baa9e91c553d8db2a2a62f09c36b30a984b07f
+PIN=2e1cb4a
+PIN_FULL=2e1cb4adef795488c0530be297e441f923bbe090
+OLD_PIN=c9baa9e
+OLD_PIN_FULL=c9baa9e91c553d8db2a2a62f09c36b30a984b07f
 NPKC=${NPKC:-$WB/.internal/toolchain/$PIN/npkc}
 NPKRT=${NPKRT:-$WB/.internal/toolchain/$PIN/npkrt.o}
+NPKC_OLD=${NPKC_OLD:-$WB/.internal/toolchain/$OLD_PIN/npkc}
+NPKRT_OLD=${NPKRT_OLD:-$WB/.internal/toolchain/$OLD_PIN/npkrt.o}
 TOOLS=$REPO/meta/roadmap/0.0/tools
 A=$REPO/.internal/w00
 CHECK=$WB/skills/check/scripts
 mkdir -p "$A/tmp"
 TMPDIR=$A/tmp
-export NPKC NPKRT TMPDIR A TOOLS
+export NPKC NPKRT NPKC_OLD NPKRT_OLD TMPDIR A TOOLS
 
 # Compile each file as a root from its own directory: `<file>: compiles`, or each diagnostic's code and its site in
 # the file, `CODE L:C`, in the order the compiler reports them, and `npkc` exit status beside them.

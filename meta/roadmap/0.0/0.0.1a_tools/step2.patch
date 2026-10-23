@@ -1,0 +1,336 @@
+diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
+index cf58870..d4e0162 100644
+--- a/meta/DECISIONS.md
++++ b/meta/DECISIONS.md
+@@ -253,6 +253,8 @@ all.
+ 
+ ### PA-021 — `Event` is POD; scalar text is a `TextRef`, never an owned string
+ > **SUPERSEDED IN PART by @@PD-129@@ and @@PD-130@@ (2026-10-15)** — measured by cycle 0.0.0's probes; the rule stands.
++> *(@@DATE@@, cycle 0.0.1a:)* this marker landed on 2026-10-17, at cycle 0.0.0; its date is
++> the plan's drafting date.
+ 
+ **2026-09-03.** A plain 24-byte value with no owning field, so it returns by
+ value, sits in a `Vec`, compares and copies.
+@@ -263,12 +265,14 @@ copied or cleared; and **an arena `get` returns a copy** (D-152), and a copy of
+ an owning value is *refused* — so the same shape in a `Node` could not be read
+ back at all.
+ 
+-*(2026-10-15, cycle 0.0.0: "24-byte" is 32, measured by probe 02, and both forcing
++*(2026-10-17, cycle 0.0.0: "24-byte" is 32, measured by probe 02, and both forcing
+ reasons are restated by measurement — @@PD-129@@ and @@PD-130@@ supersede this
+ decision in part. The rule, no owning field, stands.)*
+ 
+ ### PA-022 — nesting is an explicit stack; there is no native recursion
+ > **SUPERSEDED IN PART by @@PD-133@@ (2026-10-15)** — its stated reason, measured by probe 10b; the rule stands.
++> *(@@DATE@@, cycle 0.0.1a:)* this marker landed on 2026-10-17, at cycle 0.0.0; its date is
++> the plan's drafting date.
+ 
+ **2026-09-03.** Not in the parsers, not in the tree builder, not in the writers,
+ not in the comparison, not in the walk, not in the drop.
+@@ -284,7 +288,7 @@ a *recursive drop* is a stack overflow at the end of a **successful** parse.
+ That is the form of this bug most likely to survive review, which is why the
+ rule names the walk, the compare, the print and the drop explicitly.
+ 
+-*(2026-10-15, cycle 0.0.0: "no stack-depth guard … a raw fault, not a controlled
++*(2026-10-17, cycle 0.0.0: "no stack-depth guard … a raw fault, not a controlled
+ stop" is false at compiler `7e91730` — a stack overflow traps `StackExhausted`
+ (the compiler's D-305), measured by probe 10b. @@PD-133@@ supersedes the reason in
+ part; the rule stands, because a trap stops the whole program.)*
+@@ -314,6 +318,8 @@ avoid one.
+ 
+ ### PA-030 — the tree is an arena of POD nodes with a side string pool
+ > **SUPERSEDED IN PART by @@PD-130@@ (2026-10-15)** — measured by cycle 0.0.0's probes; the rule stands.
++> *(@@DATE@@, cycle 0.0.1a:)* this marker landed on 2026-10-17, at cycle 0.0.0; its date is
++> the plan's drafting date.
+ 
+ **2026-09-03.** Not a linked structure of owning values.
+ 
+@@ -327,7 +333,7 @@ compile. Text lives in the pool and a node addresses it by offset and length.
+ outlived its slot fails `get` with `StaleHandle` (−4106) rather than reading
+ freed memory — the use-after-free class closed structurally.
+ 
+-*(2026-10-15, cycle 0.0.0: the refusal is at `arena_make`, `NITPICK-TYPE-007`,
++*(2026-10-17, cycle 0.0.0: the refusal is at `arena_make`, `NITPICK-TYPE-007`,
+ measured by probe 05 — not TYPE-046 at the `get`. @@PD-130@@ supersedes the stated
+ reason in part; the tree, the pool and the stale-handle answer (probe 04) stand.)*
+ 
+@@ -387,6 +393,8 @@ they forget.
+ 
+ ### PA-040 — one `ParseError` value with a closed code enum
+ > **SUPERSEDED IN PART by @@PD-129@@ (2026-10-15)** — measured by cycle 0.0.0's probes; the rule stands.
++> *(@@DATE@@, cycle 0.0.1a:)* this marker landed on 2026-10-17, at cycle 0.0.0; its date is
++> the plan's drafting date.
+ 
+ **2026-09-03.** A plain 24-byte value: a `FaultCode`, flags, a span, an
+ `expected` bitmask, what was found, and the depth. No owning field, so it rides
+@@ -402,7 +410,7 @@ removed from `Result`, so the accessor pair `fault_found_byte` /
+ `fault_found_class` is the only way to read it — which is what the D-069
+ objection was actually about. The alternative is two fields and 28 bytes.
+ 
+-*(2026-10-15, cycle 0.0.0: "a plain 24-byte value" is 28, measured by probe 03 —
++*(2026-10-17, cycle 0.0.0: "a plain 24-byte value" is 28, measured by probe 03 —
+ `FaultCode` is an `int32` tag — so the one `found` field already costs what this
+ paragraph priced two at. @@PD-129@@ supersedes the number; whether the compromise
+ still earns its keep is cycle 0.2.1's, where `ParseError` is built.)*
+@@ -417,7 +425,7 @@ translation possible, and keeps the struct at 24 bytes with no owning field.
+ The code `NPARSE-nnnn` is stable and the prose after it is not — the compiler's
+ own rule, for the same reason.
+ 
+-*(2026-10-15, cycle 0.0.0: the struct is 28 bytes, measured by probe 03; @@PD-129@@.
++*(2026-10-17, cycle 0.0.0: the struct is 28 bytes, measured by probe 03; @@PD-129@@.
+ The reasoning stands — no stored text is still what keeps it free of an owning
+ field.)*
+ 
+@@ -568,7 +576,7 @@ bound is the intended path and what every example uses; `dyn` costs an indirect
+ call per event and exists so that "choose the format from the file extension"
+ does not require a hand-written `pick` in every consumer.
+ 
+-*(2026-10-16, cycle 0.0.0: object safety measured — `dyn` over a `Self->` method runs,
++*(2026-10-17, cycle 0.0.0: object safety measured — `dyn` over a `Self->` method runs,
+ probe 07 — and at compiler `c9baa9e` so does the static path through a bound, probe 06, a
+ compiler defect at `7e91730` until the compiler's landing 118; @@PD-131@@.)*
+ 
+@@ -726,6 +734,9 @@ four (the compiler's `TYPE_REFERENCE.md` §9.3). `EventKind`, `ScalarKind`,
+ `NodeKind`, `TextSrc` and `FaultCode` stay enum-typed fields, and the rules that
+ assert a size (E-6, F-1, D-3) assert these.
+ 
++*(@@DATE@@, cycle 0.0.1a:)* this decision landed on 2026-10-17, at cycle 0.0.0; the date that
++opens it is the plan's drafting date.
++
+ It supersedes in part PA-021's "24-byte", and PA-040's; neither rule moves.
+ 
+ *Alternatives declined:* **`uint8` fields with the enum read by `=>!`** — 24 bytes
+@@ -756,6 +767,9 @@ pool (PA-030), now for the reason the compiler gives; `Event`, `Node`,
+ every container read here is — rather than as a language one; and the managed half
+ of any container's obligations is gated by a capped pair, not by `exit 0`.
+ 
++*(@@DATE@@, cycle 0.0.1a:)* this decision landed on 2026-10-17, at cycle 0.0.0; the date that
++opens it is the plan's drafting date.
++
+ It supersedes in part PA-030's stated reason, and PA-021's ("a copy of an owning
+ value is refused"), which named the copy `get` makes; the rules stand.
+ 
+@@ -785,6 +799,11 @@ the implementation's symbol, where `Count:Src.step` is defined, so `llc` refused
+ which the compiler registered as DEF-253 and fixed in its landing 118, which the libraries' one
+ re-pin carries; nothing was re-spelled around it while it stood.
+ 
++*(@@DATE@@, cycle 0.0.1a:)* this decision landed on 2026-10-17, at cycle 0.0.0; the date that
++opens it is the plan's drafting date, and its second date the adoption's at `c9baa9e`. The
++"libraries' one re-pin" above was the first: a second, to compiler `2e1cb4a` at landing
++140, followed on 2026-10-22.
++
+ *Alternatives declined:* **re-spell the bound path through `dyn`** — a workaround
+ buried in library code, which `CLAUDE.md` forbids, and an indirect call per event
+ PA-071 chose not to pay; **make `step` take `Self` by value** — the control shows a
+@@ -808,6 +827,9 @@ the slot exactly as its trait does (`NITPICK-TYPE-014`, probe 08f). A plain
+ `uint8[]` still converts in (probe 08), so the change widens every contract, and a
+ write through the view is refused (`NITPICK-TYPE-086`, probe 08e).
+ 
++*(@@DATE@@, cycle 0.0.1a:)* this decision landed on 2026-10-17, at cycle 0.0.0; the date that
++opens it is the plan's drafting date.
++
+ What a view may travel to, measured at compiler `c9baa9e` (probe 08 and its
+ refusals): a function handed the caller's
+ bytes may RETURN a range of them (`event_text`'s shape) or a struct holding them
+@@ -850,6 +872,9 @@ a recursion traps is not this library's to know: probe 10b's frame completes
+ 131 063 through `opt -O2` — so the plan's first recursive probe, at 50 000, would
+ have run to the end at both legs and demonstrated nothing.
+ 
++*(@@DATE@@, cycle 0.0.1a:)* this decision landed on 2026-10-17, at cycle 0.0.0; the date that
++opens it is the plan's drafting date.
++
+ It supersedes in part PA-022's stated reason; strikes `OPEN_QUESTIONS.md` O-N2 as
+ answered (the early ecosystem audit's ES1); and keeps `check_no_recursion` as the
+ instrument, because the compiler's `stack-depth` rows — derived from `terminate`
+@@ -883,6 +908,9 @@ untouched; what a consumer owes beyond it is the machinery's, and S-7's generate
+ list, held to `NITPICK-REACH-003` by `check_failsafe_arms` from cycle 0.2, is
+ where it is stated per module.
+ 
++*(@@DATE@@, cycle 0.0.1a:)* this decision landed on 2026-10-17, at cycle 0.0.0; the date that
++opens it is the plan's drafting date.
++
+ The tests' arm codes follow `PLAYBOOK.md` §3 item 8, plus three it does not
+ assign, taken as the sibling libraries take them where they do: 97
+ `DivByZero`, 98 `DivOverflow`, and 110 `StaleHandle`, which none of them has
+diff --git a/meta/OPEN_QUESTIONS.md b/meta/OPEN_QUESTIONS.md
+index 8884e48..f9e4884 100644
+--- a/meta/OPEN_QUESTIONS.md
++++ b/meta/OPEN_QUESTIONS.md
+@@ -60,7 +60,7 @@ the resolver's roots from `[dependencies]`. Neither is on the compiler's 1.5 or
+ 
+ ### ~~O-N2 — there is no stack-depth guard, and `stack-depth` obligations are 1.5.8~~ — **ANSWERED by the compiler, @@PD-133@@**
+ 
+-*(2026-10-15, cycle 0.0.0: both halves landed. A stack overflow traps
++*(2026-10-17, cycle 0.0.0: both halves landed. A stack overflow traps
+ `StackExhausted` — the compiler's D-305, 1.5.8 — measured by probe 10b at `7e91730`:
+ 1 048 576 levels, exit 106 at both legs. And the `stack-depth` rows exist, derived by
+ the compiler's runners from `terminate` rows (its `VERIFICATION_REFERENCE.md`'s row
+@@ -92,7 +92,7 @@ index (`VALUE_MODEL.md` §5), and `SmallMap<K,V>` is ours (PA-004).
+ is fine. Recorded only so that the question "why is there no hash map here" has
+ a written answer, because it is asked every time somebody meets the value model.
+ 
+-*(2026-10-15, cycle 0.0.0: **this entry's id is this repository's own**; the workbench
++*(2026-10-17, cycle 0.0.0: **this entry's id is this repository's own**; the workbench
+ registry's `O-N3` is a different question (the early ecosystem audit's ED2), and
+ nothing here takes a registry id.)*
+ 
+@@ -108,7 +108,7 @@ element type may not own anything**, because `get` copies and a copy of an owner
+ is refused. It would have saved this library a design iteration and it will save
+ the next one.
+ 
+-*(2026-10-15, cycle 0.0.0 — probe 05's evidence, measured at `7e91730`: the refusal
++*(2026-10-17, cycle 0.0.0 — probe 05's evidence, measured at `7e91730`: the refusal
+ is at `arena_make`, `NITPICK-TYPE-007`, whose own sentence says the element "OWNS
+ heap storage, and `get`/`put` copy bytes" and names the answer the compiler plans,
+ deep-view accessors (D-183). The diagnostic now says what this ask wanted the
+diff --git a/meta/specs/DIAGNOSTIC_MODEL.md b/meta/specs/DIAGNOSTIC_MODEL.md
+index 1c0cb6b..61347cb 100644
+--- a/meta/specs/DIAGNOSTIC_MODEL.md
++++ b/meta/specs/DIAGNOSTIC_MODEL.md
+@@ -28,7 +28,7 @@ pub struct:ParseError = {
+ };                       // 28 bytes, align 4 — measured (@@PD-129@@)
+ ```
+ 
+-*(2026-10-15, cycle 0.0.0, @@PD-129@@: the comments said `2 bytes` for the code and `24 bytes` for the
++*(2026-10-17, cycle 0.0.0, @@PD-129@@: the comments said `2 bytes` for the code and `24 bytes` for the
+ whole. Measured at compiler `7e91730` by probe 03 it is **28**: `FaultCode` is an `int32` tag.)*
+ 
+ **Rule F-1 — no owning field**, so it rides inside `Step.Fault(ParseError)`,
+diff --git a/meta/specs/EVENT_MODEL.md b/meta/specs/EVENT_MODEL.md
+index 1028087..a992681 100644
+--- a/meta/specs/EVENT_MODEL.md
++++ b/meta/specs/EVENT_MODEL.md
+@@ -72,7 +72,7 @@ pub struct:Event = {
+ };                      // 32 bytes, align 4 — measured, not summed (@@PD-129@@)
+ ```
+ 
+-*(2026-10-15, cycle 0.0.0, @@PD-129@@: the comments said `1 byte` for each kind and `24 bytes` for the
++*(2026-10-17, cycle 0.0.0, @@PD-129@@: the comments said `1 byte` for each kind and `24 bytes` for the
+ whole, which is the field widths added up. Measured at compiler `7e91730` by probe 02 —
+ `tests/probe/probe02_pod_event.npk`, whose exit code is `#size_of<Event>()` — it is **32**: a payload-free
+ enum is an `int32` tag, four bytes (the compiler's `TYPE_REFERENCE.md` §9.3).)*
+@@ -96,7 +96,7 @@ pub enum:ScalarKind = { Null; Bool; Int; Float; Str; Date; Time; DateTime; Raw;
+ a design rule, not a language one: an owning field would cost `Copy`, and with
+ it the by-value reads every container here makes.
+ 
+-*(2026-10-15, cycle 0.0.0, @@PD-130@@: this rule said "a plain 24-byte value" — 32
++*(2026-10-17, cycle 0.0.0, @@PD-130@@: this rule said "a plain 24-byte value" — 32
+ measured, @@PD-129@@ — and gave as its forcing reason that "an arena `get` returns a
+ *copy*, and a copy of an owning value is refused". Measured at `7e91730`, the arena
+ refuses an owning element at `arena_make`, `NITPICK-TYPE-007` (probe 05), and a `Vec`
+diff --git a/meta/specs/PLUGIN_MODEL.md b/meta/specs/PLUGIN_MODEL.md
+index 4743905..f5a5a58 100644
+--- a/meta/specs/PLUGIN_MODEL.md
++++ b/meta/specs/PLUGIN_MODEL.md
+@@ -71,7 +71,7 @@ intended path and is what every example uses. `dyn` costs an indirect call per
+ event and exists so that "choose at run time" does not require a hand-written
+ `pick` in every consumer.
+ 
+-*(2026-10-16, cycle 0.0.0, @@PD-131@@: both paths measured at compiler `c9baa9e` — a
++*(2026-10-17, cycle 0.0.0, @@PD-131@@: both paths measured at compiler `c9baa9e` — a
+ generic `consume<F: Format>(F->:p)` calling `p.step()` links and runs (probe 06), and
+ so does the `dyn` path (probe 07). At `7e91730` the static path was a compiler
+ defect, DEF-253, accepted by `npkc` and refused by `llc`; the compiler's landing 118
+diff --git a/meta/specs/SAFETY.md b/meta/specs/SAFETY.md
+index a85ab40..477ddb3 100644
+--- a/meta/specs/SAFETY.md
++++ b/meta/specs/SAFETY.md
+@@ -208,7 +208,7 @@ frame completes 65 534 levels and traps at 65 535 at `-O0`, and completes
+ `7e91730`), so a depth a test passes is a statement about one frame and one
+ optimiser.
+ 
+-*(2026-10-15, cycle 0.0.0, @@PD-133@@: this paragraph said the language had no
++*(2026-10-17, cycle 0.0.0, @@PD-133@@: this paragraph said the language had no
+ stack-depth guard and the overflow was "a raw fault, not a controlled stop", which
+ was true before the compiler's 1.5.8. Probe 10b, 1 048 576 levels: `StackExhausted`,
+ 106, at both legs. The rule above it stands; its reason changed.)*
+@@ -241,7 +241,7 @@ rule for the rest:
+   element out and drop it, and nothing but a memory cap sees a free that does
+   not (S-18; probes 09b and 09c).
+ 
+-*(2026-10-15, cycle 0.0.0, @@PD-130@@: until this subcycle the first bullet said an
++*(2026-10-17, cycle 0.0.0, @@PD-130@@: until this subcycle the first bullet said an
+ owning field made a `Vec` of them impossible to copy, clear or compare, and the
+ second that the arena's copying `get` was refused TYPE-046. Measured at
+ `7e91730`, neither is the mechanism: `PLAYBOOK.md` §2's row on move-only values
+diff --git a/meta/specs/SCAN_MODEL.md b/meta/specs/SCAN_MODEL.md
+index 5c9e2d9..4bbaa8a 100644
+--- a/meta/specs/SCAN_MODEL.md
++++ b/meta/specs/SCAN_MODEL.md
+@@ -42,7 +42,7 @@ field's code, which no probe provokes:
+ 
+ `EVENT_MODEL.md` §5 states the consequence for the public API.
+ 
+-*(2026-10-15, cycle 0.0.0, @@PD-132@@: this rule said the borrow was `uint8[]` under
++*(2026-10-17, cycle 0.0.0, @@PD-132@@: this rule said the borrow was `uint8[]` under
+ D-070, and that a `Cursor` "cannot be returned from a function, stored in something
+ that outlives the call". At `7e91730` `string_bytes` returns `fixed uint8[]`, which
+ no plain slot accepts (`NITPICK-TYPE-007`), and a `Cursor` over a parameter's bytes
+diff --git a/meta/specs/VALUE_MODEL.md b/meta/specs/VALUE_MODEL.md
+index 7c635e4..d455e12 100644
+--- a/meta/specs/VALUE_MODEL.md
++++ b/meta/specs/VALUE_MODEL.md
+@@ -28,7 +28,7 @@ language rule rather than a preference:
+ > therefore not be stored **at all** — not "would be slow", not "would allocate":
+ > `arena<Node>` would not compile.
+ 
+-*(2026-10-15, cycle 0.0.0, @@PD-130@@: until this subcycle the quotation said the
++*(2026-10-17, cycle 0.0.0, @@PD-130@@: until this subcycle the quotation said the
+ refusal was TYPE-046's, of the copy `doc.nodes.get(h)` makes. The arena refuses
+ earlier, at the make; and the compiler names its answer for owning elements —
+ generated deep-view accessors — so the day those land, probe 05 stops being refused
+diff --git a/meta/specs/VERIFICATION.md b/meta/specs/VERIFICATION.md
+index 9f7bc59..7e0642d 100644
+--- a/meta/specs/VERIFICATION.md
++++ b/meta/specs/VERIFICATION.md
+@@ -42,9 +42,14 @@ so a premature `ensures` is a build failure, not a silent no-op.
+   a `Vec`'s `wild` block's. Those indexes are checked by this library's own
+   accessors, or by nothing.
+ 
+-*(2026-10-15, cycle 0.0.0, probe 11 and the early ecosystem audit's EC2: this
++*(2026-10-17, cycle 0.0.0, probe 11 and the early ecosystem audit's EC2: this
+ bullet said "every index into a slice, array or `buffer`", which `PLAYBOOK.md`
+ §2's index row corrects for the pointer.)*
++*(@@DATE@@, cycle 0.0.1a: from the compiler's landing 128 (D-341), which the pin `2e1cb4a`
++carries, a `buffer` is indexed and ranged like a slice of bytes, checked against its length, and a
++`#wild_slice` over its pointer is a view of its owner. An index through `.ptr`, which probe 11
++writes through and cycle 0.0.4's `Bytes` is planned to, is still checked by nothing but this
++library's own accessors.)*
+ - **Every plain integer `+ - *` traps on overflow** (D-210) — which for this
+   library is not a gift but the hazard itself (§4).
+ - **Division by zero traps** (D-007).
+@@ -179,7 +184,7 @@ native recursion on an input-controlled path") is currently held by a **grep**
+ becomes a discharged obligation and the exceptions table becomes provably
+ empty.
+ 
+-*(2026-10-15, cycle 0.0.0, @@PD-133@@: 1.5.8 has landed, and it is not what this rule
++*(2026-10-17, cycle 0.0.0, @@PD-133@@: 1.5.8 has landed, and it is not what this rule
+ waited for. The compiler's runners DERIVE a `stack-depth` row from a recursion's
+ `terminate` rows — discharged when every member states `decreases`, open otherwise —
+ and the trap is D-305's prologue check. Neither says "no recursion on an
+diff --git a/tests/probe/probe06_trait_bound.npk b/tests/probe/probe06_trait_bound.npk
+index 2da3fa9..10ea8b8 100644
+--- a/tests/probe/probe06_trait_bound.npk
++++ b/tests/probe/probe06_trait_bound.npk
+@@ -16,7 +16,7 @@
+ // `@"npk.probe06_trait_bound.Count->:Src.step"` -- the receiver's POINTER type in the
+ // implementation's symbol -- where `@"npk.probe06_trait_bound.Count:Src.step"` is defined, so `llc`
+ // refused the module. The compiler registered it as DEF-253 and fixed it in its landing 118, which
+-// the libraries' one re-pin carries; nothing was re-spelled around it (`CLAUDE.md`: never work
++// the libraries' first re-pin carries; nothing was re-spelled around it (`CLAUDE.md`: never work
+ // around a compiler defect).
+ mod:probe06_trait_bound;
+ 
+diff --git a/tests/probe/refused/probe08h_view_reseated.npk b/tests/probe/refused/probe08h_view_reseated.npk
+index f7fea7f..e195759 100644
+--- a/tests/probe/refused/probe08h_view_reseated.npk
++++ b/tests/probe/refused/probe08h_view_reseated.npk
+@@ -12,7 +12,7 @@
+ // `7e91730`, where this cycle was planned, it was a compiler defect, a use-after-free in safe code:
+ // `npkc` accepted it, and after the block `c.src[0]` read the runtime's free poison, 0xAA -- exit
+ // 170 at -O0 and through `opt -O2`. The compiler registered it as DEF-252 and fixed it in that
+-// landing, which the libraries' one re-pin carries.
++// landing, which the libraries' first re-pin carries.
+ mod:probe08h_view_reseated;
+ 
+ struct:Cursor = { fixed uint8[]:src; int64:pos; };

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Cycle 0.0 -- read `.npk` files the way the compiler does (bytes; `\\n` the only line end; comments and string
 literals blanked) and count the shapes a plan must not write: those whose answer moved between compiler `7e91730`,
-the cycle's first pin, and the landings its pin `c9baa9e` carries (the cycle README's landing list), and those a
-pin is silent on.
+the cycle's first pin, and the landings its pins `c9baa9e` and `2e1cb4a` carry (the cycle README's landing list),
+and those a pin is silent on.
 
     python3 -B shapes.py <file>...           one line per shape: its count over all the files
     python3 -B shapes.py --sites <file>...   and every site, `<file>:<line>`, beside it
@@ -19,7 +19,7 @@ The shapes, each with the landing or the row that moves it:
   `exit` operands, by form       104 (DEF-249: the operand is held to `int32`)
   `#wild_slice`                  the read-only view rule (no untied view of a managed header, D-341)
   a plain `uint8[]`              the read-only view rule -- listed, because a probe may need one on purpose
-  `stack` as a name              `PLAYBOOK.md` §10 (a memory qualifier: a local's PARSE-002 at its declaration, at `c9baa9e`)
+  `stack` as a name              `PLAYBOOK.md` §10 (a memory qualifier: a local's PARSE-002 at its declaration at `c9baa9e`, PARSE-001 at its name from landing 136, in `2e1cb4a`)
   `.is_error ||` and its mirror  `PLAYBOOK.md` §2 (`if (a.is_error || b.is_error)` clears neither taint)
   a `failsafe` whose first statement is not its `pick`   109 (DEF-224 finds a nested pick; `7e91730` did not)
   a trait default calling a sibling on `self`   118 (DEF-254: it never links before) -- added by cycle 0.0.2's

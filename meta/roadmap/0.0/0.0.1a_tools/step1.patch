@@ -1,0 +1,154 @@
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index fe49754..1e64066 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -26,16 +26,21 @@ permissions:
+   contents: read
+ 
+ env:
+-  # The workbench's pinned compiler, by FULL sha (`c9baa9e` in the roadmap). @@PD-136@@.
+-  NITPICK_COMMIT: "c9baa9e91c553d8db2a2a62f09c36b30a984b07f"
+-  # THE EMISSION AT THAT COMMIT, as the compiler's own build recorded it -- notice 118's
++  # The workbench's pinned compiler, by FULL sha (`2e1cb4a` in the roadmap). @@PD-136@@.
++  NITPICK_COMMIT: "2e1cb4adef795488c0530be297e441f923bbe090"
++  # THE EMISSION AT THAT COMMIT, as the compiler's own build recorded it -- notice 140's
+   # `npkc.ll` row. The emission step below ASSERTS it: the compiler's D-265 says the
+   # emission, not the binary, is the cross-machine claim. Moved with every pin.
+-  NPKC_LL_SHA256: "1f48a31a5c9b5b78053444c404b7b2dd7c8c470c354dd3b14d47b3e75585ee2a"
+-  NPKC_LL_BYTES: "31731079"
++  NPKC_LL_SHA256: "0073060250f0e56329ab77a01de45b0f499c0441db66215b7b762c9fe911b27c"
++  NPKC_LL_BYTES: "32569732"
+   # nitpick.toml's [toolchain] llvm: an exact patch release. Upstream publishes
+   # `LLVM-20.1.8-Linux-X64.tar.xz` at its `llvmorg-20.1.8` release.
+   LLVM_VERSION: "20.1.8"
++  # THAT ASSET BY CONTENT (cycle 0.0.1a): its sha256 as the plan measured it, streamed
++  # whole, and as GitHub's record of the asset and the LLVM project's provenance for it
++  # give it (`meta/research/llvm-release-asset.md`). The install step holds the
++  # download to it before `tar` reads a byte.
++  LLVM_TARBALL_SHA256: "1ead36b3dfcb774b57be530df42bec70ab2d239fbce9889447c7a29a4ddc1ae6"
+ 
+ jobs:
+   build:
+@@ -71,13 +76,21 @@ jobs:
+           echo "compiler HEAD == $have (clean)"
+ 
+       # The upstream release tarball: apt.llvm.org packages by MAJOR version and would
+-      # give whatever 20.1.x is current. Cached on the version, an immutable asset.
++      # give whatever 20.1.x is current. WHAT THE CHECK GUARANTEES (cycle 0.0.1a): the
++      # install step downloads the tarball to a file and holds it to LLVM_TARBALL_SHA256
++      # with `sha256sum -c` before `tar` reads it, so a tree unpacked on a cache miss is
++      # the asset that digest names; and the key names the digest, so a hit restores a
++      # tree saved under it, which this job saves only when it succeeds, its check
++      # passed. It says nothing of who built the asset: that the digest is the LLVM
++      # project's own is the plan's measurement. *(Until cycle 0.0.1a this said "Cached
++      # on the version, an immutable asset", which nothing measured: the release is not
++      # immutable in GitHub's sense, and the tarball was piped into `tar` unchecked.)*
+       - name: Cache LLVM ${{ env.LLVM_VERSION }}
+         id: llvm-cache
+         uses: actions/cache@v4
+         with:
+           path: ~/llvm
+-          key: llvm-${{ env.LLVM_VERSION }}-linux-x64
++          key: llvm-${{ env.LLVM_VERSION }}-linux-x64-${{ env.LLVM_TARBALL_SHA256 }}
+ 
+       - name: Install LLVM ${{ env.LLVM_VERSION }}
+         if: steps.llvm-cache.outputs.cache-hit != 'true'
+@@ -85,7 +98,12 @@ jobs:
+           set -euo pipefail
+           mkdir -p ~/llvm
+           url="https://github.com/llvm/llvm-project/releases/download/llvmorg-${LLVM_VERSION}/LLVM-${LLVM_VERSION}-Linux-X64.tar.xz"
+-          curl -fsSL "$url" | tar -xJ --strip-components=1 -C ~/llvm
++          tarball="$RUNNER_TEMP/LLVM-${LLVM_VERSION}-Linux-X64.tar.xz"
++          curl -fsSL -o "$tarball" "$url"
++          echo "downloaded $(stat -c '%s' "$tarball") B: $url"
++          echo "$LLVM_TARBALL_SHA256  $tarball" | sha256sum -c -
++          tar -xJf "$tarball" --strip-components=1 -C ~/llvm
++          rm -f "$tarball"
+ 
+       - name: Put LLVM on PATH and assert the pin
+         run: |
+diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
+index d66235c..cf58870 100644
+--- a/meta/DECISIONS.md
++++ b/meta/DECISIONS.md
+@@ -933,6 +933,12 @@ number, and the harness asserts the tools against it.
+ `NITPICK_COMMIT` and the emission's digest in CI, and the LLVM row only if a landing
+ moves the compiler's D-349.
+ 
++*(@@DATE@@, cycle 0.0.1a:)* the re-pin at landing 118 was the first. A second, to compiler
++`2e1cb4a` at landing 140 (the author's word of 2026-10-22), moves `NITPICK_COMMIT` and the
++emission's digest again, to notice 140's `npkc.ll` row; the LLVM row stays, since the
++compiler's `nitpick.toml` is byte-identical at `c9baa9e` and `2e1cb4a`; and from cycle
++0.0.1a CI holds LLVM's release asset to its sha256 before it unpacks it.
++
+ ### @@PD-137@@ — one currency table; the library is security-sensitive, and its three research items gate cycle 0.0's work
+ **2026-10-15, cycle 0.0.1.** Every outside fact the plan rests on is a row of
+ `meta/research/CURRENCY.md` (the workbench research skill's §7, and `PLAYBOOK.md`
+diff --git a/meta/research/CURRENCY.md b/meta/research/CURRENCY.md
+index 74afb5f..b79d46a 100644
+--- a/meta/research/CURRENCY.md
++++ b/meta/research/CURRENCY.md
+@@ -12,7 +12,7 @@ says which.
+ |---|---|---|---|---|
+ | GitHub Actions' runner image — CI's `runs-on` | `ubuntu-24.04` | by cycle 0.0.1's first CI run, whose log the record quotes | github.com/actions/runner-images | @@PD-136@@ |
+ | GitHub's `actions/checkout` and `actions/cache` | `@v4` each, as `nitpick-regex`'s and `nitpick-time`'s workflows | by the same run; the early ecosystem audit's EK2 recorded their Node 20 runtime as deprecated, and the run's log says whether GitHub still warns | github.com/actions/checkout, github.com/actions/cache | @@PD-136@@ |
+-| LLVM's release asset — what CI installs | `LLVM-20.1.8-Linux-X64.tar.xz` at `llvmorg-20.1.8` (the version is the compiler's D-349, read in its tree) | by the same run's install step, which downloads it | github.com/llvm/llvm-project/releases | @@PD-136@@ |
++| LLVM's release asset — what CI installs | `LLVM-20.1.8-Linux-X64.tar.xz` at `llvmorg-20.1.8` (the version is the compiler's D-349, read in its tree), and since cycle 0.0.1a by content: sha256 `1ead36b3dfcb774b57be530df42bec70ab2d239fbce9889447c7a29a4ddc1ae6`, 2 021 269 412 B, which CI's install step checks before it unpacks | 2026-10-23, at cycle 0.0.1a's planning: [the asset streamed whole, GitHub's record of it and the project's provenance](llvm-release-asset.md); and by cycle 0.0.1a's first CI run, the second reading, whose log its record quotes | github.com/llvm/llvm-project/releases | @@PD-136@@ |
+ | Python — the harness's interpreter | 3.12.3, the version on the workbench and on `ubuntu-24.04` | by cycle 0.0.2, which writes the harness | python.org | @@PD-137@@ |
+ | UTF-8 — what a JSON, TOML or YAML input must be (`SCAN_MODEL.md` §3) | RFC 3629 (STD 63) and the Unicode Standard's Table 3-7, the edition to be named | **not yet** — cycle 0.1, whose decoder reads it, checks it before it starts | rfc-editor.org/rfc/rfc3629; unicode.org | PA-013 |
+ | JSON | RFC 8259 | not yet — cycle 0.3 | rfc-editor.org/rfc/rfc8259 | PA-050 |
+diff --git a/meta/research/llvm-release-asset.md b/meta/research/llvm-release-asset.md
+new file mode 100644
+index 0000000..66f5492
+--- /dev/null
++++ b/meta/research/llvm-release-asset.md
+@@ -0,0 +1,49 @@
++# The LLVM 20.1.8 release asset CI installs — research digest
++
++**As of 2026-10-23.** Question: what are the sha256 and the size of `LLVM-20.1.8-Linux-X64.tar.xz`, the asset of the
++LLVM project's `llvmorg-20.1.8` release that `.github/workflows/ci.yml` installs, as the asset itself and the
++release's own records give them, and can the asset be replaced under its name? Asked by cycle 0.0.1a's plan, the
++adoption of compiler `2e1cb4a`, whose CI step pins the digest (the libraries' seat's ruling of 2026-10-22 on
++`ci.yml`'s "an immutable asset").
++
++## Answer
++
++The asset is
++`https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.8/LLVM-20.1.8-Linux-X64.tar.xz`,
++**2 021 269 412 bytes, sha256 `1ead36b3dfcb774b57be530df42bec70ab2d239fbce9889447c7a29a4ddc1ae6`**. Three readings
++agree: the asset itself, streamed whole through a hash and a byte count and never written to disk; GitHub's record of
++the asset; and the provenance the LLVM project's release workflow published for it. **The release is not
++immutable**: GitHub's record of it reads `"immutable": false`, so an asset can be deleted and uploaded again under
++the same name, and what pins the asset is its digest, not its name.
++
++## Evidence
++
++- `https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.8/LLVM-20.1.8-Linux-X64.tar.xz` — retrieved
++  2026-10-23, 03:13:05 to 03:14:10 EDT, `curl -fsSL` piped into a single pass of Python's `hashlib.sha256` and a
++  byte count, pipeline exit 0: `sha256: 1ead36b3dfcb774b57be530df42bec70ab2d239fbce9889447c7a29a4ddc1ae6`,
++  `bytes: 2021269412`.
++- `https://api.github.com/repos/llvm/llvm-project/releases/tags/llvmorg-20.1.8` (`gh api`) — retrieved 2026-10-23
++  03:13:10 EDT: release 231011227, `"immutable": false`, published 2025-07-09T03:20:57Z; its asset
++  `LLVM-20.1.8-Linux-X64.tar.xz`, `"id": 271269785`, `"size": 2021269412`,
++  `"digest": "sha256:1ead36b3dfcb774b57be530df42bec70ab2d239fbce9889447c7a29a4ddc1ae6"`,
++  `"created_at": "2025-07-09T05:32:33Z"`, `"updated_at": "2025-07-09T05:33:23Z"`, uploaded by `github-actions[bot]`.
++- `https://github.com/llvm/llvm-project/releases/download/llvmorg-20.1.8/LLVM-20.1.8-Linux-X64.tar.xz.jsonl` —
++  retrieved 2026-10-23: 10 422 bytes, sha256 `00beee3c049c219a524f567bf08c667c160926092623366ad23c37d5c6aca75d`,
++  equal to GitHub's record of that asset (271269921). A Sigstore bundle whose in-toto statement, of predicate type
++  `https://slsa.dev/provenance/v1`, names the subject `LLVM-20.1.8-Linux-X64.tar.xz` with sha256
++  `1ead36b3dfcb774b57be530df42bec70ab2d239fbce9889447c7a29a4ddc1ae6`, built by
++  `.github/workflows/release-tasks.yml` at `refs/tags/llvmorg-20.1.8` of `https://github.com/llvm/llvm-project`
++  (its run 16159480195, attempt 1), and logged at Rekor index 268489885, integrated 2025-07-09T05:32:25Z. Read as
++  the project's statement: its signature was not verified.
++
++## What would change this
++
++An asset deleted and uploaded again under the same name, which `"immutable": false` allows: its digest would differ,
++and CI's check would then refuse the download before unpacking it. A release that moved its tag would move the
++records above as well. Neither is a version change: the version is the compiler's D-349, read in its tree.
++
++## Confidence and gaps
++
++High for the size and the digest: the bytes themselves and two of the project's own records agree. The provenance
++bundle's signature was not verified, so it is read as the project's statement, not as proof of who built the asset.
++CI's own fetch, on cycle 0.0.1a's step 1 push, is the second reading of the asset itself.
