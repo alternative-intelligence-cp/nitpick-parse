@@ -1306,10 +1306,10 @@ index 0000000..dedd517
 +        out(f"ok    ${var} is a file")
 +    return got[0], got[1]
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index d66235c..ecead42 100644
+index d4e0162..a625dd0 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
-@@ -965,3 +965,83 @@ the gate to cycle 0.1, through 0.0.5's close — 0.0.0's gate item 7 and block 0
+@@ -999,3 +999,83 @@ the gate to cycle 0.1, through 0.0.5's close — 0.0.0's gate item 7 and block 0
  research lines go, `CURRENCY.md`'s three research rows wait for their digests, and
  `0.1/0.1.0.md`'s gate names them; to count the library routine, strike `CURRENCY.md`'s
  research section and its three rows, and the gate with them.

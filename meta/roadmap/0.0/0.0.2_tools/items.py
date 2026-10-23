@@ -5,7 +5,8 @@ step's patch changes, and the run's date wherever steps 1, 3 and 4 wrote it.
 
     python3 -B items.py <tree>
 
-Each line is `(<item>) <file>:<n>: <text>`, the site found by a text the new line carries, cut at 150 characters.
+Each line is `(<item>) <file>:<n>: <text>`, the site found by a text the new line carries, cut at 150 characters; item
+(3)'s notes in `meta/DECISIONS.md` are those that name cycle 0.0.1, since cycle 0.0.1a's notes beside them name 0.0.0.
 A date prints with `/` (2026/10/21) because the comparator masks an ISO date, which would hide a wrong one; the
 run's own date -- the one `../tools/apply.py` recorded in `.internal/w00/0.0.2.date` -- prints as `<the run's
 date>`, which no Expect can know. A site whose text is missing prints NOT FOUND, and so does a missing date file:
@@ -27,8 +28,8 @@ SITES = [
     ("3", "harness/README.md", r"^\*\(\S+, cycle 0\.0\.1:\)\*"),
     ("3", "meta/specs/FORMATS.md", r"^\*\(\S+, cycle 0\.0\.1, PA-\d+: this rule named"),
     ("3", "meta/roadmap/ROADMAP.md", r"^\*\(\S+, cycle 0\.0\.1 — the research gate"),
-    ("3", "meta/DECISIONS.md", r"this marker landed on"),
-    ("3", "meta/DECISIONS.md", r"this decision landed on"),
+    ("3", "meta/DECISIONS.md", r"this marker landed on \S+ at cycle 0\.0\.1;"),
+    ("3", "meta/DECISIONS.md", r"this decision landed on \S+ at cycle 0\.0\.1;"),
     ("3", "harness/README.md", r"^\*\(\S+, cycle 0\.0\.2: the stub is replaced"),
     ("3", "meta/DECISIONS.md", r"^\*\*\S+, cycle 0\.0\.2\.\*\*"),
     ("3", "meta/specs/BUILD.md", r"^\*\((Corrected|Re-read) \S+, cycle 0\.0\.2"),
@@ -42,7 +43,7 @@ SITES = [
     ("10", "meta/research/CURRENCY.md", r"^\| GitHub Actions' runner image"),
     ("5", "meta/research/CURRENCY.md", r"^\| UTF-8"),
     ("5", "meta/roadmap/0.0/0.0.1.md", r"cycle 0\.0\.2, for the libraries' seat's review of this record"),
-    ("6", "CLAUDE.md", r"the pin `c9baa9e` a local named `stack`"),
+    ("6", "CLAUDE.md", r"the pin `2e1cb4a` a local named `stack`"),
     ("6", "meta/specs/BUILD.md", r"^\| `stack` \|"),
     ("6", "meta/roadmap/0.0/0.0.0.md", r"cycle 0\.0\.2:\)\* not at `c9baa9e`"),
     ("7", "CLAUDE.md", r"which cost `nitpick-regex`'s cycle 0\.0\.0"),

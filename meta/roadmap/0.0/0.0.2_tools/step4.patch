@@ -1,5 +1,5 @@
 diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
-index beb6143..e26fa68 100644
+index f2ec61a..334a5a9 100644
 --- a/.github/workflows/ci.yml
 +++ b/.github/workflows/ci.yml
 @@ -1,11 +1,15 @@
@@ -24,7 +24,7 @@ index beb6143..e26fa68 100644
  #
  # WHAT A GREEN RUN PROVES SINCE CYCLE 0.0.2: the compiler's checkout is the pinned
  # commit, clean; its emission, `npkc.ll`, is the one the pin recorded, built by a run
-@@ -42,16 +46,17 @@ env:
+@@ -47,16 +51,17 @@ env:
  
  jobs:
    build:
@@ -45,16 +45,16 @@ index beb6143..e26fa68 100644
          with:
            repository: alternative-intelligence-cp/nitpick
            ref: ${{ env.NITPICK_COMMIT }}
-@@ -77,7 +82,7 @@ jobs:
-       # give whatever 20.1.x is current. Cached on the version, an immutable asset.
+@@ -90,7 +95,7 @@ jobs:
+       # immutable in GitHub's sense, and the tarball was piped into `tar` unchecked.)*
        - name: Cache LLVM ${{ env.LLVM_VERSION }}
          id: llvm-cache
 -        uses: actions/cache@v4
 +        uses: "actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830" # v4
          with:
            path: ~/llvm
-           key: llvm-${{ env.LLVM_VERSION }}-linux-x64
-@@ -104,12 +109,15 @@ jobs:
+           key: llvm-${{ env.LLVM_VERSION }}-linux-x64-${{ env.LLVM_TARBALL_SHA256 }}
+@@ -122,12 +127,15 @@ jobs:
              echo "$t --version == $have"
            done
  
@@ -75,7 +75,7 @@ index beb6143..e26fa68 100644
            path: .nitpick/.internal/quickemit
            key: npkc-${{ env.NITPICK_COMMIT }}-llvm-${{ env.LLVM_VERSION }}
 diff --git a/CLAUDE.md b/CLAUDE.md
-index 8585379..e8090ec 100644
+index 8585379..3564394 100644
 --- a/CLAUDE.md
 +++ b/CLAUDE.md
 @@ -95,8 +95,12 @@ that bite hardest here:
@@ -86,10 +86,10 @@ index 8585379..e8090ec 100644
 -declaration and a claim that a brace is never closed, far from the cause.
 +which cost `nitpick-regex`'s cycle 0.0.0 about an hour bisecting a brace imbalance
 +that did not exist (its `meta/roadmap/done/0.0/0.0.0.md`, lines 524 and 599). At
-+the pin `c9baa9e` a local named `stack` is `NITPICK-PARSE-002`, "expected an
-+expression", at its declaration and is refused again at each later use, and a
-+parameter so named is `NITPICK-PARSE-001`, which names the keyword; no brace error
-+follows (six shapes, measured by cycle 0.0.1's step 6).
++the pin `2e1cb4a` a local named `stack` is `NITPICK-PARSE-001` at its name, which
++names the keyword, and is refused again at each later use; a parameter so named is
++`NITPICK-PARSE-001` once. No brace error follows (six shapes: cycle 0.0.1's step 6
++at `c9baa9e`, where a local was `NITPICK-PARSE-002`, and cycle 0.0.2's §1.16).
  
  The substitutes this library uses, so they are used consistently: `hi` for an
  upper bound, `src` for a byte origin, `sink` for a byte destination, `kind` for
@@ -107,10 +107,10 @@ index d769ac3..da6632a 100644
  *(@@DATE@@, cycle 0.0.2: the stub is replaced by the runner below; cycle 0.0.3 adds the
  refusal and parse stages, the self-check and the tree checks.)*
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index ecead42..ad8f9aa 100644
+index a625dd0..1a8c4b1 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
-@@ -494,6 +494,8 @@ correspondingly larger.
+@@ -502,6 +502,8 @@ correspondingly larger.
  
  ### PA-054 — the specification version is pinned and recorded
  > **SUPERSEDED IN PART by @@PD-137@@ (2026-10-15)** — where the version is recorded; the rule stands.
@@ -119,7 +119,7 @@ index ecead42..ad8f9aa 100644
  
  **2026-09-03.** In `meta/research/format-versions.md`, with the document's own
  version string and the date it was read. "TOML" without a version is three
-@@ -907,6 +909,9 @@ literally, forbade every import it drew. `src/README.md` had the direction right
+@@ -935,6 +937,9 @@ literally, forbade every import it drew. `src/README.md` had the direction right
  seven placeholder modules each state their row in their header (cycle 0.0.1's plan),
  and the harness's `check_layering` (cycle 0.0.3) reads the table.
  
@@ -129,7 +129,7 @@ index ecead42..ad8f9aa 100644
  *Alternatives declined:* **correct the sentence and keep the drawing** — the drawing
  would still show the forbidden arrow, and a drawing is what a reader copies; **draw it
  again** — a table is the form a check can read without a second, hand-written copy.
-@@ -924,6 +929,9 @@ and the documents that named 20.1.2 name 20.1.8. The compiler moved its pin at i
+@@ -952,6 +957,9 @@ and the documents that named 20.1.2 name 20.1.8. The compiler moved its pin at i
  landing 99 (D-349), and its runners refuse a manifest without the two target rows
  (`BUILD_REFERENCE.md` §1). The pin audit's PL-4 and the early ecosystem audit's E2-4.
  
@@ -139,7 +139,7 @@ index ecead42..ad8f9aa 100644
  *Alternatives declined:* **write the version and no target rows** — the compiler's
  runners refuse that manifest by name, and the rows are what a reader of an emission
  lays it out by; **say "the compiler's pin" and no number** — a manifest row is a
-@@ -951,6 +959,9 @@ a `security` digest, stale ninety days after its date (the research skill's §6)
+@@ -985,6 +993,9 @@ a `security` digest, stale ninety days after its date (the research skill's §6)
  three dates before it starts, and all three are re-run at hardening (its §8). TOML's row records that v1.1.0
  is published and that the version is cycle 0.6.0's to decide. The early ecosystem audit's E2-13.
  
@@ -150,7 +150,7 @@ index ecead42..ad8f9aa 100644
  tables of outside facts, and the workbench's checks read one; **name the file
  `format-versions.md` and put every row in it** — the workbench's rule, its audit and
 diff --git a/meta/research/CURRENCY.md b/meta/research/CURRENCY.md
-index 21fc9e0..0d4c710 100644
+index 2791bc2..af00505 100644
 --- a/meta/research/CURRENCY.md
 +++ b/meta/research/CURRENCY.md
 @@ -10,11 +10,11 @@ says which.
@@ -161,7 +161,7 @@ index 21fc9e0..0d4c710 100644
 -| GitHub's `actions/checkout` and `actions/cache` | `@v4` each, as `nitpick-regex`'s and `nitpick-time`'s workflows | by the same run; the early ecosystem audit's EK2 recorded their Node 20 runtime as deprecated, and the run's log says whether GitHub still warns | github.com/actions/checkout, github.com/actions/cache | @@PD-136@@ |
 +| GitHub Actions' runner image — CI's `runs-on` | the label `ubuntu-24.04`, under which GitHub rolls the image: cycle 0.0.1's four runs got 20261018.339.1 twice, then 20261012.334.1 twice, and each run's log names its version | by cycle 0.0.1's first CI run, whose log the record quotes | github.com/actions/runner-images | @@PD-136@@ |
 +| GitHub's `actions/checkout` and `actions/cache` | each by full commit sha since cycle 0.0.2, checkout `11d5960a326750d5838078e36cf38b85af677262` and cache `0057852bfaa89a56745cba8c7296529d2fc39830`, which `@v4` resolved to in each of cycle 0.0.1's four runs | by the same run; the early ecosystem audit's EK2 recorded their Node 20 runtime as deprecated, and the run's log says whether GitHub still warns | github.com/actions/checkout, github.com/actions/cache | @@PD-136@@ |
- | LLVM's release asset — what CI installs | `LLVM-20.1.8-Linux-X64.tar.xz` at `llvmorg-20.1.8` (the version is the compiler's D-349, read in its tree) | by the same run's install step, which downloads it | github.com/llvm/llvm-project/releases | @@PD-136@@ |
+ | LLVM's release asset — what CI installs | `LLVM-20.1.8-Linux-X64.tar.xz` at `llvmorg-20.1.8` (the version is the compiler's D-349, read in its tree), and since cycle 0.0.1a by content: sha256 `1ead36b3dfcb774b57be530df42bec70ab2d239fbce9889447c7a29a4ddc1ae6`, 2 021 269 412 B, which CI's install step checks before it unpacks | 2026-10-23, at cycle 0.0.1a's planning: [the asset streamed whole, GitHub's record of it and the project's provenance](llvm-release-asset.md); and by cycle 0.0.1a's first CI run, the second reading, whose log its record quotes | github.com/llvm/llvm-project/releases | @@PD-136@@ |
  | Python — the harness's interpreter | 3.12.3, the version on the workbench and on `ubuntu-24.04` | @@DATE@@, cycle 0.0.2: `python3 --version` on the workbench, 3.12.3, by its block 3; on `ubuntu-24.04` by the run on its step 3's push, the first whose harness step prints the version, which its record quotes | python.org | @@PD-137@@ |
 -| UTF-8 — what a JSON, TOML or YAML input must be (`SCAN_MODEL.md` §3) | RFC 3629 (STD 63) and the Unicode Standard's Table 3-7, the edition to be named | **not yet** — cycle 0.1, whose decoder reads it, checks it before it starts | rfc-editor.org/rfc/rfc3629; unicode.org | PA-013 |
 +| UTF-8 — what a JSON, TOML or YAML input must be (`SCAN_MODEL.md` §4) | RFC 3629 (STD 63) and the Unicode Standard's Table 3-7, the edition to be named | **not yet** — cycle 0.1, whose decoder reads it, checks it before it starts | rfc-editor.org/rfc/rfc3629; unicode.org | PA-013 |
@@ -169,16 +169,17 @@ index 21fc9e0..0d4c710 100644
  | TOML | v1.0.0, as `FORMATS.md` names it. **v1.1.0 is published** (the workbench's currency audit of 2026-10-09, which the second research item below read at the source before cycle 0.0's first probe), and that item's digest lists the five changes the project's changelog gives from v1.0.0 to v1.1.0 in what a parser accepts, the fifth, on integer and float sizes, one that may loosen the integer rule ([`security-guidance.md`](security-guidance.md)) | not yet — cycle 0.6.0 decides the version (PA-054 as @@PD-137@@ amends it) | toml.io; github.com/toml-lang/toml/releases | PA-054 |
  | CSV | RFC 4180, and the dialects `FORMATS.md` §6 names | not yet — cycle 0.7 | rfc-editor.org/rfc/rfc4180 | PA-050 |
 diff --git a/meta/roadmap/0.0/0.0.0.md b/meta/roadmap/0.0/0.0.0.md
-index 293ba48..e8f4d61 100644
+index 293ba48..8c62f75 100644
 --- a/meta/roadmap/0.0/0.0.0.md
 +++ b/meta/roadmap/0.0/0.0.0.md
-@@ -855,6 +855,9 @@ item", below, gives each item's verdict, every one held.
+@@ -855,6 +855,10 @@ item", below, gives each item's verdict, every one held.
  
  - **`stack` is a memory qualifier**, and a local of that name is `NITPICK-PARSE-002` followed by a claim that a brace
    is never closed, far from the cause (`PLAYBOOK.md` §10). The explicit stack's local is `frames`.
-+  *(@@DATE@@, cycle 0.0.2:)* not at `c9baa9e`: a local named `stack` is `NITPICK-PARSE-002` at its declaration and
-+  refused again at each later use, a parameter so named `NITPICK-PARSE-001`, and no brace error follows, in the six
-+  shapes cycle 0.0.1's step 6 measured; the brace account is `nitpick-regex`'s cycle 0.0.0's, at an earlier compiler.
++  *(@@DATE@@, cycle 0.0.2:)* not at `c9baa9e` or `2e1cb4a`: in the six shapes cycle 0.0.1's step 6 measured, a local
++  named `stack` is refused at its declaration — `NITPICK-PARSE-002` at `c9baa9e`, and from the compiler's landing 136
++  `NITPICK-PARSE-001` at its name — and again at each later use, a parameter so named is `NITPICK-PARSE-001`, and no
++  brace error follows; the brace account is `nitpick-regex`'s cycle 0.0.0's, at an earlier compiler.
  - **A `never fails` function's call is a `Result` unless it is called `raw`.** A size probe's `#size_of` is an
    `int64`: narrow it with `=>! int32` for `exit`, which landing 104 holds to `int32`.
  - **A probe that compiles is not a probe that runs**: at `7e91730` probe 06 was accepted by `npkc` and refused by
@@ -218,7 +219,7 @@ index e3d8608..673fc39 100644
  `../OPEN_QUESTIONS.md`; the author answered it on 2026-10-16, (A), and cycle 0.1's decision
  records it, at 0.1.1 of [its roadmap](0.1/README.md); no cycle waits on it.)*
 diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md
-index 617cc34..7b7c367 100644
+index 617cc34..f686da6 100644
 --- a/meta/specs/BUILD.md
 +++ b/meta/specs/BUILD.md
 @@ -290,7 +290,7 @@ on `doc`**, because a streaming consumer must be able to import a format
@@ -250,7 +251,7 @@ index 617cc34..7b7c367 100644
  | `Self`, `Result`, `Optional`, `Handle`, `arena` | type keywords |
  | `trit`, `nit`, `oflags`, `prot`, `mflags`, `fmode` | type keywords |
 -| `stack` | a memory qualifier — and every explicit-stack parser wants it; refused at the declaration with a misleading brace error after it (measured by cycle 0.0.0) |
-+| `stack` | a memory qualifier — and every explicit-stack parser wants it; a local so named is `NITPICK-PARSE-002` at its declaration and refused again at each later use, a parameter so named `NITPICK-PARSE-001`, and no brace error follows (measured at `c9baa9e` in six shapes, cycle 0.0.1's step 6) |
++| `stack` | a memory qualifier — and every explicit-stack parser wants it; a local so named is `NITPICK-PARSE-001` at its name and refused again at each later use, a parameter so named `NITPICK-PARSE-001` once, and no brace error follows (measured at `2e1cb4a` in six shapes, cycle 0.0.2's §1.16; at `c9baa9e`, cycle 0.0.1's step 6, a local was `NITPICK-PARSE-002` at its declaration) |
  | `fixed`, `sealed`, `hidden`, `decreases`, `unbounded`, `shared_arena`, `acquire` | keywords (`PLAYBOOK.md` §10's list at the compiler's 1.5 re-pin) |
  
  The names this library therefore uses instead, fixed here so they are used

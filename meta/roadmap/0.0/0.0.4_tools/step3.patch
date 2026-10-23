@@ -1,5 +1,5 @@
 diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md
-index e96945b..4fc0e6d 100644
+index 531e809..a2f0a56 100644
 --- a/meta/specs/BUILD.md
 +++ b/meta/specs/BUILD.md
 @@ -259,6 +259,11 @@ header — a second handle on its block — is `NITPICK-TYPE-046`; every index a
@@ -7,16 +7,16 @@ index e96945b..4fc0e6d 100644
  `vec_init(0)` gives a capacity of one, so that `cap <= 0` marks only a freed `Vec`.)*
  
 +*(2026-10-15, cycle 0.0.4 — @@PD-144@@:
-+`Bytes` has no `view` at the pin — a `buffer` cannot be ranged, and a view through `.ptr` is tied to nothing (the
-+compiler's D-341, unbuilt) — and its `take` is an owned copy, after which it is empty; it is freed when it leaves
-+scope, so it has no `free`, and `bytes_capacity` reads the capacity its hidden buffer holds.)*
++`Bytes` has no `view` — a `buffer` could not be ranged at `7e91730`; from the compiler's landing 128 (D-341) its range
++is a frozen view, which no decision has taken for `Bytes` — and its `take` is an owned copy, after which it is empty;
++it is freed when it leaves scope, so it has no `free`, and `bytes_capacity` reads the capacity its hidden buffer holds.)*
 +
  **Rule B-13.** `nparse` declares no other container. The `Document` tree is an
  `arena<Node>` with `Handle<Node>`, which is what the language provides for
  graph-shaped data.
 diff --git a/src/core/bytes.npk b/src/core/bytes.npk
 new file mode 100644
-index 0000000..e37ee74
+index 0000000..6076f99
 --- /dev/null
 +++ b/src/core/bytes.npk
 @@ -0,0 +1,246 @@
@@ -33,11 +33,11 @@ index 0000000..e37ee74
 +// (`tests/probe/probe11_bytes_growth.npk` measured the shape; `tests/unit/bytes_growth.npk`
 +// keeps it).
 +//
-+// ---- A `buffer` IS NOT BOUNDS-CHECKED, SO THIS FILE CHECKS ------------------------------
++// ---- A `buffer`'S `.ptr` IS NOT BOUNDS-CHECKED, SO THIS FILE CHECKS ---------------------
 +//
 +// The body is a managed `buffer` (P-24): it drops at scope exit, so a `Bytes` needs no free
-+// and there is no free here to forget. A `buffer` cannot be indexed or ranged at the pin
-+// (NITPICK-TYPE-007; the compiler's D-341 plans it, unbuilt), so its bytes are reached through
++// and there is no free here to forget. A `buffer` could not be indexed or ranged at `7e91730`
++// (NITPICK-TYPE-007; the compiler's landing 128 does both, checked), so its bytes are reached through
 +// `.ptr`, a bare pointer, whose index is NOT checked (`VERIFICATION.md` §2). So every index
 +// is checked in the function that uses it, before `.ptr` is touched: a read against `len`, a
 +// write against the capacity, and `buf` is `hidden`, so no other module reaches `.ptr` at all
@@ -47,9 +47,9 @@ index 0000000..e37ee74
 +//
 +// ---- NO VIEW OF THE BYTES LEAVES THIS FILE ----------------------------------------------
 +//
-+// There is no `bytes_view`: a view of the body is invalidated by the next growth, which frees
-+// the body under it (`nitpick-time`'s TM-139 measured the use-after-free), and a `buffer`
-+// cannot be ranged anyway. The bytes leave one at a time (`bytes_at`) or all at once as an
++// There is no `bytes_view`: a view of the body does not survive the next growth, which frees
++// the body under it (`nitpick-time`'s TM-139), and the compiler refuses that growth while a view
++// lives, from its landing 128. The bytes leave one at a time (`bytes_at`) or all at once as an
 +// OWNED copy (`bytes_take`). Every slice this file takes is a `fixed uint8[]`, read-only.
 +//
 +// ---- GROWTH DOUBLES, AND NO MULTIPLY CAN OVERFLOW ---------------------------------------

@@ -12,10 +12,10 @@ index 5bedfed..cea15ed 100644
    event/      #   the event vocabulary, the Format trait, the depth stack
    doc/        #   the Document tree and the query API
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index b0760d0..2501f03 100644
+index b90a95c..78c6da3 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
-@@ -1170,3 +1170,21 @@ eight) — every format's consumer owes `DivByZero` and `DivOverflow` already, t
+@@ -1204,3 +1204,21 @@ eight) — every format's consumer owes `DivByZero` and `DivOverflow` already, t
  
  *Reversal, for the author:* when D-341 lands, `Bytes` may offer a frozen view by a decision; when a decision accepts
  the contracts' arms, the comments become clauses, a marker deleted per site.
@@ -53,12 +53,12 @@ index 898c181..262cf3f 100644
  ### 0.1 — Scan
  `src/scan/`: the total cursor, `Span`, the generated 256-byte class table, the
 diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md
-index 4fc0e6d..788a2fe 100644
+index a2f0a56..133e361 100644
 --- a/meta/specs/BUILD.md
 +++ b/meta/specs/BUILD.md
 @@ -264,6 +264,10 @@ accessors, because an index through a `wild` block does not trap, and a misuse t
- compiler's D-341, unbuilt) — and its `take` is an owned copy, after which it is empty; it is freed when it leaves
- scope, so it has no `free`, and `bytes_capacity` reads the capacity its hidden buffer holds.)*
+ is a frozen view, which no decision has taken for `Bytes` — and its `take` is an owned copy, after which it is empty;
+ it is freed when it leaves scope, so it has no `free`, and `bytes_capacity` reads the capacity its hidden buffer holds.)*
  
 +*(2026-10-15, cycle 0.0.4 — @@PD-145@@:
 +`SmallMap` waits for its first consumer: no specification or roadmap names one — the `Document` scans and indexes

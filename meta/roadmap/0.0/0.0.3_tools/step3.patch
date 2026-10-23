@@ -1,5 +1,5 @@
 diff --git a/CLAUDE.md b/CLAUDE.md
-index e8090ec..55c4c9a 100644
+index 3564394..f207f4e 100644
 --- a/CLAUDE.md
 +++ b/CLAUDE.md
 @@ -42,7 +42,9 @@ The shared house rules for every library in this ecosystem are
@@ -61,7 +61,7 @@ index 787ca4a..5bedfed 100644
  **Parsing a number cannot stop your program.** Plain integer overflow *traps*
  in Nitpick (D-210), so the ordinary `acc = acc * 10 + d` accumulator crashes the
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index ef7e204..65610db 100644
+index 592f66a..990da85 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
 @@ -149,6 +149,9 @@ cycle 0.12's application; semantic versioning thereafter.
@@ -161,7 +161,7 @@ index a8c1155..c7bb139 100644
 +error identity — **no input can produce one of the two error names this library
  declares**.
 diff --git a/meta/specs/SAFETY.md b/meta/specs/SAFETY.md
-index a85ab40..7712438 100644
+index 477ddb3..a631eed 100644
 --- a/meta/specs/SAFETY.md
 +++ b/meta/specs/SAFETY.md
 @@ -15,7 +15,7 @@ costs a library that reads bytes somebody else controls.

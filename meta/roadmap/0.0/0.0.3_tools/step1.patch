@@ -819,10 +819,10 @@ index 0000000..792105f
 +         ("check_codes_documented", "cycle 0.2"), ("check_failsafe_arms", "cycle 0.2"),
 +         ("check_corpus_provenance", "cycle 0.3")]
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index ad8f9aa..ef7e204 100644
+index 1a8c4b1..592f66a 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
-@@ -1056,3 +1056,61 @@ the name both sides use.
+@@ -1090,3 +1090,61 @@ the name both sides use.
  *Reversal, for the author:* none for the mechanism; each pending unit's marker and list line go
  when its fix is pinned, and a new observation form joins B-5b by a decision when a defect shows
  a failure this one cannot name.
@@ -885,7 +885,7 @@ index ad8f9aa..ef7e204 100644
 +*Reversal, for the author:* none for the key; a layer S-6 does not list, or a third name, is a change to `SAFETY.md` §3
 +by a decision, which the check then reads.
 diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md
-index 7b7c367..94fa8b9 100644
+index f686da6..f8606f8 100644
 --- a/meta/specs/BUILD.md
 +++ b/meta/specs/BUILD.md
 @@ -135,13 +135,17 @@ runner and not a change of suite, and adds two of its own.
@@ -922,9 +922,9 @@ index 7b7c367..94fa8b9 100644
  **Rule B-7 — unexpected diagnostics fail a test as surely as missing ones**
  (D-237). The set of codes a rejection test reports must **equal** the set its
  expectations name.
-+*(Re-read 2026-10-15, cycle 0.0.3 — @@PD-140@@: a SET, as written: the compiler's DEF-245 reports one failing
-+header two or three times, so a count of reports would judge the report and not the refusal; and each
-+`expect-error-at` names a site its code was reported at.)*
++*(Re-read 2026-10-15, cycle 0.0.3 — @@PD-140@@: a SET, as written: the compiler's DEF-245 reported one failing
++header two or three times until its landing 130, so a count of reports would judge the report and not the
++refusal; and each `expect-error-at` names a site its code was reported at.)*
  
  **Rule B-8 — the harness is itself tested** (`TESTING.md` §7). A self-check
  feeds it wrong expectations and requires it to report every one as a failure,

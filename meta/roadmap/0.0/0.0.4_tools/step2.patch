@@ -1,8 +1,8 @@
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index b694ebe..b0760d0 100644
+index 044f03f..b90a95c 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
-@@ -1140,3 +1140,33 @@ S-135).
+@@ -1174,3 +1174,33 @@ S-135).
  Expects and no other block of 0.0.4 or 0.0.5: block 0b, whose §1.5 counts one more `exit` operand, declared name and
  `fixed` binding, and block 5's sweep, whose ninth-limit subject gains the new row. Every text that says the ninth
  waits for cycle 0.4 is rewritten with them, and what the new words move is retaken too.
@@ -37,7 +37,7 @@ index b694ebe..b0760d0 100644
 +*Reversal, for the author:* when D-341 lands, `Bytes` may offer a frozen view by a decision; when a decision accepts
 +the contracts' arms, the comments become clauses, a marker deleted per site.
 diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md
-index 94fa8b9..e96945b 100644
+index f8606f8..531e809 100644
 --- a/meta/specs/BUILD.md
 +++ b/meta/specs/BUILD.md
 @@ -252,6 +252,13 @@ into it and nothing converts back (`NITPICK-TYPE-007`; @@PD-132@@).
@@ -55,7 +55,7 @@ index 94fa8b9..e96945b 100644
  `arena<Node>` with `Handle<Node>`, which is what the language provides for
  graph-shaped data.
 diff --git a/meta/specs/VERIFICATION.md b/meta/specs/VERIFICATION.md
-index 9f7bc59..4ccbc9c 100644
+index 7e0642d..190d33a 100644
 --- a/meta/specs/VERIFICATION.md
 +++ b/meta/specs/VERIFICATION.md
 @@ -29,6 +29,17 @@ beside the code in the exact syntax it will take**, and is enforced by a
@@ -76,7 +76,7 @@ index 9f7bc59..4ccbc9c 100644
  
  ---
  
-@@ -70,8 +81,8 @@ func:cur_at = uint8(Cursor->:c, int64:k)
+@@ -75,8 +86,8 @@ func:cur_at = uint8(Cursor->:c, int64:k)
  | Site | Obligation | How discharged |
  |---|---|---|
  | `cur_at`, `cur_slice` | index and range within `src` | contract, Z3 |

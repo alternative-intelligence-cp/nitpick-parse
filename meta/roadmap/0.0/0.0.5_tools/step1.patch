@@ -24,7 +24,7 @@ index bac3b73..db14885 100644
 +this listed "the cycle-0.13 dogfood program" among them; the dogfood consumer is cycle 0.12's, in its own repository
 +under `nitpick-apps` (PA-103).)*
 diff --git a/meta/OPEN_QUESTIONS.md b/meta/OPEN_QUESTIONS.md
-index 8884e48..ffd67a8 100644
+index f9e4884..f202f47 100644
 --- a/meta/OPEN_QUESTIONS.md
 +++ b/meta/OPEN_QUESTIONS.md
 @@ -14,9 +14,10 @@ is struck through here with the decision's number, **never deleted** — the
