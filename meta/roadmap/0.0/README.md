@@ -160,8 +160,9 @@ this table said "nothing is known" of 114 and 115, and stopped there; the record
 **Rows 119 … 140, measured at the adoption of `2e1cb4a`** (2026-10-23, by its planner, T12), over every `.npk` of the
 plan — the tree's 37, and the 78 that 0.0.0 … 0.0.4's patches leave, in a stand-in at the rehearsal: at `c9baa9e` and
 `2e1cb4a` every file compiles, or is refused with the same codes at the same sites; every emission is the same through
-the compiler's `sitenorm.py --site-path-cap`; every program exits the same at both legs; and every block of 0.0.2 …
-0.0.5 read `SAME` but the pin's own lines and 0.0.2's six `stack` shapes. Each row's account is the compiler's notice,
+the compiler's `sitenorm.py --site-path-cap`; every program exits the same at both legs; and the unchanged plan, run
+at `2e1cb4a` with `env.sh`'s pin alone moved, read `SAME` in every block of 0.0.2 … 0.0.5 but each block 0a's commit
+line and 0.0.2's six `stack` shapes. Each row's account is the compiler's notice,
 read at the landing's commit and its row in the compiler's `meta/NOTICES.md`, beside the workbench board's census
 for it, which says "nothing of ours moves" for every one but 124 and 128, whose two moves are `nitpick-time`'s.
 **Rows 141 … 151** are the landings past the pin, up to the compiler's `main` at 0.0.1a's planning (`9eaf3b6`, landing
