@@ -1,5 +1,5 @@
 diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
-index f2ec61a..334a5a9 100644
+index f2ec61a..b2c6277 100644
 --- a/.github/workflows/ci.yml
 +++ b/.github/workflows/ci.yml
 @@ -1,11 +1,15 @@
@@ -63,10 +63,10 @@ index f2ec61a..334a5a9 100644
 -      # two artefacts this library needs -- `npkc` and `npkrt.o` -- in `.internal/quickemit/`.
 +      # Keyed on the compiler's commit and the LLVM release. A hit rebuilds nothing, and of
 +      # the restored build the emission step asserts only `npkc.ll`'s digest and size:
-+      # `npkc` and `npkrt.o` are printed, not asserted. The fresh-build proof is the first,
-+      # uncached run's (cycle 0.0.1's run 39634141608). The compiler's bootstrap harness,
-+      # `quickemit.py`, leaves the two artefacts this library needs -- `npkc` and
-+      # `npkrt.o` -- in `.internal/quickemit/`.
++      # `npkc` and `npkrt.o` are printed, not asserted. The fresh-build proof is each pin's
++      # first, uncached run: `c9baa9e`'s on cycle 0.0.1's step 4, `2e1cb4a`'s on cycle
++      # 0.0.1a's step 1. The compiler's bootstrap harness, `quickemit.py`, leaves the two
++      # artefacts this library needs -- `npkc` and `npkrt.o` -- in `.internal/quickemit/`.
        - name: Cache the built compiler
          id: npkc-cache
 -        uses: actions/cache@v4
@@ -107,7 +107,7 @@ index d769ac3..da6632a 100644
  *(@@DATE@@, cycle 0.0.2: the stub is replaced by the runner below; cycle 0.0.3 adds the
  refusal and parse stages, the self-check and the tree checks.)*
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index a625dd0..1a8c4b1 100644
+index aad7500..befefca 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
 @@ -502,6 +502,8 @@ correspondingly larger.
@@ -219,7 +219,7 @@ index e3d8608..673fc39 100644
  `../OPEN_QUESTIONS.md`; the author answered it on 2026-10-16, (A), and cycle 0.1's decision
  records it, at 0.1.1 of [its roadmap](0.1/README.md); no cycle waits on it.)*
 diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md
-index 617cc34..f686da6 100644
+index d4bbaab..d699580 100644
 --- a/meta/specs/BUILD.md
 +++ b/meta/specs/BUILD.md
 @@ -290,7 +290,7 @@ on `doc`**, because a streaming consumer must be able to import a format

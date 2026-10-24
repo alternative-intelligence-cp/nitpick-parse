@@ -1,8 +1,8 @@
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index 990da85..044f03f 100644
+index 002dddc..dfd4504 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
-@@ -1151,3 +1151,26 @@ checks written now** — their inputs do not exist, and a check over nothing is
+@@ -1155,3 +1155,26 @@ checks written now** — their inputs do not exist, and a check over nothing is
  
  *Reversal, for the author:* none for the key; a layer S-6 does not list, or a third name, is a change to `SAFETY.md` §3
  by a decision, which the check then reads.

@@ -1306,10 +1306,10 @@ index 0000000..dedd517
 +        out(f"ok    ${var} is a file")
 +    return got[0], got[1]
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index d4e0162..a625dd0 100644
+index d4e0162..aad7500 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
-@@ -999,3 +999,83 @@ the gate to cycle 0.1, through 0.0.5's close — 0.0.0's gate item 7 and block 0
+@@ -999,3 +999,87 @@ the gate to cycle 0.1, through 0.0.5's close — 0.0.0's gate item 7 and block 0
  research lines go, `CURRENCY.md`'s three research rows wait for their digests, and
  `0.1/0.1.0.md`'s gate names them; to count the library routine, strike `CURRENCY.md`'s
  research section and its three rows, and the gate with them.
@@ -1342,6 +1342,8 @@ index d4e0162..a625dd0 100644
 +- **Reproducible** (B-4): `[build] entry` and every conformance root, built from two copies
 +  each carrying its manifest, emit byte-identical modules; without the manifest the consumer's
 +  two modules differ, which is the check's own failure, measured.
++
++*(Re-measured at `2e1cb4a`, 2026-10-24, in cycle 0.0.2's planning: the same.)*
 +
 +*Alternatives declined:* **a library object linked into every program** — nothing emits one;
 +**`llvm-nm` for the symbol table** — a fourth tool outside the pin, read as text (the first
@@ -1382,6 +1384,8 @@ index d4e0162..a625dd0 100644
 +after the floor
 +program under it.
 +
++*(Re-measured at `2e1cb4a`, 2026-10-24, in cycle 0.0.2's planning: the same.)*
++
 +*Alternatives declined:* **leave the defect directories out of the run** — a defect nobody's
 +run re-derives is noticed fixed by accident, or never; **a plain `expect-` for the broken
 +answer** — the suite would then defend the defect, and go red the day it is fixed with nothing
@@ -1394,7 +1398,7 @@ index d4e0162..a625dd0 100644
 +when its fix is pinned, and a new observation form joins B-5b by a decision when a defect shows
 +a failure this one cannot name.
 diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md
-index 1603419..617cc34 100644
+index 1603419..d4bbaab 100644
 --- a/meta/specs/BUILD.md
 +++ b/meta/specs/BUILD.md
 @@ -44,19 +44,34 @@ compiler's own harness is Python for the same reason.
@@ -1418,7 +1422,7 @@ index 1603419..617cc34 100644
  
 +*(Corrected @@DATE@@, cycle 0.0.2 — @@PD-138@@: the drawing compiled `src/lib.npk` into
 +`build/nparse.ll` and `build/nparse.o` and then linked "one program object + npkrt.o", as if
-+a library object sat between them. Measured at the pin `7e91730`, `npkc` emits a root and
++a library object sat between them. Measured at the pin `2e1cb4a`, `npkc` emits a root and
 +everything it imports as one module — an imported module's function is DEFINED in the
 +root's emission — so a program links as its one object and the runtime, and the library is
 +compiled on its own only to be scanned and compared.)*

@@ -1,8 +1,8 @@
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index 044f03f..b90a95c 100644
+index dfd4504..79e10a0 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
-@@ -1174,3 +1174,33 @@ S-135).
+@@ -1178,3 +1178,33 @@ S-135).
  Expects and no other block of 0.0.4 or 0.0.5: block 0b, whose §1.5 counts one more `exit` operand, declared name and
  `fixed` binding, and block 5's sweep, whose ninth-limit subject gains the new row. Every text that says the ninth
  waits for cycle 0.4 is rewritten with them, and what the new words move is retaken too.
@@ -37,7 +37,7 @@ index 044f03f..b90a95c 100644
 +*Reversal, for the author:* when D-341 lands, `Bytes` may offer a frozen view by a decision; when a decision accepts
 +the contracts' arms, the comments become clauses, a marker deleted per site.
 diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md
-index f8606f8..531e809 100644
+index 0a89507..4762aed 100644
 --- a/meta/specs/BUILD.md
 +++ b/meta/specs/BUILD.md
 @@ -252,6 +252,13 @@ into it and nothing converts back (`NITPICK-TYPE-007`; @@PD-132@@).
