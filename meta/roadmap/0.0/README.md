@@ -82,10 +82,10 @@ author.**
 
 ## The pin, and what each later landing would move
 
-**Planned at `7e91730`** — the workbench's pin then, landings 83 … 103 — and **re-pinned once, at landing 118**, by
+**Planned at `7e91730`** — the workbench's pin then, landings 83 … 103 — and **re-pinned first at landing 118**, by
 the author's word on the workbench's question 32 (2026-10-15 12:04), so that one adoption carries 104 … 118: the
-use-after-free fix (116), the refusal of generic value parameters (117) and the two link fixes (118). **The pin is
-`c9baa9e`**, landing 118's commit, taken by the workbench on 2026-10-16 at a quiet point with no claim in flight, and
+use-after-free fix (116), the refusal of generic value parameters (117) and the two link fixes (118). **`c9baa9e`**,
+landing 118's commit, was taken by the workbench on 2026-10-16 at a quiet point with no claim in flight, and
 adopted here the same day, before any subcycle of the cycle started. *(Corrected 2026-10-15 by the pass's
 continuation: this said "after landing 115", the author's word of 07:42, which question 32 superseded.)* **The pin is
 `2e1cb4a` since the libraries' second re-pin**, landing 140's commit, by the author's word of 2026-10-22 03:49:41
