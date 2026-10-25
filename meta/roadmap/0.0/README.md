@@ -328,10 +328,10 @@ file states its own acceptance when it reaches the pin, and where the two differ
 - [x] `CLAUDE.md` and `CONTRIBUTING.md` re-read against 0.0.0's verdicts and extended
 
 ### 0.0.1a — the adoption of `2e1cb4a`
-- [ ] CI's three rows at `2e1cb4a` and notice 140's `npkc.ll` row; LLVM's release asset held to its sha256 before it is unpacked, the cache keyed on it, `CURRENCY.md`'s row and its digest
-- [ ] cycle 0.0.0's 19 notes re-dated to 2026-10-17, and its ten decision sites each with an added dated note, their text unchanged
-- [ ] the old-pin leg on `c9baa9e`: no verdict moved, every emission the same through `sitenorm.py --site-path-cap`, the same exits
-- [ ] CI green at the new pin, its first run's install step and emission quoted
+- [x] CI's three rows at `2e1cb4a` and notice 140's `npkc.ll` row; LLVM's release asset held to its sha256 before it is unpacked, the cache keyed on it, `CURRENCY.md`'s row and its digest
+- [x] cycle 0.0.0's 19 notes re-dated to 2026-10-17, and its ten decision sites each with an added dated note, their text unchanged
+- [x] the old-pin leg on `c9baa9e`: no verdict moved, every emission the same through `sitenorm.py --site-path-cap`, the same exits
+- [x] CI green at the new pin, its first run's install step and emission quoted
 
 ### 0.0.2 — the harness, part 1
 - [ ] `harness/run.py`, `manifest.py`, `toolchain.py`, `expect.py`, `build.py`, `irscan.py`, `elf.py`, `stages.py`, and `baseline/`
