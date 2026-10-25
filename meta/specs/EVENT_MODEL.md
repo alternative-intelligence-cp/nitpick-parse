@@ -72,7 +72,7 @@ pub struct:Event = {
 };                      // 32 bytes, align 4 — measured, not summed (PA-104)
 ```
 
-*(2026-10-15, cycle 0.0.0, PA-104: the comments said `1 byte` for each kind and `24 bytes` for the
+*(2026-10-17, cycle 0.0.0, PA-104: the comments said `1 byte` for each kind and `24 bytes` for the
 whole, which is the field widths added up. Measured at compiler `7e91730` by probe 02 —
 `tests/probe/probe02_pod_event.npk`, whose exit code is `#size_of<Event>()` — it is **32**: a payload-free
 enum is an `int32` tag, four bytes (the compiler's `TYPE_REFERENCE.md` §9.3).)*
@@ -96,7 +96,7 @@ pub enum:ScalarKind = { Null; Bool; Int; Float; Str; Date; Time; DateTime; Raw; 
 a design rule, not a language one: an owning field would cost `Copy`, and with
 it the by-value reads every container here makes.
 
-*(2026-10-15, cycle 0.0.0, PA-105: this rule said "a plain 24-byte value" — 32
+*(2026-10-17, cycle 0.0.0, PA-105: this rule said "a plain 24-byte value" — 32
 measured, PA-104 — and gave as its forcing reason that "an arena `get` returns a
 *copy*, and a copy of an owning value is refused". Measured at `7e91730`, the arena
 refuses an owning element at `arena_make`, `NITPICK-TYPE-007` (probe 05), and a `Vec`

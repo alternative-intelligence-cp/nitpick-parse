@@ -253,6 +253,8 @@ all.
 
 ### PA-021 — `Event` is POD; scalar text is a `TextRef`, never an owned string
 > **SUPERSEDED IN PART by PA-104 and PA-105 (2026-10-15)** — measured by cycle 0.0.0's probes; the rule stands.
+> *(2026-10-25, cycle 0.0.1a:)* this marker landed on 2026-10-17, at cycle 0.0.0; its date is
+> the plan's drafting date.
 
 **2026-09-03.** A plain 24-byte value with no owning field, so it returns by
 value, sits in a `Vec`, compares and copies.
@@ -263,12 +265,14 @@ copied or cleared; and **an arena `get` returns a copy** (D-152), and a copy of
 an owning value is *refused* — so the same shape in a `Node` could not be read
 back at all.
 
-*(2026-10-15, cycle 0.0.0: "24-byte" is 32, measured by probe 02, and both forcing
+*(2026-10-17, cycle 0.0.0: "24-byte" is 32, measured by probe 02, and both forcing
 reasons are restated by measurement — PA-104 and PA-105 supersede this
 decision in part. The rule, no owning field, stands.)*
 
 ### PA-022 — nesting is an explicit stack; there is no native recursion
 > **SUPERSEDED IN PART by PA-108 (2026-10-15)** — its stated reason, measured by probe 10b; the rule stands.
+> *(2026-10-25, cycle 0.0.1a:)* this marker landed on 2026-10-17, at cycle 0.0.0; its date is
+> the plan's drafting date.
 
 **2026-09-03.** Not in the parsers, not in the tree builder, not in the writers,
 not in the comparison, not in the walk, not in the drop.
@@ -284,7 +288,7 @@ a *recursive drop* is a stack overflow at the end of a **successful** parse.
 That is the form of this bug most likely to survive review, which is why the
 rule names the walk, the compare, the print and the drop explicitly.
 
-*(2026-10-15, cycle 0.0.0: "no stack-depth guard … a raw fault, not a controlled
+*(2026-10-17, cycle 0.0.0: "no stack-depth guard … a raw fault, not a controlled
 stop" is false at compiler `7e91730` — a stack overflow traps `StackExhausted`
 (the compiler's D-305), measured by probe 10b. PA-108 supersedes the reason in
 part; the rule stands, because a trap stops the whole program.)*
@@ -314,6 +318,8 @@ avoid one.
 
 ### PA-030 — the tree is an arena of POD nodes with a side string pool
 > **SUPERSEDED IN PART by PA-105 (2026-10-15)** — measured by cycle 0.0.0's probes; the rule stands.
+> *(2026-10-25, cycle 0.0.1a:)* this marker landed on 2026-10-17, at cycle 0.0.0; its date is
+> the plan's drafting date.
 
 **2026-09-03.** Not a linked structure of owning values.
 
@@ -327,7 +333,7 @@ compile. Text lives in the pool and a node addresses it by offset and length.
 outlived its slot fails `get` with `StaleHandle` (−4106) rather than reading
 freed memory — the use-after-free class closed structurally.
 
-*(2026-10-15, cycle 0.0.0: the refusal is at `arena_make`, `NITPICK-TYPE-007`,
+*(2026-10-17, cycle 0.0.0: the refusal is at `arena_make`, `NITPICK-TYPE-007`,
 measured by probe 05 — not TYPE-046 at the `get`. PA-105 supersedes the stated
 reason in part; the tree, the pool and the stale-handle answer (probe 04) stand.)*
 
@@ -387,6 +393,8 @@ they forget.
 
 ### PA-040 — one `ParseError` value with a closed code enum
 > **SUPERSEDED IN PART by PA-104 (2026-10-15)** — measured by cycle 0.0.0's probes; the rule stands.
+> *(2026-10-25, cycle 0.0.1a:)* this marker landed on 2026-10-17, at cycle 0.0.0; its date is
+> the plan's drafting date.
 
 **2026-09-03.** A plain 24-byte value: a `FaultCode`, flags, a span, an
 `expected` bitmask, what was found, and the depth. No owning field, so it rides
@@ -402,7 +410,7 @@ removed from `Result`, so the accessor pair `fault_found_byte` /
 `fault_found_class` is the only way to read it — which is what the D-069
 objection was actually about. The alternative is two fields and 28 bytes.
 
-*(2026-10-15, cycle 0.0.0: "a plain 24-byte value" is 28, measured by probe 03 —
+*(2026-10-17, cycle 0.0.0: "a plain 24-byte value" is 28, measured by probe 03 —
 `FaultCode` is an `int32` tag — so the one `found` field already costs what this
 paragraph priced two at. PA-104 supersedes the number; whether the compromise
 still earns its keep is cycle 0.2.1's, where `ParseError` is built.)*
@@ -417,7 +425,7 @@ translation possible, and keeps the struct at 24 bytes with no owning field.
 The code `NPARSE-nnnn` is stable and the prose after it is not — the compiler's
 own rule, for the same reason.
 
-*(2026-10-15, cycle 0.0.0: the struct is 28 bytes, measured by probe 03; PA-104.
+*(2026-10-17, cycle 0.0.0: the struct is 28 bytes, measured by probe 03; PA-104.
 The reasoning stands — no stored text is still what keeps it free of an owning
 field.)*
 
@@ -568,7 +576,7 @@ bound is the intended path and what every example uses; `dyn` costs an indirect
 call per event and exists so that "choose the format from the file extension"
 does not require a hand-written `pick` in every consumer.
 
-*(2026-10-16, cycle 0.0.0: object safety measured — `dyn` over a `Self->` method runs,
+*(2026-10-17, cycle 0.0.0: object safety measured — `dyn` over a `Self->` method runs,
 probe 07 — and at compiler `c9baa9e` so does the static path through a bound, probe 06, a
 compiler defect at `7e91730` until the compiler's landing 118; PA-106.)*
 
@@ -726,6 +734,9 @@ four (the compiler's `TYPE_REFERENCE.md` §9.3). `EventKind`, `ScalarKind`,
 `NodeKind`, `TextSrc` and `FaultCode` stay enum-typed fields, and the rules that
 assert a size (E-6, F-1, D-3) assert these.
 
+*(2026-10-25, cycle 0.0.1a:)* this decision landed on 2026-10-17, at cycle 0.0.0; the date that
+opens it is the plan's drafting date.
+
 It supersedes in part PA-021's "24-byte", and PA-040's; neither rule moves.
 
 *Alternatives declined:* **`uint8` fields with the enum read by `=>!`** — 24 bytes
@@ -756,6 +767,9 @@ pool (PA-030), now for the reason the compiler gives; `Event`, `Node`,
 every container read here is — rather than as a language one; and the managed half
 of any container's obligations is gated by a capped pair, not by `exit 0`.
 
+*(2026-10-25, cycle 0.0.1a:)* this decision landed on 2026-10-17, at cycle 0.0.0; the date that
+opens it is the plan's drafting date.
+
 It supersedes in part PA-030's stated reason, and PA-021's ("a copy of an owning
 value is refused"), which named the copy `get` makes; the rules stand.
 
@@ -785,6 +799,11 @@ the implementation's symbol, where `Count:Src.step` is defined, so `llc` refused
 which the compiler registered as DEF-253 and fixed in its landing 118, which the libraries' one
 re-pin carries; nothing was re-spelled around it while it stood.
 
+*(2026-10-25, cycle 0.0.1a:)* this decision landed on 2026-10-17, at cycle 0.0.0; the date that
+opens it is the plan's drafting date, and its second date the adoption's at `c9baa9e`. The
+"libraries' one re-pin" above was the first: a second, to compiler `2e1cb4a` at landing
+140, followed on 2026-10-22.
+
 *Alternatives declined:* **re-spell the bound path through `dyn`** — a workaround
 buried in library code, which `CLAUDE.md` forbids, and an indirect call per event
 PA-071 chose not to pay; **make `step` take `Self` by value** — the control shows a
@@ -807,6 +826,9 @@ the compiler's own `Writer.write` takes it, because an implementation must spell
 the slot exactly as its trait does (`NITPICK-TYPE-014`, probe 08f). A plain
 `uint8[]` still converts in (probe 08), so the change widens every contract, and a
 write through the view is refused (`NITPICK-TYPE-086`, probe 08e).
+
+*(2026-10-25, cycle 0.0.1a:)* this decision landed on 2026-10-17, at cycle 0.0.0; the date that
+opens it is the plan's drafting date.
 
 What a view may travel to, measured at compiler `c9baa9e` (probe 08 and its
 refusals): a function handed the caller's
@@ -850,6 +872,9 @@ a recursion traps is not this library's to know: probe 10b's frame completes
 131 063 through `opt -O2` — so the plan's first recursive probe, at 50 000, would
 have run to the end at both legs and demonstrated nothing.
 
+*(2026-10-25, cycle 0.0.1a:)* this decision landed on 2026-10-17, at cycle 0.0.0; the date that
+opens it is the plan's drafting date.
+
 It supersedes in part PA-022's stated reason; strikes `OPEN_QUESTIONS.md` O-N2 as
 answered (the early ecosystem audit's ES1); and keeps `check_no_recursion` as the
 instrument, because the compiler's `stack-depth` rows — derived from `terminate`
@@ -882,6 +907,9 @@ PA-008's budget — two declared identities, neither reachable from input — is
 untouched; what a consumer owes beyond it is the machinery's, and S-7's generated
 list, held to `NITPICK-REACH-003` by `check_failsafe_arms` from cycle 0.2, is
 where it is stated per module.
+
+*(2026-10-25, cycle 0.0.1a:)* this decision landed on 2026-10-17, at cycle 0.0.0; the date that
+opens it is the plan's drafting date.
 
 The tests' arm codes follow `PLAYBOOK.md` §3 item 8, plus three it does not
 assign, taken as the sibling libraries take them where they do: 97

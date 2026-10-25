@@ -16,7 +16,7 @@
 // `@"npk.probe06_trait_bound.Count->:Src.step"` -- the receiver's POINTER type in the
 // implementation's symbol -- where `@"npk.probe06_trait_bound.Count:Src.step"` is defined, so `llc`
 // refused the module. The compiler registered it as DEF-253 and fixed it in its landing 118, which
-// the libraries' one re-pin carries; nothing was re-spelled around it (`CLAUDE.md`: never work
+// the libraries' first re-pin carries; nothing was re-spelled around it (`CLAUDE.md`: never work
 // around a compiler defect).
 mod:probe06_trait_bound;
 

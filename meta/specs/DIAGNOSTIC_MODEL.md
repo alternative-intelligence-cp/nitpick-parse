@@ -28,7 +28,7 @@ pub struct:ParseError = {
 };                       // 28 bytes, align 4 — measured (PA-104)
 ```
 
-*(2026-10-15, cycle 0.0.0, PA-104: the comments said `2 bytes` for the code and `24 bytes` for the
+*(2026-10-17, cycle 0.0.0, PA-104: the comments said `2 bytes` for the code and `24 bytes` for the
 whole. Measured at compiler `7e91730` by probe 03 it is **28**: `FaultCode` is an `int32` tag.)*
 
 **Rule F-1 — no owning field**, so it rides inside `Step.Fault(ParseError)`,

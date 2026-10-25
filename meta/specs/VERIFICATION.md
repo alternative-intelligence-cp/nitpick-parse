@@ -42,9 +42,14 @@ so a premature `ensures` is a build failure, not a silent no-op.
   a `Vec`'s `wild` block's. Those indexes are checked by this library's own
   accessors, or by nothing.
 
-*(2026-10-15, cycle 0.0.0, probe 11 and the early ecosystem audit's EC2: this
+*(2026-10-17, cycle 0.0.0, probe 11 and the early ecosystem audit's EC2: this
 bullet said "every index into a slice, array or `buffer`", which `PLAYBOOK.md`
 §2's index row corrects for the pointer.)*
+*(2026-10-25, cycle 0.0.1a: from the compiler's landing 128 (D-341), which the pin `2e1cb4a`
+carries, a `buffer` is indexed and ranged like a slice of bytes, checked against its length, and a
+`#wild_slice` over its pointer is a view of its owner. An index through `.ptr`, which probe 11
+writes through and cycle 0.0.4's `Bytes` is planned to, is still checked by nothing but this
+library's own accessors.)*
 - **Every plain integer `+ - *` traps on overflow** (D-210) — which for this
   library is not a gift but the hazard itself (§4).
 - **Division by zero traps** (D-007).
@@ -179,7 +184,7 @@ native recursion on an input-controlled path") is currently held by a **grep**
 becomes a discharged obligation and the exceptions table becomes provably
 empty.
 
-*(2026-10-15, cycle 0.0.0, PA-108: 1.5.8 has landed, and it is not what this rule
+*(2026-10-17, cycle 0.0.0, PA-108: 1.5.8 has landed, and it is not what this rule
 waited for. The compiler's runners DERIVE a `stack-depth` row from a recursion's
 `terminate` rows — discharged when every member states `decreases`, open otherwise —
 and the trap is D-305's prologue check. Neither says "no recursion on an

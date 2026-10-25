@@ -28,7 +28,7 @@ language rule rather than a preference:
 > therefore not be stored **at all** — not "would be slow", not "would allocate":
 > `arena<Node>` would not compile.
 
-*(2026-10-15, cycle 0.0.0, PA-105: until this subcycle the quotation said the
+*(2026-10-17, cycle 0.0.0, PA-105: until this subcycle the quotation said the
 refusal was TYPE-046's, of the copy `doc.nodes.get(h)` makes. The arena refuses
 earlier, at the make; and the compiler names its answer for owning elements —
 generated deep-view accessors — so the day those land, probe 05 stops being refused

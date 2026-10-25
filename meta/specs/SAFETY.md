@@ -208,7 +208,7 @@ frame completes 65 534 levels and traps at 65 535 at `-O0`, and completes
 `7e91730`), so a depth a test passes is a statement about one frame and one
 optimiser.
 
-*(2026-10-15, cycle 0.0.0, PA-108: this paragraph said the language had no
+*(2026-10-17, cycle 0.0.0, PA-108: this paragraph said the language had no
 stack-depth guard and the overflow was "a raw fault, not a controlled stop", which
 was true before the compiler's 1.5.8. Probe 10b, 1 048 576 levels: `StackExhausted`,
 106, at both legs. The rule above it stands; its reason changed.)*
@@ -241,7 +241,7 @@ rule for the rest:
   element out and drop it, and nothing but a memory cap sees a free that does
   not (S-18; probes 09b and 09c).
 
-*(2026-10-15, cycle 0.0.0, PA-105: until this subcycle the first bullet said an
+*(2026-10-17, cycle 0.0.0, PA-105: until this subcycle the first bullet said an
 owning field made a `Vec` of them impossible to copy, clear or compare, and the
 second that the arena's copying `get` was refused TYPE-046. Measured at
 `7e91730`, neither is the mechanism: `PLAYBOOK.md` §2's row on move-only values

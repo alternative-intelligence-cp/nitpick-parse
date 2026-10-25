@@ -60,7 +60,7 @@ the resolver's roots from `[dependencies]`. Neither is on the compiler's 1.5 or
 
 ### ~~O-N2 — there is no stack-depth guard, and `stack-depth` obligations are 1.5.8~~ — **ANSWERED by the compiler, PA-108**
 
-*(2026-10-15, cycle 0.0.0: both halves landed. A stack overflow traps
+*(2026-10-17, cycle 0.0.0: both halves landed. A stack overflow traps
 `StackExhausted` — the compiler's D-305, 1.5.8 — measured by probe 10b at `7e91730`:
 1 048 576 levels, exit 106 at both legs. And the `stack-depth` rows exist, derived by
 the compiler's runners from `terminate` rows (its `VERIFICATION_REFERENCE.md`'s row
@@ -92,7 +92,7 @@ index (`VALUE_MODEL.md` §5), and `SmallMap<K,V>` is ours (PA-004).
 is fine. Recorded only so that the question "why is there no hash map here" has
 a written answer, because it is asked every time somebody meets the value model.
 
-*(2026-10-15, cycle 0.0.0: **this entry's id is this repository's own**; the workbench
+*(2026-10-17, cycle 0.0.0: **this entry's id is this repository's own**; the workbench
 registry's `O-N3` is a different question (the early ecosystem audit's ED2), and
 nothing here takes a registry id.)*
 
@@ -108,7 +108,7 @@ element type may not own anything**, because `get` copies and a copy of an owner
 is refused. It would have saved this library a design iteration and it will save
 the next one.
 
-*(2026-10-15, cycle 0.0.0 — probe 05's evidence, measured at `7e91730`: the refusal
+*(2026-10-17, cycle 0.0.0 — probe 05's evidence, measured at `7e91730`: the refusal
 is at `arena_make`, `NITPICK-TYPE-007`, whose own sentence says the element "OWNS
 heap storage, and `get`/`put` copy bytes" and names the answer the compiler plans,
 deep-view accessors (D-183). The diagnostic now says what this ask wanted the

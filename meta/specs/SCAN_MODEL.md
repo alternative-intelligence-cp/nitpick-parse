@@ -42,7 +42,7 @@ field's code, which no probe provokes:
 
 `EVENT_MODEL.md` §5 states the consequence for the public API.
 
-*(2026-10-15, cycle 0.0.0, PA-107: this rule said the borrow was `uint8[]` under
+*(2026-10-17, cycle 0.0.0, PA-107: this rule said the borrow was `uint8[]` under
 D-070, and that a `Cursor` "cannot be returned from a function, stored in something
 that outlives the call". At `7e91730` `string_bytes` returns `fixed uint8[]`, which
 no plain slot accepts (`NITPICK-TYPE-007`), and a `Cursor` over a parameter's bytes

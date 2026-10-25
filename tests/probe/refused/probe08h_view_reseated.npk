@@ -12,7 +12,7 @@
 // `7e91730`, where this cycle was planned, it was a compiler defect, a use-after-free in safe code:
 // `npkc` accepted it, and after the block `c.src[0]` read the runtime's free poison, 0xAA -- exit
 // 170 at -O0 and through `opt -O2`. The compiler registered it as DEF-252 and fixed it in that
-// landing, which the libraries' one re-pin carries.
+// landing, which the libraries' first re-pin carries.
 mod:probe08h_view_reseated;
 
 struct:Cursor = { fixed uint8[]:src; int64:pos; };
