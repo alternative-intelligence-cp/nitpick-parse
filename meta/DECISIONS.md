@@ -933,6 +933,12 @@ number, and the harness asserts the tools against it.
 `NITPICK_COMMIT` and the emission's digest in CI, and the LLVM row only if a landing
 moves the compiler's D-349.
 
+*(2026-10-25, cycle 0.0.1a:)* the re-pin at landing 118 was the first. A second, to compiler
+`2e1cb4a` at landing 140 (the author's word of 2026-10-22), moves `NITPICK_COMMIT` and the
+emission's digest again, to notice 140's `npkc.ll` row; the LLVM row stays, since the
+compiler's `nitpick.toml` is byte-identical at `c9baa9e` and `2e1cb4a`; and from cycle
+0.0.1a CI holds LLVM's release asset to its sha256 before it unpacks it.
+
 ### PA-112 — one currency table; the library is security-sensitive, and its three research items gate cycle 0.0's work
 **2026-10-15, cycle 0.0.1.** Every outside fact the plan rests on is a row of
 `meta/research/CURRENCY.md` (the workbench research skill's §7, and `PLAYBOOK.md`

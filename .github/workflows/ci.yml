@@ -26,16 +26,21 @@ permissions:
   contents: read
 
 env:
-  # The workbench's pinned compiler, by FULL sha (`c9baa9e` in the roadmap). PA-111.
-  NITPICK_COMMIT: "c9baa9e91c553d8db2a2a62f09c36b30a984b07f"
-  # THE EMISSION AT THAT COMMIT, as the compiler's own build recorded it -- notice 118's
+  # The workbench's pinned compiler, by FULL sha (`2e1cb4a` in the roadmap). PA-111.
+  NITPICK_COMMIT: "2e1cb4adef795488c0530be297e441f923bbe090"
+  # THE EMISSION AT THAT COMMIT, as the compiler's own build recorded it -- notice 140's
   # `npkc.ll` row. The emission step below ASSERTS it: the compiler's D-265 says the
   # emission, not the binary, is the cross-machine claim. Moved with every pin.
-  NPKC_LL_SHA256: "1f48a31a5c9b5b78053444c404b7b2dd7c8c470c354dd3b14d47b3e75585ee2a"
-  NPKC_LL_BYTES: "31731079"
+  NPKC_LL_SHA256: "0073060250f0e56329ab77a01de45b0f499c0441db66215b7b762c9fe911b27c"
+  NPKC_LL_BYTES: "32569732"
   # nitpick.toml's [toolchain] llvm: an exact patch release. Upstream publishes
   # `LLVM-20.1.8-Linux-X64.tar.xz` at its `llvmorg-20.1.8` release.
   LLVM_VERSION: "20.1.8"
+  # THAT ASSET BY CONTENT (cycle 0.0.1a): its sha256 as the plan measured it, streamed
+  # whole, and as GitHub's record of the asset and the LLVM project's provenance for it
+  # give it (`meta/research/llvm-release-asset.md`). The install step holds the
+  # download to it before `tar` reads a byte.
+  LLVM_TARBALL_SHA256: "1ead36b3dfcb774b57be530df42bec70ab2d239fbce9889447c7a29a4ddc1ae6"
 
 jobs:
   build:
@@ -71,13 +76,21 @@ jobs:
           echo "compiler HEAD == $have (clean)"
 
       # The upstream release tarball: apt.llvm.org packages by MAJOR version and would
-      # give whatever 20.1.x is current. Cached on the version, an immutable asset.
+      # give whatever 20.1.x is current. WHAT THE CHECK GUARANTEES (cycle 0.0.1a): the
+      # install step downloads the tarball to a file and holds it to LLVM_TARBALL_SHA256
+      # with `sha256sum -c` before `tar` reads it, so a tree unpacked on a cache miss is
+      # the asset that digest names; and the key names the digest, so a hit restores a
+      # tree saved under it, which this job saves only when it succeeds, its check
+      # passed. It says nothing of who built the asset: that the digest is the LLVM
+      # project's own is the plan's measurement. *(Until cycle 0.0.1a this said "Cached
+      # on the version, an immutable asset", which nothing measured: the release is not
+      # immutable in GitHub's sense, and the tarball was piped into `tar` unchecked.)*
       - name: Cache LLVM ${{ env.LLVM_VERSION }}
         id: llvm-cache
         uses: actions/cache@v4
         with:
           path: ~/llvm
-          key: llvm-${{ env.LLVM_VERSION }}-linux-x64
+          key: llvm-${{ env.LLVM_VERSION }}-linux-x64-${{ env.LLVM_TARBALL_SHA256 }}
 
       - name: Install LLVM ${{ env.LLVM_VERSION }}
         if: steps.llvm-cache.outputs.cache-hit != 'true'
@@ -85,7 +98,12 @@ jobs:
           set -euo pipefail
           mkdir -p ~/llvm
           url="https://github.com/llvm/llvm-project/releases/download/llvmorg-${LLVM_VERSION}/LLVM-${LLVM_VERSION}-Linux-X64.tar.xz"
-          curl -fsSL "$url" | tar -xJ --strip-components=1 -C ~/llvm
+          tarball="$RUNNER_TEMP/LLVM-${LLVM_VERSION}-Linux-X64.tar.xz"
+          curl -fsSL -o "$tarball" "$url"
+          echo "downloaded $(stat -c '%s' "$tarball") B: $url"
+          echo "$LLVM_TARBALL_SHA256  $tarball" | sha256sum -c -
+          tar -xJf "$tarball" --strip-components=1 -C ~/llvm
+          rm -f "$tarball"
 
       - name: Put LLVM on PATH and assert the pin
         run: |
