@@ -149,6 +149,9 @@ cycle 0.12's application; semantic versioning thereafter.
 
 - **adding a public `error:` identity** — REACH-002 makes it a new mandatory
   `failsafe` arm in every consumer, a compiler-enforced source break;
+  *(2026-10-29, cycle 0.0.3 — PA-117: measured at the pin, the arm is owed for every identity a reachable
+  `fail` raises, a PRIVATE one included, named by its module — so this reads "adding an identity a reachable `fail`
+  raises".)*
 - **adding an `EventKind`, a `ScalarKind`, a `NodeKind` or a `FaultCode`
   variant** — a consumer's exhaustive `pick` stops compiling;
 - removing or renaming any public name, as usual.

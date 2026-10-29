@@ -32,7 +32,7 @@ never for concluding; nothing is committed on the strength of a filtered run.
 
 1. **A syntax error is not an error.** It is a `Fault` value in the success
    channel, and `pick` exhaustiveness is what forces the caller to handle it.
-   The library declares two `error:` identities and **neither can be produced
+   The library declares two `error:` names and **neither can be produced
    by any input**. If you find yourself adding a third, and the trigger is
    something a byte stream can cause, you have found a design mistake rather
    than a missing error.

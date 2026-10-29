@@ -60,7 +60,7 @@ cycle freezes**.
 - [ ] `Options` with every field and `options_default()` (G-12: struct literals must be complete, so the constructor is the compatible path)
 - [ ] **an incoherent option is `EParseState` at construction**, not a surprise at step 4000 (E-21) — asserted for `max_depth == 0` and `max_scalar == 0`
 - [ ] `step` idempotent after `Done` and after `Fault` (PA-024), asserted by calling three more times
-- [ ] `check_error_budget` confirming exactly two identities exist
+- [ ] `check_error_budget` confirming the identities the tree's `fail` sites raise, keyed by (module, name), are the ones `SAFETY.md` §3 and S-6 allow (cycle 0.0.3's check)
 
 ### 0.2.3 — the depth stack
 - [ ] `Frame { kind, count, span }`, `Vec<Frame>`, **preallocated to the bound** (E-16)

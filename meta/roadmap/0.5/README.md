@@ -38,7 +38,7 @@ PA-060, PA-061, PA-062, PA-080. All settled.
 - [ ] `ND_BIG` written verbatim from its retained text (W-8)
 - [ ] `-0` written as `-0`, asserted through a full round trip (E-9)
 - [ ] **an explicit stack**, not recursion (W-4) — a 50 000-deep document printed and freed, exiting 0
-- [ ] `EParseEncode` for what JSON cannot represent: a `Date` scalar, a NaN, a non-string map key — the second of the library's two error identities, and a **caller** mistake
+- [ ] `EParseEncode` for what JSON cannot represent: a `Date` scalar, a NaN, a non-string map key — the second of the library's two error names, and a **caller** mistake
 - [ ] the writer is deterministic: the same document printed twice is byte-identical, asserted
 
 ### 0.5.1 — the `EventSink` trait

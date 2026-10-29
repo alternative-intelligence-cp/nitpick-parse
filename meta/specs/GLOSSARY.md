@@ -11,7 +11,7 @@ two ways, this table says which one `nparse` means.
 | **event** | one item of the pull stream: a container boundary, a key, or a scalar. 32 bytes, no owning field (PA-104). |
 | **step** | one call's answer: `Ev`, `Fault` or `Done`. |
 | **fault** | a `ParseError` **value** — what a malformed input produces. **Never** an `error:` identity. |
-| **error** | one of the two `error:` identities, `EParseState` and `EParseEncode`. Only a *caller* can cause one. |
+| **error** | one of the two `error:` names, `EParseState` and `EParseEncode` — an identity is a module and a name (`SAFETY.md` §3). Only a *caller* can cause one. |
 | **scalar** | a leaf value: null, bool, number, string, or a format's date/time. |
 | **text ref** | where a scalar's bytes are — in the input, or in the parser's scratch. Valid until the next step. |
 | **scratch** | the parser's own byte buffer, holding only scalars an escape forced it to rewrite. |

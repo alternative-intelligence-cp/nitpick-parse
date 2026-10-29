@@ -15,7 +15,7 @@ costs a library that reads bytes somebody else controls.
 
 | Language rule | Where | Consequence for `nparse` |
 |---|---|---|
-| `failsafe`'s `pick` must **name** every error that can reach it | REACH-002 | Every public `error:` we declare is an arm every consuming program owes. §3. |
+| `failsafe`'s `pick` must **name** every error that can reach it | REACH-002 | Every identity a reachable `fail` raises — public or private, named by its module (`m.E`) — is an arm every consuming program owes, and a declaration never raised costs nothing (measured at the pin, PA-117). §3. |
 | Reachability is **import-scoped** | 1.4.8's `nsys` note | Module decomposition decides what a consumer's `failsafe` owes. §3. |
 | Plain integer `+ - *` **traps** on overflow | D-210 | `acc = acc * 10 + d` is a **remote crash**. §4 — this is the biggest one. |
 | `/` and `%` by zero trap | D-007, D-142 | A divisor from input is checked before use. §4. |
@@ -67,7 +67,11 @@ stops the process. For a library whose entire job is reading bytes somebody
 else controls, **routing malformed input through that channel would mean a bad
 byte can stop a program.** So it does not.
 
-`nparse` declares exactly two public error identities:
+`nparse` declares exactly two error names, each raised only in the layers S-6 lists:
+*(Corrected 2026-10-29, cycle 0.0.3 — PA-117, the ecosystem audit's EC3: this said "exactly two public error
+identities". An identity is a module and a name — measured at the pin, a root importing a module whose reachable
+`fail` raises a PRIVATE error owes it as `<module>.<name>`, and a public error never raised costs nothing — so the two
+are names, and `check_error_budget` holds the identities the tree raises to this table and S-6.)*
 
 | Error | Raised when | Can an input cause it? |
 |---|---|---|

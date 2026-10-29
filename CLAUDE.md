@@ -42,7 +42,9 @@ The shared house rules for every library in this ecosystem are
   commit — never by editing the text and moving on, and never by a comment.
 - **A settled decision's text is never rewritten.** Supersede it with a new
   numbered decision that says why. This is the compiler's D-085/D-202 pattern.
-- **Two public error identities, and no input can produce either** (PA-008).
+- **Two error names, and no input can produce either** (PA-008); an identity is a
+  module and a name, so a consumer owes an arm for each one a reachable `fail`
+  raises, a private one too (`meta/specs/SAFETY.md` §3, PA-117).
   `EParseState` and `EParseEncode` fire only on programmer misuse. Every
   condition an input can cause is a `Fault` value the caller must handle by
   `pick` exhaustiveness. **Adding a third is a major version and needs a
@@ -119,7 +121,9 @@ compiler's own bootstrap ladder, and `[dependencies]` resolves to nothing.
 `NPKC=… NPKRT=… python3 -B harness/run.py` builds and scans every module under
 `src/`, runs every suite `nitpick.toml` declares at −O0 and through `opt -O2`,
 and prints its verdict last (`harness/README.md`). *(Until cycle 0.0.2 the probes
-were run by hand, by `meta/roadmap/0.0/0.0.0.md` §2's command.)*
+were run by hand, by `meta/roadmap/0.0/0.0.0.md` §2's command.)* Since cycle 0.0.3 it
+runs its self-check before it judges anything, judges the refusals by their codes,
+sweeps every `.npk` in the tree, and runs the tree checks; `--only` concludes nothing.
 
 The compiler binary is the **pinned toolchain** the board names
 (`../BOARD.md`, W-18): `$NPKC` and `$NPKRT` are supplied to every session by the

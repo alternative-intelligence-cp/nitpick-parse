@@ -32,7 +32,7 @@ decide it.
 - [ ] the per-import arm list generated (`specs/SAFETY.md` S-7) and published in `docs/`
 - [ ] `check_failsafe_arms` proving the published list is what a program actually owes
 - [ ] **the headline stated once, prominently**: `nparse` declares two error
-      identities, `EParseState` and `EParseEncode`, and **no input can produce
+      names, `EParseState` and `EParseEncode`, and **no input can produce
       either** — every condition a byte stream can cause is a `Fault` value the
       compiler makes you handle
 - [ ] the modules that declare **no** errors named explicitly (`scan`, `event`,
@@ -67,7 +67,7 @@ decide it.
 - [ ] **the three major-version triggers stated prominently**: a new `error:`
       identity, a new variant in any closed enum, and any removal — the first
       two being rules no other language's library has to have
-- [ ] the current counts published beside them (two identities; nine
+- [ ] the current counts published beside them (two error names; nine
       `EventKind`s; nine `ScalarKind`s), so a consumer can see the budget rather
       than infer it
 

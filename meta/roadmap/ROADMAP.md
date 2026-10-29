@@ -52,7 +52,8 @@ whether it kept them.**
 
 The second constraint is what shapes the *interface*:
 
-> **Every public `error:` costs every consumer a `failsafe` arm** (REACH-002),
+> **Every error identity a reachable `fail` raises costs every consumer a `failsafe` arm** (REACH-002 —
+> public or private, named by its module),
 > and **there are no closures** (D-018).
 
 The first made a syntax error a **value** rather than an error (PA-008), which

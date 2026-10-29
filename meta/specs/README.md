@@ -66,5 +66,5 @@ implementation reads bytes the caller owns and answers `Ev`, `Fault` or `Done`;
 a small tree builder over that stream produces a `Document` for callers who want
 one. Scalar text is a reference into the input, so nothing proportional to the
 input is copied. A syntax error is a value the caller must handle, never an
-error identity — **no input can produce one of the two identities this library
+error identity — **no input can produce one of the two error names this library
 declares**.

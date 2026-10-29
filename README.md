@@ -35,14 +35,14 @@ share it".
 ## What makes it different
 
 **A syntax error is a value, not an error.** This is the headline. In Nitpick
-every public `error:` a library declares becomes a mandatory `pick` arm in
-every consuming program's `failsafe`, and an unhandled one stops the process.
+every error identity a library's reachable `fail` raises — public or private, named
+by its module — becomes a mandatory `pick` arm in every consuming program's `failsafe`, and an unhandled one stops the process.
 For a library whose entire job is reading input somebody else controls, routing
 malformed input through that channel would mean a bad byte can stop a program.
 So it does not: `parse_next` returns a `Step` — `Ev`, `Fault(ParseError)` or
 `Done` — and `pick` exhaustiveness makes the caller handle the fault. **No
-input, however hostile, can produce an error identity.** The two the library
-declares can only fire on programmer misuse.
+input, however hostile, can produce an error identity.** The two error names the
+library declares can only fire on programmer misuse.
 
 **Parsing a number cannot stop your program.** Plain integer overflow *traps*
 in Nitpick (D-210), so the ordinary `acc = acc * 10 + d` accumulator crashes the

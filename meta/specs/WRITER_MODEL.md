@@ -156,7 +156,7 @@ only one.
 **Rule W-16 — a sink refuses what its format cannot represent** with
 `EParseEncode`: a NaN in JSON, a top-level scalar in TOML, a map key that is not
 a string, a `Date` scalar in JSON. This is the second of the library's two error
-identities (`SAFETY.md` §3) and it is a **caller** mistake — the caller chose
+names (`SAFETY.md` §3) and it is a **caller** mistake — the caller chose
 the target format — which is why it is an identity rather than a `Fault`.
 
 ---
