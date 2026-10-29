@@ -107,6 +107,16 @@ program's object and a syscaller's must differ by `npk_sys6` alone, and the
 call-edge scan must flag the syscaller's `main` and nothing in the floor, so a
 scan gone blind reddens the run rather than passing everything (`PLAYBOOK.md`:
 an undefined-symbol scan once could not see a syscall at all).
+*(Re-read 2026-10-29, cycle 0.0.3 — PA-113: "nothing in the floor" was checked by
+nothing. The call-edge scan's baseline is the floor program's own edges, so the
+floor scanned against them is empty by construction. The run holds the floor to its
+two lists instead, exactly: at the pin `2e1cb4a` its object's five undefined symbols
+— `__morestack`, `npk_chain_reset`, `npk_dalloc`, `npk_ofd_close` and `npk_trap` —
+and its -O0 IR's four call edges to the runtime — the drop glue's to `npk_dalloc`
+and to `npk_ofd_close`, which is denied, and the failsafe's to `npk_chain_reset` and
+to `npk_trap`. So a floor that gains a call cannot widen every unit's baseline
+unseen, and a re-pin that moves either list reddens the run until its adoption moves
+the list in `harness/run.py`.)*
 
 **Rule B-3.** The optimised leg runs on every program, every time: the same
 program re-emitted through `opt -O2` + `llc -O2` must produce the **same exit
