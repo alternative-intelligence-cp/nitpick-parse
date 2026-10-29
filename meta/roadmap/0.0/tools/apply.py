@@ -7,6 +7,11 @@ The patch is `meta/roadmap/0.0/<subcycle>_tools/step<step>.patch` BESIDE THIS SC
 it is applied to -- a `git diff` of the design chain the plan was cut from, and the review surface: a worker may tighten a text, never change what it says, and amends THE PATCH, never
 the tree by hand (the workbench `PLAYBOOK.md` §12).
 
+A STEP IS A NUMBER, OR A NUMBER AND ONE LETTER for one part of that step: `step0c.patch` is step 0's part c, and a
+step's parts come after it and before the next step, in their letters' order -- `step0c.patch`, `step0d.patch`,
+`step0e.patch`, then `step1.patch` (cycle 0.0.3's step cut, which put the libraries' seat's three harness gaps in its
+step 0 as parts, so that its steps 1 ... 3 keep the numbers the settled records cite).
+
 THE DECISION NUMBERS ARE WRITTEN HERE, NOT IN THE PLAN. Every `@@PD-nnn@@` in a patch becomes this repository's
 number for that proposed decision: `decisions.txt` beside this tool lists the accepted PDs in order after a `base`,
 and PD at rank k (1-based) is `PA-<base + k>`. A placeholder with no line there is a STOP: the review declined it,
@@ -102,16 +107,17 @@ def base_number():
 
 
 def plan_order():
-    """Every step patch of the cycle beside this plan, in plan order: [(subcycle, step, path)]."""
+    """Every step patch of the cycle beside this plan, in plan order: [(subcycle, step, path)], a step's parts
+    after it (the module's docstring)."""
     out = []
     for d in sorted(glob.glob(os.path.join(HERE, "..", "0.0.*_tools"))):
         sub = os.path.basename(d)[:-len("_tools")]
         steps = []
         for p in glob.glob(os.path.join(d, "step*.patch")):
-            m = re.search(r"step(\d+)\.patch$", p)
+            m = re.search(r"step(\d+)([a-z]?)\.patch$", p)
             if m:
-                steps.append((int(m.group(1)), p))
-        out += [(sub, str(n), p) for n, p in sorted(steps)]
+                steps.append(((int(m.group(1)), m.group(2)), p))
+        out += [(sub, "%d%s" % k, p) for k, p in sorted(steps)]
     return out
 
 

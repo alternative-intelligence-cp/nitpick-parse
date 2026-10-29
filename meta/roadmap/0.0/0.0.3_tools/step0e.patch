@@ -1,0 +1,91 @@
+diff --git a/harness/run.py b/harness/run.py
+index bb39d5e..2f51c48 100644
+--- a/harness/run.py
++++ b/harness/run.py
+@@ -14,9 +14,12 @@ WHAT A RUN DOES, IN ORDER, and every step can fail it:
+    and `$NPKRT` set -- and holds `irscan.py`'s two lists to `$NPKRT`: every name in them
+    defined, and every global symbol it defines in one of them -- exit 2 otherwise;
+ 3. three BUILD STEPS (`meta/specs/BUILD.md` B-2, B-2a, B-4; @@PD-138@@): the scans' own
+-   controls -- the floor program and a syscaller from `harness/baseline/`, whose objects
+-   must differ by `npk_sys6` alone and whose call edges the scan must flag in the
+-   syscaller's `main` and nowhere in the floor's, so a blind scan reddens the run; the
++   controls -- the floor program and a syscaller from `harness/baseline/`: the floor's
++   object's undefined symbols and its IR's call edges to the runtime EXACTLY
++   `FLOOR_UNDEFINED` and `FLOOR_EDGES` below, and the syscaller's object differing from the
++   floor's by `npk_sys6` alone, with the call-edge scan, whose baseline is the floor's edges,
++   flagging the syscaller's `main` calling it and nothing else -- so a blind scan, or a floor
++   that gained or lost a symbol or a call, reddens the run; the
+    library -- every module under `src/`, each compiled as a root on its own and scanned, the
+    entry's artefacts left at `[build] output`; and REPRO -- `[build] entry` and every
+    conformance root built from two copies of the tree, each carrying its manifest, their IR
+@@ -70,6 +73,28 @@ def honour(man):
+              "honours 0 only")
+ 
+ 
++# The floor program's own scan at the pin `2e1cb4a`, held EXACTLY on every run (B-2a; cycle 0.0.3): its
++# object's undefined symbols, and its -O0 IR's call edges to the runtime, `.<digits>` normalised as
++# `irscan.edges` does. The call-edge scan's baseline is the floor's edges, so a floor that gained one would
++# pass it in every unit unseen -- a denied one too: `npk_ofd_close`, the drop glue's, is denied. A re-pin
++# that moves either list reddens the run until its adoption moves these lines.
++FLOOR_UNDEFINED = frozenset(("__morestack", "npk_chain_reset", "npk_dalloc", "npk_ofd_close", "npk_trap"))
++FLOOR_EDGES = frozenset((("npk.drop.N", "npk_dalloc"), ("npk.drop.N", "npk_ofd_close"),
++                         ("npk_failsafe", "npk_chain_reset"), ("npk_failsafe", "npk_trap")))
++
++
++def floor_off(undefined, edges):
++    """How the floor program's own scan differs from its two lists: [] when it is exactly them."""
++    off = []
++    for what, got, want in (("undefined symbols", undefined, FLOOR_UNDEFINED), ("call edges", edges, FLOOR_EDGES)):
++        name = lambda x: x if isinstance(x, str) else f"{x[0]} -> {x[1]}"
++        extra, lost = sorted(map(name, got - want)), sorted(map(name, want - got))
++        if extra or lost:
++            off.append(f"its {what} differ from its list: " + "; ".join(
++                ([", ".join(extra) + " unlisted"] if extra else []) + ([", ".join(lost) + " listed and absent"] if lost else [])))
++    return off
++
++
+ def baseline(ctx, failures):
+     """The scans' controls: floor and syscaller, both built, both run, and their difference."""
+     got = {}
+@@ -91,11 +116,15 @@ def baseline(ctx, failures):
+     diff = sorted(sys_undef ^ floor_undef)
+     flagged = irscan.findings(sys_ir, floor_edges, "syscaller")
+     ok = diff == ["npk_sys6"] and len(flagged) == 1 and "`main` calls `npk_sys6`" in flagged[0]
+-    ok = ok and not irscan.findings(floor_ir, floor_edges, "floor")
+-    out(f"{'ok  ' if ok else 'FAIL'}  build step 1, the scans' controls: the floor program has "
+-        f"{len(floor_undef)} undefined symbols and {len(floor_edges)} call edges to the floor; the "
+-        f"syscaller differs by {' '.join(diff) or 'nothing'}, and the call-edge scan flags "
+-        f"{len(flagged)} edge(s) in it")
++    off = floor_off(floor_undef, floor_edges)
++    out(f"{'ok  ' if ok and not off else 'FAIL'}  build step 1, the scans' controls: the floor program "
++        + ("-- " + "; ".join(off) if off else f"has {len(floor_undef)} undefined symbols and "
++           f"{len(floor_edges)} call edges to the floor, exactly its lists")
++        + f"; the syscaller differs by {' '.join(diff) or 'nothing'}, and the call-edge scan flags "
++          f"{len(flagged)} edge(s) in it")
++    if off:
++        failures.append("build step 1: the floor program's own scan is not its list -- a floor that gained a "
++                        "call would widen every unit's baseline unseen")
+     if not ok:
+         failures.append("build step 1: the no-syscall instruments did not see the syscaller "
+                         "exactly -- a blind scan passes everything")
+diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md
+index d699580..deb943e 100644
+--- a/meta/specs/BUILD.md
++++ b/meta/specs/BUILD.md
+@@ -107,6 +107,16 @@ program's object and a syscaller's must differ by `npk_sys6` alone, and the
+ call-edge scan must flag the syscaller's `main` and nothing in the floor, so a
+ scan gone blind reddens the run rather than passing everything (`PLAYBOOK.md`:
+ an undefined-symbol scan once could not see a syscall at all).
++*(Re-read @@DATE@@, cycle 0.0.3 — @@PD-138@@: "nothing in the floor" was checked by
++nothing. The call-edge scan's baseline is the floor program's own edges, so the
++floor scanned against them is empty by construction. The run holds the floor to its
++two lists instead, exactly: at the pin `2e1cb4a` its object's five undefined symbols
++— `__morestack`, `npk_chain_reset`, `npk_dalloc`, `npk_ofd_close` and `npk_trap` —
++and its -O0 IR's four call edges to the runtime — the drop glue's to `npk_dalloc`
++and to `npk_ofd_close`, which is denied, and the failsafe's to `npk_chain_reset` and
++to `npk_trap`. So a floor that gains a call cannot widen every unit's baseline
++unseen, and a re-pin that moves either list reddens the run until its adoption moves
++the list in `harness/run.py`.)*
+ 
+ **Rule B-3.** The optimised leg runs on every program, every time: the same
+ program re-emitted through `opt -O2` + `llc -O2` must produce the **same exit

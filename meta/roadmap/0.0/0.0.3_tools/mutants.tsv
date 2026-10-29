@@ -1,6 +1,18 @@
-# 0.0.3's mutants of the harness's second half -- each one facet of one check broken alone, by the edits of one
-# name; `mutants.py` makes each edit exactly once in a copy of the tree's HEAD and runs the harness there.
+# 0.0.3's mutants: first the three harness gaps' (step 0's parts c, d and e), then the harness's second half's -- each
+# one facet of one check broken alone, by the edits of one name; `mutants.py` makes each edit exactly once in a copy of
+# the tree's HEAD, or of its index with `--staged`, and runs the harness there.
 # TAB-separated: name, file, the text replaced, its replacement; `\n` is a newline and `\t` a tab.
+marker-unjudged-no-colon	tests/probe/probe02_pod_event.npk	// expect-exit: 32\n	// expect-exit: 32\n// expect-no-parse-error\n
+pending-masks-call-edge	tests/probe/probe01b_checked_accumulate.npk	// expect-exit: 0\n//\n// PROBE 01b	// expect-exit: 0\n// pending-until: DEF-253 undefined-value @npk.x\n//\n// PROBE 01b
+pending-masks-call-edge	tests/probe/probe01b_checked_accumulate.npk	    exit 0i32;\n	    Result<int64>:pend_r = sys(39i64);\n    if (pend_r.is_error) { exit 70i32; }\n    exit 0i32;\n
+pending-masks-call-edge	harness/baseline/PENDING.txt	# stale, and the marker and its line here go together, by the adoption that carries the fix.\n	# stale, and the marker and its line here go together, by the adoption that carries the fix.\ntests/probe/probe01b_checked_accumulate.npk\tDEF-253\tundefined-value @npk.x\ta mutant's line\n
+pending-masks-call-edge	harness/build.py	    bad = target_problems(ctx, b.ll, "the emission")\n	    if src.endswith("probe01b_checked_accumulate.npk"):\n        with open(b.ll, "a", encoding="utf-8") as fh:\n            fh.write("""\ndefine void @npk.mutant() {\n  call void @npk.x()\n  ret void\n}\n""")\n    bad = target_problems(ctx, b.ll, "the emission")\n
+floor-denied-call	harness/baseline/floor.npk	    exit 0i32;\n	    discard(mono_now());\n    exit 0i32;\n
+floor-denied-call	harness/baseline/syscaller.npk	    exit 0i32;\n	    discard(mono_now());\n    exit 0i32;\n
+floor-edge-added	harness/baseline/floor.npk	    exit 0i32;\n	    int32:a = 1i32;\n    int32:b = a + 1i32;\n    if (b == 3i32) { exit 3i32; }\n    exit 0i32;\n
+floor-edge-added	harness/baseline/floor.npk	        (MachineFault)      { exit 107i32; },\n	        (MachineFault)      { exit 107i32; },\n        (IntOverflow)       { exit 93i32; },\n
+floor-symbol-added	harness/baseline/floor.npk	    exit 0i32;\n	    flt64:x = 7.5;\n    flt64:y = x % 2.0;\n    if (y > 9.0) { exit 3i32; }\n    exit 0i32;\n
+floor-symbol-added	harness/baseline/syscaller.npk	    exit 0i32;\n	    flt64:x = 7.5;\n    flt64:y = x % 2.0;\n    if (y > 9.0) { exit 3i32; }\n    exit 0i32;\n
 refusal-code	tests/probe/refused/probe05_arena_owning.npk	// expect-error: NITPICK-TYPE-007	// expect-error: NITPICK-TYPE-008
 refusal-site	tests/probe/refused/probe08b_view_of_local_returned.npk	// expect-error-at: 13:22	// expect-error-at: 13:23
 sweep-parse-error	tests/probe/probe12_module_fixed.npk	mod:probe12_module_fixed;	mod:probe12_module_fixed

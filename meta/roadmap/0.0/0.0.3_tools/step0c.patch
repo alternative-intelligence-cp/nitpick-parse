@@ -1,0 +1,45 @@
+diff --git a/harness/expect.py b/harness/expect.py
+index 8e23986..b1b99d4 100644
+--- a/harness/expect.py
++++ b/harness/expect.py
+@@ -11,10 +11,14 @@ test whose expectations cannot be read is a FAILING test, never a silently defau
+ `harness/expect.py`, which holds the same grammar to the same reader.)
+ 
+ THE MARKERS THE COMPILER'S READER HAS AND THIS RUNNER DOES NOT JUDGE -- `argv:`,
+-`expect-note:`, `expect-note-at:`, `expect-obligation:`, `explore:`, `explore-seed:`,
+-`npkc-flags:` -- and this library's two whose stages do not exist yet -- `expect-roundtrip:`
+-(cycle 0.5) and `expect-fault:` (cycle 0.1 on) -- each make a file UNREADABLE, by name: a
+-marker a runner ignores is an expectation nobody checks.
++`expect-no-parse-error`, `expect-note:`, `expect-note-at:`, `expect-obligation:`, `explore:`,
++`explore-seed:`, `npkc-flags:` -- and this library's two whose stages do not exist yet --
++`expect-roundtrip:` (cycle 0.5) and `expect-fault:` (cycle 0.1 on) -- each make a file
++UNREADABLE, by name: a marker a runner ignores is an expectation nobody checks. The compiler's
++markers are the twelve names its reader tests with `text_starts_with` (`npkg/expect.npk`, the
++same twelve at `7e91730`, `c9baa9e` and `2e1cb4a`), four judged here and eight refused, each
++matched as that reader matches it: `expect-no-parse-error` has no colon, and a body that starts
++with it is that marker.
+ 
+ THE RUNNER'S OWN TWO (B-5b, @@PD-139@@), which `npkg` does not have:
+ 
+@@ -33,9 +37,9 @@ import re
+ 
+ MARKERS_JUDGED = ("expect-exit:", "expect-error:", "expect-error-at:", "stress:",
+                   "mem-cap-mib:", "pending-until:")
+-MARKERS_REFUSED = ("argv:", "expect-note:", "expect-note-at:", "expect-obligation:",
+-                   "explore:", "explore-seed:", "npkc-flags:", "expect-roundtrip:",
+-                   "expect-fault:")
++MARKERS_REFUSED = ("argv:", "expect-no-parse-error", "expect-note:", "expect-note-at:",
++                   "expect-obligation:", "explore:", "explore-seed:", "npkc-flags:",
++                   "expect-roundtrip:", "expect-fault:")
+ _CODE = re.compile(r"^NITPICK-[A-Z]+-[0-9]{3}$")
+ _AT = re.compile(r"^([0-9]+)(?::([0-9]+))?$")
+ _INT = re.compile(r"^-?[0-9]+$")
+@@ -75,7 +79,7 @@ def read_text(text, path):
+             continue
+         value = body[len(name):].strip()
+         if name in MARKERS_REFUSED:
+-            _bad(e, n, f"`{name}` is a marker this runner does not judge at cycle 0.0.2, "
++            _bad(e, n, f"`{name}` is a marker this runner does not judge at cycle 0.0.3, "
+                        "so the expectation would go unchecked")
+         elif name == "expect-exit:":
+             if not _INT.match(value):

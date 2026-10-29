@@ -1,0 +1,64 @@
+diff --git a/harness/stages.py b/harness/stages.py
+index c84862b..9066ae2 100644
+--- a/harness/stages.py
++++ b/harness/stages.py
+@@ -15,13 +15,15 @@ nothing fails it measures the loader, not the unit (`PLAYBOOK.md` §9).
+ A PENDING UNIT (`pending-until: DEF-<n> <observation> <argument>`, @@PD-139@@) is built like
+ any other, and its verdict is PEND only when the one failure its marker names is what EVERY
+ leg shows; it is then counted apart from the denominator, as neither a pass nor a failure.
+-It is a FAILURE when it shows anything else, and a FAILURE when it MEETS its expectation --
+-the run reddens to say the marker is stale, and its marker and its line in
+-`harness/baseline/PENDING.txt` go, by the adoption that carries the fix. And every marker
+-must have its line in that reviewed list, path, label and observation exactly, or the unit is
+-a failure: a marker is a way for a red to leave a green run, so taking a unit out of the
+-count is two edits in two files, one of them a reviewed line with a reason (`nitpick-regex`'s
+-RX-154). `run.py` checks the other direction.
++Its -O0 IR is scanned like every unit's, and a call-edge finding there fails it BEFORE that
++test: LLVM's refusal of a leg does not unmake a call `npkc` emitted, and a marker excuses one
++failure, never a second. It is a FAILURE when it shows anything else, and a FAILURE when it
++MEETS its expectation -- the run reddens to say the marker is stale, and its marker and its
++line in `harness/baseline/PENDING.txt` go, by the adoption that carries the fix. And every
++marker must have its line in that reviewed list, path, label and observation exactly, or the
++unit is a failure: a marker is a way for a red to leave a green run, so taking a unit out of
++the count is two edits in two files, one of them a reviewed line with a reason
++(`nitpick-regex`'s RX-154). `run.py` checks the other direction.
+ """
+ import os
+ import resource
+@@ -104,7 +106,7 @@ class Stage:
+                                                  "stage cannot judge")
+         stem = os.path.join(self.ctx.work, suite, os.path.splitext(os.path.basename(src))[0])
+         b = build.program(self.ctx, src, stem)
+-        exits, why = {}, None
++        exits, why, found = {}, None, []
+         if b.npkc_exit != 0:
+             why = build.npkc_failure(b)
+         else:
+@@ -123,7 +125,7 @@ class Stage:
+                     exits[leg.name] = [run_binary(leg.binary, e.mem_cap_mib)
+                                        for _ in range(e.stress)]
+         if e.pending:
+-            return self._pending(suite, rel, e, b, exits, why)
++            return self._pending(suite, rel, e, b, exits, why, found)
+         if why:
+             return self._say("FAIL", suite, rel, why)
+         shown = ", ".join(f"{k} {self._show(v)}" for k, v in exits.items())
+@@ -131,7 +133,7 @@ class Stage:
+             return self._say("PASS", suite, rel, shown)
+         return self._say("FAIL", suite, rel, f"expected exit {e.exit}; {shown}")
+ 
+-    def _pending(self, suite, rel, e, b, exits, why):
++    def _pending(self, suite, rel, e, b, exits, why, found):
+         label, observation, arg = e.pending
+         key = (rel, label, f"{observation} {arg}")
+         marker = f"`pending-until: {label} {observation} {arg}`"
+@@ -139,6 +141,9 @@ class Stage:
+             return self._say("FAIL", suite, rel, f"{marker} is NOT ON THE REVIEWED PENDING LIST "
+                                                  "(harness/baseline/PENDING.txt)")
+         self.pending_seen.add(key)
++        if found:
++            return self._say("FAIL", suite, rel, f"{marker} cannot excuse a call-edge finding -- "
++                                                 + "; ".join(found))
+         if (observation == "undefined-value" and b.npkc_exit == 0 and b.legs
+                 and all(leg.stop and leg.undefined_value == arg for leg in b.legs)):
+             return self._say("PEND", suite, rel, f"{label} -- every leg refused by LLVM naming "
