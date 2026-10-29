@@ -41,4 +41,5 @@ ordinary one here:
   `probe` suite runs the three.
 - probe 08h, [`refused/probe08h_view_reseated.npk`](refused/probe08h_view_reseated.npk) — a view
   re-seated by a callee, which read freed memory at `7e91730`: the compiler's DEF-252,
-  refused from its landing 116, `NITPICK-BORROW-002` (PA-107).
+  refused from its landing 116, `NITPICK-BORROW-002` (PA-107). Since cycle 0.0.3 the harness's
+  `refused` suite judges it by that code at its site.

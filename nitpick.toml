@@ -93,6 +93,15 @@ name  = "probe"
 stage = "program"
 path  = "tests/probe"
 
+# Cycle 0.0.3's refusals (PA-115): the probes refused on purpose, each judged
+# by `npkc` alone against exactly the codes and sites it names (`BUILD.md` B-7),
+# probe 08h among them -- the reseat a callee makes, refused from the compiler's
+# landing 116 (DEF-252).
+[[test]]
+name  = "refused"
+stage = "check"
+path  = "tests/probe/refused"
+
 # The parse sweep (cycle 0.0.3, PA-115): every `.npk` in the tree compiled as
 # a root, none with a LEX- or PARSE- code. It comes last, so a file a suite
 # judges is judged there first, by its own rule. The runner refuses a manifest
