@@ -1,0 +1,265 @@
+diff --git a/harness/README.md b/harness/README.md
+index dd25495..890a11a 100644
+--- a/harness/README.md
++++ b/harness/README.md
+@@ -28,7 +28,7 @@ prints is its verdict — `harness: GREEN -- …` or `harness: RED -- …` — a
+ | File | What |
+ |---|---|
+ | `run.py` | the driver: the manifest and the entries it can honour, the toolchain, three build steps, the suites in manifest order, the reviewed list's other direction, the summary |
+-| `manifest.py` | `nitpick.toml` in the compiler's subset, held to the compiler's schema at the pin |
++| `manifest.py` | `nitpick.toml` in the compiler's subset, held to the compiler's schema at the pin `2e1cb4a` |
+ | `toolchain.py` | `llc`, `opt`, `ld.lld` at the manifest's LLVM; its `datalayout` the one the pinned `opt` derives (`BUILD.md` B-1a) |
+ | `expect.py` | the markers a test file carries (B-5, B-5b) |
+ | `build.py` | one root to one module, both legs, the undefined-symbol scan (B-2), and `npkc`'s exit alphabet |
+@@ -37,14 +37,17 @@ prints is its verdict — `harness: GREEN -- …` or `harness: RED -- …` — a
+ | `stages.py` | the `program` stage and `compile`/`positive`: both legs, `stress`, the cap, and the pending units (B-5b); the `check` stage, a refusal judged as the set of its codes at their sites (B-7); and the `parse` sweep |
+ | `selfcheck.py` | the harness fed wrong expectations and required to fail, before any judgment (B-8, `TESTING.md` V-19, V-20) |
+ | `treecheck.py` | the tree checks, each reading its authority document (`TESTING.md` §3) |
+-| `lexical.py` | the one reading of `.npk` text the checks share: bytes, comments and strings blanked |
++| `lexical.py` | the one reading of `.npk` text that four of the six tree checks share: bytes, comments and strings blanked |
+ | `baseline/` | the floor program and the syscaller (build step 1, and the cap's control), and `PENDING.txt`, the reviewed list of pending units |
+ 
+ ## What a green run asserts
+ 
+-- the manifest names no entry this runner cannot judge, and the toolchain is the pin's;
++- the manifest names no entry this runner cannot judge, and `llc`, `opt` and `ld.lld` are the LLVM its `[toolchain]`
++  pins — of `$NPKC` and `$NPKRT` the run asserts only that each names a file, their commit being the pin the
++  workbench's board names;
+ - every live case of the self-check was red, and its pending ones were printed as pending;
+-- the two scans see a syscall — the floor and the syscaller differ by `npk_sys6` alone, and the
++- the floor program's own scan is exactly `run.py`'s two lists of it, its undefined symbols and its call edges to the
++  runtime (B-2a), and the two scans see a syscall — the floor and the syscaller differ by `npk_sys6` alone, and the
+   syscaller's `main` is flagged — on this run, at this compiler;
+ - every module under `src/` compiles as a root with no diagnostic, and none needs a symbol the
+   runtime does not define or calls a denied one;
+diff --git a/harness/baseline/floor.npk b/harness/baseline/floor.npk
+index 7c25b11..263f273 100644
+--- a/harness/baseline/floor.npk
++++ b/harness/baseline/floor.npk
+@@ -4,7 +4,7 @@
+ // It allocates nothing and calls nothing: its object's undefined symbols and its IR's call edges
+ // to the runtime are what the compiler emits into every program, so a program's edge the floor
+ // does not have was written by that program (`irscan.py`). Its `failsafe` is the six-arm floor
+-// every root owes (`NITPICK-REACH-003` at the pin) and a catch-all.
++// every root owes (`NITPICK-REACH-003` at the pin `2e1cb4a`) and a catch-all.
+ mod:floor;
+ 
+ func:main = int32(cstring[]:_~argv) {
+diff --git a/harness/expect.py b/harness/expect.py
+index 18a4139..1c257e2 100644
+--- a/harness/expect.py
++++ b/harness/expect.py
+@@ -1,7 +1,7 @@
+ #!/usr/bin/env python3
+ """A test's expectations, read from the test file -- `meta/specs/BUILD.md` B-5 and B-5b.
+ 
+-THE COMPILER'S GRAMMAR, as `npkg/expect.npk` reads it at the pin `7e91730`: a line whose
++THE COMPILER'S GRAMMAR, as `npkg/expect.npk` reads it at the pin `2e1cb4a`, the same file as at `7e91730`: a line whose
+ stripped form starts with `//` is a comment; its body, stripped, is a MARKER when it starts
+ with a marker's name -- `// see expect-exit: 94` is prose -- and the marker's value is the
+ WHOLE rest of the line, so `// expect-exit: 94 -- the OutOfBounds arm` cannot be read, and a
+diff --git a/harness/irscan.py b/harness/irscan.py
+index 93f8e60..922f60e 100644
+--- a/harness/irscan.py
++++ b/harness/irscan.py
+@@ -6,8 +6,8 @@ WHY CALL EDGES. An undefined-symbol scan reports THAT an object needs a runtime
+ never WHERE it is called from; and at an earlier compiler every syscall went through one
+ symbol the empty program already carried, so a program that made one had the same symbol set
+ as one that did not (`PLAYBOOK.md`: "the undefined-symbol scan ... CANNOT SEE A SYSCALL"). At
+-the pin `7e91730` the floor program's object has 5 undefined symbols and a syscaller's 6, the
+-difference exactly `npk_sys6` (cycle 0.0.2's §1.4) -- and `run.py` re-measures that pair on
++the pin `2e1cb4a` the floor program's object has 5 undefined symbols and a syscaller's 6, the
++difference exactly `npk_sys6` (as at `7e91730`, cycle 0.0.2's §1.4) -- and `run.py` re-measures that pair on
+ every full run, so the day a prelude starts emitting the symbol again the run says so.
+ 
+ WHAT IT SCANS. Every `(enclosing function, callee)` edge in the -O0 IR whose callee is
+@@ -18,7 +18,7 @@ symbol, is a finding that names the calling function. After `nitpick-regex`'s
+ `harness/irscan.py`, whose three measured lessons (the intrinsics, the glue's numbering, a
+ deny list rather than a permit list) this keeps.
+ 
+-THE TWO LISTS CLASS THE RUNTIME WHOLE. At the pin the runtime object defines 119 global symbols,
++THE TWO LISTS CLASS THE RUNTIME WHOLE. At the pin `2e1cb4a` the runtime object defines 119 global symbols,
+ the only runtime symbols a module's call can reach (a call to a local one does not link), and
+ each is in exactly one list here: DENIED, by the facet of PA-006 or `SAFETY.md` §2 that forbids
+ it -- the kernel, a file or descriptor, a process, a signal handler, the clock, the
+diff --git a/harness/lexical.py b/harness/lexical.py
+index 257a02a..ca47b8d 100644
+--- a/harness/lexical.py
++++ b/harness/lexical.py
+@@ -2,7 +2,8 @@
+ """The harness's one reading of `.npk` source text (PA-117): a file read as BYTES, `\\n` the only line end as in
+ the compiler's lexer, and `blank()` replacing comments and string and character literals by spaces, line
+ structure kept -- so a check reading code is not fooled by a word in a comment, and every line number it reports is
+-the file's. The tree checks (`treecheck.py`) and the parse sweep's reader use it.
++the file's. Four of the tree checks (`treecheck.py`) use `blank()`, on text `treecheck._read` reads as `read()` here
++does; the parse sweep reads no source -- it hands each file git tracks to `npkc`.
+ """
+ import re
+ 
+diff --git a/harness/manifest.py b/harness/manifest.py
+index d4d14e9..9ceb3d4 100644
+--- a/harness/manifest.py
++++ b/harness/manifest.py
+@@ -7,9 +7,9 @@ The subset is the compiler's -- tables, `[[test]]` headers, strings, integers, b
+ single-line arrays -- and a key the schema lacks is refused by name: a key nothing reads is
+ the next stale document (the compiler's D-204). After `nitpick-regex`'s `harness/manifest.py`.
+ 
+-THE SCHEMA IS THE COMPILER'S AT THE PIN: `npkg/manifest.npk`'s `schema_allows` at `7e91730`,
+-table for table and key for key, `[dependencies]` taking any key. Cycle 0.0.2's facts script
+-re-derives it from that function and compares (`0.0.2.md` §1.2).
++THE SCHEMA IS THE COMPILER'S AT THE PIN: `npkg/manifest.npk`'s `schema_allows` at `2e1cb4a`
++(the same file at `7e91730`), table for table and key for key, `[dependencies]` taking any key.
++Cycle 0.0.2's facts script re-derives it from that function and compares (`0.0.2.md` §1.2).
+ 
+ THE STAGES are the compiler's vocabulary -- the twelve `npkg/manifest.npk`'s `stage_known`
+ accepts at the pin `2e1cb4a`, `BUILD_REFERENCE.md` §7.1's eleven and `object`, which that
+diff --git a/harness/run.py b/harness/run.py
+index 4119796..29787a4 100644
+--- a/harness/run.py
++++ b/harness/run.py
+@@ -131,14 +131,16 @@ def baseline(ctx, failures):
+     flagged = irscan.findings(sys_ir, floor_edges, "syscaller")
+     ok = diff == ["npk_sys6"] and len(flagged) == 1 and "`main` calls `npk_sys6`" in flagged[0]
+     off = floor_off(floor_undef, floor_edges)
++    denied = [f"{a} -> {b}" for a, b in sorted(floor_edges) if b in irscan.DENIED]
+     out(f"{'ok  ' if ok and not off else 'FAIL'}  build step 1, the scans' controls: the floor program "
+         + ("-- " + "; ".join(off) if off else f"has {len(floor_undef)} undefined symbols and "
+-           f"{len(floor_edges)} call edges to the floor, exactly its lists")
++           f"{len(floor_edges)} call edges to the runtime, {len(denied)} to a denied symbol "
++           f"({', '.join(denied) or 'none'}), exactly its lists")
+         + f"; the syscaller differs by {' '.join(diff) or 'nothing'}, and the call-edge scan flags "
+           f"{len(flagged)} edge(s) in it")
+     if off:
+-        failures.append("build step 1: the floor program's own scan is not its list -- a floor that gained a "
+-                        "call would widen every unit's baseline unseen")
++        failures.append("build step 1: the floor program's own scan is not its list -- it gained or lost a call or a "
++                        "symbol, and a call it gained would widen every unit's baseline unseen")
+     if not ok:
+         failures.append("build step 1: the no-syscall instruments did not see the syscaller "
+                         "exactly -- a blind scan passes everything")
+diff --git a/harness/selfcheck.py b/harness/selfcheck.py
+index 701632f..6069086 100644
+--- a/harness/selfcheck.py
++++ b/harness/selfcheck.py
+@@ -1,6 +1,6 @@
+ #!/usr/bin/env python3
+ """The self-check -- the harness fed wrong expectations and required to FAIL (`meta/specs/BUILD.md` B-8,
+-`TESTING.md` §7; PA-116). It runs FIRST in every full run, and if any live case is not red the run stops
++`TESTING.md` §9; @@PD-141@@). It runs FIRST in every full run, and if any live case is not red the run stops
+ RED there: a suite that only ever agrees with what it is handed reports green while checking nothing.
+ 
+ Every case builds its fixture in `build/harness/selfcheck/<case>/` and hands it to the SAME functions the run
+@@ -11,8 +11,8 @@ function calling `@npk.x`, which nothing defines (`build.npkc`, wrapped for that
+ LLVM refuses both legs naming that value, as a defect of DEF-253's kind did at cycle 0.0.2; all after the emission
+ is the run's own code.
+ A LIVE case passes when its function reports the failure it names; a PENDING case is printed as pending, with the
+-cycle that makes it live, and is never counted as passing. The fixtures' codes are measured at the pin by cycle
+-0.0.3's plan (`0.0.3.md` §1).
++cycle that makes it live, and is never counted as passing. The fixtures' codes are measured at the pin `2e1cb4a`
++by cycle 0.0.3's plan (`0.0.3.md` §1).
+ """
+ import os
+ import shutil
+diff --git a/harness/treecheck.py b/harness/treecheck.py
+index a60f012..2903dd2 100644
+--- a/harness/treecheck.py
++++ b/harness/treecheck.py
+@@ -1,8 +1,10 @@
+ #!/usr/bin/env python3
+-"""The tree checks -- the library diffed against the documents that describe it (`meta/specs/TESTING.md` §5,
++"""The tree checks -- the library diffed against the documents that describe it (`meta/specs/TESTING.md` §3,
+ PA-117). Each reads its AUTHORITY from the specification, not from a copy of it here, and prints what it
+ examined, so a check that had nothing to read says so rather than passing in silence. Every one but
+-`check_specs_current` fails the run. Source is read as `shapes.py` reads it: bytes, comments and strings blanked.
++`check_specs_current` fails the run. Four of the six read source as `shapes.py` reads it, bytes with comments and
++strings blanked (`lexical.blank`); `check_layering` reads each module's header comment and its `use` paths, and
++`check_specs_current` the rule ids cited in comments, so both read the text unblanked.
+ 
+   check_layering           every `use` edge between `src/` layers, and every module header's `MAY IMPORT:` line,
+                            against `BUILD.md` B-17's table; a name after "never" in a cell or a header is forbidden,
+diff --git a/meta/roadmap/0.0/0.0.2.md b/meta/roadmap/0.0/0.0.2.md
+index 76affe2..f9a64d1 100644
+--- a/meta/roadmap/0.0/0.0.2.md
++++ b/meta/roadmap/0.0/0.0.2.md
+@@ -109,6 +109,9 @@ this file, and a link out of it would break at the move.
+ - **the file one step leaves for the next** — `.internal/w00/0.0.2.date`, the run's one date, which `apply.py` writes when
+   step 1 applies and steps 2 … 4 read (`tools/apply.py`). Each worker removes its other scratch by name and keeps this
+   file; step 1's entry records the date it holds; step 6 removes it, after block 6 and before its commit;
++  *(@@DATE@@, cycle 0.0.4 — steps 3 and 4 read it, and step 2 did not: `apply.py` opens the date file only for a patch
++  whose text holds the date's placeholder, and `step2.patch` holds none, as step 2's entry records. The file was kept
++  through step 2 all the same.)*
+ - **AUDIT** — 0.0.2 is not the cycle's close, 0.0.5 is: step 6 closes the subcycle `DONE`, never `READY-TO-CLOSE`.
+ 
+ | Step | Inputs — the commit it starts from, and what it reads | Outputs | Check | Stop | Expected size |
+diff --git a/meta/roadmap/0.12/README.md b/meta/roadmap/0.12/README.md
+index 59a45c4..2ba5b40 100644
+--- a/meta/roadmap/0.12/README.md
++++ b/meta/roadmap/0.12/README.md
+@@ -81,7 +81,8 @@ gets an answer with evidence behind it.
+ - [ ] the defects fixed, each with a regression test
+ - [ ] the scheduled gaps closed
+ - [ ] goldens re-recorded **only** where a change was intended, and a re-record reviewed as a diff
+-- [ ] `check_error_budget` still reporting two — a consumer's convenience is not a reason for a third identity
++- [ ] `check_error_budget` still reporting only `SAFETY.md` §3's two names, each in a layer S-6 allows (an identity is a
++  module and a name, @@PD-142@@) — a consumer's convenience is not a reason for a third name
+ 
+ ## Gate
+ 
+diff --git a/meta/roadmap/0.13/README.md b/meta/roadmap/0.13/README.md
+index 032010c..1b0f282 100644
+--- a/meta/roadmap/0.13/README.md
++++ b/meta/roadmap/0.13/README.md
+@@ -42,7 +42,8 @@ PA-083, and `specs/VERIFICATION.md` in full.
+ ### 0.13.3 — the checks proven
+ - [ ] `check_no_recursion`'s exceptions table **empty**, and the check green over the whole tree (0.0.3's P-20)
+ - [ ] `check_no_raw_accumulate` green with no exceptions
+-- [ ] `check_error_budget` reporting exactly two
++- [ ] `check_error_budget` green, every identity it reports one of `SAFETY.md` §3's two names, raised in a layer S-6
++  allows it (an identity is a module and a name, @@PD-142@@)
+ - [ ] `check_no_owning_fields` covering every value in a `Vec` or an arena
+ - [ ] every tree check in `specs/TESTING.md` §3 live, with none reporting a pending row
+ 
+diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md
+index fb56826..8685d25 100644
+--- a/meta/specs/BUILD.md
++++ b/meta/specs/BUILD.md
+@@ -203,9 +203,11 @@ expectations name.
+ header two or three times until its landing 130, so a count of reports would judge the report and not the
+ refusal; and each `expect-error-at` names a site its code was reported at.)*
+ 
+-**Rule B-8 — the harness is itself tested** (`TESTING.md` §7). A self-check
++**Rule B-8 — the harness is itself tested** (`TESTING.md` §9). A self-check
+ feeds it wrong expectations and requires it to report every one as a failure,
+ and it runs first.
++*(@@DATE@@, cycle 0.0.4 — this pointed at `TESTING.md` §7, which is fuzzing; the harness's own test is §9, V-19 and
++V-20.)*
+ 
+ **Rule B-9 — a corpus count is exact.** A `corpus` entry names how many cases
+ must pass, and both a regression and an *unexpected improvement* fail the run.
+diff --git a/meta/specs/SAFETY.md b/meta/specs/SAFETY.md
+index b475d32..d5db5bf 100644
+--- a/meta/specs/SAFETY.md
++++ b/meta/specs/SAFETY.md
+@@ -313,10 +313,18 @@ Stated once, here, and repeated in the public documentation:
+    handling it by discarding is still a decision — a malformed document that
+    silently becomes an empty one is the vulnerability this library's shape was
+    chosen to prevent.
+-2. **Carry the `failsafe` arms your imports require** — of this library's own
+-   identities at most `EParseState` and `EParseEncode`, plus the system
+-   identities its modules' machinery reaches (§3, S-6), and S-7's generated list
+-   says exactly which per module.
++2. **Carry the `failsafe` arms your imports require** — of this library's own,
++   one per module declaring `EParseState` or `EParseEncode` whose error a `fail`
++   your imports reach can raise, as `<module>.<name>` (an identity is the
++   declaring module and the name, @@PD-142@@), plus the system identities its
++   modules' machinery reaches (§3, S-6), and S-7's generated list says exactly
++   which per module.
++   *(Corrected @@DATE@@, cycle 0.0.4 — @@PD-142@@: this said "of this library's own
++   identities at most `EParseState` and `EParseEncode`", a count of names.
++   Measured at the pin `2e1cb4a`: a root importing two modules that each declare
++   and raise `EParseState` owes `pa.EParseState` and `pb.EParseState`, and one
++   importing a module that raises an `EParseState` it imports owes the declaring
++   module's, `pc.EParseState`.)*
+ 3. **Keep the input alive while the events are alive.** A `TextRef` points into
+    the caller's bytes. The borrow rules enforce it within a call; across calls
+    it is the caller's discipline and it is stated in `EVENT_MODEL.md` §5.
