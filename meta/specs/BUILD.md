@@ -290,7 +290,7 @@ on `doc`**, because a streaming consumer must be able to import a format
 without pulling in the tree. `emit` depends on `doc` (it prints a tree) and on
 `event` (it can also print a stream).
 
-*(2026-10-15, cycle 0.0.1, PA-110: until this subcycle the rule was a drawing —
+*(2026-10-21, cycle 0.0.1, PA-110: until this subcycle the rule was a drawing —
 `format ──► doc ──► event ──► …` on one line, the first arrow the one B-18 forbids —
 and the sentence "a module may not import one to its right", where every arrow in
 the drawing pointed right, at what the module imports: the reverse of what it meant,
@@ -302,9 +302,12 @@ the arrow most likely to be drawn by accident, and drawing it would make every
 streaming consumer link the arena and the tree.
 
 **Rule B-19 — a `use` cycle is legal** (D-086) and is still a decomposition
-mistake. The harness checks the layering against this diagram on every run,
+mistake. The harness checks the layering against B-17's table on every run,
 because the compiler's experience is that a layering violation arrives as a
 cycle six months after somebody moved one function.
+
+*(2026-10-28, cycle 0.0.2, PA-110: this rule named B-17's drawing, which PA-110
+replaced with the table at cycle 0.0.1.)*
 
 ---
 
@@ -329,7 +332,7 @@ these reads like an ordinary local name and is not:
 | `on` | a keyword — `Node?:on = …` does not parse |
 | `Self`, `Result`, `Optional`, `Handle`, `arena` | type keywords |
 | `trit`, `nit`, `oflags`, `prot`, `mflags`, `fmode` | type keywords |
-| `stack` | a memory qualifier — and every explicit-stack parser wants it; refused at the declaration with a misleading brace error after it (measured by cycle 0.0.0) |
+| `stack` | a memory qualifier — and every explicit-stack parser wants it; a local so named is `NITPICK-PARSE-001` at its name and refused again at each later use, a parameter so named `NITPICK-PARSE-001` once, and no brace error follows (measured at `2e1cb4a` in six shapes, cycle 0.0.2's §1.16; at `c9baa9e`, cycle 0.0.1's step 6, a local was `NITPICK-PARSE-002` at its declaration) |
 | `fixed`, `sealed`, `hidden`, `decreases`, `unbounded`, `shared_arena`, `acquire` | keywords (`PLAYBOOK.md` §10's list at the compiler's 1.5 re-pin) |
 
 The names this library therefore uses instead, fixed here so they are used

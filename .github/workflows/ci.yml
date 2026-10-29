@@ -1,11 +1,15 @@
 # nparse CI.
 #
-# EVERY INPUT IS PINNED, AND THE PIN IS ENFORCED RATHER THAN REQUESTED (cycle 0.0.1's
-# plan; the compiler's D-204: the toolchain is a build input). The compiler is a
-# COMMIT, never a branch: a library whose CI tracks another repository's `main` goes
-# red for reasons that are not its own. Bumping a pin is a deliberate commit, and the
-# commit that bumps it is the one that runs the full suite. Modelled on
-# `nitpick-regex`'s workflow.
+# EVERY INPUT BUT THE RUNNER'S IMAGE IS PINNED, AND THE PIN IS ENFORCED RATHER THAN
+# REQUESTED (cycle 0.0.1's plan; the compiler's D-204: the toolchain is a build input).
+# The compiler is a COMMIT, never a branch: a library whose CI tracks another
+# repository's `main` goes red for reasons that are not its own. Bumping a pin is a
+# deliberate commit, and the commit that bumps it is the one that runs the full suite.
+# Each action is pinned by the full commit sha that cycle 0.0.1's four runs each
+# resolved its `@v4` to, the tag kept as a comment. The runner is a LABEL,
+# `runs-on: ubuntu-24.04`, under which GitHub rolls the image: those four runs got
+# 20261018.339.1 twice and then 20261012.334.1 twice, the second version the older,
+# so the record quotes each run's image. Modelled on `nitpick-regex`'s workflow.
 #
 # WHAT A GREEN RUN PROVES SINCE CYCLE 0.0.2: the compiler's checkout is the pinned
 # commit, clean; its emission, `npkc.ll`, is the one the pin recorded, built by a run
@@ -47,16 +51,17 @@ env:
 
 jobs:
   build:
-    # Pinned, not `ubuntu-latest`: a runner image that rolls forward is an unpinned input.
+    # A release's label, not `ubuntu-latest` -- but GitHub still rolls the image under it,
+    # the one input not pinned (the header).
     runs-on: ubuntu-24.04
     timeout-minutes: 60
 
     steps:
       - name: Check out nparse
-        uses: actions/checkout@v4
+        uses: "actions/checkout@11d5960a326750d5838078e36cf38b85af677262" # v4
 
       - name: Check out the pinned compiler
-        uses: actions/checkout@v4
+        uses: "actions/checkout@11d5960a326750d5838078e36cf38b85af677262" # v4
         with:
           repository: alternative-intelligence-cp/nitpick
           ref: ${{ env.NITPICK_COMMIT }}
@@ -90,7 +95,7 @@ jobs:
       # immutable in GitHub's sense, and the tarball was piped into `tar` unchecked.)*
       - name: Cache LLVM ${{ env.LLVM_VERSION }}
         id: llvm-cache
-        uses: actions/cache@v4
+        uses: "actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830" # v4
         with:
           path: ~/llvm
           key: llvm-${{ env.LLVM_VERSION }}-linux-x64-${{ env.LLVM_TARBALL_SHA256 }}
@@ -122,12 +127,15 @@ jobs:
             echo "$t --version == $have"
           done
 
-      # Keyed on the compiler's commit and the LLVM release, so a hit is by construction
-      # the right binary. The compiler's bootstrap harness, `quickemit.py`, leaves the
-      # two artefacts this library needs -- `npkc` and `npkrt.o` -- in `.internal/quickemit/`.
+      # Keyed on the compiler's commit and the LLVM release. A hit rebuilds nothing, and of
+      # the restored build the emission step asserts only `npkc.ll`'s digest and size:
+      # `npkc` and `npkrt.o` are printed, not asserted. The fresh-build proof is each pin's
+      # first, uncached run: `c9baa9e`'s on cycle 0.0.1's step 4, `2e1cb4a`'s on cycle
+      # 0.0.1a's step 1. The compiler's bootstrap harness, `quickemit.py`, leaves the two
+      # artefacts this library needs -- `npkc` and `npkrt.o` -- in `.internal/quickemit/`.
       - name: Cache the built compiler
         id: npkc-cache
-        uses: actions/cache@v4
+        uses: "actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830" # v4
         with:
           path: .nitpick/.internal/quickemit
           key: npkc-${{ env.NITPICK_COMMIT }}-llvm-${{ env.LLVM_VERSION }}

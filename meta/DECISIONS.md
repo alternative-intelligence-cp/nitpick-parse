@@ -502,6 +502,8 @@ correspondingly larger.
 
 ### PA-054 — the specification version is pinned and recorded
 > **SUPERSEDED IN PART by PA-112 (2026-10-15)** — where the version is recorded; the rule stands.
+> *(2026-10-28, cycle 0.0.2:)* this marker landed on 2026-10-21, at cycle 0.0.1; its date is
+> the plan's drafting date.
 
 **2026-09-03.** In `meta/research/format-versions.md`, with the document's own
 version string and the date it was read. "TOML" without a version is three
@@ -935,6 +937,9 @@ literally, forbade every import it drew. `src/README.md` had the direction right
 seven placeholder modules each state their row in their header (cycle 0.0.1's plan),
 and the harness's `check_layering` (cycle 0.0.3) reads the table.
 
+*(2026-10-28, cycle 0.0.2:)* this decision landed on 2026-10-21, at cycle 0.0.1; the date that
+opens it is the plan's drafting date.
+
 *Alternatives declined:* **correct the sentence and keep the drawing** — the drawing
 would still show the forbidden arrow, and a drawing is what a reader copies; **draw it
 again** — a table is the form a check can read without a second, hand-written copy.
@@ -951,6 +956,9 @@ at the pinned commit and asserts its emission against the pin's recorded digest;
 and the documents that named 20.1.2 name 20.1.8. The compiler moved its pin at its
 landing 99 (D-349), and its runners refuse a manifest without the two target rows
 (`BUILD_REFERENCE.md` §1). The pin audit's PL-4 and the early ecosystem audit's E2-4.
+
+*(2026-10-28, cycle 0.0.2:)* this decision landed on 2026-10-21, at cycle 0.0.1; the date that
+opens it is the plan's drafting date.
 
 *Alternatives declined:* **write the version and no target rows** — the compiler's
 runners refuse that manifest by name, and the rows are what a reader of an emission
@@ -984,6 +992,9 @@ asks; `CURRENCY.md`'s research section says where every other finding is held an
 a `security` digest, stale ninety days after its date (the research skill's §6), so a later cycle reads the
 three dates before it starts, and all three are re-run at hardening (its §8). TOML's row records that v1.1.0
 is published and that the version is cycle 0.6.0's to decide. The early ecosystem audit's E2-13.
+
+*(2026-10-28, cycle 0.0.2:)* this decision landed on 2026-10-21, at cycle 0.0.1; the date that
+opens it is the plan's drafting date.
 
 *Alternatives declined:* **keep `format-versions.md` beside `CURRENCY.md`** — two
 tables of outside facts, and the workbench's checks read one; **name the file

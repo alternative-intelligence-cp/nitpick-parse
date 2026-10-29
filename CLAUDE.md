@@ -95,8 +95,12 @@ that bite hardest here:
 `limit`, `any`, `buffer`, `raw`, `move`, `pick`, `fall`, `give`, `pass`,
 `fail`, `relay`, `is`, `is_err`, `where`, `with`, `as`, `on`, `never`, `fails`,
 `mod`, `unit`, `Self`, `Result`, `Optional` — and **`stack`**, a memory qualifier,
-which cost cycle 0.0.0 a build: `Vec<Frame>:stack` is `NITPICK-PARSE-002` at the
-declaration and a claim that a brace is never closed, far from the cause.
+which cost `nitpick-regex`'s cycle 0.0.0 about an hour bisecting a brace imbalance
+that did not exist (its `meta/roadmap/done/0.0/0.0.0.md`, lines 524 and 599). At
+the pin `2e1cb4a` a local named `stack` is `NITPICK-PARSE-001` at its name, which
+names the keyword, and is refused again at each later use; a parameter so named is
+`NITPICK-PARSE-001` once. No brace error follows (six shapes: cycle 0.0.1's step 6
+at `c9baa9e`, where a local was `NITPICK-PARSE-002`, and cycle 0.0.2's §1.16).
 
 The substitutes this library uses, so they are used consistently: `hi` for an
 upper bound, `src` for a byte origin, `sink` for a byte destination, `kind` for

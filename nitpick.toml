@@ -6,7 +6,7 @@
 # runners, and no tool of this library runs either. It is written in full
 # ahead of the tool that reads it, because a manifest that appears when the
 # tooling arrives is a manifest nobody reviewed.
-# *(Corrected 2026-10-15, cycle 0.0.1 -- PA-111: this said "four tables plus the
+# *(Corrected 2026-10-21, cycle 0.0.1 -- PA-111: this said "four tables plus the
 # `[[test]]` array", and the compiler's schema has six.)*
 #
 # WHAT CANNOT READ THIS YET. `npkg build` is the compiler's own bootstrap
@@ -40,7 +40,7 @@ opt-level = 0
 # compiler pins, because a patch release may change instruction selection. These
 # lists are READ by every `llc`/`opt`/`ld.lld` invocation the harness makes; a
 # stated flag nothing consumes is the next stale document.
-# *(20.1.8 since cycle 0.0.1, 2026-10-15 -- PA-111: the compiler's D-349 moved its pin from
+# *(20.1.8 since cycle 0.0.1, 2026-10-21 -- PA-111: the compiler's D-349 moved its pin from
 # 20.1.2 at its landing 99, and compiler `7e91730` carries it.)*
 [toolchain]
 llvm          = "20.1.8"

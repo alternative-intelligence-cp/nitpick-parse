@@ -21,7 +21,7 @@ as a row of `meta/research/CURRENCY.md`, with the document's own version string 
 the date it was read, and the digest that read it beside it. "TOML" without a
 version is three incompatible languages.
 
-*(2026-10-15, cycle 0.0.1, PA-112: this rule named `meta/research/format-versions.md`,
+*(2026-10-21, cycle 0.0.1, PA-112: this rule named `meta/research/format-versions.md`,
 and the workbench's rule names `CURRENCY.md` for every outside fact; one table holds
 them all.)*
 

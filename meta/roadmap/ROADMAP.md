@@ -10,7 +10,7 @@ waiting for a consumer to ask, one gated on the compiler's tooling, four that
 are the compiler's rather than ours, and four for the project's author, none of
 which gates cycle 0.0. **No cycle in this plan is blocked on a decision.**
 
-*(2026-10-16, cycle 0.0.1 — the research gate put one question to the project's author, the
+*(2026-10-21, cycle 0.0.1 — the research gate put one question to the project's author, the
 workbench's question 36, what an input over 4 GiB answers, which is not an entry of
 `../OPEN_QUESTIONS.md`; the author answered it on 2026-10-16, (A), and cycle 0.1's decision
 records it, at 0.1.1 of [its roadmap](0.1/README.md); no cycle waits on it.)*
