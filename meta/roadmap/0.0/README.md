@@ -349,13 +349,13 @@ file states its own acceptance when it reaches the pin, and where the two differ
 - [x] cycle 0.0.1's twelve items carried out as the libraries' seat ruled them (steps 3 and 4)
 
 ### 0.0.3 — the harness, part 2
-- [ ] the three harness gaps 0.0.2's work found, closed first, each in its own commit, its mutants let through before it and refused after it: the compiler's `expect-no-parse-error` refused by name, a call-edge finding failing a pending unit, the floor held to its two lists
-- [ ] the parse sweep (`npkc` over every `.npk`, judged by the diagnostic's code family) and the refusal stage with the **exact-code** rule (B-7, a set at its sites); `accept` struck
-- [ ] 0.0.0's `refused/` judged by its codes, probe 08h among them; the runner refusing a manifest with no sweep, and knowing the compiler's twelve stages, `object` among them
-- [ ] `--only`, and output that says twice that a filtered run concludes nothing and never the green summary
-- [ ] `harness/selfcheck.py`, its sixteen live cases each **seen red** and its four pending printed as pending; it runs before any judgment, and a live case not red stops the run
-- [ ] `check_layering`, `check_error_budget` (keyed by module and name), `check_constants_named`, `check_no_raw_accumulate`, `check_no_recursion` and `check_specs_current` live, each saying what it read; `check_no_owning_fields` from 0.2
-- [ ] EC3's sentences corrected; each mutant red by the check it breaks
+- [x] the three harness gaps 0.0.2's work found, closed first, each in its own commit, its mutants let through before it and refused after it: the compiler's `expect-no-parse-error` refused by name, a call-edge finding failing a pending unit, the floor held to its two lists
+- [x] the parse sweep (`npkc` over every `.npk`, judged by the diagnostic's code family) and the refusal stage with the **exact-code** rule (B-7, a set at its sites); `accept` struck
+- [x] 0.0.0's `refused/` judged by its codes, probe 08h among them; the runner refusing a manifest with no sweep, and knowing the compiler's twelve stages, `object` among them
+- [x] `--only`, and output that says twice that a filtered run concludes nothing and never the green summary
+- [x] `harness/selfcheck.py`, its sixteen live cases each **seen red** and its four pending printed as pending; it runs before any judgment, and a live case not red stops the run
+- [x] `check_layering`, `check_error_budget` (keyed by module and name), `check_constants_named`, `check_no_raw_accumulate`, `check_no_recursion` and `check_specs_current` live, each saying what it read; `check_no_owning_fields` from 0.2
+- [x] EC3's sentences corrected; each mutant red by the check it breaks
 
 ### 0.0.4 — `src/core/`
 - [ ] `src/core/limits.npk` — the eight bounds of `specs/SAFETY.md` §7, each with its row; `VALUE_MODEL.md` D-16's ninth joins it in cycle 0.4 (PD-143)
