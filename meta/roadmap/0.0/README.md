@@ -334,15 +334,15 @@ file states its own acceptance when it reaches the pin, and where the two differ
 - [x] CI green at the new pin, its first run's install step and emission quoted
 
 ### 0.0.2 — the harness, part 1
-- [ ] `harness/run.py`, `manifest.py`, `toolchain.py`, `expect.py`, `build.py`, `irscan.py`, `elf.py`, `stages.py`, and `baseline/`
-- [ ] one program object and `npkrt.o` per link, every argv built from the manifest's flag lists, every module the manifest's target rows
-- [ ] the undefined-symbol scan and the call-edge scan as build steps, over every module under `src/` and every program, the floor and the syscaller their controls on every run
-- [ ] the `program` stage at -O0 and again under `opt -O2`, same exit required; `expect-exit`, `stress` and `mem-cap-mib` honoured
-- [ ] the `repro` check: two builds from different working directories, each copy with its manifest — and **seen to fail** without it
-- [ ] 0.0.0's `tests/probe/` green as the first real `program` suite, probe 06 and its controls among it; the reviewed list naming no unit at the pin, and every way the pending mechanism can be wrong seen red
-- [ ] CI's harness step asserting the runner's unqualified green summary
-- [ ] `irscan.py`'s two lists class the runtime's global symbols whole, and each denied facet a source construct reaches seen red
-- [ ] cycle 0.0.1's twelve items carried out as the libraries' seat ruled them (steps 3 and 4)
+- [x] `harness/run.py`, `manifest.py`, `toolchain.py`, `expect.py`, `build.py`, `irscan.py`, `elf.py`, `stages.py`, and `baseline/`
+- [x] one program object and `npkrt.o` per link, every argv built from the manifest's flag lists, every module the manifest's target rows
+- [x] the undefined-symbol scan and the call-edge scan as build steps, over every module under `src/` and every program, the floor and the syscaller their controls on every run
+- [x] the `program` stage at -O0 and again under `opt -O2`, same exit required; `expect-exit`, `stress` and `mem-cap-mib` honoured
+- [x] the `repro` check: two builds from different working directories, each copy with its manifest — and **seen to fail** without it
+- [x] 0.0.0's `tests/probe/` green as the first real `program` suite, probe 06 and its controls among it; the reviewed list naming no unit at the pin, and every way the pending mechanism can be wrong seen red
+- [x] CI's harness step asserting the runner's unqualified green summary
+- [x] `irscan.py`'s two lists class the runtime's global symbols whole, and each denied facet a source construct reaches seen red
+- [x] cycle 0.0.1's twelve items carried out as the libraries' seat ruled them (steps 3 and 4)
 
 ### 0.0.3 — the harness, part 2
 - [ ] the parse sweep (`npkc` over every `.npk`, judged by the diagnostic's code family) and the refusal stage with the **exact-code** rule (B-7, a set at its sites); `accept` struck
