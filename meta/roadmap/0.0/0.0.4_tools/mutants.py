@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""0.0.4 -- `src/core/`'s own checks and the harness's, each broken alone in a copy of the tree, and what the runner says.
+"""0.0.4 -- the harness's checks and `src/core/`'s, each broken alone in a copy of the tree, and what the runner says.
 
     python3 -B mutants.py <tree> [--staged] [<name> ...]
 
@@ -16,10 +16,12 @@ line, else its `CANNOT PROCEED` line), cut at 200 characters, or its summary whe
 time; the copies are removed at the end. Each mutant breaks ONE facet of one check, so the line names the check that
 saw it (`0.0.4.md` §4).
 
-NAMES run those mutants alone, in the table's order, and not the unchanged tree; a name the table does not hold is a
-STOP, exit 2, before anything is copied. `--staged` copies the tree's INDEX, what its next `git commit` commits
-(`git checkout-index`), in place of its `HEAD`: so a part's block runs its mutants over `HEAD`, the tree before the
-part's patch, and over the index with the patch staged, before the part is committed (`0.0.4.md` §3, step 0).
+NAMES run those mutants alone, in the table's order, and not the unchanged tree unless `unchanged` is among them,
+which runs it first (`0.0.4.md`'s blocks 4m and 4n split the table so that each fits a call); a name the table does
+not hold is a STOP, exit 2, before anything is copied. `--staged` copies the tree's INDEX, what its next `git commit`
+commits (`git checkout-index`), in place of its `HEAD`: so a part's block runs its mutants over the index with the
+patch staged, before the part is committed, and part c's nested checkout over `HEAD` too, the tree before the patch
+(`0.0.4.md` §3, step 0).
 """
 import concurrent.futures
 import os
@@ -90,13 +92,13 @@ def main(argv):
     tree, names = os.path.realpath(argv[1]), [a for a in argv[2:] if a != "--staged"]
     base = os.path.join(os.environ["A"], "mut")
     order, rows = table()
-    unknown = [n for n in names if n not in rows]
+    unknown = [n for n in names if n not in rows and n != "unchanged"]
     if unknown:
         print("STOP -- mutants.tsv holds no mutant named " + ", ".join(unknown))
         return 2
     shutil.rmtree(base, ignore_errors=True)
-    jobs = ([(n, rows[n]) for n in order if n in names] if names
-            else [("unchanged", [])] + [(n, rows[n]) for n in order])
+    jobs = (([("unchanged", [])] if "unchanged" in names else []) + [(n, rows[n]) for n in order if n in names]
+            if names else [("unchanged", [])] + [(n, rows[n]) for n in order])
     with concurrent.futures.ThreadPoolExecutor(3) as ex:
         results = list(ex.map(lambda j: one(tree, base, staged, *j), jobs))
     for line in results:

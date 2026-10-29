@@ -1,5 +1,5 @@
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index 7d1b282..5585be4 100644
+index 6f6ef6d..ef3656b 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
 @@ -1161,3 +1161,26 @@ checks written now** — their inputs do not exist, and a check over nothing is
@@ -8,7 +8,7 @@ index 7d1b282..5585be4 100644
  by a decision, which the check then reads.
 +
 +### @@PD-143@@ — `limits.npk` holds `SAFETY.md` §7's eight bounds at cycle 0.0.4, and the ninth joins them with its consumer
-+**2026-10-15, cycle 0.0.4.** `src/core/limits.npk` declares each bound of `SAFETY.md` §7's table as a `pub fixed int64`
++**@@DATE@@, cycle 0.0.4.** `src/core/limits.npk` declares each bound of `SAFETY.md` §7's table as a `pub fixed int64`
 +with its row — `NPARSE_MAX_DEPTH`, `_SCALAR`, `_KEY`, `_MEMBERS`, `_DIGITS`, `_EXPONENT`, `_ERRORS` and `_INPUT` — and
 +`check_constants_named` (cycle 0.0.3) holds the file's values to the table and every other module under `src/` to
 +naming them. A ninth bound has a specification and no row: `VALUE_MODEL.md` D-16's `NPARSE_DUP_SCAN_MAX`, the 1024
@@ -30,14 +30,14 @@ index 7d1b282..5585be4 100644
 +`fixed` binding, and block 5's sweep, whose ninth-limit subject gains the new row. Every text that says the ninth
 +waits for cycle 0.4 is rewritten with them, and what the new words move is retaken too.
 diff --git a/meta/specs/SAFETY.md b/meta/specs/SAFETY.md
-index 99ab6c2..fc34ab3 100644
+index d5db5bf..02ff9a2 100644
 --- a/meta/specs/SAFETY.md
 +++ b/meta/specs/SAFETY.md
 @@ -300,6 +300,11 @@ is a loop over attacker-controlled length without one.
  | `NPARSE_MAX_ERRORS` | 64 | faults collected in recovery mode before parsing stops | parsing stops; the collected set is returned |
  | `NPARSE_MAX_INPUT` | 2^47 | the input length the cursor's arithmetic is proven over | `EParseState` (a caller mistake, not an input) |
  
-+*(2026-10-15, cycle 0.0.4 — @@PD-143@@: `src/core/limits.npk` holds these eight, each a `pub fixed int64` with its
++*(@@DATE@@, cycle 0.0.4 — @@PD-143@@: `src/core/limits.npk` holds these eight, each a `pub fixed int64` with its
 +row, and `check_constants_named` holds the file to this table and every other module to naming them. A ninth bound,
 +`VALUE_MODEL.md` D-16's `NPARSE_DUP_SCAN_MAX`, has no row here yet: it joins the table and the file with its switch,
 +in cycle 0.4.)*
@@ -46,7 +46,7 @@ index 99ab6c2..fc34ab3 100644
  which is a property of the cursor's arithmetic proof and is not adjustable.
  
 diff --git a/nitpick.toml b/nitpick.toml
-index a97925b..5b267be 100644
+index 20bf517..bb032c0 100644
 --- a/nitpick.toml
 +++ b/nitpick.toml
 @@ -102,6 +102,13 @@ name  = "refused"
@@ -60,7 +60,7 @@ index a97925b..5b267be 100644
 +stage = "program"
 +path  = "tests/unit"
 +
- # The parse sweep (cycle 0.0.3, @@PD-140@@): every `.npk` in the tree compiled as
+ # The parse sweep (cycle 0.0.3, @@PD-140@@): every `.npk` git tracks compiled as
  # a root, none with a LEX- or PARSE- code. It comes last, so a file a suite
  # judges is judged there first, by its own rule. The runner refuses a manifest
 diff --git a/src/core/limits.npk b/src/core/limits.npk

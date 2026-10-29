@@ -1,14 +1,14 @@
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index 5585be4..949f37c 100644
+index ef3656b..d26568b 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
-@@ -1184,3 +1184,33 @@ S-135).
+@@ -1184,3 +1184,43 @@ S-135).
  Expects and no other block of 0.0.4 or 0.0.5: block 0b, whose §1.5 counts one more `exit` operand, declared name and
  `fixed` binding, and block 5's sweep, whose ninth-limit subject gains the new row. Every text that says the ninth
  waits for cycle 0.4 is rewritten with them, and what the new words move is retaken too.
 +
 +### @@PD-144@@ — the containers check their own indexes and trap the language's `OutOfBounds` on misuse; an obligation is a comment unless a decision accepts its arm; `Bytes` has no view at the pin
-+**2026-10-15, cycle 0.0.4.** Measured at the pin `7e91730`. `Vec<T: Copy>` and `Bytes` check every index and count in
++**@@DATE@@, cycle 0.0.4.** Measured at the pin `7e91730`. `Vec<T: Copy>` and `Bytes` check every index and count in
 +their own accessors — an index through a `wild` block or a `buffer`'s `.ptr` does not trap, since a bare pointer
 +carries no length — and a misuse (an index out of range, an empty pop, a use after free, a negative capacity) traps
 +the language's `OutOfBounds` through one helper per module, since `core` imports nothing (`BUILD.md` B-17) and
@@ -36,15 +36,25 @@ index 5585be4..949f37c 100644
 +
 +*Reversal, for the author:* when D-341 lands, `Bytes` may offer a frozen view by a decision; when a decision accepts
 +the contracts' arms, the comments become clauses, a marker deleted per site.
++*(Re-measured at `2e1cb4a`, 2026-10-29, in cycle 0.0.4's step cut: the compiler's landing 128, in the pin, built
++D-341 — a `buffer`'s `b[i]` is a checked place (index 9 of four bytes traps `OutOfBounds`, exit 94 at both legs), its
++`b[lo...hi]` a view frozen like any other (the buffer re-assigned while the view lives is `NITPICK-BORROW-015`), and a
++`#wild_slice` of its `.ptr` is tied to it the same way (`NITPICK-BORROW-015`) — so "a `buffer` cannot be ranged at the
++pin, and a view through `.ptr` is tied to nothing" and the declined view's read of freed memory describe `7e91730`,
++not the pin. An index through `.ptr` still does not trap (index 9 of four bytes: exit 0 at both legs), so `Bytes`
++checks its own; and the reversal's "when D-341 lands" is met, so a frozen view for `Bytes` waits on a decision alone,
++which none takes at 0.0.4. The rest stands as measured again at the pin: the live clauses' arms, the consumers' eight,
++ten and six identities, and `put_uint`, which allocates nothing — one allocation, the sink's, for a thousand
++renderings (`0.0.4.md` §1).)*
 diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md
-index c83fa1c..2ca986c 100644
+index 8685d25..c14f539 100644
 --- a/meta/specs/BUILD.md
 +++ b/meta/specs/BUILD.md
-@@ -262,6 +262,13 @@ into it and nothing converts back (`NITPICK-TYPE-007`; @@PD-132@@).
+@@ -268,6 +268,13 @@ into it and nothing converts back (`NITPICK-TYPE-007`; PA-107).
    fall back on** — see `VALUE_MODEL.md` §5 for what a `Document` does about
    large maps.
  
-+*(2026-10-15, cycle 0.0.4 — @@PD-144@@: measured at the pin `7e91730`. `Vec<T>` is `Vec<T: Copy>`, since a
++*(@@DATE@@, cycle 0.0.4 — @@PD-144@@: measured at the pin `2e1cb4a`. `Vec<T>` is `Vec<T: Copy>`, since a
 +generic by-value read needs the bound and a generic free cannot see an owning element's drop (@@PD-130@@), with a
 +fourth field, a hidden zero-length `string[0]`, which costs no byte and makes a `Vec` move-only, so a copy of its
 +header — a second handle on its block — is `NITPICK-TYPE-046`; every index and count is checked by its own
@@ -55,14 +65,14 @@ index c83fa1c..2ca986c 100644
  `arena<Node>` with `Handle<Node>`, which is what the language provides for
  graph-shaped data.
 diff --git a/meta/specs/VERIFICATION.md b/meta/specs/VERIFICATION.md
-index 7e0642d..190d33a 100644
+index 0a19b66..dc7dd04 100644
 --- a/meta/specs/VERIFICATION.md
 +++ b/meta/specs/VERIFICATION.md
 @@ -29,6 +29,17 @@ beside the code in the exact syntax it will take**, and is enforced by a
  property test. The switch is then deleting a comment marker rather than
  inventing the clause. The compiler's rungs refuse the constructs by name today,
  so a premature `ensures` is a build failure, not a silent no-op.
-+*(Superseded in part 2026-10-15, cycle 0.0.4 — @@PD-144@@ and the early ecosystem audit's EK1: at the pin `7e91730`
++*(Superseded in part @@DATE@@, cycle 0.0.4 — @@PD-144@@ and the early ecosystem audit's EK1: at the pin `2e1cb4a`
 +the constructs are LIVE — a `requires`, an `ensures` and a `limit<…>` field each compile, are checked at run time,
 +and each charges every consumer a `failsafe` arm, `RequiresViolated`, `EnsuresViolated` and `LimitViolated`,
 +measured — so "until a construct is live" no longer describes the pin, and P-1a does.)*
@@ -88,7 +98,7 @@ index 7e0642d..190d33a 100644
  | depth stack push/pop | `count < NPARSE_MAX_DEPTH`; `count > 0` on pop | contract, Z3 |
  | class table lookup | the index is a `uint8`, so `< 256` by type | free |
 diff --git a/nitpick.toml b/nitpick.toml
-index 5b267be..8f4193c 100644
+index bb032c0..7f14562 100644
 --- a/nitpick.toml
 +++ b/nitpick.toml
 @@ -102,8 +102,9 @@ name  = "refused"

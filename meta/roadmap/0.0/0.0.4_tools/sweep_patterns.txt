@@ -5,3 +5,11 @@ SmallMap's overflow | EParseState on overflow|SmallMap[^.]{0,80}EParseState
 a view of Bytes | view\(\)[^.]{0,30}borrowed|Bytes view|hands a borrowed .?uint8
 the ninth limit | DUP_SCAN|no specification defines|has no specification
 SmallMap built in cycle 0.0 | (Vec|Bytes)[^.]{0,40}SmallMap|SmallMap[^.]{0,60}\b(built|0\.0\.4|cycle 0\.0)\b|primitives[^.]{0,60}SmallMap
+the public error count | every public .?error|public error identit|count and names of public|two public error|exactly two identities|two .?error:?.? identit|two identities|two the library declares|reporting exactly two|still reporting two|identities at most eparsestate
+the sweep's files | \.npk in the tree|every \.npk under|sweep_skip
+the layering's never | arrow \(b-18\) a cell|never doc
+the raw accumulation's operators | x = x \+|or \+ applied to
+the testing sections | testing\.md §[57]\b
+the harness's reading of source | sweep.s reader|as shapes\.py reads|text the checks share
+the pin by its commit | pin 7e91730|schema at the pin(?! 2e1cb4a)|allows at 7e91730|at the pin (the|by)\b|toolchain is the pin.s
+the floor's edges | edges to the floor|floor that gained a|edges to the runtime

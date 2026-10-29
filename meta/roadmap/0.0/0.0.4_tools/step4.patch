@@ -12,16 +12,16 @@ index 5bedfed..cea15ed 100644
    event/      #   the event vocabulary, the Format trait, the depth stack
    doc/        #   the Document tree and the query API
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index 949f37c..16e5e7e 100644
+index d26568b..2099c7e 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
-@@ -1214,3 +1214,21 @@ eight) — every format's consumer owes `DivByZero` and `DivOverflow` already, t
- 
- *Reversal, for the author:* when D-341 lands, `Bytes` may offer a frozen view by a decision; when a decision accepts
- the contracts' arms, the comments become clauses, a marker deleted per site.
+@@ -1224,3 +1224,21 @@ checks its own; and the reversal's "when D-341 lands" is met, so a frozen view f
+ which none takes at 0.0.4. The rest stands as measured again at the pin: the live clauses' arms, the consumers' eight,
+ ten and six identities, and `put_uint`, which allocates nothing — one allocation, the sink's, for a thousand
+ renderings (`0.0.4.md` §1).)*
 +
 +### @@PD-145@@ — `SmallMap` waits for its first consumer
-+**2026-10-15, cycle 0.0.4.** `BUILD.md` B-12 names `SmallMap<K, V>`, a fixed-capacity ordered association list, and no
++**@@DATE@@, cycle 0.0.4.** `BUILD.md` B-12 names `SmallMap<K, V>`, a fixed-capacity ordered association list, and no
 +specification or roadmap names a use for it: the `Document` scans its own nodes for a key (`VALUE_MODEL.md` D-10) and
 +builds a `MapIndex` for a large map (D-13). Its first writing's answer to an overflow, `EParseState`, is declared by
 +`doc` and the formats (`SAFETY.md` S-6), which `core` may not import (B-17). Built now, it would choose a key
@@ -38,7 +38,7 @@ index 949f37c..16e5e7e 100644
 +`SmallMap<K: Copy, V: Copy>` over a by-value key comparison, its insert answering `false` when full; that step's suite
 +joins the gate, and the checklist and the cycle README move with it.
 diff --git a/meta/roadmap/ROADMAP.md b/meta/roadmap/ROADMAP.md
-index 898c181..262cf3f 100644
+index 97bf821..f9115d5 100644
 --- a/meta/roadmap/ROADMAP.md
 +++ b/meta/roadmap/ROADMAP.md
 @@ -112,8 +112,8 @@ specifications, and the two compiler defects its planning found at `7e91730` wer
@@ -53,14 +53,14 @@ index 898c181..262cf3f 100644
  ### 0.1 — Scan
  `src/scan/`: the total cursor, `Span`, the generated 256-byte class table, the
 diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md
-index b76e1f9..30f50a8 100644
+index a752532..5487018 100644
 --- a/meta/specs/BUILD.md
 +++ b/meta/specs/BUILD.md
-@@ -274,6 +274,10 @@ accessors, because an index through a `wild` block does not trap, and a misuse t
+@@ -280,6 +280,10 @@ accessors, because an index through a `wild` block does not trap, and a misuse t
  is a frozen view, which no decision has taken for `Bytes` — and its `take` is an owned copy, after which it is empty;
  it is freed when it leaves scope, so it has no `free`, and `bytes_capacity` reads the capacity its hidden buffer holds.)*
  
-+*(2026-10-15, cycle 0.0.4 — @@PD-145@@:
++*(@@DATE@@, cycle 0.0.4 — @@PD-145@@:
 +`SmallMap` waits for its first consumer: no specification or roadmap names one — the `Document` scans and indexes
 +its own nodes (`VALUE_MODEL.md` D-10, D-13) — and it is declared by the cycle whose specification first uses it.)*
 +

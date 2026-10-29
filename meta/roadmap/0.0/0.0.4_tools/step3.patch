@@ -1,12 +1,12 @@
 diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md
-index 2ca986c..b76e1f9 100644
+index c14f539..a752532 100644
 --- a/meta/specs/BUILD.md
 +++ b/meta/specs/BUILD.md
-@@ -269,6 +269,11 @@ header — a second handle on its block — is `NITPICK-TYPE-046`; every index a
+@@ -275,6 +275,11 @@ header — a second handle on its block — is `NITPICK-TYPE-046`; every index a
  accessors, because an index through a `wild` block does not trap, and a misuse traps the language's `OutOfBounds`;
  `vec_init(0)` gives a capacity of one, so that `cap <= 0` marks only a freed `Vec`.)*
  
-+*(2026-10-15, cycle 0.0.4 — @@PD-144@@:
++*(@@DATE@@, cycle 0.0.4 — @@PD-144@@:
 +`Bytes` has no `view` — a `buffer` could not be ranged at `7e91730`; from the compiler's landing 128 (D-341) its range
 +is a frozen view, which no decision has taken for `Bytes` — and its `take` is an owned copy, after which it is empty;
 +it is freed when it leaves scope, so it has no `free`, and `bytes_capacity` reads the capacity its hidden buffer holds.)*
