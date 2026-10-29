@@ -37,7 +37,8 @@ ordinary one here:
   `probe06b_bound_by_value.npk` and `probe06c_concrete_pointer.npk` — a
   synchronous `Self->` method called through a generic bound, accepted by `npkc`
   and refused by `llc` at `7e91730`: the compiler's DEF-253, fixed by its landing
-  118. At the pin it links and runs (PA-106).
+  118. At the pin it links and runs (PA-106). Since cycle 0.0.2 the harness's
+  `probe` suite runs the three.
 - probe 08h, [`refused/probe08h_view_reseated.npk`](refused/probe08h_view_reseated.npk) — a view
   re-seated by a callee, which read freed memory at `7e91730`: the compiler's DEF-252,
   refused from its landing 116, `NITPICK-BORROW-002` (PA-107).
