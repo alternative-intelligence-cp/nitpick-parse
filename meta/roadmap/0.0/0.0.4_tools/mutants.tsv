@@ -1,6 +1,19 @@
-# 0.0.4's mutants of `src/core/` -- each one guard or one value broken alone; `mutants.py` makes each edit exactly
-# once in a copy of the tree's HEAD and runs the harness there. TAB-separated: name, file, the text replaced, its
-# replacement; `\n` is a newline and `\t` a tab.
+# 0.0.4's mutants -- the harness's four first items' (steps 0c ... 0f: the sweep, the layering's "never", the raw
+# accumulation's operators, 0.0.3's first two gaps), each a fix undone or a tree it must not read, then `src/core/`'s,
+# each one guard or one value broken alone; `mutants.py` makes each edit exactly once in a copy of the tree's HEAD and
+# runs the harness there. TAB-separated: name, file, the text replaced, its replacement; `\n` is a newline and `\t`
+# a tab; an old text of `<checkout>` writes the file in a nested checkout of its own.
+sweep-nested-checkout	.nitpick/stray.npk	<checkout>	mod:stray;\n\nfunc:main = int32(cstring[]:_~argv) {\n    exit 0i32\n};\n
+sweep-walks-the-directory	harness/stages.py	    return sorted(x for x in r.stdout.decode("utf-8", errors="replace").split("\0") if x), None	    return sorted(os.path.relpath(os.path.join(d, f), root) for d, _, fs in os.walk(root) for f in fs if f.endswith(".npk")), None
+sweep-unreadable-passes	harness/stages.py	        return stage._say("FAIL", entry["name"], rel, f"the sweep's list cannot be read	        return stage._say("PASS", entry["name"], rel, f"the sweep's list cannot be read
+sweep-empty-passes	harness/stages.py	        return stage._say("FAIL", entry["name"], rel, "the sweep's list is empty	        return stage._say("PASS", entry["name"], rel, "the sweep's list is empty
+layering-never-allowed	harness/treecheck.py	    parts = re.split(r"\bnever\b", text, maxsplit=1)	    parts = [text]
+accumulate-mul-assign-passed	harness/treecheck.py	            star = re.search(r"(?<![-*/])\*(=?)(?![*/])", code)	            star = re.search(r"(?<![-*/])\*()(?![*/=])", code)
+accumulate-add-assign-passed	harness/treecheck.py	            m = re.search(r"\b(\w+)\s*\+=\s*([^;]+);", line)	            m = re.search(r"\b(\w+)\s*\+=\s*([^;]+);", "")
+accumulate-glob-import-flagged	harness/treecheck.py	_GLOB.sub(r"\1 \2", line.replace("->", "  "))	line.replace("->", "  ")
+accumulate-arm-flagged	harness/treecheck.py	code = _ARM.sub(lambda a: " " * len(a.group(0)), _GLOB.sub(	code = (_GLOB.sub(
+marker-read-as-prose	harness/expect.py	MARKERS_REFUSED = ("argv:", "expect-no-parse-error", 	MARKERS_REFUSED = ("argv:", 
+pending-call-edge-excused	harness/stages.py	        if found:\n            return self._say("FAIL", suite, rel, f"{marker} cannot excuse	        if found and False:\n            return self._say("FAIL", suite, rel, f"{marker} cannot excuse
 vec-at-upper	src/core/vec.npk	pub func:vec_at<T: Copy> = T(Vec<T>:v, int64:i) never fails {\n    if (v.cap <= 0i64) { drop vec_oob(v.cap); }\n    if (i < 0i64) { drop vec_oob(i); }\n    if (i >= v.count) { drop vec_oob(i); }\n	pub func:vec_at<T: Copy> = T(Vec<T>:v, int64:i) never fails {\n    if (v.cap <= 0i64) { drop vec_oob(v.cap); }\n    if (i < 0i64) { drop vec_oob(i); }\n
 vec-at-negative	src/core/vec.npk	pub func:vec_at<T: Copy> = T(Vec<T>:v, int64:i) never fails {\n    if (v.cap <= 0i64) { drop vec_oob(v.cap); }\n    if (i < 0i64) { drop vec_oob(i); }\n    if (i >= v.count) { drop vec_oob(i); }\n	pub func:vec_at<T: Copy> = T(Vec<T>:v, int64:i) never fails {\n    if (v.cap <= 0i64) { drop vec_oob(v.cap); }\n    if (i >= v.count) { drop vec_oob(i); }\n
 vec-pop-empty	src/core/vec.npk	pub func:vec_pop<T: Copy> = T(Vec<T>->:v) never fails {\n    if (v.cap <= 0i64) { drop vec_oob(v.cap); }\n    if (v.count <= 0i64) { drop vec_oob(v.count); }\n	pub func:vec_pop<T: Copy> = T(Vec<T>->:v) never fails {\n    if (v.cap <= 0i64) { drop vec_oob(v.cap); }\n

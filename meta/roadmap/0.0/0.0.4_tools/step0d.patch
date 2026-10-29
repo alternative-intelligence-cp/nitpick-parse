@@ -1,0 +1,104 @@
+diff --git a/harness/selfcheck.py b/harness/selfcheck.py
+index 47ff0f1..03e3e0d 100644
+--- a/harness/selfcheck.py
++++ b/harness/selfcheck.py
+@@ -141,6 +141,10 @@ def cases(ctx, root, floor_bin, floor_edges):
+     add("layering-core-imports-scan", tree("layering-core-imports-scan", treecheck.check_layering, {
+         "src/core/a.npk": "mod:a;\n\n// MAY IMPORT: nothing (B-17)\nuse \"../scan/b.npk\".*;\n",
+         "src/scan/b.npk": "mod:b;\n\n// MAY IMPORT: `core` (B-17)\n"}, "does not allow"))
++    add("layering-format-imports-doc", tree("layering-format-imports-doc", treecheck.check_layering, {
++        "src/format/a.npk": "mod:a;\n\n// MAY IMPORT: `event`, `diag`, `scan` and `core` — never `doc` (B-17)\n"
++                            "use \"../doc/b.npk\".*;\n",
++        "src/doc/b.npk": "mod:b;\n\n// MAY IMPORT: `event`, `diag`, `scan` and `core` (B-17)\n"}, 'after "never"'))
+     add("error-budget-private-identity", tree("error-budget-private-identity", treecheck.check_error_budget, {
+         "src/core/a.npk": "mod:a;\n\nerror:EPrivate;\n\nfunc:f = NIL() {\n    fail EPrivate;\n};\n"}, "`a.EPrivate`"))
+     add("constants-bound-literal", tree("constants-bound-literal", treecheck.check_constants_named, {
+diff --git a/harness/treecheck.py b/harness/treecheck.py
+index dbe2d6e..cb53265 100644
+--- a/harness/treecheck.py
++++ b/harness/treecheck.py
+@@ -5,7 +5,8 @@ examined, so a check that had nothing to read says so rather than passing in sil
+ `check_specs_current` fails the run. Source is read as `shapes.py` reads it: bytes, comments and strings blanked.
+ 
+   check_layering           every `use` edge between `src/` layers, and every module header's `MAY IMPORT:` line,
+-                           against `BUILD.md` B-17's table
++                           against `BUILD.md` B-17's table; a name after "never" in a cell or a header is forbidden,
++                           not allowed (B-18's `format` -> `doc`)
+   check_error_budget       the identities the tree's `fail` sites raise, keyed by (module, name), private ones
+                            included, against `SAFETY.md` §3's table and S-6's layers (the ecosystem audit's EC3)
+   check_constants_named    no integer literal under `src/` outside `src/core/limits.npk` equal to a bound of
+@@ -41,33 +42,44 @@ def _layer(root, path):
+     return rel[0] if len(rel) > 1 else "lib"
+ 
+ 
++def _cell(text):
++    """(allowed, forbidden): the backticked names of a B-17 cell or a `MAY IMPORT:` line, a name after the word
++    "never" forbidden and not allowed -- the `format` cell's "never `doc`" is B-18's arrow, not an import it allows."""
++    parts = re.split(r"\bnever\b", text, maxsplit=1)
++    return set(re.findall(r"`(\w+)`", parts[0])), set(re.findall(r"`(\w+)`", parts[1] if len(parts) > 1 else ""))
++
++
+ def check_layering(root):
+     spec = _read(os.path.join(root, "meta", "specs", "BUILD.md"))
+     sec = spec[spec.index("**Rule B-17"):spec.index("**Rule B-18")]
+     table = {}
+     for m in re.finditer(r"^\| `(\w+)` \| (.+?) \|$", sec, re.M):
+-        table[m.group(1)] = set(re.findall(r"`(\w+)`", m.group(2)))
++        table[m.group(1)] = _cell(m.group(2))
+     bad, edges, files = [], 0, _src_files(root)
+     for f in files:
+         layer, raw = _layer(root, f), _read(f)
+         if layer == "lib":
+             continue
+         head = re.search(r"^// MAY IMPORT: (.+)$", raw, re.M)
+-        want = table.get(layer)
+-        if want is None:
++        if layer not in table:
+             bad.append(f"{os.path.relpath(f, root)}: layer `{layer}` has no row in B-17's table")
+             continue
++        want, never = table[layer]
+         if head is None:
+             bad.append(f"{os.path.relpath(f, root)}: no `// MAY IMPORT:` header line")
+-        elif set(re.findall(r"`(\w+)`", head.group(1).split("(")[0])) != want:
+-            bad.append(f"{os.path.relpath(f, root)}: its header names {head.group(1).split('(')[0].strip()!r}, B-17's row {sorted(want) or 'nothing'}")
++        elif _cell(head.group(1).split("(")[0]) != (want, never):
++            bad.append(f"{os.path.relpath(f, root)}: its header names {head.group(1).split('(')[0].strip()!r}, B-17's row "
++                       f"{sorted(want) or 'nothing'}" + (f", never {sorted(never)}" if never else ""))
+         for m in re.finditer(r'\buse\s+"([^"]+)"', raw):
+             target = os.path.normpath(os.path.join(os.path.dirname(f), m.group(1)))
+             if not target.startswith(os.path.join(root, "src") + os.sep):
+                 continue
+             edges += 1
+             to = _layer(root, target)
+-            if to != layer and to not in want:
++            if to != layer and to in never:
++                bad.append(f"{os.path.relpath(f, root)}: imports `{to}` ({m.group(1)}), which B-17's row for `{layer}` "
++                           f"names after \"never\" (B-18)")
++            elif to != layer and to not in want:
+                 bad.append(f"{os.path.relpath(f, root)}: imports `{to}` ({m.group(1)}), which B-17's row for `{layer}` does not allow")
+     return f"check_layering: {len(files)} module(s), {edges} import edge(s) between src/ files, {len(table)} table row(s)", bad
+ 
+diff --git a/meta/specs/TESTING.md b/meta/specs/TESTING.md
+index f27f86a..38e380c 100644
+--- a/meta/specs/TESTING.md
++++ b/meta/specs/TESTING.md
+@@ -56,7 +56,7 @@ them found something on its first run.
+ | `check_no_owning_fields` | `Event`, `Node`, `ParseError`, `Frame` and every value stored in a `Vec` or an arena declare no owning field |
+ | `check_error_budget` | the identities the tree's `fail` sites raise, keyed by (module, name), private ones included, against `SAFETY.md` §3's table and S-6's layers — **two names, and the check is what keeps it two** |
+ | `check_failsafe_arms` | the generated per-module arm list against a program that imports each module and compiles its `failsafe` |
+-| `check_layering` | every `use` edge between `src/` layers, and every module header's `MAY IMPORT:` line, against `BUILD.md` B-17's table — the `format` ↛ `doc` arrow (B-18) a cell of it |
++| `check_layering` | every `use` edge between `src/` layers, and every module header's `MAY IMPORT:` line, against `BUILD.md` B-17's table, a name after "never" forbidden — so the `format` ↛ `doc` arrow (B-18), the `format` cell's "never `doc`", is checked |
+ | `check_constants_named` | no integer literal under `src/` outside `src/core/limits.npk` equal to a bound of `SAFETY.md` §7's table, in any spelling; and `limits.npk`'s values the table's |
+ | `check_codes_documented` | every `FaultCode` variant appears in `DIAGNOSTIC_MODEL.md` §3's table and has at least one test that produces it |
+ | `check_corpus_provenance` | every corpus directory has a `PROVENANCE.md` naming its upstream commit, and the vendored tree's hash matches what it records |
+@@ -66,6 +66,10 @@ them found something on its first run.
+ and names of public `error:` declarations"), `check_layering` (B-17's table since cycle 0.0.1), `check_constants_named`,
+ `check_no_raw_accumulate` and `check_specs_current` say what each live check reads; `check_no_owning_fields`,
+ `check_codes_documented` and `check_failsafe_arms` go live at cycle 0.2 and `check_corpus_provenance` at 0.3.)*
++*(@@DATE@@, cycle 0.0.4 — the libraries' seat's ruling of 2026-10-29 on 0.0.3's step 1: `check_layering`'s row said
++the arrow was "a cell of it" while the check read every backticked name in a cell as allowed, the `format` cell's
++"never `doc`" among them, so an import of `doc` from `format` passed; it reads a name after "never" as forbidden now,
++in the cell and in a module's `MAY IMPORT:` line, and flags an import of it.)*
+ 
+ **Rule V-3 — `check_no_raw_accumulate` and `check_no_recursion` are the two
+ that matter most**, because they enforce the two rules that keep hostile input

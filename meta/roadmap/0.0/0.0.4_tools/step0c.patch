@@ -1,0 +1,199 @@
+diff --git a/CLAUDE.md b/CLAUDE.md
+index 88aa16d..f590422 100644
+--- a/CLAUDE.md
++++ b/CLAUDE.md
+@@ -123,7 +123,7 @@ compiler's own bootstrap ladder, and `[dependencies]` resolves to nothing.
+ and prints its verdict last (`harness/README.md`). *(Until cycle 0.0.2 the probes
+ were run by hand, by `meta/roadmap/0.0/0.0.0.md` §2's command.)* Since cycle 0.0.3 it
+ runs its self-check before it judges anything, judges the refusals by their codes,
+-sweeps every `.npk` in the tree, and runs the tree checks; `--only` concludes nothing.
++sweeps every `.npk` git tracks, and runs the tree checks; `--only` concludes nothing.
+ 
+ The compiler binary is the **pinned toolchain** the board names
+ (`../BOARD.md`, W-18): `$NPKC` and `$NPKRT` are supplied to every session by the
+diff --git a/harness/README.md b/harness/README.md
+index 571f778..dd25495 100644
+--- a/harness/README.md
++++ b/harness/README.md
+@@ -55,5 +55,5 @@ prints is its verdict — `harness: GREEN -- …` or `harness: RED -- …` — a
+   under its cap after the floor program under the same cap — and exited as it expects; and every
+   pending unit showed the one failure its marker names, on every leg, and is a line of
+   `baseline/PENDING.txt`, which names no unit that is not pending;
+-- every refusal was refused with exactly its set of codes at its sites, every `.npk` in the tree compiled as a root
++- every refusal was refused with exactly its set of codes at its sites, every `.npk` git tracks compiled as a root
+   with no LEX- or PARSE- code, and every live tree check agreed with the document it reads.
+diff --git a/harness/run.py b/harness/run.py
+index 4df8c9d..4119796 100644
+--- a/harness/run.py
++++ b/harness/run.py
+@@ -80,7 +80,7 @@ def honour(man):
+                  f"{', kind `' + t['kind'] + '`' if 'kind' in t else ''}, which this runner does "
+                  "not judge at cycle 0.0.3 -- refused by name, never skipped")
+     if not any(t["stage"] == "parse" and manifest.paths_of(t) == ["."] for t in man.tests):
+-        stop("no [[test]] entry of stage `parse` over `.` -- the sweep every `.npk` in the tree gets (BUILD.md §3); "
++        stop("no [[test]] entry of stage `parse` over `.` -- the sweep every `.npk` git tracks gets (BUILD.md §3); "
+              "a run without it would be green over files nothing compiled")
+     if man.need("build", "opt-level") != 0:
+         stop("[build] opt-level is not 0 -- raising it is its own decision, and this runner "
+diff --git a/harness/selfcheck.py b/harness/selfcheck.py
+index b7d1f81..47ff0f1 100644
+--- a/harness/selfcheck.py
++++ b/harness/selfcheck.py
+@@ -5,12 +5,14 @@ RED there: a suite that only ever agrees with what it is handed reports green wh
+ 
+ Every case builds its fixture in `build/harness/selfcheck/<case>/` and hands it to the SAME functions the run
+ uses -- `stages.Stage`, `stages.check_suite`, `stages.parse_sweep`, `treecheck.*` -- never a copy of their logic.
++A sweep case's fixture is a git checkout of its own, since the sweep reads the files git tracks (cycle 0.0.4).
+ A LIVE case passes when its function reports the failure it names; a PENDING case is printed as pending, with the
+ cycle that makes it live, and is never counted as passing. The fixtures' codes are measured at the pin by cycle
+ 0.0.3's plan (`0.0.3.md` §1).
+ """
+ import os
+ import shutil
++import subprocess
+ 
+ import stages
+ import treecheck
+@@ -29,6 +31,7 @@ FLOOR = '''func:failsafe = int32(Error:e) {
+ };
+ '''
+ MAIN0 = "func:main = int32(cstring[]:_~argv) {\n    exit 0i32;\n};\n"
++NOT_PARSING = "func:main = int32(cstring[]:_~argv) {\n    exit 0i32\n};\n"
+ TWO_CODES = ("int64:COUNTER = 0i64;\n\nfunc:main = int32(cstring[]:_~argv) {\n    string:s = string_concat(\"ab\", \"c\");\n"
+              "    uint8[]:p = string_bytes(s);\n    exit 0i32;\n};\n")
+ PENDING = [("roundtrip-second-parse-differs", "cycle 0.5, which builds the roundtrip stage"),
+@@ -45,6 +48,13 @@ def _program(d, name, header, body):
+     return p
+ 
+ 
++def _checkout(d, stage_all=True):
++    """`d` made a git checkout of its own, every file in it staged unless `stage_all` is False."""
++    subprocess.run(["git", "-C", d, "init", "-q"], check=True, capture_output=True)
++    if stage_all:
++        subprocess.run(["git", "-C", d, "add", "-A"], check=True, capture_output=True)
++
++
+ class _Quiet(stages.Stage):
+     def _say(self, verdict, suite, rel, detail):
+         self.verdicts.append((verdict, suite, rel, detail))
+@@ -106,11 +116,28 @@ def cases(ctx, root, floor_bin, floor_edges):
+     add("check-site-wrong", chk("check-site-wrong", "// expect-error: NITPICK-TYPE-055\n// expect-error-at: 4:1\n",
+                                 "int64:COUNTER = 0i64;\n\n" + MAIN0, want="expected at 4:1"))
+     add("check-accepted", chk("check-accepted", "// expect-error: NITPICK-TYPE-007\n", MAIN0, want="ACCEPTED"))
+-    d = os.path.join(w, "parse-not-parsing")
+-    _program(d, "parse_not_parsing", "", "func:main = int32(cstring[]:_~argv) {\n    exit 0i32\n};\n")
+-    st = _stage(ctx, d, floor_bin, floor_edges)
+-    stages.parse_sweep(st, {"name": "selfcheck", "path": "."})
+-    add("parse-not-parsing", _red(st, "NITPICK-PARSE-"))
++    def sweep(case, body, plant, want):
++        d = os.path.join(w, case)
++        _program(d, case.replace("-", "_"), "", body)
++        plant(d)
++        st = _stage(ctx, d, floor_bin, floor_edges)
++        stages.parse_sweep(st, {"name": "selfcheck", "path": "."})
++        return _red(st, want)
++
++    def unreadable(d):
++        with open(os.path.join(d, ".git"), "w", encoding="utf-8") as fh:
++            fh.write("gitdir: nowhere\n")
++
++    def nested(d):
++        _checkout(d)
++        _program(os.path.join(d, ".nitpick"), "stray", "", NOT_PARSING)
++        _checkout(os.path.join(d, ".nitpick"))
++
++    add("parse-not-parsing", sweep("parse-not-parsing", NOT_PARSING, _checkout, "NITPICK-PARSE-"))
++    add("sweep-untracked-checkout", sweep("sweep-untracked-checkout", NOT_PARSING, nested,
++                                          "1 tracked file(s) swept; sweep_untracked_checkout.npk: NITPICK-PARSE-"))
++    add("sweep-list-unreadable", sweep("sweep-list-unreadable", MAIN0, unreadable, "the sweep's list cannot be read"))
++    add("sweep-list-empty", sweep("sweep-list-empty", MAIN0, lambda d: _checkout(d, False), "the sweep's list is empty"))
+     add("layering-core-imports-scan", tree("layering-core-imports-scan", treecheck.check_layering, {
+         "src/core/a.npk": "mod:a;\n\n// MAY IMPORT: nothing (B-17)\nuse \"../scan/b.npk\".*;\n",
+         "src/scan/b.npk": "mod:b;\n\n// MAY IMPORT: `core` (B-17)\n"}, "does not allow"))
+diff --git a/harness/stages.py b/harness/stages.py
+index 2ebd180..9985cf1 100644
+--- a/harness/stages.py
++++ b/harness/stages.py
+@@ -231,18 +231,36 @@ def check_suite(stage, entry):
+         _check_unit(stage, entry["name"], src, os.path.relpath(src, stage.root))
+ 
+ 
+-SWEEP_SKIP = {".git", "build", ".internal"}
++def tracked_npk(root):
++    """(the `.npk` files git tracks under `root`, None), or (None, why) when git cannot give that list:
++    `git ls-files '*.npk'` (the libraries' seat's ruling of 2026-10-29), so the sweep judges what is committed, and a
++    checkout nested in the work tree -- CI's compiler at `.nitpick/` -- is never read."""
++    try:
++        r = subprocess.run(["git", "-C", root, "ls-files", "-z", "--", "*.npk"], capture_output=True)
++    except OSError as e:
++        return None, f"git could not be run: {e.strerror}"
++    if r.returncode != 0:
++        return None, f"`git ls-files '*.npk'` exited {r.returncode}"
++    return sorted(x for x in r.stdout.decode("utf-8", errors="replace").split("\0") if x), None
+ 
+ 
+ def parse_sweep(stage, entry):
+-    """Every `.npk` under the entry's path, each compiled as a root by `npkc` and judged by its diagnostics' FAMILY:
+-    it parses unless a `NITPICK-LEX-` or `NITPICK-PARSE-` code is reported, or `npkc` could not proceed (exit 2 or
+-    3). A file refused for its types, its borrows or its reach parses -- `refused/` holds such files on purpose."""
++    """Every `.npk` git tracks under the entry's path (`tracked_npk`), each compiled as a root by `npkc` and judged by
++    its diagnostics' FAMILY: it parses unless a `NITPICK-LEX-` or `NITPICK-PARSE-` code is reported, or `npkc` could
++    not proceed (exit 2 or 3). A file refused for its types, its borrows or its reach parses -- `refused/` holds such
++    files on purpose. The sweep FAILS CLOSED: a list git cannot give, or one that names no file, fails it, since a
++    sweep over nothing would pass in silence."""
++    rel = entry["paths"][0] if "paths" in entry else entry["path"]
++    listed, why = tracked_npk(stage.root)
++    if why:
++        return stage._say("FAIL", entry["name"], rel, f"the sweep's list cannot be read -- {why}; the sweep judges what "
++                                                       "git tracks, and fails closed rather than read the directory")
+     files = []
+-    for rel in (entry["paths"] if "paths" in entry else [entry["path"]]):
+-        for d, dirs, fs in os.walk(os.path.join(stage.root, rel)):
+-            dirs[:] = sorted(x for x in dirs if x not in SWEEP_SKIP)
+-            files += [os.path.join(d, f) for f in sorted(fs) if f.endswith(".npk")]
++    for top in (os.path.normpath(r) for r in (entry["paths"] if "paths" in entry else [entry["path"]])):
++        files += [os.path.join(stage.root, f) for f in listed if top == "." or f.startswith(top + "/")]
++    if not files:
++        return stage._say("FAIL", entry["name"], rel, "the sweep's list is empty -- git tracks no `.npk` under "
++                                                       f"`{rel}`, and a sweep over nothing would pass in silence")
+     bad = []
+     for src in files:
+         out = os.path.join(stage.ctx.work, "sweep", os.path.relpath(src, stage.root)[:-4].replace(os.sep, "_") + ".ll")
+@@ -251,7 +269,6 @@ def parse_sweep(stage, entry):
+         fam = sorted({c for c, _, _ in codes if c.startswith(("NITPICK-LEX-", "NITPICK-PARSE-"))})
+         if rc not in (0, 1) or fam:
+             bad.append(f"{os.path.relpath(src, stage.root)}: " + (" ".join(fam) if fam else f"npkc exit {rc}"))
+-    rel = entry["paths"][0] if "paths" in entry else entry["path"]
+     stage._say("FAIL" if bad else "PASS", entry["name"], rel,
+-               (f"{len(files)} file(s) swept; " + "; ".join(bad)) if bad else
+-               f"{len(files)} file(s) swept, each compiled as a root, none with a LEX- or PARSE- code")
++               (f"{len(files)} tracked file(s) swept; " + "; ".join(bad)) if bad else
++               f"{len(files)} tracked file(s) swept, each compiled as a root, none with a LEX- or PARSE- code")
+diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md
+index c7c88bc..fb56826 100644
+--- a/meta/specs/BUILD.md
++++ b/meta/specs/BUILD.md
+@@ -155,6 +155,10 @@ runner and not a change of suite, and adds two of its own.
+ *(2026-10-29, cycle 0.0.3 — PA-115: the `parse` and `check` stages are judged by `npkc`, not by the compiler's
+ `tools/parse_check` and `tools/check`, which are `.npk` sources a run would have to build from the compiler's tree, and
+ nothing here builds the compiler; and `accept` is struck, since `tests/conformance/` is run.)*
++*(@@DATE@@, cycle 0.0.4 — @@PD-140@@'s sweep, as the libraries' seat ruled it on 2026-10-29: "every `.npk` in the
++tree" is every `.npk` git tracks, `git ls-files '*.npk'`, so the sweep judges what is committed, and a checkout nested
++in the work tree, CI's compiler at `.nitpick/`, is never swept; a list git cannot give, or one naming no file, fails the
++sweep.)*
+ 
+ **Rule B-5 — expectations live in the test file.** The marker grammar is the
+ compiler's, marker for marker, plus two of ours:
+diff --git a/nitpick.toml b/nitpick.toml
+index ceffe8e..20bf517 100644
+--- a/nitpick.toml
++++ b/nitpick.toml
+@@ -102,7 +102,7 @@ name  = "refused"
+ stage = "check"
+ path  = "tests/probe/refused"
+ 
+-# The parse sweep (cycle 0.0.3, PA-115): every `.npk` in the tree compiled as
++# The parse sweep (cycle 0.0.3, @@PD-140@@): every `.npk` git tracks compiled as
+ # a root, none with a LEX- or PARSE- code. It comes last, so a file a suite
+ # judges is judged there first, by its own rule. The runner refuses a manifest
+ # without it: a run that swept nothing would be green over files nothing compiled.

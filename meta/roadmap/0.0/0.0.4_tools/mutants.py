@@ -1,16 +1,25 @@
 #!/usr/bin/env python3
-"""0.0.4 -- `src/core/`'s own checks, each broken alone in a copy of the tree, and what the runner says.
+"""0.0.4 -- `src/core/`'s own checks and the harness's, each broken alone in a copy of the tree, and what the runner says.
 
-    python3 -B mutants.py <tree>
+    python3 -B mutants.py <tree> [--staged] [<name> ...]
 
 Every row of `mutants.tsv` beside this script, `name<TAB>file<TAB>old<TAB>new` (`\\n` a newline, `\\t` a tab in a
 text), is one edit; the rows sharing a name are one mutant. For the unchanged tree and then each mutant in the
-table's order, the tree's COMMITTED `HEAD` is copied (`git archive`) into `$A/mut/<name>/`, each edit made
-EXACTLY ONCE -- any other count is a STOP, printed, and that mutant is not run -- and `harness/run.py` is run in
-the copy with `$NPKC` and `$NPKRT` from the environment. It prints one line per mutant: `<name>: exit <n> --` and
-the run's first failing line (a `FAIL` line, else a `failed:` line, else its `CANNOT PROCEED` line), cut at 200
-characters, or its summary when nothing failed. Three run at a time; the copies are removed at the end. Each
-mutant breaks ONE facet of one check, so the line names the check that saw it (`0.0.4.md` §4).
+table's order, the tree's COMMITTED `HEAD` is copied (`git archive`) into `$A/mut/<name>/`, and the copy is made a
+git checkout of its own, every file staged (`git init`, `git add -A`), since the harness's sweep reads the files git
+tracks (`0.0.4.md` step 0c); then each edit is made EXACTLY ONCE -- any other count is a STOP, printed, and that
+mutant is not run -- and `harness/run.py` is run in the copy with `$NPKC` and `$NPKRT` from the environment. A row
+whose `old` is `<checkout>` writes `new` as a new `file`, in a directory made a git checkout of its own with the file
+staged there, which the copy's own index does not hold: a nested checkout, as CI's compiler is at `.nitpick/`. It
+prints one line per mutant: `<name>: exit <n> --` and the run's first failing line (a `FAIL` line, else a `failed:`
+line, else its `CANNOT PROCEED` line), cut at 200 characters, or its summary when nothing failed. Three run at a
+time; the copies are removed at the end. Each mutant breaks ONE facet of one check, so the line names the check that
+saw it (`0.0.4.md` §4).
+
+NAMES run those mutants alone, in the table's order, and not the unchanged tree; a name the table does not hold is a
+STOP, exit 2, before anything is copied. `--staged` copies the tree's INDEX, what its next `git commit` commits
+(`git checkout-index`), in place of its `HEAD`: so a part's block runs its mutants over `HEAD`, the tree before the
+part's patch, and over the index with the patch staged, before the part is committed (`0.0.4.md` §3, step 0).
 """
 import concurrent.futures
 import os
@@ -19,6 +28,7 @@ import subprocess
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+CHECKOUT = "<checkout>"
 
 
 def table():
@@ -36,13 +46,31 @@ def table():
     return order, rows
 
 
-def one(tree, base, name, edits):
+def _git(d, *args):
+    subprocess.run(["git", "-C", d, *args], check=True, capture_output=True)
+
+
+def one(tree, base, staged, name, edits):
     d = os.path.join(base, name)
     os.makedirs(d)
-    arc = subprocess.run(["git", "-C", tree, "archive", "HEAD"], capture_output=True, check=True).stdout
-    subprocess.run(["tar", "-x", "-C", d], input=arc, check=True)
+    if staged:
+        subprocess.run(["git", "-C", tree, "checkout-index", "--all", "--prefix=" + d + os.sep], check=True)
+    else:
+        arc = subprocess.run(["git", "-C", tree, "archive", "HEAD"], capture_output=True, check=True).stdout
+        subprocess.run(["tar", "-x", "-C", d], input=arc, check=True)
+    _git(d, "init", "-q")
+    _git(d, "add", "-A")
     for f, old, new in edits:
         p = os.path.join(d, f)
+        if old == CHECKOUT:
+            if os.path.exists(p):
+                return f"{name}: STOP -- {f} exists already"
+            os.makedirs(os.path.dirname(p), exist_ok=True)
+            with open(p, "w", encoding="utf-8") as fh:
+                fh.write(new)
+            _git(os.path.dirname(p), "init", "-q")
+            _git(os.path.dirname(p), "add", "-A")
+            continue
         s = open(p, encoding="utf-8").read()
         if s.count(old) != 1:
             return f"{name}: STOP -- the text to replace occurs {s.count(old)} times in {f}"
@@ -58,13 +86,19 @@ def one(tree, base, name, edits):
 
 
 def main(argv):
-    tree = os.path.realpath(argv[1])
+    staged = "--staged" in argv[2:]
+    tree, names = os.path.realpath(argv[1]), [a for a in argv[2:] if a != "--staged"]
     base = os.path.join(os.environ["A"], "mut")
-    shutil.rmtree(base, ignore_errors=True)
     order, rows = table()
-    jobs = [("unchanged", [])] + [(n, rows[n]) for n in order]
+    unknown = [n for n in names if n not in rows]
+    if unknown:
+        print("STOP -- mutants.tsv holds no mutant named " + ", ".join(unknown))
+        return 2
+    shutil.rmtree(base, ignore_errors=True)
+    jobs = ([(n, rows[n]) for n in order if n in names] if names
+            else [("unchanged", [])] + [(n, rows[n]) for n in order])
     with concurrent.futures.ThreadPoolExecutor(3) as ex:
-        results = list(ex.map(lambda j: one(tree, base, *j), jobs))
+        results = list(ex.map(lambda j: one(tree, base, staged, *j), jobs))
     for line in results:
         print(line)
     shutil.rmtree(base, ignore_errors=True)

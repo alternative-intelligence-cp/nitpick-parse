@@ -1,0 +1,92 @@
+diff --git a/harness/selfcheck.py b/harness/selfcheck.py
+index 03e3e0d..c8b85a9 100644
+--- a/harness/selfcheck.py
++++ b/harness/selfcheck.py
+@@ -151,6 +151,15 @@ def cases(ctx, root, floor_bin, floor_edges):
+         "src/scan/a.npk": "mod:a;\n\nfunc:f = int64() never fails {\n    pass 4096i64;\n};\n"}, "the literal 4096"))
+     add("raw-accumulate", tree("raw-accumulate", treecheck.check_no_raw_accumulate, {
+         "src/scan/a.npk": "mod:a;\n\nfunc:f = int64(int64:acc, int64:d) never fails {\n    pass acc * 10i64 + d;\n};\n"}, "a `*`"))
++    add("raw-accumulate-mul-assign", tree("raw-accumulate-mul-assign", treecheck.check_no_raw_accumulate, {
++        "src/scan/a.npk": "mod:a;\n\nfunc:f = int64(int64:acc, int64:d) never fails {\n    int64:x = acc;\n    x *= d;\n    pass x;\n};\n"}, "a `*=`"))
++    add("raw-accumulate-add-assign", tree("raw-accumulate-add-assign", treecheck.check_no_raw_accumulate, {
++        "src/format/a.npk": "mod:a;\n\nfunc:f = int64(int64:acc, int64:d) never fails {\n    int64:x = acc;\n    x += d;\n    pass x;\n};\n"}, "`x += ...`"))
++    add("raw-accumulate-glob-import-passed", tree("raw-accumulate-glob-import-passed", treecheck.check_no_raw_accumulate, {
++        "src/scan/a.npk": "mod:a;\n\nuse \"../core/b.npk\".*;\n\nfunc:f = int64(int64:acc, int64:d) never fails {\n    pass acc * d;\n};\n"}, "src/scan/a.npk:6: a `*`"))
++    add("raw-accumulate-arm-passed", tree("raw-accumulate-arm-passed", treecheck.check_no_raw_accumulate, {
++        "src/scan/a.npk": "mod:a;\n\nfunc:f = int64(int64:acc, int64:d) never fails {\n    pick (d) {\n        (0)    { pass 0i64; },\n        (*)    { pass acc; }\n"
++                          "    }\n    pass acc * d;\n};\n"}, "src/scan/a.npk:8: a `*`"))
+     add("recursion-self-call", tree("recursion-self-call", treecheck.check_no_recursion, {
+         "src/scan/a.npk": "mod:a;\n\nfunc:f = int64(int64:n) {\n    int64:m = relay f(n);\n    pass m;\n};\n"}, "a call cycle: f -> f"))
+     marker = "// expect-exit: 0\n// pending-until: DEF-1 undefined-value @x\n"
+diff --git a/harness/treecheck.py b/harness/treecheck.py
+index cb53265..a60f012 100644
+--- a/harness/treecheck.py
++++ b/harness/treecheck.py
+@@ -11,8 +11,9 @@ examined, so a check that had nothing to read says so rather than passing in sil
+                            included, against `SAFETY.md` §3's table and S-6's layers (the ecosystem audit's EC3)
+   check_constants_named    no integer literal under `src/` outside `src/core/limits.npk` equal to a bound of
+                            `SAFETY.md` §7's table, in any spelling; and limits.npk's values the table's
+-  check_no_raw_accumulate  no `*`, and no `x = x + <a non-literal>`, under `src/scan/` and `src/format/` outside
+-                           `arith.npk` (PA-012)
++  check_no_raw_accumulate  no `*` or `*=`, and no `x = x + <a non-literal>` or `x += <a non-literal>`, under
++                           `src/scan/` and `src/format/` outside `arith.npk` (PA-012); a glob import's `.*` and a
++                           `pick`'s `(*)` arm are no multiplication
+   check_no_recursion       no cycle in the call graph of the functions under `src/` (PA-022); the exceptions
+                            table is empty and stays empty at 1.0
+   check_specs_current      REPORTS, never fails: a rule id a `src/` or `harness/` comment cites that no
+@@ -166,6 +167,11 @@ def check_constants_named(root):
+             f"literal(s) outside limits.npk read; src/core/limits.npk {have}"), bad
+ 
+ 
++_GLOB = re.compile(r'(\buse\s+"[^"\n]*"\s*\.\s*)\*(\s*;)')    # a glob import, `use "x.npk".*;`
++_ARM = re.compile(r"\(\s*\*\s*\)")                             # a `pick`'s catch-all arm, `(*)`
++_LITERAL = re.compile(r"\s*\d+[iu]\d+\s*")
++
++
+ def check_no_raw_accumulate(root):
+     bad, files, read = [], _src_files(root), 0
+     for f in files:
+@@ -177,11 +183,16 @@ def check_no_raw_accumulate(root):
+         read += 1
+         t = _blank(_read(f))
+         for n, line in enumerate(t.split("\n"), 1):
+-            if re.search(r"(?<![-*/])\*(?![*/=])", line.replace("->", "  ")) and not re.match(r"\s*(//|/\*)", line):
+-                bad.append(f"{rel}:{n}: a `*` outside arith.npk -- an accumulation is range-checked first (PA-012)")
++            code = _ARM.sub(lambda a: " " * len(a.group(0)), _GLOB.sub(r"\1 \2", line.replace("->", "  ")))
++            star = re.search(r"(?<![-*/])\*(=?)(?![*/])", code)
++            if star and not re.match(r"\s*(//|/\*)", line):
++                bad.append(f"{rel}:{n}: a `*{star.group(1)}` outside arith.npk -- an accumulation is range-checked first (PA-012)")
+             m = re.search(r"\b(\w+)\s*=\s*\1\s*\+\s*([^;]+);", line)
+-            if m and not re.fullmatch(r"\s*\d+[iu]\d+\s*", m.group(2)):
++            if m and not _LITERAL.fullmatch(m.group(2)):
+                 bad.append(f"{rel}:{n}: `{m.group(1)} = {m.group(1)} + ...` outside arith.npk (PA-012)")
++            m = re.search(r"\b(\w+)\s*\+=\s*([^;]+);", line)
++            if m and not _LITERAL.fullmatch(m.group(2)):
++                bad.append(f"{rel}:{n}: `{m.group(1)} += ...` outside arith.npk (PA-012)")
+     return f"check_no_raw_accumulate: {read} module(s) under src/scan/ and src/format/ outside arith.npk", bad
+ 
+ 
+diff --git a/meta/specs/TESTING.md b/meta/specs/TESTING.md
+index 38e380c..cf72261 100644
+--- a/meta/specs/TESTING.md
++++ b/meta/specs/TESTING.md
+@@ -51,7 +51,7 @@ them found something on its first run.
+ 
+ | Check | Diffs |
+ |---|---|
+-| `check_no_raw_accumulate` | `src/scan/` and `src/format/` outside `arith.npk` for any `*`, and any `x = x + …` whose added term is not a literal — **the no-trap rule, enforced** (`SCAN_MODEL.md` C-15) |
++| `check_no_raw_accumulate` | `src/scan/` and `src/format/` outside `arith.npk` for any `*` or `*=`, and any `x = x + …` or `x += …` whose added term is not a literal — a glob import's `.*` and a `pick`'s `(*)` arm are no multiplication — **the no-trap rule, enforced** (`SCAN_MODEL.md` C-15) |
+ | `check_no_recursion` | every function in `src/` against a call-graph cycle — **the depth rule, enforced** (`SAFETY.md` §5). A cycle is a finding, and the exceptions table must name a reason |
+ | `check_no_owning_fields` | `Event`, `Node`, `ParseError`, `Frame` and every value stored in a `Vec` or an arena declare no owning field |
+ | `check_error_budget` | the identities the tree's `fail` sites raise, keyed by (module, name), private ones included, against `SAFETY.md` §3's table and S-6's layers — **two names, and the check is what keeps it two** |
+@@ -70,6 +70,10 @@ and names of public `error:` declarations"), `check_layering` (B-17's table sinc
+ the arrow was "a cell of it" while the check read every backticked name in a cell as allowed, the `format` cell's
+ "never `doc`" among them, so an import of `doc` from `format` passed; it reads a name after "never" as forbidden now,
+ in the cell and in a module's `MAY IMPORT:` line, and flags an import of it.)*
++*(@@DATE@@, cycle 0.0.4 — the same ruling: `check_no_raw_accumulate`'s row named "any `*`" and "any `x = x + …`", and
++the check passed `*=` and `+=`, which the pin compiles to the plain `*` and `+` (`0.0.4.md` §1.8), and flagged a glob
++import's `.*` and a `(*)` arm; it flags the two compound forms as it flags the plain ones now, and passes the other
++two.)*
+ 
+ **Rule V-3 — `check_no_raw_accumulate` and `check_no_recursion` are the two
+ that matter most**, because they enforce the two rules that keep hostile input

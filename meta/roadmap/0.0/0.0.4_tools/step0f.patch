@@ -1,0 +1,113 @@
+diff --git a/harness/selfcheck.py b/harness/selfcheck.py
+index c8b85a9..701632f 100644
+--- a/harness/selfcheck.py
++++ b/harness/selfcheck.py
+@@ -6,6 +6,10 @@ RED there: a suite that only ever agrees with what it is handed reports green wh
+ Every case builds its fixture in `build/harness/selfcheck/<case>/` and hands it to the SAME functions the run
+ uses -- `stages.Stage`, `stages.check_suite`, `stages.parse_sweep`, `treecheck.*` -- never a copy of their logic.
+ A sweep case's fixture is a git checkout of its own, since the sweep reads the files git tracks (cycle 0.0.4).
++One case stands in for a compiler defect: `pending-masks-call-edge`'s emission gains, after `npkc` writes it, a
++function calling `@npk.x`, which nothing defines (`build.npkc`, wrapped for that case alone and restored after), so
++LLVM refuses both legs naming that value, as a defect of DEF-253's kind did at cycle 0.0.2; all after the emission
++is the run's own code.
+ A LIVE case passes when its function reports the failure it names; a PENDING case is printed as pending, with the
+ cycle that makes it live, and is never counted as passing. The fixtures' codes are measured at the pin by cycle
+ 0.0.3's plan (`0.0.3.md` §1).
+@@ -14,6 +18,7 @@ import os
+ import shutil
+ import subprocess
+ 
++import build
+ import stages
+ import treecheck
+ 
+@@ -32,6 +37,8 @@ FLOOR = '''func:failsafe = int32(Error:e) {
+ '''
+ MAIN0 = "func:main = int32(cstring[]:_~argv) {\n    exit 0i32;\n};\n"
+ NOT_PARSING = "func:main = int32(cstring[]:_~argv) {\n    exit 0i32\n};\n"
++SYSCALL = ("func:main = int32(cstring[]:_~argv) {\n    Result<int64>:r = sys(39i64);\n    if (r.is_error) { exit 70i32; }\n"
++           "    exit 0i32;\n};\n")
+ TWO_CODES = ("int64:COUNTER = 0i64;\n\nfunc:main = int32(cstring[]:_~argv) {\n    string:s = string_concat(\"ab\", \"c\");\n"
+              "    uint8[]:p = string_bytes(s);\n    exit 0i32;\n};\n")
+ PENDING = [("roundtrip-second-parse-differs", "cycle 0.5, which builds the roundtrip stage"),
+@@ -48,6 +55,17 @@ def _program(d, name, header, body):
+     return p
+ 
+ 
++def _defect(real, src):
++    """`real` (`build.npkc`), and for `src` alone the emission gains a call to `@npk.x`, defined nowhere."""
++    def npkc(ctx, root, out_ll):
++        got = real(ctx, root, out_ll)
++        if got[0] == 0 and root == src:
++            with open(out_ll, "a", encoding="utf-8") as fh:
++                fh.write("\ndefine void @npk.mutant() {\n  call void @npk.x()\n  ret void\n}\n")
++        return got
++    return npkc
++
++
+ def _checkout(d, stage_all=True):
+     """`d` made a git checkout of its own, every file in it staged unless `stage_all` is False."""
+     subprocess.run(["git", "-C", d, "init", "-q"], check=True, capture_output=True)
+@@ -87,12 +105,18 @@ def cases(ctx, root, floor_bin, floor_edges):
+     shutil.rmtree(w, ignore_errors=True)
+     hdr = "// MAY IMPORT: nothing\n"
+ 
+-    def prog(case, header, body, pending=None, want="expected exit"):
++    def prog(case, header, body, pending=None, want="expected exit", defect=False):
+         d = os.path.join(w, case)
+         p = _program(d, case.replace("-", "_"), header, body)
+         st = _stage(ctx, d, floor_bin, floor_edges, pending)
+-        st._unit("selfcheck", p, os.path.relpath(p, d))
+-        return _red(st, want)
++        real = build.npkc
++        build.npkc = _defect(real, p) if defect else real
++        try:
++            st._unit("selfcheck", p, os.path.relpath(p, d))
++        finally:
++            build.npkc = real
++        red, line = _red(st, want)
++        return red, line.replace(d + os.sep, "")
+ 
+     def chk(case, header, body, pending=None, want=""):
+         d = os.path.join(w, case)
+@@ -109,6 +133,8 @@ def cases(ctx, root, floor_bin, floor_edges):
+     out = []
+     add = lambda name, r: out.append((name, r[0], r[1]))
+     add("program-exit-off-by-one", prog("program-exit-off-by-one", "// expect-exit: 1\n", MAIN0))
++    add("marker-unjudged-no-colon", prog("marker-unjudged-no-colon", "// expect-exit: 0\n// expect-no-parse-error\n", MAIN0,
++                                         want="`expect-no-parse-error` is a marker this runner does not judge"))
+     add("check-code-not-reported", chk("check-code-not-reported", "// expect-error: NITPICK-TYPE-007\n",
+                                        "int64:COUNTER = 0i64;\n\n" + MAIN0, want="expected and not reported: NITPICK-TYPE-007"))
+     add("check-code-unasserted", chk("check-code-unasserted", "// expect-error: NITPICK-TYPE-055\n", TWO_CODES,
+@@ -169,6 +195,9 @@ def cases(ctx, root, floor_bin, floor_edges):
+     other = {("pending_other_failure.npk", "DEF-1", "undefined-value @x"): "a self-check case"}
+     add("pending-other-failure", prog("pending-other-failure", marker.replace("expect-exit: 0", "expect-exit: 3"),
+                                       MAIN0, other, want="PENDING ON A DIFFERENT FAILURE"))
++    masks = {("pending_masks_call_edge.npk", "DEF-1", "undefined-value @npk.x"): "a self-check case"}
++    add("pending-masks-call-edge", prog("pending-masks-call-edge", "// expect-exit: 0\n// pending-until: DEF-1 undefined-value @npk.x\n",
++                                        SYSCALL, masks, want="cannot excuse a call-edge finding", defect=True))
+     acc = {("check_pending_stale.npk", "DEF-1", "accepted"): "a self-check case"}
+     add("check-pending-stale", chk("check-pending-stale", "// expect-error: NITPICK-TYPE-055\n// pending-until: DEF-1 accepted\n",
+                                    "int64:COUNTER = 0i64;\n\n" + MAIN0, acc, want="STALE"))
+diff --git a/meta/roadmap/0.0/0.0.3.md b/meta/roadmap/0.0/0.0.3.md
+index 62888d2..ff48b54 100644
+--- a/meta/roadmap/0.0/0.0.3.md
++++ b/meta/roadmap/0.0/0.0.3.md
+@@ -861,6 +861,17 @@ is GREEN. The self-check's sixteen live cases are the permanent half of this tab
+ five are the gaps'**, each also run in its part's block over the tree before the part's patch, where the gap lets it
+ through — the last column, from blocks 0c, 0d and 0e.
+ 
++*(@@DATE@@, cycle 0.0.4 — "the permanent half of this table" holds of nine rows, not sixteen. A row's permanent half
++is a live case that runs the check its third column names, and seven rows had none when this cycle closed:
++`marker-unjudged-no-colon` and `pending-masks-call-edge` (the reader's refusal by the marker's name; the pending unit's
++call-edge finding before its PEND test), `floor-denied-call`, `floor-edge-added` and `floor-symbol-added` (build step
++1's two lists, which no case feeds), `sweep-entry-dropped` (`run.honour`) and `selfcheck-blind` (the self-check
++itself). Three of the nine have a case that runs their check but not the facet the row breaks: `sweep-parse-error` (no
++case has the `program` stage meet a refusal), `pending-refusal-unlisted` (the `check` stage's marker off the list) and
++`layering-header` (a module's header against B-17's row). Cycle 0.0.4's step 0f gives the first two rows a live case
++each, of the same names (`0.0.4.md` §4); the other five have none. The libraries' seat's ruling of 2026-10-29 named
++four of the seven; the floor's three were found when 0.0.4's plan re-read this table.)*
++
+ | Mutant | What it breaks | The check that sees it | Before its part's patch |
+ |---|---|---|---|
+ | `marker-unjudged-no-colon` | probe 02 carries `// expect-no-parse-error`, the compiler's marker with no colon | the reader, by the marker's name (step 0c) | GREEN, 18 of 18 units passed: the marker read as prose |
