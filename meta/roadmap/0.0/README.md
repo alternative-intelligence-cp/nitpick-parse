@@ -17,7 +17,10 @@ the three by their sha256. **Its adoption of the libraries' first re-pin** (2026
 before any subcycle started, by the landing table below, row by row. **The second re-pin**, to compiler `2e1cb4a` at
 landing 140, came after 0.0.0 and 0.0.1 had run at `c9baa9e`: its adoption is the lettered subcycle
 [0.0.1a](0.0.1a.md) (the workbench's rule W-31), planned on 2026-10-23 (T12) with 0.0.2 … 0.0.5 re-derived at the new
-pin, by the table's rows 119 … 140, each measured.
+pin, by the table's rows 119 … 140, each measured. **0.0.3's amendments and step cut** (2026-10-29, T14) put the three
+harness gaps 0.0.2's work found first in it, each its own commit with a mutant the fixed harness refuses, as the
+libraries' seat ruled at its review of 0.0.2; its step 1 takes `object` among the manifest's stages and lands PD-140's
+text as the author accepted it, a dated note of its re-measurement beneath it; and the cut takes no decision.
 
 | File | At `2e1cb4a` |
 |---|---|
@@ -25,7 +28,7 @@ pin, by the table's rows 119 … 140, each measured.
 | [0.0.1](0.0.1.md) | **done at `c9baa9e`** — its record; its CI moves to `2e1cb4a` by 0.0.1a's step 1 |
 | [0.0.1a](0.0.1a.md) | **yes** — the adoption: two patches over 0.0.1's record, the old-pin leg and the sweep, blocks with filled Expects; cut into fresh-worker steps, each pushed and its CI run read |
 | [0.0.2](0.0.2.md) | **yes** — four patches over 0.0.1a's record, the fourth carrying out ten of cycle 0.0.1's twelve items as ruled; blocks with filled Expects, the mutants' table; cut into fresh-worker steps, each pushed and its CI run read |
-| [0.0.3](0.0.3.md) | **yes** — three patches over 0.0.2's record, blocks with filled Expects, the mutants' table; CI's run is its worker's |
+| [0.0.3](0.0.3.md) | **yes** — six patches over 0.0.2's record, the first three the libraries' seat's three harness gaps, each with its mutants; blocks with filled Expects, the mutants' table; cut into fresh-worker steps, each pushed and its CI run read |
 | [0.0.4](0.0.4.md) | **yes** — four patches over 0.0.3's record, blocks with filled Expects, the mutants' table; CI's run is its worker's |
 | [0.0.5](0.0.5.md) | **yes** — two patches over 0.0.4's record, blocks with filled Expects, the archive its last block; its execution, the close, is the libraries' seat's |
 
@@ -79,6 +82,7 @@ author.**
 | PD-145 | 0.0.4 | `SmallMap` waits for its first consumer |
 | PD-146 … PD-148 | — | unused: 0.0.5 proposes none |
 | — | 0.0.1a | none: the adoption of `2e1cb4a` takes no decision, and PD-191 … PD-200, its planning dispatch's block, are unused |
+| — | 0.0.3 | none for its amendments and step cut: each of the libraries' seat's four rulings carries out a rule already accepted, and PD-191 … PD-200, the cut's dispatch's block, are unused |
 
 ## The pin, and what each later landing would move
 
@@ -345,8 +349,9 @@ file states its own acceptance when it reaches the pin, and where the two differ
 - [x] cycle 0.0.1's twelve items carried out as the libraries' seat ruled them (steps 3 and 4)
 
 ### 0.0.3 — the harness, part 2
+- [ ] the three harness gaps 0.0.2's work found, closed first, each in its own commit, its mutants let through before it and refused after it: the compiler's `expect-no-parse-error` refused by name, a call-edge finding failing a pending unit, the floor held to its two lists
 - [ ] the parse sweep (`npkc` over every `.npk`, judged by the diagnostic's code family) and the refusal stage with the **exact-code** rule (B-7, a set at its sites); `accept` struck
-- [ ] 0.0.0's `refused/` judged by its codes, probe 08h among them; the runner refusing a manifest with no sweep
+- [ ] 0.0.0's `refused/` judged by its codes, probe 08h among them; the runner refusing a manifest with no sweep, and knowing the compiler's twelve stages, `object` among them
 - [ ] `--only`, and output that says twice that a filtered run concludes nothing and never the green summary
 - [ ] `harness/selfcheck.py`, its sixteen live cases each **seen red** and its four pending printed as pending; it runs before any judgment, and a live case not red stops the run
 - [ ] `check_layering`, `check_error_budget` (keyed by module and name), `check_constants_named`, `check_no_raw_accumulate`, `check_no_recursion` and `check_specs_current` live, each saying what it read; `check_no_owning_fields` from 0.2

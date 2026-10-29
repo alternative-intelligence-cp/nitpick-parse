@@ -61,14 +61,14 @@ index 787ca4a..5bedfed 100644
  **Parsing a number cannot stop your program.** Plain integer overflow *traps*
  in Nitpick (D-210), so the ordinary `acc = acc * 10 + d` accumulator crashes the
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index af5d87b..002dddc 100644
+index a5db02a..7d1b282 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
 @@ -149,6 +149,9 @@ cycle 0.12's application; semantic versioning thereafter.
  
  - **adding a public `error:` identity** — REACH-002 makes it a new mandatory
    `failsafe` arm in every consumer, a compiler-enforced source break;
-+  *(2026-10-15, cycle 0.0.3 — @@PD-142@@: measured at the pin, the arm is owed for every identity a reachable
++  *(@@DATE@@, cycle 0.0.3 — @@PD-142@@: measured at the pin, the arm is owed for every identity a reachable
 +  `fail` raises, a PRIVATE one included, named by its module — so this reads "adding an identity a reachable `fail`
 +  raises".)*
  - **adding an `EventKind`, a `ScalarKind`, a `NodeKind` or a `FaultCode`
@@ -161,7 +161,7 @@ index a8c1155..c7bb139 100644
 +error identity — **no input can produce one of the two error names this library
  declares**.
 diff --git a/meta/specs/SAFETY.md b/meta/specs/SAFETY.md
-index 477ddb3..a631eed 100644
+index 477ddb3..99ab6c2 100644
 --- a/meta/specs/SAFETY.md
 +++ b/meta/specs/SAFETY.md
 @@ -15,7 +15,7 @@ costs a library that reads bytes somebody else controls.
@@ -179,7 +179,7 @@ index 477ddb3..a631eed 100644
  
 -`nparse` declares exactly two public error identities:
 +`nparse` declares exactly two error names, each raised only in the layers S-6 lists:
-+*(Corrected 2026-10-15, cycle 0.0.3 — @@PD-142@@, the ecosystem audit's EC3: this said "exactly two public error
++*(Corrected @@DATE@@, cycle 0.0.3 — @@PD-142@@, the ecosystem audit's EC3: this said "exactly two public error
 +identities". An identity is a module and a name — measured at the pin, a root importing a module whose reachable
 +`fail` raises a PRIVATE error owes it as `<module>.<name>`, and a public error never raised costs nothing — so the two
 +are names, and `check_error_budget` holds the identities the tree raises to this table and S-6.)*

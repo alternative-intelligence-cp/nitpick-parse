@@ -7,3 +7,7 @@ the layering's diagram | §6.s diagram|against .?BUILD\.md.? §6
 probe 08h's old header | npkc: 0|run: 170 at
 the specs check's old reach | cited symbols no longer resolve
 the self-check's eight | the eight cases|five live and three pending|eight cases
+the compiler's markers the runner refuses | npkc-flags|markers? the compiler.s reader (has|tests)|marker of the compiler.s grammar
+the pending verdict | PEND only when|any other failure fails|shows anything else|one failure (its marker names|excused|the marker excuses)|cannot excuse a call-edge
+the floor's own scan | nothing in the floor|nowhere in the floor|floor.{0,40}scanned against|baseline is the floor
+the compiler's stages | §7\.1|stage_known

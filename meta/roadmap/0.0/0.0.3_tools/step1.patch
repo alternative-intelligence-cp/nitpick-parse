@@ -1,10 +1,10 @@
 diff --git a/harness/README.md b/harness/README.md
-index da6632a..1d563b8 100644
+index da6632a..bbcc4e6 100644
 --- a/harness/README.md
 +++ b/harness/README.md
 @@ -12,5 +12,8 @@ and says so; CI runs it so that the workflow's last step exists before the runne
  refusal and parse stages, the self-check and the tree checks.)*
-+*(2026-10-15, cycle 0.0.3: added. A run is now the toolchain, the floor program, the self-check, the other two build
++*(@@DATE@@, cycle 0.0.3: added. A run is now the toolchain, the floor program, the self-check, the other two build
 +steps, the suites, the tree checks and the reviewed list's other direction, in that order; `--only SUBSTR` runs the
 +matching `program` and `check` units alone and concludes nothing.)*
  
@@ -31,10 +31,10 @@ index da6632a..1d563b8 100644
 +- every refusal was refused with exactly its set of codes at its sites, every `.npk` in the tree compiled as a root
 +  with no LEX- or PARSE- code, and every live tree check agreed with the document it reads.
 diff --git a/harness/expect.py b/harness/expect.py
-index 8e23986..7eb19a9 100644
+index b1b99d4..0dc1914 100644
 --- a/harness/expect.py
 +++ b/harness/expect.py
-@@ -25,9 +25,10 @@ THE RUNNER'S OWN TWO (B-5b, @@PD-139@@), which `npkg` does not have:
+@@ -29,9 +29,10 @@ THE RUNNER'S OWN TWO (B-5b, @@PD-139@@), which `npkg` does not have:
    defect DEF-<n> is in the pinned compiler. The label is the compiler seat's registration,
    a label nothing resolves; the OBSERVATION is the one failure the marker excuses, and the
    only one, on every leg (`nitpick-regex`'s RX-154 lesson: a marker that excuses any failure
@@ -48,7 +48,7 @@ index 8e23986..7eb19a9 100644
  """
  import re
  
-@@ -40,7 +41,7 @@ _CODE = re.compile(r"^NITPICK-[A-Z]+-[0-9]{3}$")
+@@ -44,7 +45,7 @@ _CODE = re.compile(r"^NITPICK-[A-Z]+-[0-9]{3}$")
  _AT = re.compile(r"^([0-9]+)(?::([0-9]+))?$")
  _INT = re.compile(r"^-?[0-9]+$")
  _LABEL = re.compile(r"^DEF-[0-9]+$")
@@ -57,7 +57,7 @@ index 8e23986..7eb19a9 100644
  
  
  class Expect:
-@@ -115,16 +116,15 @@ def read_text(text, path):
+@@ -119,16 +120,15 @@ def read_text(text, path):
              e.mem_cap_mib = int(value)
          elif name == "pending-until:":
              parts = value.split(None, 2)
@@ -121,8 +121,36 @@ index 0000000..0409e88
 +        else:
 +            out.append(c); i += 1
 +    return "".join(out)
+diff --git a/harness/manifest.py b/harness/manifest.py
+index 2a8686b..d4d14e9 100644
+--- a/harness/manifest.py
++++ b/harness/manifest.py
+@@ -11,9 +11,11 @@ THE SCHEMA IS THE COMPILER'S AT THE PIN: `npkg/manifest.npk`'s `schema_allows` a
+ table for table and key for key, `[dependencies]` taking any key. Cycle 0.0.2's facts script
+ re-derives it from that function and compares (`0.0.2.md` §1.2).
+ 
+-THE STAGES are the compiler's vocabulary (`BUILD_REFERENCE.md` §7.1 at the pin) and this
+-library's two (`roundtrip`, `corpus`; `BUILD.md` §3). The compiler's rule is this runner's:
+-an entry it cannot honour is REFUSED BY NAME before anything runs, never skipped (`run.py`).
++THE STAGES are the compiler's vocabulary -- the twelve `npkg/manifest.npk`'s `stage_known`
++accepts at the pin `2e1cb4a`, `BUILD_REFERENCE.md` §7.1's eleven and `object`, which that
++table does not list -- and this library's two (`roundtrip`, `corpus`; `BUILD.md` §3). The
++compiler's rule is this runner's: an entry it cannot honour is REFUSED BY NAME before anything
++runs, never skipped (`run.py`).
+ """
+ import re
+ 
+@@ -33,7 +35,7 @@ SCHEMA = {
+     "verify.nikos": {"domain"},
+ }
+ ANY_KEY = {"dependencies"}
+-KNOWN_STAGES = {"compile", "parse", "resolve", "check", "accept", "fixture", "program",
++KNOWN_STAGES = {"compile", "parse", "resolve", "check", "accept", "object", "fixture", "program",
+                 "runtime", "verify", "cost", "explore", "roundtrip", "corpus"}
+ KNOWN_KINDS = {"positive", "negative", "diagnostic"}
+ 
 diff --git a/harness/run.py b/harness/run.py
-index bb39d5e..b670fa3 100644
+index 2f51c48..604237f 100644
 --- a/harness/run.py
 +++ b/harness/run.py
 @@ -1,14 +1,14 @@
@@ -144,7 +172,7 @@ index bb39d5e..b670fa3 100644
  2. holds the toolchain to the manifest (`toolchain.py`): `llc`, `opt` and `ld.lld` at its
     LLVM exactly, its datalayout the one the pinned `opt` derives from its triple, `$NPKC`
     and `$NPKRT` set -- and holds `irscan.py`'s two lists to `$NPKRT`: every name in them
-@@ -21,11 +21,20 @@ WHAT A RUN DOES, IN ORDER, and every step can fail it:
+@@ -24,11 +24,20 @@ WHAT A RUN DOES, IN ORDER, and every step can fail it:
     entry's artefacts left at `[build] output`; and REPRO -- `[build] entry` and every
     conformance root built from two copies of the tree, each carrying its manifest, their IR
     compared byte for byte;
@@ -166,7 +194,7 @@ index bb39d5e..b670fa3 100644
  It prints one line per step and unit, and LAST, the summary -- `harness: GREEN -- …` when
  nothing failed, `harness: RED -- …` otherwise -- and exits 0 on GREEN, 1 on RED and 2 when it
  could not proceed. Its scratch is `build/harness/`, cleared at the start of each run and left
-@@ -41,12 +50,14 @@ sys.path.insert(0, HERE)
+@@ -44,12 +53,14 @@ sys.path.insert(0, HERE)
  import build      # noqa: E402
  import irscan     # noqa: E402
  import manifest   # noqa: E402
@@ -182,7 +210,7 @@ index bb39d5e..b670fa3 100644
  
  
  def out(line):
-@@ -64,7 +75,10 @@ def honour(man):
+@@ -67,7 +78,10 @@ def honour(man):
          if (t["stage"], t.get("kind")) not in JUDGED:
              stop(f"[[test]] `{t['name']}` is stage `{t['stage']}`"
                   f"{', kind `' + t['kind'] + '`' if 'kind' in t else ''}, which this runner does "
@@ -194,7 +222,7 @@ index bb39d5e..b670fa3 100644
      if man.need("build", "opt-level") != 0:
          stop("[build] opt-level is not 0 -- raising it is its own decision, and this runner "
               "honours 0 only")
-@@ -163,11 +177,15 @@ def repro(ctx, man, failures):
+@@ -192,11 +206,15 @@ def repro(ctx, man, failures):
  
  
  def main(argv):
@@ -215,7 +243,7 @@ index bb39d5e..b670fa3 100644
      try:
          man = manifest.read(os.path.join(ROOT, "nitpick.toml"))
      except manifest.ManifestError as e:
-@@ -199,18 +217,37 @@ def main(argv):
+@@ -228,18 +246,37 @@ def main(argv):
      if floor_edges is None:
          out("harness: RED -- " + "; ".join(failures))
          return 1
@@ -260,7 +288,7 @@ index bb39d5e..b670fa3 100644
      n = {v: sum(1 for x in st.verdicts if x[0] == v) for v in ("PASS", "FAIL", "PEND")}
      failures += [f"{s}/{os.path.basename(r)}" for v, s, r, _ in st.verdicts if v == "FAIL"]
      if verdicts_path:
-@@ -221,12 +258,18 @@ def main(argv):
+@@ -250,12 +287,18 @@ def main(argv):
      judged = n["PASS"] + n["FAIL"]
      tail = (f"{n['PASS']} of {judged} units passed, {n['PEND']} pending"
              f"{' (' + ', '.join(labels) + ')' if labels else ''}")
@@ -434,10 +462,10 @@ index 0000000..37670e3
 +    live_red = sum(1 for _, r, _ in got if r)
 +    return live_red == len(got), f"the self-check: {live_red} of {len(got)} live cases red, {len(PENDING)} pending"
 diff --git a/harness/stages.py b/harness/stages.py
-index c84862b..93973d3 100644
+index 9066ae2..22e9cf1 100644
 --- a/harness/stages.py
 +++ b/harness/stages.py
-@@ -34,7 +34,7 @@ import irscan
+@@ -36,7 +36,7 @@ import irscan
  RUN_TIMEOUT = 600
  
  
@@ -446,7 +474,7 @@ index c84862b..93973d3 100644
      out = []
      for rel in (entry["paths"] if "paths" in entry else [entry["path"]]):
          top = os.path.join(root, rel)
-@@ -46,7 +46,13 @@ def _units(root, entry):
+@@ -48,7 +48,13 @@ def _units(root, entry):
          else:
              out += [os.path.join(top, f) for f in sorted(os.listdir(top))
                      if f.endswith(".npk") and os.path.isfile(os.path.join(top, f))]
@@ -461,7 +489,7 @@ index c84862b..93973d3 100644
  
  
  def _cap(mib):
-@@ -80,8 +86,8 @@ def read_pending_list(root):
+@@ -82,8 +88,8 @@ def read_pending_list(root):
  
  
  class Stage:
@@ -472,7 +500,7 @@ index c84862b..93973d3 100644
          self.pending_list, self.pending_seen, self.floor_under = pending_list, set(), {}
          self.verdicts = []          # (PASS|FAIL|PEND, suite, relpath, detail)
  
-@@ -91,7 +97,7 @@ class Stage:
+@@ -93,7 +99,7 @@ class Stage:
          print(f"{verdict} {suite}/{os.path.basename(rel)}: {detail}", flush=True)
  
      def program_suite(self, entry):
@@ -481,9 +509,9 @@ index c84862b..93973d3 100644
              rel = os.path.relpath(src, self.root)
              self._unit(entry["name"], src, rel)
  
-@@ -133,8 +139,8 @@ class Stage:
+@@ -135,8 +141,8 @@ class Stage:
  
-     def _pending(self, suite, rel, e, b, exits, why):
+     def _pending(self, suite, rel, e, b, exits, why, found):
          label, observation, arg = e.pending
 -        key = (rel, label, f"{observation} {arg}")
 -        marker = f"`pending-until: {label} {observation} {arg}`"
@@ -492,7 +520,7 @@ index c84862b..93973d3 100644
          if key not in self.pending_list:
              return self._say("FAIL", suite, rel, f"{marker} is NOT ON THE REVIEWED PENDING LIST "
                                                   "(harness/baseline/PENDING.txt)")
-@@ -161,3 +167,86 @@ class Stage:
+@@ -166,3 +172,86 @@ class Stage:
      def _show(v):
          v = ["hang" if x is None else str(x) for x in v]
          return v[0] if len(v) == 1 else (f"{v[0]} x{len(v)}" if len(set(v)) == 1 else "/".join(v))
@@ -819,16 +847,16 @@ index 0000000..792105f
 +         ("check_codes_documented", "cycle 0.2"), ("check_failsafe_arms", "cycle 0.2"),
 +         ("check_corpus_provenance", "cycle 0.3")]
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index befefca..af5d87b 100644
+index befefca..a5db02a 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
-@@ -1094,3 +1094,61 @@ the name both sides use.
+@@ -1094,3 +1094,67 @@ the name both sides use.
  *Reversal, for the author:* none for the mechanism; each pending unit's marker and list line go
  when its fix is pinned, and a new observation form joins B-5b by a decision when a defect shows
  a failure this one cannot name.
 +
 +### @@PD-140@@ — the refusals and the sweep are judged by `npkc`; `accept` is struck; a refusal is a set of codes at their sites; a refusal the pin does not give is a pending one
-+**2026-10-15, cycle 0.0.3.** `specs/BUILD.md` §3, B-5b and B-7. The `check` stage compiles each file with the pinned
++**@@DATE@@, cycle 0.0.3.** `specs/BUILD.md` §3, B-5b and B-7. The `check` stage compiles each file with the pinned
 +`npkc` and requires exit 1 with exactly the set of codes the file names, each `expect-error-at` a site its code was
 +reported at; exit 0 is ACCEPTED and fails, and 2 or 3 is a broken run, printed with its code. The `parse` stage — the
 +sweep — compiles every `.npk` in the tree as a root and passes it unless a `NITPICK-LEX-` or `NITPICK-PARSE-` code is
@@ -844,12 +872,18 @@ index befefca..af5d87b 100644
 +count of reports per code** — the compiler's DEF-245 reports one failing header two or three times, so a count would
 +judge the report; **the reseat's probe run as a program** — its exit, the free poison or a reused byte, is a rate and
 +not a verdict, and its right answer is a refusal, which only `npkc` gives.
++*(Re-measured at `2e1cb4a`, 2026-10-29, in cycle 0.0.3's step cut: the compiler's landing 130, in the pin, makes a
++declaration whose header fails one report — its own example, `func<T>:process = int32(T:_~x) never fails { pass
++0i32; };`, is three reports of `NITPICK-PARSE-001` at `c9baa9e` and one at the pin — so the reason given above for
++declining a count of reports is the compiler's state before the pin. The set of codes stands on its own: a count per
++code is the compiler's to hold (its D-332), and DEF-245 was itself a count that moved with a landing while the set
++did not.)*
 +
 +*Reversal, for the author:* none for the stages; when the compiler's checker is a tool a library may run without a
 +build, `parse` and `check` can move to it by a decision, judged the same way.
 +
 +### @@PD-141@@ — the self-check is its own printed list, live and pending, it runs before any judgment, and a filtered run concludes nothing
-+**2026-10-15, cycle 0.0.3.** `specs/TESTING.md` V-19 and V-20, `BUILD.md` B-8. `harness/selfcheck.py` hands the
++**@@DATE@@, cycle 0.0.3.** `specs/TESTING.md` V-19 and V-20, `BUILD.md` B-8. `harness/selfcheck.py` hands the
 +harness's own functions — the stages and the tree checks, never a copy of their logic — fixtures that must fail: a
 +wrong exit; a refusal expecting a code not reported, reporting one not expected, at the wrong site, and accepted; a file
 +that does not parse; each tree check planted; and each way a pending marker can be wrong. Every live case must be red;
@@ -867,7 +901,7 @@ index befefca..af5d87b 100644
 +its stage.
 +
 +### @@PD-142@@ — the tree checks read their authorities; the error budget is keyed by module and name, private identities included
-+**2026-10-15, cycle 0.0.3.** `specs/TESTING.md` §3. Six checks run on every full run and print what each read:
++**@@DATE@@, cycle 0.0.3.** `specs/TESTING.md` §3. Six checks run on every full run and print what each read:
 +`check_layering` (B-17's table, every import edge and every module header's `MAY IMPORT:` line), `check_error_budget`,
 +`check_constants_named` (`SAFETY.md` §7's values, in any spelling, and `limits.npk`'s), `check_no_raw_accumulate`
 +(PA-012), `check_no_recursion` (PA-022, its exceptions table empty and empty at 1.0) and `check_specs_current`, which
@@ -885,10 +919,10 @@ index befefca..af5d87b 100644
 +*Reversal, for the author:* none for the key; a layer S-6 does not list, or a third name, is a change to `SAFETY.md` §3
 +by a decision, which the check then reads.
 diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md
-index d699580..0a89507 100644
+index deb943e..c83fa1c 100644
 --- a/meta/specs/BUILD.md
 +++ b/meta/specs/BUILD.md
-@@ -135,13 +135,17 @@ runner and not a change of suite, and adds two of its own.
+@@ -145,13 +145,17 @@ runner and not a change of suite, and adds two of its own.
  
  | Stage | Directory | Passes when |
  |---|---|---|
@@ -902,18 +936,18 @@ index d699580..0a89507 100644
  | `roundtrip` | `tests/roundtrip/` | **ours** — parse, print, parse again, and the second parse's event stream equals the first's (`WRITER_MODEL.md` §4) |
  | `corpus` | `tests/corpus/<name>/` | **ours** — every case in a vendored conformance corpus is judged as the corpus says, with a per-corpus expected-pass count that must match exactly |
  
-+*(2026-10-15, cycle 0.0.3 — @@PD-140@@: the `parse` and `check` stages are judged by `npkc`, not by the compiler's
++*(@@DATE@@, cycle 0.0.3 — @@PD-140@@: the `parse` and `check` stages are judged by `npkc`, not by the compiler's
 +`tools/parse_check` and `tools/check`, which are `.npk` sources a run would have to build from the compiler's tree, and
 +nothing here builds the compiler; and `accept` is struck, since `tests/conformance/` is run.)*
 +
  **Rule B-5 — expectations live in the test file.** The marker grammar is the
  compiler's, marker for marker, plus two of ours:
  
-@@ -172,12 +176,18 @@ grammar that this runner does not judge yet — `argv:`, `expect-note:`,
+@@ -182,12 +186,18 @@ grammar that this runner does not judge yet — `argv:`, `expect-note:`,
  `expect-obligation:`, `explore:`, `npkc-flags:` and their kin — and this library's
  `expect-roundtrip:` and `expect-fault:` until their stages exist, make their file
  fail by name: an expectation nobody checks is the failure this rule exists to stop.
-+*(2026-10-16, cycle 0.0.3 — @@PD-140@@: a second observation, `// pending-until: DEF-<n> accepted`, for a `check`
++*(@@DATE@@, cycle 0.0.3 — @@PD-140@@: a second observation, `// pending-until: DEF-<n> accepted`, for a `check`
 +unit whose right answer is a refusal and which `npkc` accepts at the pin, exit 0 with no diagnostic — probe 08h's
 +shape on DEF-252 at `7e91730`, which the compiler's landing 116 fixed, so no unit takes it at `c9baa9e`.)*
  
@@ -922,14 +956,14 @@ index d699580..0a89507 100644
  **Rule B-7 — unexpected diagnostics fail a test as surely as missing ones**
  (D-237). The set of codes a rejection test reports must **equal** the set its
  expectations name.
-+*(Re-read 2026-10-15, cycle 0.0.3 — @@PD-140@@: a SET, as written: the compiler's DEF-245 reported one failing
++*(Re-read @@DATE@@, cycle 0.0.3 — @@PD-140@@: a SET, as written: the compiler's DEF-245 reported one failing
 +header two or three times until its landing 130, so a count of reports would judge the report and not the
 +refusal; and each `expect-error-at` names a site its code was reported at.)*
  
  **Rule B-8 — the harness is itself tested** (`TESTING.md` §7). A self-check
  feeds it wrong expectations and requires it to report every one as a failure,
 diff --git a/meta/specs/TESTING.md b/meta/specs/TESTING.md
-index 19e0ac7..49f78a2 100644
+index 19e0ac7..2cfba81 100644
 --- a/meta/specs/TESTING.md
 +++ b/meta/specs/TESTING.md
 @@ -51,16 +51,21 @@ them found something on its first run.
@@ -952,7 +986,7 @@ index 19e0ac7..49f78a2 100644
 -| `check_specs_current` | reports, does not fail: spec sections whose cited symbols no longer resolve |
 +| `check_specs_current` | reports, does not fail: a rule id a `src/` or `harness/` comment cites beside a specification's name that no specification defines |
 +
-+*(2026-10-15, cycle 0.0.3 — @@PD-142@@: the rows for `check_error_budget` (the ecosystem audit's EC3: it said "the count
++*(@@DATE@@, cycle 0.0.3 — @@PD-142@@: the rows for `check_error_budget` (the ecosystem audit's EC3: it said "the count
 +and names of public `error:` declarations"), `check_layering` (B-17's table since cycle 0.0.1), `check_constants_named`,
 +`check_no_raw_accumulate` and `check_specs_current` say what each live check reads; `check_no_owning_fields`,
 +`check_codes_documented` and `check_failsafe_arms` go live at cycle 0.2 and `check_corpus_provenance` at 0.3.)*
@@ -963,14 +997,14 @@ index 19e0ac7..49f78a2 100644
  - a `check_no_raw_accumulate` violation planted in a scratch file;
  - a `parse` case that does not parse.
  
-+*(2026-10-15, cycle 0.0.3 — @@PD-141@@: the cases are `harness/selfcheck.py`'s list, which every run prints case by
++*(@@DATE@@, cycle 0.0.3 — @@PD-141@@: the cases are `harness/selfcheck.py`'s list, which every run prints case by
 +case: the five of these whose stage exists, and more — a refusal at the wrong site, a refusal case `npkc` accepts,
 +each tree check planted, and each way a pending marker can be wrong — and the three whose stage does not exist yet
 +printed as pending with the cycle that builds it, beside `check_no_owning_fields`'s.)*
 +
  **Rule V-20 — the self-check runs first in every full invocation.** A harness
  that has not proven it can fail has not proven anything.
-+*(2026-10-15, cycle 0.0.3 — @@PD-141@@: first after the toolchain check and the floor program its cases are built on,
++*(@@DATE@@, cycle 0.0.3 — @@PD-141@@: first after the toolchain check and the floor program its cases are built on,
 +and before every step that judges the library; a live case not red stops the run.)*
 diff --git a/nitpick.toml b/nitpick.toml
 index 856353a..81218e6 100644
