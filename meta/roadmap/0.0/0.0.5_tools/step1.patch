@@ -24,7 +24,7 @@ index bac3b73..db14885 100644
 +this listed "the cycle-0.13 dogfood program" among them; the dogfood consumer is cycle 0.12's, in its own repository
 +under `nitpick-apps` (PA-103).)*
 diff --git a/meta/OPEN_QUESTIONS.md b/meta/OPEN_QUESTIONS.md
-index f9e4884..f202f47 100644
+index ada6599..f38412e 100644
 --- a/meta/OPEN_QUESTIONS.md
 +++ b/meta/OPEN_QUESTIONS.md
 @@ -14,9 +14,10 @@ is struck through here with the decision's number, **never deleted** — the
@@ -42,7 +42,7 @@ index f9e4884..f202f47 100644
  ---
  
 diff --git a/meta/roadmap/0.12/README.md b/meta/roadmap/0.12/README.md
-index 59a45c4..24b8701 100644
+index 2ba5b40..ed0df93 100644
 --- a/meta/roadmap/0.12/README.md
 +++ b/meta/roadmap/0.12/README.md
 @@ -7,8 +7,9 @@
@@ -83,7 +83,7 @@ index 59a45c4..24b8701 100644
  ### 0.12.1 — triage
  - [ ] every finding classified: **defect** (the library is wrong), **gap** (a consumer reasonably needs something absent), or **cost** (the library is right and this is what the design costs)
 diff --git a/meta/roadmap/0.6/README.md b/meta/roadmap/0.6/README.md
-index 0369446..9d65463 100644
+index 6623b22..9570c23 100644
 --- a/meta/roadmap/0.6/README.md
 +++ b/meta/roadmap/0.6/README.md
 @@ -1,6 +1,7 @@
@@ -96,7 +96,7 @@ index 0369446..9d65463 100644
  second, independent oracle with it.
  
 diff --git a/meta/roadmap/1.0/README.md b/meta/roadmap/1.0/README.md
-index 94a2869..1e7defc 100644
+index ffdc9f7..eaf9c66 100644
 --- a/meta/roadmap/1.0/README.md
 +++ b/meta/roadmap/1.0/README.md
 @@ -59,7 +59,7 @@ decide it.
@@ -109,7 +109,7 @@ index 94a2869..1e7defc 100644
  
  ### 1.0.4 — versioning
 diff --git a/meta/roadmap/ROADMAP.md b/meta/roadmap/ROADMAP.md
-index 262cf3f..b5fae37 100644
+index f9115d5..569e953 100644
 --- a/meta/roadmap/ROADMAP.md
 +++ b/meta/roadmap/ROADMAP.md
 @@ -3,12 +3,15 @@
@@ -144,7 +144,7 @@ index 262cf3f..b5fae37 100644
  things nothing else in the plan exercises hard. Written **without changing the
  library**, so every friction is recorded rather than smoothed over, then
 diff --git a/meta/specs/FORMATS.md b/meta/specs/FORMATS.md
-index 1eaebba..48e62d6 100644
+index 60a4694..bb470d6 100644
 --- a/meta/specs/FORMATS.md
 +++ b/meta/specs/FORMATS.md
 @@ -12,7 +12,7 @@ behind it rather than a claim.

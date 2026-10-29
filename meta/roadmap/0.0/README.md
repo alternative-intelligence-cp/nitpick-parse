@@ -29,7 +29,7 @@ text as the author accepted it, a dated note of its re-measurement beneath it; a
 | [0.0.1a](0.0.1a.md) | **yes** — the adoption: two patches over 0.0.1's record, the old-pin leg and the sweep, blocks with filled Expects; cut into fresh-worker steps, each pushed and its CI run read |
 | [0.0.2](0.0.2.md) | **yes** — four patches over 0.0.1a's record, the fourth carrying out ten of cycle 0.0.1's twelve items as ruled; blocks with filled Expects, the mutants' table; cut into fresh-worker steps, each pushed and its CI run read |
 | [0.0.3](0.0.3.md) | **yes** — six patches over 0.0.2's record, the first three the libraries' seat's three harness gaps, each with its mutants; blocks with filled Expects, the mutants' table; cut into fresh-worker steps, each pushed and its CI run read |
-| [0.0.4](0.0.4.md) | **yes** — four patches over 0.0.3's record, blocks with filled Expects, the mutants' table; CI's run is its worker's |
+| [0.0.4](0.0.4.md) | **yes** — nine patches over 0.0.3's record, the first four the libraries' seat's four harness items, each with the cases or mutants it must refuse, the fifth a text round; blocks with filled Expects, the mutants' table; cut into fresh-worker steps, each pushed and its CI run read |
 | [0.0.5](0.0.5.md) | **yes** — two patches over 0.0.4's record, blocks with filled Expects, the archive its last block; its execution, the close, is the libraries' seat's |
 
 ## Why this shape
@@ -83,6 +83,7 @@ author.**
 | PD-146 … PD-148 | — | unused: 0.0.5 proposes none |
 | — | 0.0.1a | none: the adoption of `2e1cb4a` takes no decision, and PD-191 … PD-200, its planning dispatch's block, are unused |
 | — | 0.0.3 | none for its amendments and step cut: each of the libraries' seat's four rulings carries out a rule already accepted, and PD-191 … PD-200, the cut's dispatch's block, are unused |
+| — | 0.0.4 | none for its amendments and step cut: each of the libraries' seat's rulings on 0.0.3's findings carries out a rule already accepted, and PD-191 … PD-200, the cut's dispatch's block, are unused |
 
 ## The pin, and what each later landing would move
 
@@ -358,6 +359,8 @@ file states its own acceptance when it reaches the pin, and where the two differ
 - [x] EC3's sentences corrected; each mutant red by the check it breaks
 
 ### 0.0.4 — `src/core/`
+- [ ] the four harness items 0.0.3's review ruled, first, each in its own commit with the cases or mutants it must refuse: the parse sweep over what git tracks, failing closed; `check_layering`'s "never"; `check_no_raw_accumulate`'s `*=` and `+=`, a glob import and a `(*)` arm passed; live cases for 0.0.3's first two gaps
+- [ ] the text round: the harness's four comments, PA-117's count in the 0.12 and 0.13 roadmaps and `SAFETY.md` §8, and the older items
 - [ ] `src/core/limits.npk` — the eight bounds of `specs/SAFETY.md` §7, each with its row; `VALUE_MODEL.md` D-16's ninth joins it in cycle 0.4 (PD-143)
 - [ ] `src/core/vec.npk` — `Vec<T: Copy>`, every accessor boundary-tested at `0`, `count-1` and `count`, a misuse trapping `OutOfBounds`
 - [ ] `src/core/bytes.npk` — `Bytes` over `buffer` through `.ptr`, `put_uint` allocation-free, growth doubling and counted, no view
