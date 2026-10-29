@@ -1,8 +1,8 @@
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index 002dddc..dfd4504 100644
+index 7d1b282..5585be4 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
-@@ -1155,3 +1155,26 @@ checks written now** — their inputs do not exist, and a check over nothing is
+@@ -1161,3 +1161,26 @@ checks written now** — their inputs do not exist, and a check over nothing is
  
  *Reversal, for the author:* none for the key; a layer S-6 does not list, or a third name, is a change to `SAFETY.md` §3
  by a decision, which the check then reads.
@@ -30,7 +30,7 @@ index 002dddc..dfd4504 100644
 +`fixed` binding, and block 5's sweep, whose ninth-limit subject gains the new row. Every text that says the ninth
 +waits for cycle 0.4 is rewritten with them, and what the new words move is retaken too.
 diff --git a/meta/specs/SAFETY.md b/meta/specs/SAFETY.md
-index a631eed..8ece808 100644
+index 99ab6c2..fc34ab3 100644
 --- a/meta/specs/SAFETY.md
 +++ b/meta/specs/SAFETY.md
 @@ -300,6 +300,11 @@ is a loop over attacker-controlled length without one.

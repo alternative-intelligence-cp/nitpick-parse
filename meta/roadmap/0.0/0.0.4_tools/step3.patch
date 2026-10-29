@@ -1,8 +1,8 @@
 diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md
-index 4762aed..cfe81a2 100644
+index 2ca986c..b76e1f9 100644
 --- a/meta/specs/BUILD.md
 +++ b/meta/specs/BUILD.md
-@@ -259,6 +259,11 @@ header — a second handle on its block — is `NITPICK-TYPE-046`; every index a
+@@ -269,6 +269,11 @@ header — a second handle on its block — is `NITPICK-TYPE-046`; every index a
  accessors, because an index through a `wild` block does not trap, and a misuse traps the language's `OutOfBounds`;
  `vec_init(0)` gives a capacity of one, so that `cap <= 0` marks only a freed `Vec`.)*
  
