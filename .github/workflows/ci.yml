@@ -7,10 +7,13 @@
 # commit that bumps it is the one that runs the full suite. Modelled on
 # `nitpick-regex`'s workflow.
 #
-# WHAT A GREEN RUN PROVES AT CYCLE 0.0.1: the pinned compiler builds from a clean
-# checkout of the pinned commit; its emission is the one the pin recorded; LLVM is
-# exactly 20.1.8; and the conformance consumer compiles, links, runs and exits 0.
-# `harness/run.py` is a stub that judges nothing until cycle 0.0.2, and says so.
+# WHAT A GREEN RUN PROVES SINCE CYCLE 0.0.2: the compiler's checkout is the pinned
+# commit, clean; its emission, `npkc.ll`, is the one the pin recorded, built by a run
+# with no cache and restored by one that hits it (the cache's step, below); LLVM is
+# exactly 20.1.8; and `harness/run.py` printed its UNQUALIFIED green summary -- its
+# three build steps and every suite `nitpick.toml` declares (`harness/README.md`).
+# *(Cycle 0.0.1's line: the conformance consumer was built and run here by hand, and
+# `harness/run.py` was a stub that judged nothing.)*
 #
 # EVERY HEX VALUE IS QUOTED. GitHub reads a workflow as YAML 1.2, where a bare run of
 # digits, one `e` and digits is a NUMBER -- `7e91730` is infinity -- so a commit, a
@@ -168,25 +171,23 @@ jobs:
           fi
           echo "npkc.ll == the pin's emission, $size B / $have"
 
-      # A STUB UNTIL CYCLE 0.0.2, and it says so in its output. 0.0.2 replaces this step's
-      # body with one that asserts the runner's unqualified green summary.
+      # THE HARNESS, AND ITS SUMMARY ASSERTED, NOT ONLY ITS STATUS (`nitpick-regex`'s CI is
+      # the model). The runner prints its verdict LAST, `harness: GREEN -- ...` when nothing
+      # failed; this step requires that line as the log's last, so an exit 0 that does not
+      # end in it -- a runner that stopped short -- is red here. The interpreter's version is
+      # printed first: `meta/research/CURRENCY.md` holds a row for it.
       - name: Run the harness
-        run: python3 -B harness/run.py
-
-      # Until the harness judges it (cycle 0.0.2), the one thing 0.0.1 establishes is run
-      # here in full: the consumer compiles, links, RUNS and exits 0. `npkc` exiting 0
-      # does not mean `llc` accepts the module, so all four steps run and the last is judged.
-      - name: The conformance consumer, all four steps
         run: |
-          set -euo pipefail
-          work="$RUNNER_TEMP/conformance"
-          mkdir -p "$work"
-          ( cd tests/conformance && "$NPKC" import.npk -o "$work/import.ll" )
-          llc -O0 -filetype=obj -relocation-model=static "$work/import.ll" -o "$work/import.o"
-          ld.lld -static "$work/import.o" "$NPKRT" -o "$work/import"
           set +e
-          "$work/import"
+          set -uo pipefail
+          python3 --version
+          log="$RUNNER_TEMP/harness.log"
+          python3 -B harness/run.py > "$log" 2>&1
           status=$?
-          set -e
-          echo "tests/conformance/import.npk exits $status"
-          test "$status" -eq 0
+          cat "$log"
+          if [ "$status" -ne 0 ]; then exit "$status"; fi
+          last="$(tail -n 1 "$log")"
+          case "$last" in
+            "harness: GREEN -- "*) echo "the harness's summary is the unqualified green one" ;;
+            *) echo "the harness exited 0 without its unqualified green summary last: $last" >&2; exit 1 ;;
+          esac

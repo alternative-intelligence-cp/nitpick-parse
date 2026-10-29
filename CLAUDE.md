@@ -111,9 +111,11 @@ trailing semicolon; declarations end `};` and control-flow blocks do not.
 
 **`npkg` cannot build this yet** (`meta/specs/BUILD.md` §1): it is the
 compiler's own bootstrap ladder, and `[dependencies]` resolves to nothing.
-`harness/run.py` is the runner until that changes (PA-003). Until cycle 0.0.2
-lands it, probes are run by hand — `meta/roadmap/0.0/0.0.0.md` §2 has the
-command.
+`harness/run.py` is the runner until that changes (PA-003), since cycle 0.0.2:
+`NPKC=… NPKRT=… python3 -B harness/run.py` builds and scans every module under
+`src/`, runs every suite `nitpick.toml` declares at −O0 and through `opt -O2`,
+and prints its verdict last (`harness/README.md`). *(Until cycle 0.0.2 the probes
+were run by hand, by `meta/roadmap/0.0/0.0.0.md` §2's command.)*
 
 The compiler binary is the **pinned toolchain** the board names
 (`../BOARD.md`, W-18): `$NPKC` and `$NPKRT` are supplied to every session by the

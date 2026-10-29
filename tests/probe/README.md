@@ -19,7 +19,7 @@ the three the library adds — 97 `DivByZero`, 98 `DivOverflow`, 110 `StaleHandl
 |---|---|---|
 | `tests/probe/` | a program that compiles, links and runs; judged by its exit code at `-O0` and again through `opt -O2` | `// expect-exit: N`, and `// mem-cap-mib: N` where it runs under an address-space cap |
 | [`refused/`](refused/) | a program the compiler must refuse with exactly the codes it names | `// expect-error: CODE` and `// expect-error-at: L:C` |
-| `defect/` | the reproduction of a compiler defect, with its controls and a README saying what it blocks — none at the pin, so the directory is not made | the verdict it was written against, as a comment |
+| `defect/` | the reproduction of a compiler defect, with its controls and a README saying what it blocks — none at the pin, so the directory is not made | the verdict it was written against, as a comment — or, once the harness runs it, its RIGHT answer and the `// pending-until:` marker naming the one failure it is excused (`BUILD.md` B-5b) |
 
 A probe's header is a hypothesis; the verdict is the table in `0.0.0.md` §6. A
 size probe exits with the `#size_of` of its subject — `Event` (02), `Step` (03),
