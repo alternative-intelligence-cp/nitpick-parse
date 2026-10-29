@@ -1,0 +1,13 @@
+# THE REVIEWED LIST OF PENDING UNITS -- meta/specs/BUILD.md B-5b, PA-114.
+#
+# One line per unit that is CORRECT AND RED because the compiler defect it waits on is in the
+# pinned compiler, four fields separated by one TAB each:
+#
+#     path<TAB>label<TAB>observation argument<TAB>reason
+#
+# `path` is the unit's path from the repository root; `label` and `observation argument` are its
+# `// pending-until: <label> <observation> <argument>` marker, exactly; `reason` says what turns it
+# green. The runner checks the list BOTH WAYS: a marker it does not name is a failure, and a line
+# no pending unit matched is a failure -- so taking a unit out of the count is two edits in two
+# files, this one reviewed. A unit that MEETS its expectation reddens the run to say its marker is
+# stale, and the marker and its line here go together, by the adoption that carries the fix.

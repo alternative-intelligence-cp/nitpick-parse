@@ -999,3 +999,87 @@ the gate to cycle 0.1, through 0.0.5's close — 0.0.0's gate item 7 and block 0
 research lines go, `CURRENCY.md`'s three research rows wait for their digests, and
 `0.1/0.1.0.md`'s gate names them; to count the library routine, strike `CURRENCY.md`'s
 research section and its three rows, and the gate with them.
+
+### PA-113 — the build is one module per root, held to the target rows, scanned two ways on both legs, and reproducible from two directories
+**2026-10-28, cycle 0.0.2.** Measured at the pin `7e91730`, and each a rule of `specs/BUILD.md`:
+
+- **One module per root** (§2's drawing). `npkc` emits a root and every module it imports as
+  one module — a function of an imported module is DEFINED in the root's emission — so a
+  program links as its one object and `npkrt.o`, and `src/` is compiled module by module, each
+  as a root of its own, to be scanned. The first writing's "one build of the library per run,
+  reused by every program" (this subcycle's first writing) described a library object nothing
+  emits.
+- **The target rows are held** (B-1a): every emitted and optimised module states the
+  manifest's `triple` and `datalayout`, and the layout row is the one the pinned `opt` derives.
+- **Two scans, both legs** (B-2, B-2a). Every object's undefined symbols are the runtime
+  object's own defines — the runtime the link uses — and every -O0 module's call edges to the
+  runtime are held to the floor program's. `harness/irscan.py` classes the runtime object's
+  global symbols — 119 at the pin, all a call can resolve to — each in exactly one of two
+  lists: DENIED, 75, by the facet of PA-006 or `SAFETY.md` §2 that forbids it (the kernel, a
+  file or descriptor, a process, a signal handler, the clock, the environment, concurrency,
+  machine code), or FLOOR, 44, the language's own machinery (the heap, the arena, strings, the
+  trap route, the stack guard, LLVM's libcalls, the entry). An edge to a denied symbol fails
+  the build, naming the function and the facet, and the run stops on a symbol in neither list.
+  So the scan reads PA-006 and §2 as a check for every facet a runtime function serves, and
+  for no facet whose construct lowers to no runtime call — an atomic operation is an LLVM
+  instruction, and a lock made and never held is a managed allocation — which review holds.
+  The floor program has five undefined symbols and a syscaller six, the difference
+  `npk_sys6`; the run measures that pair every time and reddens if either scan stops seeing it.
+- **Reproducible** (B-4): `[build] entry` and every conformance root, built from two copies
+  each carrying its manifest, emit byte-identical modules; without the manifest the consumer's
+  two modules differ, which is the check's own failure, measured.
+
+*(Re-measured at `2e1cb4a`, 2026-10-24, in cycle 0.0.2's planning: the same.)*
+
+*Alternatives declined:* **a library object linked into every program** — nothing emits one;
+**`llvm-nm` for the symbol table** — a fourth tool outside the pin, read as text (the first
+writing's reason stands);
+**the undefined-symbol scan alone behind "no syscall"** — it says THAT a symbol is needed and
+never where, and at an earlier compiler it could not see a syscall at all (`PLAYBOOK.md`);
+**the first writing's deny list, 41 names in four families** — seven of them local symbols no
+call can reach, and 41 global functions in PA-006's and §2's facets left out: the plan
+verification of 2026-10-15 named ten of those, and its runs stayed green with two of them, the
+environment's and a path probe's, called from `src/`;
+**a permit list for the edges** — the floor's own glue calls the allocator, the trap path and
+a descriptor's close, and `nitpick-regex` measured its permit list red on every probe; **only
+`[build] entry` scanned** — it reaches only what it imports, so a module not yet imported
+would pass whatever it called; **objects compared for repro** — B-4's claim is the IR, and with
+each copy's manifest the IR is identical; an object is what to quote for a SIZE across trees.
+
+*Reversal, for the author:* when the compiler's command line emits a module per object as its
+`BUILD_REFERENCE.md` §4.1 describes, the drawing and a library object come back by a decision;
+when a test must touch a descriptor, the deny list takes a scoped exemption by a decision; and when a re-pin adds,
+renames or removes a runtime function, the run stops naming it, and the lists move with the adoption, each new
+function classed by these facets.
+
+### PA-114 — a unit red on a compiler defect is pending: its right answer, the one failure it is excused, and a reviewed list
+**2026-10-28, cycle 0.0.2.** `specs/BUILD.md` B-5b. A test that is CORRECT AND RED because a
+defect it meets is in the pinned compiler carries its RIGHT ANSWER as its ordinary markers,
+and one more: `// pending-until: DEF-<n> <observation> <argument>` — the compiler seat's
+registration of the defect, a label nothing resolves, and the one failure the unit is excused,
+on every leg. Its verdict is PEND only when that failure is what every leg shows; it is then
+printed and counted apart, neither a pass nor a failure. Any other failure fails it, and so
+does MEETING its expectation: the run reddens to say the marker is stale, and the marker and
+its line go, by the adoption that carries the fix. Every marker has a line in
+`harness/baseline/PENDING.txt` — path, label and observation exactly, and the reason — and
+the runner holds the list both ways: a marker it does not name fails, and a line no pending
+unit matched fails. At cycle 0.0.2 the observation is `undefined-value <symbol>` (`npkc`
+accepts, and LLVM refuses the module naming that value) — probe 06's failure at `7e91730`,
+on DEF-253, which the compiler's landing 118 fixed before this subcycle, so at `c9baa9e`
+the list names no unit. And `// mem-cap-mib: N` is the runner's other marker: the cap,
+after the floor
+program under it.
+
+*(Re-measured at `2e1cb4a`, 2026-10-24, in cycle 0.0.2's planning: the same.)*
+
+*Alternatives declined:* **leave the defect directories out of the run** — a defect nobody's
+run re-derives is noticed fixed by accident, or never; **a plain `expect-` for the broken
+answer** — the suite would then defend the defect, and go red the day it is fixed with nothing
+saying why; **a marker that excuses any failure** — `nitpick-regex`'s third audit measured that
+shape absorbing a different failure, and a wrong expectation, into a green run (its RX-154);
+**a commit as the label** — a fix has no commit until it lands, and the compiler seat's DEF id is
+the name both sides use.
+
+*Reversal, for the author:* none for the mechanism; each pending unit's marker and list line go
+when its fix is pinned, and a new observation form joins B-5b by a decision when a defect shows
+a failure this one cannot name.

@@ -44,18 +44,33 @@ compiler's own harness is Python for the same reason.
 ## 2. The build, step by step
 
 ```
-src/lib.npk  (and every module it reaches by `use`)
-   → npkc              →  build/nparse.ll        the emitted LLVM IR text
-   → opt -O2           →  build/nparse.opt.ll    only on the check leg
-   → llc               →  build/nparse.o         at the manifest's flags
-   → undefined-symbol scan against the runtime allowlist
-   → ld.lld -static    →  build/<program>        one program object + npkrt.o
+a root — a program, or one module under src/ compiled alone — and every module it imports
+   → npkc              →  <root>.ll              ONE module: the root and all it imports
+   → target rows       →  held to the manifest   (B-1a)
+   → llc               →  <root>.o               at the manifest's llc-flags
+   → undefined-symbol scan, call-edge scan       (B-2, B-2a)
+   → ld.lld -static    →  <program>              the program's one object + npkrt.o
+and the check leg, every program: the same <root>.ll → opt → llc -O2 → the scans → ld.lld (B-3)
 ```
+
+*(Corrected 2026-10-28, cycle 0.0.2 — PA-113: the drawing compiled `src/lib.npk` into
+`build/nparse.ll` and `build/nparse.o` and then linked "one program object + npkrt.o", as if
+a library object sat between them. Measured at the pin `2e1cb4a`, `npkc` emits a root and
+everything it imports as one module — an imported module's function is DEFINED in the
+root's emission — so a program links as its one object and the runtime, and the library is
+compiled on its own only to be scanned and compared.)*
 
 **Rule B-1.** Every tool invocation is built from `nitpick.toml`'s
 `[toolchain]` lists. No tool ever runs at its own defaults — `llc` defaults to
 `-O2` and would optimise a build the manifest declined, which cost the compiler
 project a measured 25× on one module.
+
+**Rule B-1a (PA-113) — the target rows are held.** Every module the build
+emits or optimises states the manifest's `target triple` and `target datalayout`,
+and the runner refuses a module that states others; and before anything runs it
+holds the `datalayout` row to what the pinned `opt` derives from the `triple`
+row, because `opt` keeps a wrong layout as written and `llc` accepts one in
+silence (the compiler's D-322 (5)).
 
 **Rule B-2.** The undefined-symbol scan is a **build step, not a test**. Every
 object is scanned and the build fails on any undefined symbol outside the
@@ -65,6 +80,33 @@ For `nparse` it should be nearly vacuous — the library makes no syscall at all
 (`SAFETY.md` §2) — and **a symbol appearing here is therefore a finding**, not
 a routine pass: it means something reached for the floor that had no business
 doing so.
+*(Re-read 2026-10-28, cycle 0.0.2 — PA-113: the allowlist is the pinned
+`npkrt.o`'s own defined symbols, the runtime the link uses, and the scan runs on
+both legs' objects. Measured at the pin: the floor program's object has five
+undefined symbols, all the runtime's, and the runtime defines `memcpy`, `memmove`
+and `memset`, so a libcall `opt` mints links. The one way a source program would
+name a symbol of its own choosing, a plain function in an `extern` block, is
+`NITPICK-EXTERN-001` (an `extern` block is a driver's), so this scan catches what
+the toolchain emits; what stands behind "no syscall" is B-2a.)*
+
+**Rule B-2a (PA-113) — the call-edge scan, and its controls.** Every
+module's -O0 IR is read for its calls to the runtime, edge by edge — the calling
+function and the callee — and an edge the floor program does not have, to a
+symbol `harness/irscan.py` denies, fails the build, naming the function and the
+facet. `irscan.py` classes every global symbol of the runtime object — all a call
+can resolve to — in exactly one of two lists: DENIED, by the facet of PA-006 or
+`SAFETY.md` §2 that forbids it (the kernel, a file or descriptor, a process, a
+signal handler, the clock, the environment, concurrency, machine code), or FLOOR,
+the language's own machinery; the run stops on a symbol in neither, or a name in
+either that the runtime does not define. It reads every module under `src/`,
+compiled as a root on its own — `src/lib.npk` reaches only what it imports — and
+every program. It cannot see a facet whose construct lowers to no runtime call —
+an atomic operation, a lock made and never held — which review holds. **The
+instruments are measured on every full run:** the floor
+program's object and a syscaller's must differ by `npk_sys6` alone, and the
+call-edge scan must flag the syscaller's `main` and nothing in the floor, so a
+scan gone blind reddens the run rather than passing everything (`PLAYBOOK.md`:
+an undefined-symbol scan once could not see a syscall at all).
 
 **Rule B-3.** The optimised leg runs on every program, every time: the same
 program re-emitted through `opt -O2` + `llc -O2` must produce the **same exit
@@ -76,6 +118,12 @@ its first run there found a real defect that had passed for six cycles.
 working directories produce byte-identical IR. `nparse` inherits this from the
 compiler (D-078, D-204, D-236) and the harness has a `repro` stage that
 measures it, because a property nobody measures is a property nobody has.
+*(Re-read 2026-10-28, cycle 0.0.2 — PA-113: each copy carries its manifest.
+The compiler records source paths relative to the manifest root (D-236), so a copy
+made without one — inside this repository, under its manifest — renders its paths
+by where it sits: measured at the pin, the conformance consumer copied twice without
+the manifest emits two different modules, and with it, one. The harness's `repro`
+step builds `[build] entry` and every conformance root from two copies.)*
 
 ---
 
@@ -105,6 +153,25 @@ compiler's, marker for marker, plus two of ours:
 // expect-roundtrip: json    the format whose fixed point this case asserts
 // expect-fault: DepthExceeded   the ParseError code this input must produce
 ```
+
+**Rule B-5b (PA-114) — the runner's own markers, and the ones it does not
+judge.** Two markers the compiler's reader does not have:
+
+```
+// mem-cap-mib: 64           run under a 64 MiB address-space cap, after the floor
+                             program under the same cap, which must exit 0
+// pending-until: DEF-<n> undefined-value @npk.m.Count->:Src.step
+                             CORRECT AND RED on the compiler defect DEF-<n>: the one
+                             failure excused, on every leg; listed in
+                             harness/baseline/PENDING.txt, both ways
+```
+
+A marker's value is the whole rest of its line, so one followed by prose cannot be
+read, and a file whose markers cannot be read fails. A marker of the compiler's
+grammar that this runner does not judge yet — `argv:`, `expect-note:`,
+`expect-obligation:`, `explore:`, `npkc-flags:` and their kin — and this library's
+`expect-roundtrip:` and `expect-fault:` until their stages exist, make their file
+fail by name: an expectation nobody checks is the failure this rule exists to stop.
 
 **Rule B-6 — assert on codes and exit codes, never on message text.**
 

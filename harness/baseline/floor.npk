@@ -1,0 +1,25 @@
+// expect-exit: 0
+//
+// THE FLOOR PROGRAM -- `harness/run.py`'s build step 1, and the control under every memory cap.
+// It allocates nothing and calls nothing: its object's undefined symbols and its IR's call edges
+// to the runtime are what the compiler emits into every program, so a program's edge the floor
+// does not have was written by that program (`irscan.py`). Its `failsafe` is the six-arm floor
+// every root owes (`NITPICK-REACH-003` at the pin) and a catch-all.
+mod:floor;
+
+func:main = int32(cstring[]:_~argv) {
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest)    { exit 91i32; },
+        (HeapOom)           { exit 92i32; },
+        (Unreachable)       { exit 95i32; },
+        (WildLeak)          { exit 96i32; },
+        (StackExhausted)    { exit 106i32; },
+        (MachineFault)      { exit 107i32; },
+        (*)                 { exit 99i32; }
+    }
+    exit 9i32;
+};

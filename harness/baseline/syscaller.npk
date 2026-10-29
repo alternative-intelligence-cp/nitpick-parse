@@ -1,0 +1,26 @@
+// expect-exit: 0
+//
+// THE SYSCALLER -- the floor program and one syscall, getpid(2): `harness/run.py`'s build step 1
+// requires its object to differ from the floor's by `npk_sys6` alone, and the call-edge scan to
+// flag `main` calling it, on every full run, so a scan gone blind reddens the run instead of
+// passing everything (`PLAYBOOK.md`: measure the instrument before adopting it).
+mod:syscaller;
+
+func:main = int32(cstring[]:_~argv) {
+    Result<int64>:r = sys(39i64);
+    if (r.is_error) { exit 70i32; }
+    exit 0i32;
+};
+
+func:failsafe = int32(Error:e) {
+    pick (e) {
+        (HeapBadRequest)    { exit 91i32; },
+        (HeapOom)           { exit 92i32; },
+        (Unreachable)       { exit 95i32; },
+        (WildLeak)          { exit 96i32; },
+        (StackExhausted)    { exit 106i32; },
+        (MachineFault)      { exit 107i32; },
+        (*)                 { exit 99i32; }
+    }
+    exit 9i32;
+};
