@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """nparse's build and test runner, until `npkg` can build a library (PA-003).
 
-    NPKC=<pinned npkc> NPKRT=<pinned npkrt.o> python3 -B harness/run.py [--verdicts PATH]
+    NPKC=<pinned npkc> NPKRT=<pinned npkrt.o> python3 -B harness/run.py [--verdicts PATH] [--only SUBSTR]
 
 WHAT A RUN DOES, IN ORDER, and every step can fail it:
 
 1. reads `nitpick.toml` (`manifest.py`) and REFUSES BY NAME, before anything runs, an entry
-   this runner cannot honour -- at cycle 0.0.2 it judges `program` and `compile`/`positive`
-   entries, and `[build] opt-level = 0` -- exit 2, never a skip (the compiler's
-   `BUILD_REFERENCE.md` §7.1 rule);
+   this runner cannot honour -- it judges `program`, `compile`/`positive`, `check` (the
+   refusals, cycle 0.0.3) and `parse` (the sweep, cycle 0.0.3) entries, and `[build] opt-level
+   = 0` -- exit 2, never a skip (the compiler's `BUILD_REFERENCE.md` §7.1 rule);
 2. holds the toolchain to the manifest (`toolchain.py`): `llc`, `opt` and `ld.lld` at its
    LLVM exactly, its datalayout the one the pinned `opt` derives from its triple, `$NPKC`
    and `$NPKRT` set -- and holds `irscan.py`'s two lists to `$NPKRT`: every name in them
@@ -24,10 +24,19 @@ WHAT A RUN DOES, IN ORDER, and every step can fail it:
    entry's artefacts left at `[build] output`; and REPRO -- `[build] entry` and every
    conformance root built from two copies of the tree, each carrying its manifest, their IR
    compared byte for byte;
+   -- and between the first build step and the second, THE SELF-CHECK (`selfcheck.py`,
+   PA-116), which needs the floor program the first builds: if any live case is not red,
+   the run stops there, RED;
 4. the suites, in manifest order (`stages.py`), every unit's -O0 IR scanned for call edges
    the floor program lacks to a symbol `irscan.py` denies;
-5. holds `harness/baseline/PENDING.txt` to the pending units, the other direction: a line
+5. the tree checks (`treecheck.py`, PA-117), each printing what it read;
+6. holds `harness/baseline/PENDING.txt` to the pending units, the other direction: a line
    no pending unit matched is a failure.
+
+`--only SUBSTR` runs the `program` and `check` units whose path holds SUBSTR and nothing else
+-- no self-check, no build step past the first, no sweep, no tree check -- and says TWICE, first
+and last, that a filtered run concludes nothing; its last line is `harness: FILTERED -- …`,
+never the green summary (PA-116).
 
 It prints one line per step and unit, and LAST, the summary -- `harness: GREEN -- …` when
 nothing failed, `harness: RED -- …` otherwise -- and exits 0 on GREEN, 1 on RED and 2 when it
@@ -44,12 +53,14 @@ sys.path.insert(0, HERE)
 import build      # noqa: E402
 import irscan     # noqa: E402
 import manifest   # noqa: E402
+import selfcheck  # noqa: E402
 import stages     # noqa: E402
 import toolchain  # noqa: E402
+import treecheck  # noqa: E402
 from elf import Obj  # noqa: E402
 
 ROOT = os.path.dirname(HERE)
-JUDGED = {("program", None), ("compile", "positive")}
+JUDGED = {("program", None), ("compile", "positive"), ("check", None), ("parse", None)}
 
 
 def out(line):
@@ -67,7 +78,10 @@ def honour(man):
         if (t["stage"], t.get("kind")) not in JUDGED:
             stop(f"[[test]] `{t['name']}` is stage `{t['stage']}`"
                  f"{', kind `' + t['kind'] + '`' if 'kind' in t else ''}, which this runner does "
-                 "not judge at cycle 0.0.2 -- refused by name, never skipped")
+                 "not judge at cycle 0.0.3 -- refused by name, never skipped")
+    if not any(t["stage"] == "parse" and manifest.paths_of(t) == ["."] for t in man.tests):
+        stop("no [[test]] entry of stage `parse` over `.` -- the sweep every `.npk` in the tree gets (BUILD.md §3); "
+             "a run without it would be green over files nothing compiled")
     if man.need("build", "opt-level") != 0:
         stop("[build] opt-level is not 0 -- raising it is its own decision, and this runner "
              "honours 0 only")
@@ -192,11 +206,15 @@ def repro(ctx, man, failures):
 
 
 def main(argv):
-    verdicts_path = None
-    if argv[1:2] == ["--verdicts"] and len(argv) == 3:
-        verdicts_path = argv[2]
-    elif len(argv) != 1:
-        stop("usage: run.py [--verdicts PATH]")
+    verdicts_path, only, args = None, None, argv[1:]
+    while args:
+        if args[0] in ("--verdicts", "--only") and len(args) >= 2:
+            verdicts_path, only = (args[1], only) if args[0] == "--verdicts" else (verdicts_path, args[1])
+            args = args[2:]
+        else:
+            stop("usage: run.py [--verdicts PATH] [--only SUBSTR]")
+    if only is not None:
+        out(f"harness: --only {only} -- A FILTERED RUN CONCLUDES NOTHING: no self-check, no sweep, no tree check")
     try:
         man = manifest.read(os.path.join(ROOT, "nitpick.toml"))
     except manifest.ManifestError as e:
@@ -228,18 +246,37 @@ def main(argv):
     if floor_edges is None:
         out("harness: RED -- " + "; ".join(failures))
         return 1
-    library(ctx, man, floor_edges, failures)
-    repro(ctx, man, failures)
+    if only is None:
+        ok, said = selfcheck.run(ctx, ROOT, floor_bin, floor_edges, out)
+        out(f"{'ok  ' if ok else 'FAIL'}  {said}")
+        if not ok:
+            out(f"harness: RED -- {said}: the harness cannot be shown to fail, so nothing after it is judged")
+            return 1
+        library(ctx, man, floor_edges, failures)
+        repro(ctx, man, failures)
     try:
         pending_list = stages.read_pending_list(ROOT)
     except (OSError, ValueError) as e:
         stop(str(e))
-    st = stages.Stage(ROOT, ctx, floor_bin, pending_list, floor_edges)
+    st = stages.Stage(ROOT, ctx, floor_bin, pending_list, floor_edges, only)
     for t in man.tests:
-        st.program_suite(t)
-    for key in sorted(set(pending_list) - st.pending_seen):
-        failures.append(f"harness/baseline/PENDING.txt names {key[0]} ({key[1]} {key[2]}), and no "
-                        "pending unit matched it")
+        if t["stage"] == "check":
+            stages.check_suite(st, t)
+        elif t["stage"] == "parse":
+            if only is None:
+                stages.parse_sweep(st, t)
+        else:
+            st.program_suite(t)
+    if only is None:
+        for check in treecheck.ALL:
+            line, bad = check(ROOT)
+            for b in bad:
+                out(f"FAIL  {check.__name__}: {b}")
+            out(f"{'ok  ' if not bad else '    '}  {line}")
+            failures += [f"{check.__name__}: {b}" for b in bad]
+        for name, when in treecheck.LATER:
+            out(f"later {name}: from {when}")
+        failures += stages.orphans(pending_list, st.pending_seen)
     n = {v: sum(1 for x in st.verdicts if x[0] == v) for v in ("PASS", "FAIL", "PEND")}
     failures += [f"{s}/{os.path.basename(r)}" for v, s, r, _ in st.verdicts if v == "FAIL"]
     if verdicts_path:
@@ -250,12 +287,18 @@ def main(argv):
     judged = n["PASS"] + n["FAIL"]
     tail = (f"{n['PASS']} of {judged} units passed, {n['PEND']} pending"
             f"{' (' + ', '.join(labels) + ')' if labels else ''}")
+    if only is not None:
+        for f in failures:
+            out(f"  failed: {f}")
+        out(f"harness: --only {only} -- A FILTERED RUN CONCLUDES NOTHING; nothing here is committed on its strength")
+        out(f"harness: FILTERED -- {len(failures)} failure(s); {tail}")
+        return 1 if failures else 0
     if failures:
         for f in failures:
             out(f"  failed: {f}")
         out(f"harness: RED -- {len(failures)} failure(s); {tail}")
         return 1
-    out(f"harness: GREEN -- 3 build steps; {tail}")
+    out(f"harness: GREEN -- the self-check, 3 build steps, {len(treecheck.ALL)} tree checks; {tail}")
     return 0
 
 

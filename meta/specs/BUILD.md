@@ -145,12 +145,16 @@ runner and not a change of suite, and adds two of its own.
 
 | Stage | Directory | Passes when |
 |---|---|---|
-| `parse` | every `.npk` in the tree | accepted by `tools/parse_check` with no diagnostic |
-| `accept` | `tests/conformance/` | accepted by `tools/check` in silence |
-| `check` | `tests/rejection/` | refused by the frontend with **exactly** the expected codes |
+| `parse` | every `.npk` in the tree | compiled by `npkc` as a root, with no `NITPICK-LEX-` or `NITPICK-PARSE-` code reported |
+| ~~`accept`~~ | — | struck: `tests/conformance/` is a `compile`/`positive` suite, built, linked and run |
+| `check` | `tests/rejection/`, `tests/probe/refused/` | refused by `npkc` with **exactly** the expected codes, each `expect-error-at` a site its code was reported at |
 | `program` | `tests/unit/`, `tests/probe/`, `tests/fixtures/` | emitted, scanned, assembled, linked, run at -O0 and again under `opt -O2`, the same exit both times |
 | `roundtrip` | `tests/roundtrip/` | **ours** — parse, print, parse again, and the second parse's event stream equals the first's (`WRITER_MODEL.md` §4) |
 | `corpus` | `tests/corpus/<name>/` | **ours** — every case in a vendored conformance corpus is judged as the corpus says, with a per-corpus expected-pass count that must match exactly |
+
+*(2026-10-29, cycle 0.0.3 — PA-115: the `parse` and `check` stages are judged by `npkc`, not by the compiler's
+`tools/parse_check` and `tools/check`, which are `.npk` sources a run would have to build from the compiler's tree, and
+nothing here builds the compiler; and `accept` is struck, since `tests/conformance/` is run.)*
 
 **Rule B-5 — expectations live in the test file.** The marker grammar is the
 compiler's, marker for marker, plus two of ours:
@@ -182,12 +186,18 @@ grammar that this runner does not judge yet — `argv:`, `expect-note:`,
 `expect-obligation:`, `explore:`, `npkc-flags:` and their kin — and this library's
 `expect-roundtrip:` and `expect-fault:` until their stages exist, make their file
 fail by name: an expectation nobody checks is the failure this rule exists to stop.
+*(2026-10-29, cycle 0.0.3 — PA-115: a second observation, `// pending-until: DEF-<n> accepted`, for a `check`
+unit whose right answer is a refusal and which `npkc` accepts at the pin, exit 0 with no diagnostic — probe 08h's
+shape on DEF-252 at `7e91730`, which the compiler's landing 116 fixed, so no unit takes it at `c9baa9e`.)*
 
 **Rule B-6 — assert on codes and exit codes, never on message text.**
 
 **Rule B-7 — unexpected diagnostics fail a test as surely as missing ones**
 (D-237). The set of codes a rejection test reports must **equal** the set its
 expectations name.
+*(Re-read 2026-10-29, cycle 0.0.3 — PA-115: a SET, as written: the compiler's DEF-245 reported one failing
+header two or three times until its landing 130, so a count of reports would judge the report and not the
+refusal; and each `expect-error-at` names a site its code was reported at.)*
 
 **Rule B-8 — the harness is itself tested** (`TESTING.md` §7). A self-check
 feeds it wrong expectations and requires it to report every one as a failure,

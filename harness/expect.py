@@ -29,9 +29,10 @@ THE RUNNER'S OWN TWO (B-5b, PA-114), which `npkg` does not have:
   defect DEF-<n> is in the pinned compiler. The label is the compiler seat's registration,
   a label nothing resolves; the OBSERVATION is the one failure the marker excuses, and the
   only one, on every leg (`nitpick-regex`'s RX-154 lesson: a marker that excuses any failure
-  excuses a different one). At this subcycle the one observation is
-  `undefined-value <symbol>`: `npkc` accepts the program and LLVM refuses the module,
-  naming that undefined value -- `llc` at -O0, `opt` on the optimised leg.
+  excuses a different one). Two observations: `undefined-value <symbol>` -- `npkc` accepts the
+  program and LLVM refuses the module, naming that undefined value, `llc` at -O0 and `opt` on the
+  optimised leg (cycle 0.0.2); and `accepted` -- a file whose right answer is a refusal is
+  accepted by `npkc`, exit 0, with no diagnostic (cycle 0.0.3, PA-115).
 """
 import re
 
@@ -44,7 +45,7 @@ _CODE = re.compile(r"^NITPICK-[A-Z]+-[0-9]{3}$")
 _AT = re.compile(r"^([0-9]+)(?::([0-9]+))?$")
 _INT = re.compile(r"^-?[0-9]+$")
 _LABEL = re.compile(r"^DEF-[0-9]+$")
-OBSERVATIONS = ("undefined-value",)
+OBSERVATIONS = {"undefined-value": 1, "accepted": 0}     # each with the count of words after it
 
 
 class Expect:
@@ -119,16 +120,15 @@ def read_text(text, path):
             e.mem_cap_mib = int(value)
         elif name == "pending-until:":
             parts = value.split(None, 2)
-            if (len(parts) != 3 or not _LABEL.match(parts[0])
-                    or parts[1] not in OBSERVATIONS):
-                _bad(e, n, f"`pending-until: {value}` is not `pending-until: DEF-<n> "
-                           f"<observation> <argument>`, the observation one of "
-                           f"{', '.join(OBSERVATIONS)}")
+            if (len(parts) < 2 or not _LABEL.match(parts[0]) or parts[1] not in OBSERVATIONS
+                    or len(parts) - 2 != OBSERVATIONS[parts[1]]):
+                _bad(e, n, f"`pending-until: {value}` is not `pending-until: DEF-<n> undefined-value "
+                           "<symbol>` or `pending-until: DEF-<n> accepted`")
                 continue
             if e.pending is not None:
                 _bad(e, n, "a second `pending-until:` -- a unit waits on one defect")
                 continue
-            e.pending = (parts[0], parts[1], parts[2])
+            e.pending = (parts[0], parts[1], parts[2] if len(parts) == 3 else "")
     return e
 
 

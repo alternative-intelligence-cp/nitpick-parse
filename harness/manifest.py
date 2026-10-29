@@ -11,9 +11,11 @@ THE SCHEMA IS THE COMPILER'S AT THE PIN: `npkg/manifest.npk`'s `schema_allows` a
 table for table and key for key, `[dependencies]` taking any key. Cycle 0.0.2's facts script
 re-derives it from that function and compares (`0.0.2.md` §1.2).
 
-THE STAGES are the compiler's vocabulary (`BUILD_REFERENCE.md` §7.1 at the pin) and this
-library's two (`roundtrip`, `corpus`; `BUILD.md` §3). The compiler's rule is this runner's:
-an entry it cannot honour is REFUSED BY NAME before anything runs, never skipped (`run.py`).
+THE STAGES are the compiler's vocabulary -- the twelve `npkg/manifest.npk`'s `stage_known`
+accepts at the pin `2e1cb4a`, `BUILD_REFERENCE.md` §7.1's eleven and `object`, which that
+table does not list -- and this library's two (`roundtrip`, `corpus`; `BUILD.md` §3). The
+compiler's rule is this runner's: an entry it cannot honour is REFUSED BY NAME before anything
+runs, never skipped (`run.py`).
 """
 import re
 
@@ -33,7 +35,7 @@ SCHEMA = {
     "verify.nikos": {"domain"},
 }
 ANY_KEY = {"dependencies"}
-KNOWN_STAGES = {"compile", "parse", "resolve", "check", "accept", "fixture", "program",
+KNOWN_STAGES = {"compile", "parse", "resolve", "check", "accept", "object", "fixture", "program",
                 "runtime", "verify", "cost", "explore", "roundtrip", "corpus"}
 KNOWN_KINDS = {"positive", "negative", "diagnostic"}
 

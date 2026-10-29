@@ -10,9 +10,12 @@ Built in cycles 0.0.2 and 0.0.3.
 and says so; CI runs it so that the workflow's last step exists before the runner does.
 *(2026-10-28, cycle 0.0.2: the stub is replaced by the runner below; cycle 0.0.3 adds the
 refusal and parse stages, the self-check and the tree checks.)*
+*(2026-10-29, cycle 0.0.3: added. A run is now the toolchain, the floor program, the self-check, the other two build
+steps, the suites, the tree checks and the reviewed list's other direction, in that order; `--only SUBSTR` runs the
+matching `program` and `check` units alone and concludes nothing.)*
 
 ```
-NPKC=<pinned npkc> NPKRT=<pinned npkrt.o> python3 -B harness/run.py [--verdicts PATH]
+NPKC=<pinned npkc> NPKRT=<pinned npkrt.o> python3 -B harness/run.py [--verdicts PATH] [--only SUBSTR]
 ```
 
 `$NPKC` and `$NPKRT` are the pinned toolchain the board names (`../../BOARD.md`), and
@@ -31,12 +34,16 @@ prints is its verdict — `harness: GREEN -- …` or `harness: RED -- …` — a
 | `build.py` | one root to one module, both legs, the undefined-symbol scan (B-2), and `npkc`'s exit alphabet |
 | `irscan.py` | the call-edge scan, and its two lists that class the runtime's global symbols: DENIED by facet, and FLOOR (B-2a) |
 | `elf.py` | an ELF64 symbol table, read with `struct` |
-| `stages.py` | the `program` stage and `compile`/`positive`: both legs, `stress`, the cap, and the pending units (B-5b) |
+| `stages.py` | the `program` stage and `compile`/`positive`: both legs, `stress`, the cap, and the pending units (B-5b); the `check` stage, a refusal judged as the set of its codes at their sites (B-7); and the `parse` sweep |
+| `selfcheck.py` | the harness fed wrong expectations and required to fail, before any judgment (B-8, `TESTING.md` V-19, V-20) |
+| `treecheck.py` | the tree checks, each reading its authority document (`TESTING.md` §3) |
+| `lexical.py` | the one reading of `.npk` text the checks share: bytes, comments and strings blanked |
 | `baseline/` | the floor program and the syscaller (build step 1, and the cap's control), and `PENDING.txt`, the reviewed list of pending units |
 
 ## What a green run asserts
 
 - the manifest names no entry this runner cannot judge, and the toolchain is the pin's;
+- every live case of the self-check was red, and its pending ones were printed as pending;
 - the two scans see a syscall — the floor and the syscaller differ by `npk_sys6` alone, and the
   syscaller's `main` is flagged — on this run, at this compiler;
 - every module under `src/` compiles as a root with no diagnostic, and none needs a symbol the
@@ -47,4 +54,6 @@ prints is its verdict — `harness: GREEN -- …` or `harness: RED -- …` — a
   manifest's target rows, scanned, linked with `npkrt.o` alone, run `stress` times on each leg —
   under its cap after the floor program under the same cap — and exited as it expects; and every
   pending unit showed the one failure its marker names, on every leg, and is a line of
-  `baseline/PENDING.txt`, which names no unit that is not pending.
+  `baseline/PENDING.txt`, which names no unit that is not pending;
+- every refusal was refused with exactly its set of codes at its sites, every `.npk` in the tree compiled as a root
+  with no LEX- or PARSE- code, and every live tree check agreed with the document it reads.

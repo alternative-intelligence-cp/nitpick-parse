@@ -1094,3 +1094,67 @@ the name both sides use.
 *Reversal, for the author:* none for the mechanism; each pending unit's marker and list line go
 when its fix is pinned, and a new observation form joins B-5b by a decision when a defect shows
 a failure this one cannot name.
+
+### PA-115 — the refusals and the sweep are judged by `npkc`; `accept` is struck; a refusal is a set of codes at their sites; a refusal the pin does not give is a pending one
+**2026-10-29, cycle 0.0.3.** `specs/BUILD.md` §3, B-5b and B-7. The `check` stage compiles each file with the pinned
+`npkc` and requires exit 1 with exactly the set of codes the file names, each `expect-error-at` a site its code was
+reported at; exit 0 is ACCEPTED and fails, and 2 or 3 is a broken run, printed with its code. The `parse` stage — the
+sweep — compiles every `.npk` in the tree as a root and passes it unless a `NITPICK-LEX-` or `NITPICK-PARSE-` code is
+reported or `npkc` could not proceed: a file refused for its types or its borrows parses. `accept` is struck, since
+`tests/conformance/` is built, linked and run. And the second pending observation, `accepted`: a `check` unit whose
+right answer is a refusal and which `npkc` accepts at the pin — probe 08h's, on DEF-252, at `7e91730`; the
+compiler's landing 116 fixed it before this subcycle, and at `c9baa9e` probe 08h is an ordinary refusal,
+`NITPICK-BORROW-002`, the code of the same reseat done directly (probe 08g), so no unit takes the observation
+at the pin.
+
+*Alternatives declined:* **the compiler's `tools/parse_check` and `tools/check`** — `.npk` sources a run would build
+from the compiler's tree, which nothing here builds (`nitpick-regex` and `nitpick-time` struck them the same way); **a
+count of reports per code** — the compiler's DEF-245 reports one failing header two or three times, so a count would
+judge the report; **the reseat's probe run as a program** — its exit, the free poison or a reused byte, is a rate and
+not a verdict, and its right answer is a refusal, which only `npkc` gives.
+*(Re-measured at `2e1cb4a`, 2026-10-29, in cycle 0.0.3's step cut: the compiler's landing 130, in the pin, makes a
+declaration whose header fails one report — its own example, `func<T>:process = int32(T:_~x) never fails { pass
+0i32; };`, is three reports of `NITPICK-PARSE-001` at `c9baa9e` and one at the pin — so the reason given above for
+declining a count of reports is the compiler's state before the pin. The set of codes stands on its own: a count per
+code is the compiler's to hold (its D-332), and DEF-245 was itself a count that moved with a landing while the set
+did not.)*
+
+*Reversal, for the author:* none for the stages; when the compiler's checker is a tool a library may run without a
+build, `parse` and `check` can move to it by a decision, judged the same way.
+
+### PA-116 — the self-check is its own printed list, live and pending, it runs before any judgment, and a filtered run concludes nothing
+**2026-10-29, cycle 0.0.3.** `specs/TESTING.md` V-19 and V-20, `BUILD.md` B-8. `harness/selfcheck.py` hands the
+harness's own functions — the stages and the tree checks, never a copy of their logic — fixtures that must fail: a
+wrong exit; a refusal expecting a code not reported, reporting one not expected, at the wrong site, and accepted; a file
+that does not parse; each tree check planted; and each way a pending marker can be wrong. Every live case must be red;
+one that is not stops the run there, RED. The cases whose stage does not exist yet are printed as PENDING with the
+cycle that builds it. It runs after the toolchain check and the floor program it builds on, and before every step
+that judges the library. `--only SUBSTR` runs the matching `program` and `check` units alone, says twice that a
+filtered run concludes nothing, and ends `harness: FILTERED -- …`, which CI's assertion refuses.
+
+*Alternatives declined:* **fixtures committed as failing files** — the parse sweep would then sweep files that must
+not parse; built at run time, they are the harness's own; **the self-check last** — a run whose harness cannot fail has
+judged nothing before it; **V-19's eight cases and no more** — the pending marker shipped elsewhere with no case at all,
+and an audit measured what that let through (`nitpick-regex`'s BL-6).
+
+*Reversal, for the author:* none; each pending case goes live, by a line of `selfcheck.py`, in the cycle that builds
+its stage.
+
+### PA-117 — the tree checks read their authorities; the error budget is keyed by module and name, private identities included
+**2026-10-29, cycle 0.0.3.** `specs/TESTING.md` §3. Six checks run on every full run and print what each read:
+`check_layering` (B-17's table, every import edge and every module header's `MAY IMPORT:` line), `check_error_budget`,
+`check_constants_named` (`SAFETY.md` §7's values, in any spelling, and `limits.npk`'s), `check_no_raw_accumulate`
+(PA-012), `check_no_recursion` (PA-022, its exceptions table empty and empty at 1.0) and `check_specs_current`, which
+reports and never fails. **The error budget is the identities the tree's `fail` sites raise, keyed by (module,
+name), private ones included** — measured at the pin, a root importing a module whose reachable `fail` raises a
+PRIVATE error owes it as `<module>.<name>`, and a public error never raised costs nothing — against `SAFETY.md` §3's
+two names and S-6's layers. The sentences that counted "public `error:` declarations" say so (the early ecosystem
+audit's EC3). `check_no_owning_fields`, `check_codes_documented` and `check_failsafe_arms` go live at cycle 0.2, and
+`check_corpus_provenance` at 0.3, each named by the run until then.
+
+*Alternatives declined:* **the count of public declarations** — it passes a planted private identity in silence, the
+shape EC3 named; **the authorities copied into the checks** — a table in two places is two tables; **the four later
+checks written now** — their inputs do not exist, and a check over nothing is printed as such, not passed.
+
+*Reversal, for the author:* none for the key; a layer S-6 does not list, or a third name, is a change to `SAFETY.md` §3
+by a decision, which the check then reads.

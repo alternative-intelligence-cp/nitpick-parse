@@ -51,16 +51,21 @@ them found something on its first run.
 
 | Check | Diffs |
 |---|---|
-| `check_no_raw_accumulate` | `src/scan/` and `src/format/` for a `*` or `+` on an accumulator outside `arith.npk` — **the no-trap rule, enforced** (`SCAN_MODEL.md` C-15) |
+| `check_no_raw_accumulate` | `src/scan/` and `src/format/` outside `arith.npk` for any `*`, and any `x = x + …` whose added term is not a literal — **the no-trap rule, enforced** (`SCAN_MODEL.md` C-15) |
 | `check_no_recursion` | every function in `src/` against a call-graph cycle — **the depth rule, enforced** (`SAFETY.md` §5). A cycle is a finding, and the exceptions table must name a reason |
 | `check_no_owning_fields` | `Event`, `Node`, `ParseError`, `Frame` and every value stored in a `Vec` or an arena declare no owning field |
-| `check_error_budget` | the count and names of public `error:` declarations against `SAFETY.md` §3's table — **two, and the check is what keeps it two** |
+| `check_error_budget` | the identities the tree's `fail` sites raise, keyed by (module, name), private ones included, against `SAFETY.md` §3's table and S-6's layers — **two names, and the check is what keeps it two** |
 | `check_failsafe_arms` | the generated per-module arm list against a program that imports each module and compiles its `failsafe` |
-| `check_layering` | every `use` edge against `BUILD.md` §6's diagram, including the `format` ↛ `doc` arrow specifically |
-| `check_constants_named` | no bound outside `src/core/limits.npk` |
+| `check_layering` | every `use` edge between `src/` layers, and every module header's `MAY IMPORT:` line, against `BUILD.md` B-17's table — the `format` ↛ `doc` arrow (B-18) a cell of it |
+| `check_constants_named` | no integer literal under `src/` outside `src/core/limits.npk` equal to a bound of `SAFETY.md` §7's table, in any spelling; and `limits.npk`'s values the table's |
 | `check_codes_documented` | every `FaultCode` variant appears in `DIAGNOSTIC_MODEL.md` §3's table and has at least one test that produces it |
 | `check_corpus_provenance` | every corpus directory has a `PROVENANCE.md` naming its upstream commit, and the vendored tree's hash matches what it records |
-| `check_specs_current` | reports, does not fail: spec sections whose cited symbols no longer resolve |
+| `check_specs_current` | reports, does not fail: a rule id a `src/` or `harness/` comment cites beside a specification's name that no specification defines |
+
+*(2026-10-29, cycle 0.0.3 — PA-117: the rows for `check_error_budget` (the ecosystem audit's EC3: it said "the count
+and names of public `error:` declarations"), `check_layering` (B-17's table since cycle 0.0.1), `check_constants_named`,
+`check_no_raw_accumulate` and `check_specs_current` say what each live check reads; `check_no_owning_fields`,
+`check_codes_documented` and `check_failsafe_arms` go live at cycle 0.2 and `check_corpus_provenance` at 0.3.)*
 
 **Rule V-3 — `check_no_raw_accumulate` and `check_no_recursion` are the two
 that matter most**, because they enforce the two rules that keep hostile input
@@ -210,5 +215,12 @@ expectations and requires it to report every one as a failure:
 - a `check_no_raw_accumulate` violation planted in a scratch file;
 - a `parse` case that does not parse.
 
+*(2026-10-29, cycle 0.0.3 — PA-116: the cases are `harness/selfcheck.py`'s list, which every run prints case by
+case: the five of these whose stage exists, and more — a refusal at the wrong site, a refusal case `npkc` accepts,
+each tree check planted, and each way a pending marker can be wrong — and the three whose stage does not exist yet
+printed as pending with the cycle that builds it, beside `check_no_owning_fields`'s.)*
+
 **Rule V-20 — the self-check runs first in every full invocation.** A harness
 that has not proven it can fail has not proven anything.
+*(2026-10-29, cycle 0.0.3 — PA-116: first after the toolchain check and the floor program its cases are built on,
+and before every step that judges the library; a live case not red stops the run.)*

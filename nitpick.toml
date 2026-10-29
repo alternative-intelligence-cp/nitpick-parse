@@ -92,3 +92,13 @@ path  = "tests/conformance"
 name  = "probe"
 stage = "program"
 path  = "tests/probe"
+
+# The parse sweep (cycle 0.0.3, PA-115): every `.npk` in the tree compiled as
+# a root, none with a LEX- or PARSE- code. It comes last, so a file a suite
+# judges is judged there first, by its own rule. The runner refuses a manifest
+# without it: a run that swept nothing would be green over files nothing compiled.
+[[test]]
+name      = "sweep"
+stage     = "parse"
+path      = "."
+recursive = true
