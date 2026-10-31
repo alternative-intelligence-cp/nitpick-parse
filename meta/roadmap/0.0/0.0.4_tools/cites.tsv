@@ -24,6 +24,32 @@
 # plans or pages and five documents cited whole. Its exclusions are in its docstring, each with a planted twin in
 # `cites_plants.tsv`.
 #
+# THE PLANS (T19's (CC2): management_10's ruling of 07:54, its last lines, and nitpick-libs_35's of 10:07): a row whose
+# site is `0.0.4.md:<n>` or `0.0.5.md:<n>` is one hit on a line `git diff -U0 405df34 <at>` adds to that plan, its
+# place PROSE, TABLE or COMMENT, read the same way, against the tree as the nine patches leave it and the two plans at
+# <at>; a row's label names any other commit or source (a report or a seat's message as filed, the compiler's or the
+# workbench's tree at a commit). `record` reads only the rows of the scope it is given.
+#
+#   python3 -B meta/roadmap/0.0/0.0.4_tools/cites.py run 405df34 <at> plans
+#   python3 -B meta/roadmap/0.0/0.0.4_tools/cites.py record 405df34 <tip> meta/roadmap/0.0/0.0.4_tools/cites.tsv tip plans
+#   python3 -B meta/roadmap/0.0/0.0.4_tools/cites.py record 405df34 0eeb890 meta/roadmap/0.0/0.0.4_tools/cites.tsv 0eeb890 plans
+#
+# The floor, each plan by itself:
+#   git diff -U0 405df34 <at> -- meta/roadmap/0.0/0.0.4.md | grep '^+' | grep -v '^+++ ' \
+#     | grep -oE '\b(B|PA|PD|S|G|D|SK|W)-[0-9]{1,4}\b|\bO-N[0-9]+\b|§\s?[0-9][0-9.]*|\bitem [0-9]+' | wc -l
+# (the rule part alone for the floor, all four for C2). At 0eeb890, 0.0.4.md adds 1154 lines: the floor 205 hits on
+# 103 lines, 140 in prose and tables and 65 in `text` fences; with C2's forms 315, 96 more in prose and tables and 14
+# in fences. The census: 327 hits on 142 lines -- rule 142 (the floor's 140 and `B-2a` at :138 and :1831, which the
+# floor's `\b` after the digits cannot match), section 80 and item 24 (C2's 96, and `items 1` and `items 11` five times
+# and `Item 11` or `Item 12` three, the plural and the capital the floor's `item` does not match), ruling 13, plan 1,
+# document 46, finding 13, cycle 4, pointer 4; dropped 292 by X4 (rule 68, the floor's 65 and `C-15`, `V-19`, `V-20`;
+# section 14, C2's; code 24, pointer 58, document 125, cycle 2, ruling 1), 35 by X3 and 8 by X1 (each a code). 0.0.5.md
+# adds 24 lines: the floor 5 hits on 4 lines (one in a `text` fence), 6 with C2's (that fence's `§1.3`); the census 5
+# on 3 lines, rule 4 and document 1, and X4 drops 9. The positive control is at 0eeb890: its record exits 1 on the two
+# rows OVER-REACHES, each fixed at the tip. At the tip, 340 hits on 152 lines, 300 SUPPORTS and 40 POINTER, its record
+# exits 0. A `0eeb890` row reading `=` is read as the `tip` row of the same site and token, whose sentence is the same
+# there: the two fixes re-wrap :2077 ... :2080 and :2157 ... :2164 within their lines, every hit on them on its line.
+#
 # Columns: at; site, the patch and its line at that commit; place (C1): PATCH-ADDED on a patch line beginning `+`, the
 # text the merge freezes and the only new claims, or CONTEXT, existing tree text re-shown; form; token; class: SUPPORTS,
 # OVER-REACHES or POINTER; read against, each file and line as 0.0.4's nine patches leave the tree, unless the label
@@ -280,3 +306,676 @@ tip	step4.patch:45	CONTEXT	rule	PD-142	SUPPORTS	meta/DECISIONS.md:1158; meta/roa
 46464ba	step4.patch:43	CONTEXT	rule	PD-191	=	=	=
 46464ba	step4.patch:44	CONTEXT	ruling	ruling	=	=	=
 46464ba	step4.patch:45	CONTEXT	rule	PD-142	=	=	=
+# THE PLANS' ROWS (T19's (CC2)): at the tip, then at 0eeb890.
+tip	0.0.4.md:40	PROSE	rule	PA-009	SUPPORTS	meta/DECISIONS.md:157; meta/specs/SAFETY.md:108	"cycle 0.0.3 — PA-117: measured at the pin, the arm is owed"; "aligned to PA-009's dated note of cycle 0.0.3" -- the note, and S-4 aligned to it
+tip	0.0.4.md:48	PROSE	section	§1.11	SUPPORTS	meta/roadmap/0.0/0.0.4.md:194	"A call through a trait is charged every implementation the program holds" -- §1's item 11
+tip	0.0.4.md:50	PROSE	rule	B-17	SUPPORTS	meta/specs/BUILD.md:321; meta/specs/BUILD.md:343	"| `nparse` | nothing |"; "the table gains the `nparse` row" -- the row and its note
+tip	0.0.4.md:50	PROSE	rule	PD-191	SUPPORTS	meta/DECISIONS.md:1257; meta/roadmap/0.0/0.0.4.md:1646	"`EParseState` and `EParseEncode` are each declared once, in `src/nparse/nparse.npk`, which imports nothing"; "nparse.EParseState (src/nparse/nparse.npk:10), nparse.EParseEncode (src/nparse/nparse.npk:11)" -- PA-121's heading and block 5's `decls`, which measured it
+tip	0.0.4.md:51	PROSE	rule	PD-144	SUPPORTS	meta/DECISIONS.md:1232	"PA-121: `EParseState` is declared once, in `src/nparse/nparse.npk`, not by `doc` or a" -- PA-119's note, step 2's
+tip	0.0.4.md:51	PROSE	rule	PD-145	SUPPORTS	meta/DECISIONS.md:1253	"PA-121: `EParseState` is declared once, in `src/nparse/nparse.npk`, not by `doc` and" -- PA-120's note, step 4's
+tip	0.0.4.md:51	PROSE	section	§1.12	SUPPORTS	meta/roadmap/0.0/0.0.4.md:216	"`EParseState` and `EParseEncode` declared once, in a module of their own" -- §1's item 12
+tip	0.0.4.md:52	PROSE	rule	S-4	SUPPORTS	meta/specs/SAFETY.md:108	"cycle 0.0.4 — PA-121, aligned to PA-009's dated note of cycle 0.0.3" -- S-4's note
+tip	0.0.4.md:52	PROSE	rule	S-6	SUPPORTS	meta/specs/SAFETY.md:140	"the two bullets above name the modules that raise the identities" -- S-6's note
+tip	0.0.4.md:52	PROSE	rule	S-7	SUPPORTS	meta/specs/SAFETY.md:152	"cycle 0.0.4 — PA-121: measured at the pin `2e1cb4a`, what an import owes" -- S-7's note
+tip	0.0.4.md:52	PROSE	rule	PA-008	SUPPORTS	meta/DECISIONS.md:143	"cycle 0.0.4 — PA-121: TWO counts identities" -- PA-008's note
+tip	0.0.4.md:52	PROSE	ruling	ruling	SUPPORTS	management_10's ruling (a), its message of 2026-10-31 05:24 as sent	"RULED (a): one identity per name for the whole library"
+tip	0.0.4.md:53	PROSE	rule	G-7	SUPPORTS	meta/specs/PLUGIN_MODEL.md:118	"`nparse`'s `EParseState` is the identity `src/nparse/nparse.npk` declares" -- G-7's note
+tip	0.0.4.md:53	PROSE	finding	finding 3	SUPPORTS	T16v2's report, as filed:185	"PA-008's heading is only listed"
+tip	0.0.4.md:54	PROSE	section	§8	SUPPORTS	meta/specs/SAFETY.md:343	"at most two, `nparse.EParseState` and `nparse.EParseEncode`" -- §8's item 2, re-written
+tip	0.0.4.md:54	PROSE	item	item 2	SUPPORTS	meta/specs/SAFETY.md:343	"at most two, `nparse.EParseState` and `nparse.EParseEncode`" -- §8's item 2, re-written
+tip	0.0.4.md:55	PROSE	ruling	rulings	SUPPORTS	T18's brief, quoting management_10's ruling of 2026-10-31 04:24	"a STRUCTURAL check for the public error count, not another word list"
+tip	0.0.4.md:55	PROSE	finding	finding 2	SUPPORTS	T16v2's report, as filed:179	"SAME POINT AS T16v's finding 2, by subject: the pattern is a word list"
+tip	0.0.4.md:56	PROSE	rule	PD-191	SUPPORTS	meta/DECISIONS.md:1257; meta/roadmap/0.0/0.0.4.md:1646	"`EParseState` and `EParseEncode` are each declared once, in `src/nparse/nparse.npk`, which imports nothing"; "nparse.EParseState (src/nparse/nparse.npk:10), nparse.EParseEncode (src/nparse/nparse.npk:11)" -- PA-121's heading and block 5's `decls`, which measured it
+tip	0.0.4.md:59	PROSE	section	§5	SUPPORTS	meta/roadmap/0.0/0.0.4.md:1856	"is the check, keyed on the claim's subject"
+tip	0.0.4.md:94	PROSE	rule	PD-191	SUPPORTS	meta/roadmap/0.0/tools/decisions.txt:58	"PD-191 is the next round's (T18b, 2026-10-31), from its dispatch's block, PD-191 ... PD-200." -- the PD order's last line, PD-191 the last PD
+tip	0.0.4.md:138	TABLE	rule	B-2a	POINTER	meta/specs/BUILD.md:92	"Rule B-2a (PA-113) — the call-edge scan, and its controls" -- a reading list: names what the step reads, says nothing of it
+tip	0.0.4.md:138	TABLE	rule	B-8	POINTER	meta/specs/BUILD.md:206	"Rule B-8 — the harness is itself tested" -- a reading list: names what the step reads, says nothing of it
+tip	0.0.4.md:138	TABLE	rule	B-16	POINTER	meta/specs/BUILD.md:304	"Rule B-16 — imports are relative today" -- a reading list: names what the step reads, says nothing of it
+tip	0.0.4.md:138	TABLE	rule	B-18	POINTER	meta/specs/BUILD.md:347	"Rule B-18 — `format` may not import `doc`" -- a reading list: names what the step reads, says nothing of it
+tip	0.0.4.md:138	TABLE	rule	S-4	POINTER	meta/specs/SAFETY.md:102	"Rule S-4 — three is a major version" -- a reading list: names what the step reads, says nothing of it
+tip	0.0.4.md:138	TABLE	rule	S-7	POINTER	meta/specs/SAFETY.md:147	"The exact arm set a consuming program owes, per import" -- a reading list: names what the step reads, says nothing of it
+tip	0.0.4.md:138	TABLE	rule	G-6	POINTER	meta/specs/PLUGIN_MODEL.md:93	"Rule G-6 — the contract, enumerated" -- a reading list: names what the step reads, says nothing of it
+tip	0.0.4.md:138	TABLE	rule	G-9	POINTER	meta/specs/PLUGIN_MODEL.md:170	"drives an" -- a reading list: names what the step reads, says nothing of it
+tip	0.0.4.md:138	TABLE	section	§3	POINTER	meta/roadmap/0.0/0.0.4.md:921	"## 3. The steps, and what each commit carries" -- a reading list: names what the step reads, says nothing of it
+tip	0.0.4.md:138	TABLE	section	§3	POINTER	meta/specs/SAFETY.md:62; meta/specs/SAFETY.md:334	"## 3. The error budget — two, and no input can produce either"; "## 8." -- §§3 and 8, a reading list
+tip	0.0.4.md:138	TABLE	section	§3	POINTER	meta/roadmap/0.0/0.0.4.md:921	"## 3. The steps, and what each commit carries" -- the paragraph each sentence is read against
+tip	0.0.4.md:138	TABLE	section	§4	POINTER	meta/roadmap/0.0/0.0.4.md:1772	"## 4. The mutants, and the self-check's new cases" -- a reading list: names what the step reads, says nothing of it
+tip	0.0.4.md:138	TABLE	section	§1.9	POINTER	meta/roadmap/0.0/0.0.4.md:187	"An error identity is its declaring module and its name" -- a reading list: names what the step reads, says nothing of it
+tip	0.0.4.md:138	TABLE	section	§5	POINTER	meta/roadmap/0.0/0.0.3.md:856	"## 5. The mutants" -- a record the parts' notes join, named
+tip	0.0.4.md:138	TABLE	section	§0	POINTER	meta/roadmap/0.0/0.0.2.md:88	"## 0. Read these first, and how to run a block" -- a record the parts' notes join, named
+tip	0.0.4.md:138	TABLE	section	§1.11	POINTER	meta/roadmap/0.0/0.0.4.md:194	"A call through a trait is charged every implementation the program holds" -- a reading list: names what the step reads, says nothing of it
+tip	0.0.4.md:138	TABLE	section	§1.12	POINTER	meta/roadmap/0.0/0.0.4.md:216	"`EParseState` and `EParseEncode` declared once, in a module of their own" -- a reading list: names what the step reads, says nothing of it
+tip	0.0.4.md:138	TABLE	document	harness/README.md	POINTER	harness/README.md:1	"# `harness/` — the build and test runner" -- a reading list: names what the step reads, says nothing of it
+tip	0.0.4.md:139	TABLE	rule	D-16	POINTER	meta/specs/VALUE_MODEL.md:165	"Rule D-16 — detection is a scan of the pairs already in the chain" -- a reading list: names what the step reads, says nothing of it
+tip	0.0.4.md:139	TABLE	rule	PA-004	POINTER	meta/DECISIONS.md:58	"### PA-004 — `nparse` declares its own storage primitives" -- a reading list: names what the step reads, says nothing of it
+tip	0.0.4.md:139	TABLE	rule	PD-143	SUPPORTS	meta/DECISIONS.md:1170	"`limits.npk` holds `SAFETY.md` §7's eight bounds at cycle 0.0.4" -- PA-118's heading: commit 1 carries it
+tip	0.0.4.md:139	TABLE	section	§3	POINTER	meta/roadmap/0.0/0.0.4.md:921	"## 3. The steps, and what each commit carries" -- a reading list: names what the step reads, says nothing of it
+tip	0.0.4.md:139	TABLE	section	§7	POINTER	meta/specs/SAFETY.md:307	"## 7. The limits, in one table" -- a reading list: names what the step reads, says nothing of it
+tip	0.0.4.md:140	TABLE	rule	B-12	POINTER	meta/specs/BUILD.md:254	"Rule B-12 (PA-004)." -- a reading list: names what the step reads, says nothing of it
+tip	0.0.4.md:140	TABLE	rule	B-13	POINTER	meta/specs/BUILD.md:287	"Rule B-13." -- a reading list: names what the step reads, says nothing of it
+tip	0.0.4.md:140	TABLE	rule	PD-130	POINTER	meta/DECISIONS.md:766	"### PA-105 — what an owning value may be stored in, measured" -- read by its number (PD-130 is PA-105)
+tip	0.0.4.md:140	TABLE	rule	PD-132	POINTER	meta/DECISIONS.md:828	"### PA-107 — every slot a reader's bytes reach is the read-only view" -- read by its number (PD-132 is PA-107)
+tip	0.0.4.md:140	TABLE	rule	PD-144	SUPPORTS	meta/DECISIONS.md:1193	"the containers check their own indexes" -- PA-119's heading: commit 2 carries it
+tip	0.0.4.md:140	TABLE	section	§3	POINTER	meta/roadmap/0.0/0.0.4.md:921	"## 3. The steps, and what each commit carries" -- a reading list: names what the step reads, says nothing of it
+tip	0.0.4.md:140	TABLE	section	§3	POINTER	meta/specs/SAFETY.md:62	"## 3. The error budget — two, and no input can produce either" -- a reading list: names what the step reads, says nothing of it
+tip	0.0.4.md:140	TABLE	section	§1.2	POINTER	meta/roadmap/0.0/0.0.4.md:162	"An index through a `wild` block does not trap" -- a reading list: names what the step reads, says nothing of it
+tip	0.0.4.md:140	TABLE	section	§1.5	POINTER	meta/roadmap/0.0/0.0.4.md:168	"The shapes, names and rulings" -- a reading list: names what the step reads, says nothing of it
+tip	0.0.4.md:140	TABLE	section	§1.5	SUPPORTS	meta/roadmap/0.0/0.0.4.md:168; meta/roadmap/0.0/0.0.4.md:171	"And the census (H)"; "against the workbench `PLAYBOOK.md` §2's notes" -- §1.5's census answers the notes
+tip	0.0.4.md:140	TABLE	section	§5	POINTER	meta/specs/BUILD.md:250	"## 5." -- a reading list: names what the step reads, says nothing of it
+tip	0.0.4.md:140	TABLE	section	§1	POINTER	meta/specs/VERIFICATION.md:16; meta/specs/VERIFICATION.md:74	"## 1. Where this stands"; "## 3. Bounds" -- §§1 … 3, a reading list
+tip	0.0.4.md:140	TABLE	section	§2	POINTER	the workbench's PLAYBOOK.md at 55c96cb:38	"## 2. What the language imposes" -- the notes §1.5's census answers, named
+tip	0.0.4.md:142	TABLE	rule	PD-145	SUPPORTS	meta/DECISIONS.md:1236	"`SmallMap` waits for its first consumer" -- PA-120's heading
+tip	0.0.4.md:142	TABLE	section	§3	POINTER	meta/roadmap/0.0/0.0.4.md:921	"## 3. The steps, and what each commit carries" -- a reading list: names what the step reads, says nothing of it
+tip	0.0.4.md:144	TABLE	section	§5	POINTER	meta/roadmap/0.0/0.0.4.md:1814	"## 5. The sweep's candidates" -- a reading list: names what the step reads, says nothing of it
+tip	0.0.4.md:144	TABLE	section	§5	SUPPORTS	meta/roadmap/0.0/0.0.4.md:1816	"Block 5's sweep lists 51 candidate lines under 13 subjects over 75 files, every one read"
+tip	0.0.4.md:144	TABLE	section	§5	SUPPORTS	meta/roadmap/0.0/0.0.4.md:1816	"Block 5's sweep lists 51 candidate lines under 13 subjects over 75 files, every one read"
+tip	0.0.4.md:144	TABLE	section	§7	POINTER	the workbench's skills/worker/SKILL.md at 55c96cb:150; the workbench's skills/worker/SKILL.md at 55c96cb:180	"## 7. Closing a subcycle"; "## 9. The REPORT block" -- §§7 and 9, a reading list
+tip	0.0.4.md:144	TABLE	section	§6	SUPPORTS	meta/roadmap/0.0/0.0.4.md:1923	"## 6. Acceptance" -- §6 holds the boxes, `- [ ]` each
+tip	0.0.4.md:144	TABLE	document	README.md	SUPPORTS	meta/roadmap/0.0/README.md:32	"| [0.0.4](0.0.4.md) |" -- the cycle README's 0.0.4 row, its boxes beneath
+tip	0.0.4.md:156	PROSE	rule	PD-191	SUPPORTS	meta/roadmap/0.0/0.0.4.md:216	"`EParseState` and `EParseEncode` declared once, in a module of their own" -- §1's item 12
+tip	0.0.4.md:156	PROSE	item	items 11	SUPPORTS	meta/roadmap/0.0/0.0.4.md:194	"A call through a trait is charged every implementation the program holds" -- §1's item 11
+tip	0.0.4.md:157	PROSE	item	items 1	SUPPORTS	meta/roadmap/0.0/0.0.4_tools/facts.sh:1	"re-derives `0.0.4.md` §1's items 1 ... 10, block 0b"
+tip	0.0.4.md:157	PROSE	item	items 11	SUPPORTS	meta/roadmap/0.0/0.0.4_tools/facts.sh:1	"items 11 and 12 are"; "records, which no block re-derives"
+tip	0.0.4.md:158	PROSE	item	item 1	SUPPORTS	meta/roadmap/0.0/0.0.4.md:89	"The toolchain is `2e1cb4a`"
+tip	0.0.4.md:171	PROSE	section	§2	SUPPORTS	the workbench's PLAYBOOK.md at d13ea86:38; the workbench's PLAYBOOK.md at d13ea86:222; the workbench's PLAYBOOK.md at d13ea86:226	"## 2. What the language imposes"; "the compiler's advance notice F106 at landing 164"; "landing 166 verified at `cd3cb4d`" -- §2's notes, lines 222 … 226
+tip	0.0.4.md:181	PROSE	rule	PD-140	SUPPORTS	meta/roadmap/0.0/0.0.4.md:1011	"§1.6 placeholders in the patches: @@PD-130@@ @@PD-131@@ @@PD-140@@"
+tip	0.0.4.md:181	PROSE	rule	PD-145	SUPPORTS	meta/roadmap/0.0/0.0.4.md:1011	"§1.6 placeholders in the patches:"; "@@PD-145@@ @@PD-191@@"
+tip	0.0.4.md:181	PROSE	rule	PD-191	SUPPORTS	meta/roadmap/0.0/0.0.4.md:1011	"§1.6 placeholders in the patches:"; "@@PD-145@@ @@PD-191@@"
+tip	0.0.4.md:182	PROSE	section	§10	SUPPORTS	meta/roadmap/0.0/0.0.4.md:1015	"PLAYBOOK.md §10 (outside)"
+tip	0.0.4.md:205	PROSE	pointer	src/driver/pipeline.npk`:631	SUPPORTS	the compiler's src/driver/pipeline.npk at 2e1cb4a:640; the compiler's src/driver/pipeline.npk at 2e1cb4a:641	"while (rc0 < nmods) decreases nmods - rc0 {"; "The PRELUDE is not walked as a MODULE" -- every module walked whole, the prelude not
+tip	0.0.4.md:207	PROSE	pointer	src/frontend/analysis/reach.npk`:183	SUPPORTS	the compiler's src/frontend/analysis/reach.npk at 2e1cb4a:183; the compiler's src/frontend/analysis/reach.npk at 2e1cb4a:185	"When the recorded callee is a TRAIT's method"; "that trait that declares the method is reached too"
+tip	0.0.4.md:212	PROSE	section	§1.9	SUPPORTS	meta/roadmap/0.0/0.0.4.md:189	"one importing a module that raises the `EParseState` it imports owes the"
+tip	0.0.4.md:213	PROSE	section	§5.2	SUPPORTS	the compiler's meta/specs/TRAITS_REFERENCE.md at 2e1cb4a:863; the compiler's meta/specs/TRAITS_REFERENCE.md at 2e1cb4a:867	"### 5.2 Dynamic (`dyn`)"; "`dyn Shape` is the type of a value that implements it"
+tip	0.0.4.md:214	PROSE	document	meta/specs/TRAITS_REFERENCE.md	SUPPORTS	the compiler's meta/specs/TRAITS_REFERENCE.md at 2e1cb4a:863; the compiler's meta/specs/TRAITS_REFERENCE.md at 2e1cb4a:867	"### 5.2 Dynamic (`dyn`)"; "`dyn Shape` is the type of a value that implements it"
+tip	0.0.4.md:215	PROSE	item	Item 11	SUPPORTS	meta/roadmap/0.0/0.0.4.md:243	"Item 11's programs, at compiler `2e1cb4a`"
+tip	0.0.4.md:216	PROSE	rule	PD-191	SUPPORTS	meta/DECISIONS.md:1257; meta/roadmap/0.0/0.0.4.md:1646	"`EParseState` and `EParseEncode` are each declared once, in `src/nparse/nparse.npk`, which imports nothing"; "nparse.EParseState (src/nparse/nparse.npk:10), nparse.EParseEncode (src/nparse/nparse.npk:11)" -- PA-121's heading and block 5's `decls`, which measured it
+tip	0.0.4.md:217	PROSE	ruling	ruling	SUPPORTS	management_10's ruling (a), its message of 2026-10-31 05:24 as sent	"RULED (a): one identity per name for the whole library"
+tip	0.0.4.md:229	PROSE	rule	S-7	SUPPORTS	meta/specs/SAFETY.md:150	"exactly the documented arms and no more"
+tip	0.0.4.md:231	PROSE	item	item 11	SUPPORTS	meta/roadmap/0.0/0.0.4.md:608; meta/roadmap/0.0/0.0.4.md:611	"NITPICK-REACH-003 r_bound.npk:23:1"; "NITPICK-REACH-003 r_dyn.npk:24:1" -- item 11's r_bound and r_dyn
+tip	0.0.4.md:232	PROSE	rule	PD-191	SUPPORTS	meta/DECISIONS.md:1257; meta/roadmap/0.0/0.0.4.md:1646	"`EParseState` and `EParseEncode` are each declared once, in `src/nparse/nparse.npk`, which imports nothing"; "nparse.EParseState (src/nparse/nparse.npk:10), nparse.EParseEncode (src/nparse/nparse.npk:11)" -- PA-121's heading and block 5's `decls`, which measured it
+tip	0.0.4.md:233	PROSE	item	item 11	SUPPORTS	meta/roadmap/0.0/0.0.4.md:608	"8 identities" -- item 11's roots owed 8
+tip	0.0.4.md:233	PROSE	item	item 11	SUPPORTS	meta/roadmap/0.0/0.0.4.md:623; meta/roadmap/0.0/0.0.4.md:689	"c_only_a.npk:22:1"; "7 identities: nparse.EParseState"
+tip	0.0.4.md:234	PROSE	rule	B-17	SUPPORTS	meta/specs/BUILD.md:321; meta/specs/BUILD.md:343	"| `nparse` | nothing |"; "the table gains the `nparse` row" -- the row and its note
+tip	0.0.4.md:235	PROSE	rule	B-17	SUPPORTS	harness/treecheck.py:68	"has no row in B-17's table"
+tip	0.0.4.md:236	PROSE	item	item 11	SUPPORTS	meta/roadmap/0.0/0.0.4.md:648	"**The ruled re-run** (the management seat's ruling (a) of 2026-10-31"
+tip	0.0.4.md:236	PROSE	item	item 12	SUPPORTS	meta/roadmap/0.0/0.0.4.md:697	"Item 12's programs, at compiler `2e1cb4a`"
+tip	0.0.4.md:243	PROSE	item	Item 11	SUPPORTS	meta/roadmap/0.0/0.0.4.md:215	"Item 11's programs and their output are below."
+tip	0.0.4.md:648	PROSE	rule	PD-191	SUPPORTS	meta/DECISIONS.md:1257; meta/roadmap/0.0/0.0.4.md:1646	"`EParseState` and `EParseEncode` are each declared once, in `src/nparse/nparse.npk`, which imports nothing"; "nparse.EParseState (src/nparse/nparse.npk:10), nparse.EParseEncode (src/nparse/nparse.npk:11)" -- PA-121's heading and block 5's `decls`, which measured it
+tip	0.0.4.md:648	PROSE	item	item 11	SUPPORTS	meta/roadmap/0.0/0.0.4.md:243	"Item 11's programs, at compiler `2e1cb4a`"
+tip	0.0.4.md:648	PROSE	item	item 12	SUPPORTS	meta/roadmap/0.0/0.0.4.md:697	"Item 12's programs, at compiler `2e1cb4a`"
+tip	0.0.4.md:648	PROSE	ruling	ruling	SUPPORTS	management_10's ruling (a), its message of 2026-10-31 05:24 as sent	"RULED (a): one identity per name for the whole library"
+tip	0.0.4.md:697	PROSE	item	Item 12	SUPPORTS	meta/roadmap/0.0/0.0.4.md:236	"and item 12's follow them"
+tip	0.0.4.md:736	PROSE	rule	B-16	SUPPORTS	meta/specs/BUILD.md:307	"`pub use`s the public surface" -- the umbrella beneath `pub use`s the modules
+tip	0.0.4.md:817	PROSE	rule	S-7	SUPPORTS	meta/specs/SAFETY.md:150	"exactly the documented arms and no more"
+tip	0.0.4.md:904	TABLE	rule	PD-191	SUPPORTS	meta/DECISIONS.md:1257; meta/roadmap/0.0/0.0.4.md:1646	"`EParseState` and `EParseEncode` are each declared once, in `src/nparse/nparse.npk`, which imports nothing"; "nparse.EParseState (src/nparse/nparse.npk:10), nparse.EParseEncode (src/nparse/nparse.npk:11)" -- PA-121's heading and block 5's `decls`, which measured it
+tip	0.0.4.md:904	TABLE	section	§1.12	SUPPORTS	meta/roadmap/0.0/0.0.4.md:216	"`EParseState` and `EParseEncode` declared once, in a module of their own" -- §1's item 12
+tip	0.0.4.md:904	TABLE	ruling	ruling	SUPPORTS	management_10's ruling (a), its message of 2026-10-31 05:24 as sent	"RULED (a): one identity per name for the whole library"
+tip	0.0.4.md:914	PROSE	rule	PA-116	SUPPORTS	meta/DECISIONS.md:1133	"the self-check is its own printed list"
+tip	0.0.4.md:914	PROSE	rule	PA-117	SUPPORTS	meta/DECISIONS.md:1151	"the tree checks read their authorities; the error budget is keyed by module and name"
+tip	0.0.4.md:914	PROSE	rule	PD-191	SUPPORTS	meta/roadmap/0.0/tools/decisions.txt:58	"PD-191 is the next round's (T18b, 2026-10-31), from its dispatch's block, PD-191 ... PD-200." -- the PD order's last line, PD-191 the last PD
+tip	0.0.4.md:915	PROSE	rule	PD-191	SUPPORTS	meta/roadmap/0.0/tools/decisions.txt:58	"PD-191 is the next round's (T18b, 2026-10-31), from its dispatch's block, PD-191 ... PD-200." -- the PD order's last line, PD-191 the last PD
+tip	0.0.4.md:915	PROSE	rule	PD-200	SUPPORTS	meta/roadmap/0.0/tools/decisions.txt:58	"PD-191 is the next round's (T18b, 2026-10-31), from its dispatch's block, PD-191 ... PD-200." -- the PD order's last line, PD-191 the last PD
+tip	0.0.4.md:915	PROSE	section	§1.12	SUPPORTS	meta/roadmap/0.0/0.0.4.md:216	"`EParseState` and `EParseEncode` declared once, in a module of their own" -- §1's item 12
+tip	0.0.4.md:915	PROSE	ruling	ruling	SUPPORTS	management_10's ruling (a), its message of 2026-10-31 05:24 as sent	"RULED (a): one identity per name for the whole library"
+tip	0.0.4.md:916	PROSE	rule	PD-143	SUPPORTS	meta/DECISIONS.md:1170; meta/DECISIONS.md:1257	"### PA-118 — `limits.npk` holds `SAFETY.md` §7's eight bounds at cycle 0.0.4"; "### PA-121 — `EParseState` and `EParseEncode` are each declared once, in `src/nparse/nparse.npk`" -- inserted above PA-121
+tip	0.0.4.md:916	PROSE	rule	PD-145	SUPPORTS	meta/DECISIONS.md:1236; meta/DECISIONS.md:1257	"### PA-120 — `SmallMap` waits for its first consumer"; "### PA-121 — `EParseState` and `EParseEncode` are each declared once, in `src/nparse/nparse.npk`" -- inserted above PA-121
+tip	0.0.4.md:917	PROSE	rule	PD-192	SUPPORTS	meta/roadmap/0.0/tools/decisions.txt:58	"PD-191 is the next round's (T18b, 2026-10-31), from its dispatch's block, PD-191 ... PD-200." -- the PD order's last line, PD-191 the last PD
+tip	0.0.4.md:917	PROSE	rule	PD-200	SUPPORTS	meta/roadmap/0.0/tools/decisions.txt:58	"PD-191 is the next round's (T18b, 2026-10-31), from its dispatch's block, PD-191 ... PD-200." -- the PD order's last line, PD-191 the last PD
+tip	0.0.4.md:1218	PROSE	section	§3	SUPPORTS	meta/specs/TESTING.md:46	"## 3. What the harness checks about the tree"
+tip	0.0.4.md:1222	PROSE	section	§3	SUPPORTS	meta/specs/SAFETY.md:62	"## 3. The error budget — two, and no input can produce either"
+tip	0.0.4.md:1222	PROSE	section	§8	SUPPORTS	meta/specs/SAFETY.md:343	"at most two, `nparse.EParseState` and `nparse.EParseEncode`" -- §8's item 2, re-written
+tip	0.0.4.md:1222	PROSE	item	item 2	SUPPORTS	meta/specs/SAFETY.md:343	"at most two, `nparse.EParseState` and `nparse.EParseEncode`" -- §8's item 2, re-written
+tip	0.0.4.md:1224	PROSE	section	§1.9	SUPPORTS	meta/roadmap/0.0/0.0.4.md:187	"An error identity is its declaring module and its name"
+tip	0.0.4.md:1224	PROSE	section	§1.12	SUPPORTS	meta/roadmap/0.0/0.0.4.md:216	"`EParseState` and `EParseEncode` declared once, in a module of their own" -- §1's item 12
+tip	0.0.4.md:1224	PROSE	document	harness/README.md	SUPPORTS	harness/README.md:43; harness/README.md:49	"## What a green run asserts"; "the floor program's own scan is exactly `run.py`'s two lists of it"
+tip	0.0.4.md:1228	PROSE	rule	PD-191	SUPPORTS	meta/DECISIONS.md:1257; meta/roadmap/0.0/0.0.4.md:1646	"`EParseState` and `EParseEncode` are each declared once, in `src/nparse/nparse.npk`, which imports nothing"; "nparse.EParseState (src/nparse/nparse.npk:10), nparse.EParseEncode (src/nparse/nparse.npk:11)" -- PA-121's heading and block 5's `decls`, which measured it
+tip	0.0.4.md:1229	PROSE	rule	B-17	SUPPORTS	meta/specs/BUILD.md:321; meta/specs/BUILD.md:343	"| `nparse` | nothing |"; "the table gains the `nparse` row" -- the row and its note
+tip	0.0.4.md:1232	PROSE	rule	B-17	SUPPORTS	meta/specs/BUILD.md:325	"| `doc` | `event`, `diag`, `scan`, `core`, `nparse` |" -- the row a header follows
+tip	0.0.4.md:1232	PROSE	rule	PD-191	SUPPORTS	meta/DECISIONS.md:1257	"### PA-121 — `EParseState` and `EParseEncode` are each declared once, in `src/nparse/nparse.npk`" -- the log's last decision
+tip	0.0.4.md:1233	PROSE	rule	S-4	SUPPORTS	meta/specs/SAFETY.md:112	"identity is any (module, name) pair a reachable `fail` raises beyond the two"
+tip	0.0.4.md:1233	PROSE	section	§1.11	SUPPORTS	meta/roadmap/0.0/0.0.4.md:194	"A call through a trait is charged every implementation the program holds" -- §1's item 11
+tip	0.0.4.md:1233	PROSE	section	§1.12	SUPPORTS	meta/roadmap/0.0/0.0.4.md:216	"`EParseState` and `EParseEncode` declared once, in a module of their own" -- §1's item 12
+tip	0.0.4.md:1233	PROSE	ruling	ruling	SUPPORTS	management_10's ruling (a), its message of 2026-10-31 05:24 as sent	"RULED (a): one identity per name for the whole library"
+tip	0.0.4.md:1234	PROSE	rule	S-6	SUPPORTS	meta/specs/SAFETY.md:140	"the two bullets above name the modules that raise the identities" -- S-6's note
+tip	0.0.4.md:1235	PROSE	rule	S-7	SUPPORTS	meta/specs/SAFETY.md:156	"is read against `NITPICK-REACH-003`'s list for the same root without its"
+tip	0.0.4.md:1236	PROSE	rule	PA-008	SUPPORTS	meta/DECISIONS.md:143	"cycle 0.0.4 — PA-121: TWO counts identities" -- PA-008's note
+tip	0.0.4.md:1236	PROSE	rule	G-7	SUPPORTS	meta/specs/PLUGIN_MODEL.md:119	"`nparse.EParseState` in a consumer's `failsafe`"
+tip	0.0.4.md:1237	PROSE	rule	G-6	SUPPORTS	meta/specs/PLUGIN_MODEL.md:120	"G-6's item 3 and G-9's row"
+tip	0.0.4.md:1237	PROSE	rule	G-9	SUPPORTS	meta/specs/PLUGIN_MODEL.md:120	"G-6's item 3 and G-9's row"
+tip	0.0.4.md:1237	PROSE	item	item 3	SUPPORTS	meta/specs/PLUGIN_MODEL.md:120	"G-6's item 3 and G-9's row"
+tip	0.0.4.md:1238	PROSE	rule	PA-072	SUPPORTS	meta/DECISIONS.md:603	"plugin declares no `error:` of its own."
+tip	0.0.4.md:1240	PROSE	rule	PA-117	SUPPORTS	meta/DECISIONS.md:1151	"the error budget is keyed by module and name"
+tip	0.0.4.md:1240	PROSE	cycle	cycle 0.0.4	POINTER	meta/roadmap/0.0/0.0.4.md:921	"## 3. The steps, and what each commit carries" -- the commit subject's form, naming this subcycle
+tip	0.0.4.md:1302	PROSE	rule	B-12	SUPPORTS	meta/specs/BUILD.md:271	"PA-119: measured at the pin `2e1cb4a`. `Vec<T>` is `Vec<T: Copy>`"
+tip	0.0.4.md:1302	PROSE	rule	PD-144	SUPPORTS	meta/DECISIONS.md:1222	"Re-measured at `2e1cb4a`, 2026-10-29"
+tip	0.0.4.md:1302	PROSE	rule	PD-191	SUPPORTS	meta/DECISIONS.md:1232	"PA-121: `EParseState` is declared once"
+tip	0.0.4.md:1302	PROSE	section	§1.10	SUPPORTS	meta/roadmap/0.0/0.0.4.md:191	"10. **A `buffer` at the pin** (PD-144's re-measurement)"
+tip	0.0.4.md:1425	PROSE	rule	B-12	SUPPORTS	meta/specs/BUILD.md:283	"*(2026-10-29, cycle 0.0.4 — PA-120:"; "`SmallMap` waits for its first consumer: no specification or roadmap names one" -- B-12's note
+tip	0.0.4.md:1425	PROSE	rule	PD-145	SUPPORTS	meta/DECISIONS.md:1236	"`SmallMap` waits for its first consumer"
+tip	0.0.4.md:1425	PROSE	rule	PD-191	SUPPORTS	meta/DECISIONS.md:1253	"PA-121: `EParseState` is declared once"
+tip	0.0.4.md:1512	PROSE	section	§3	SUPPORTS	meta/roadmap/0.0/0.0.4.md:1645	"SAFETY.md §3's names: EParseEncode, EParseState; src/nparse/nparse.npk: present"
+tip	0.0.4.md:1514	PROSE	section	§5	SUPPORTS	meta/roadmap/0.0/0.0.4.md:1856	"is the check, keyed on the claim's subject"
+tip	0.0.4.md:1817	PROSE	section	§7	SUPPORTS	meta/roadmap/0.0/0.0.0.md:792	"**D** — a settled decision's own text"
+tip	0.0.4.md:1822	TABLE	rule	D-16	SUPPORTS	meta/specs/VALUE_MODEL.md:165	"Rule D-16"; "For a map beyond `NPARSE_DUP_SCAN_MAX` (1024 pairs)" -- D-16 itself, line 166
+tip	0.0.4.md:1822	TABLE	rule	PD-143	SUPPORTS	meta/DECISIONS.md:1174; meta/DECISIONS.md:1186	"A ninth bound has a specification and no row"; "*Reversal, for the author:* to hold the ninth from cycle 0.0.4" -- PA-118's text and its reversal
+tip	0.0.4.md:1822	TABLE	section	§7	SUPPORTS	meta/specs/SAFETY.md:307; meta/specs/SAFETY.md:326	"## 7. The limits, in one table"; "`VALUE_MODEL.md` D-16's `NPARSE_DUP_SCAN_MAX`, has no row here yet" -- §7's dated note, line 326
+tip	0.0.4.md:1822	TABLE	document	VALUE_MODEL.md	SUPPORTS	meta/specs/VALUE_MODEL.md:165	"Rule D-16"; "For a map beyond `NPARSE_DUP_SCAN_MAX` (1024 pairs)" -- D-16 itself, line 166
+tip	0.0.4.md:1822	TABLE	document	DECISIONS.md	SUPPORTS	meta/DECISIONS.md:1174; meta/DECISIONS.md:1186	"A ninth bound has a specification and no row"; "*Reversal, for the author:* to hold the ninth from cycle 0.0.4" -- PA-118's text and its reversal
+tip	0.0.4.md:1822	TABLE	document	SAFETY.md	SUPPORTS	meta/specs/SAFETY.md:307; meta/specs/SAFETY.md:326	"## 7. The limits, in one table"; "`VALUE_MODEL.md` D-16's `NPARSE_DUP_SCAN_MAX`, has no row here yet" -- §7's dated note, line 326
+tip	0.0.4.md:1822	TABLE	document	TESTING.md	SUPPORTS	meta/specs/TESTING.md:63	"| `check_specs_current` | reports, does not fail"; "that no specification defines"
+tip	0.0.4.md:1823	TABLE	rule	PA-004	SUPPORTS	meta/DECISIONS.md:58	"### PA-004 — `nparse` declares its own storage primitives"; "`Vec<T>`, `Bytes` and `SmallMap<K, V>` live in `src/core/`" -- where it lives, line 59
+tip	0.0.4.md:1823	TABLE	rule	PD-145	SUPPORTS	meta/DECISIONS.md:1236	"### PA-120 — `SmallMap` waits for its first consumer"
+tip	0.0.4.md:1823	TABLE	document	DECISIONS.md	SUPPORTS	meta/DECISIONS.md:58	"### PA-004 — `nparse` declares its own storage primitives"; "`Vec<T>`, `Bytes` and `SmallMap<K, V>` live in `src/core/`" -- where it lives, line 59
+tip	0.0.4.md:1823	TABLE	document	README.md	SUPPORTS	README.md:95	"Vec, Bytes, and the one file of named limits (SmallMap waits)"
+tip	0.0.4.md:1823	TABLE	cycle	cycle 0.0	POINTER	meta/DECISIONS.md:1236	"### PA-120 — `SmallMap` waits for its first consumer" -- the sweep's subject, named: the claim it looks for, which PA-120 corrects
+tip	0.0.4.md:1824	TABLE	rule	PA-117	SUPPORTS	meta/specs/SAFETY.md:71; meta/specs/TESTING.md:65	"*(Corrected 2026-10-29, cycle 0.0.3 — PA-117, the ecosystem audit's EC3"; "*(2026-10-29, cycle 0.0.3 — PA-117: the rows for `check_error_budget`" -- 0.0.3's dated notes
+tip	0.0.4.md:1824	TABLE	rule	PA-008	SUPPORTS	meta/DECISIONS.md:117	"### PA-008 — the error budget is TWO, and no input can produce either"
+tip	0.0.4.md:1824	TABLE	rule	PD-191	SUPPORTS	meta/DECISIONS.md:143	"PA-121: TWO counts identities"; "two modules each declaring `EParseState` would be two identities" -- PA-008's dated note, line 145
+tip	0.0.4.md:1824	TABLE	rule	PD-191	SUPPORTS	meta/DECISIONS.md:1274	"`pub use`s the module and two modules raising the two identities, owes 8 identities" -- PA-121's own text, line 1274
+tip	0.0.4.md:1824	TABLE	rule	S-6	SUPPORTS	meta/specs/SAFETY.md:144	"a root holding two modules that each declare and raise `EParseState` owes two identities" -- S-6's note, line 144
+tip	0.0.4.md:1824	TABLE	rule	B-17	SUPPORTS	meta/specs/BUILD.md:344	"`nparse/nparse.npk` declares the library's two error identities and imports nothing" -- B-17's note, line 344
+tip	0.0.4.md:1824	TABLE	section	§8	SUPPORTS	meta/specs/SAFETY.md:348	"*(Corrected 2026-10-29, cycle 0.0.4 — PA-117 and PA-121"; "this library's own identities at most `EParseState` and `EParseEncode`" -- §8's note quoting its item's old count, line 349
+tip	0.0.4.md:1824	TABLE	document	SAFETY.md	SUPPORTS	meta/specs/SAFETY.md:71	"*(Corrected 2026-10-29, cycle 0.0.3 — PA-117, the ecosystem audit's EC3"
+tip	0.0.4.md:1824	TABLE	document	SAFETY.md	SUPPORTS	meta/specs/SAFETY.md:348	"*(Corrected 2026-10-29, cycle 0.0.4 — PA-117 and PA-121"; "this library's own identities at most `EParseState` and `EParseEncode`" -- §8's note quoting its item's old count, line 349
+tip	0.0.4.md:1824	TABLE	document	SAFETY.md	SUPPORTS	meta/specs/SAFETY.md:144	"a root holding two modules that each declare and raise `EParseState` owes two identities" -- S-6's note, line 144
+tip	0.0.4.md:1824	TABLE	document	TESTING.md	SUPPORTS	meta/specs/TESTING.md:65	"*(2026-10-29, cycle 0.0.3 — PA-117: the rows for `check_error_budget`"
+tip	0.0.4.md:1824	TABLE	document	DECISIONS.md	SUPPORTS	meta/DECISIONS.md:117; meta/DECISIONS.md:143	"### PA-008 — the error budget is TWO"; "PA-121: TWO counts identities" -- 117 and its note, 145
+tip	0.0.4.md:1824	TABLE	document	DECISIONS.md	SUPPORTS	meta/DECISIONS.md:1274	"`pub use`s the module and two modules raising the two identities, owes 8 identities" -- PA-121's own text, line 1274
+tip	0.0.4.md:1824	TABLE	document	BUILD.md	SUPPORTS	meta/specs/BUILD.md:343	"the table gains the `nparse` row"
+tip	0.0.4.md:1824	TABLE	document	src/nparse/README.md	SUPPORTS	src/nparse/README.md:1	"# `src/nparse/` — the two error identities"
+tip	0.0.4.md:1825	TABLE	rule	PA-115	SUPPORTS	meta/DECISIONS.md:1110	"sweep — compiles every `.npk` in the tree as a root" -- PA-115's own text
+tip	0.0.4.md:1825	TABLE	section	§3	SUPPORTS	meta/specs/BUILD.md:140; meta/specs/BUILD.md:148; meta/specs/BUILD.md:158	"## 3. Test stages"; "| `parse` | every `.npk` in the tree |"; "*(2026-10-29, cycle 0.0.4 — PA-115's sweep" -- §3's `parse` row and the note at 158
+tip	0.0.4.md:1825	TABLE	document	DECISIONS.md	SUPPORTS	meta/DECISIONS.md:1110	"sweep — compiles every `.npk` in the tree as a root" -- PA-115's own text
+tip	0.0.4.md:1825	TABLE	document	BUILD.md	SUPPORTS	meta/specs/BUILD.md:140; meta/specs/BUILD.md:148; meta/specs/BUILD.md:158	"## 3. Test stages"; "| `parse` | every `.npk` in the tree |"; "*(2026-10-29, cycle 0.0.4 — PA-115's sweep" -- §3's `parse` row and the note at 158
+tip	0.0.4.md:1826	TABLE	rule	B-17	SUPPORTS	meta/specs/BUILD.md:326	"| `format` | `event`, `diag`, `scan`, `core`, `nparse` — **never `doc`** (B-18) |"
+tip	0.0.4.md:1826	TABLE	document	BUILD.md	SUPPORTS	meta/specs/BUILD.md:326	"| `format` | `event`, `diag`, `scan`, `core`, `nparse` — **never `doc`** (B-18) |"
+tip	0.0.4.md:1826	TABLE	document	TESTING.md	SUPPORTS	meta/specs/TESTING.md:59	"| `check_layering` | every `use` edge between `src/` layers"; "forbidden — so the `format` ↛ `doc`" -- the row, line 59
+tip	0.0.4.md:1828	TABLE	rule	B-8	SUPPORTS	meta/specs/BUILD.md:209	"this pointed at `TESTING.md` §7, which is fuzzing"
+tip	0.0.4.md:1828	TABLE	section	§7	SUPPORTS	meta/roadmap/0.13/README.md:25; meta/specs/TESTING.md:170	"with the five invariants from `specs/TESTING.md` §7"; "## 7. Fuzzing"
+tip	0.0.4.md:1828	TABLE	section	§5	SUPPORTS	meta/specs/PLUGIN_MODEL.md:162; meta/specs/TESTING.md:121	"`TESTING.md` §5 makes it one: the harness runs its plugin conformance suite over"; "## 5. Conformance corpora"
+tip	0.0.4.md:1828	TABLE	document	BUILD.md	SUPPORTS	meta/specs/BUILD.md:209	"this pointed at `TESTING.md` §7, which is fuzzing"
+tip	0.0.4.md:1828	TABLE	document	PLUGIN_MODEL.md	SUPPORTS	meta/specs/PLUGIN_MODEL.md:162; meta/specs/TESTING.md:121	"`TESTING.md` §5 makes it one: the harness runs its plugin conformance suite over"; "## 5. Conformance corpora"
+tip	0.0.4.md:1830	TABLE	rule	PD-144	SUPPORTS	meta/DECISIONS.md:961; meta/DECISIONS.md:1023; meta/DECISIONS.md:1194	"give them at the pin `7e91730`"; "Measured at the pin `7e91730`"; "**2026-10-29, cycle 0.0.4.** Measured at the pin `7e91730`"
+tip	0.0.4.md:1830	TABLE	document	DECISIONS.md	SUPPORTS	meta/DECISIONS.md:961; meta/DECISIONS.md:1023; meta/DECISIONS.md:1194	"give them at the pin `7e91730`"; "Measured at the pin `7e91730`"; "**2026-10-29, cycle 0.0.4.** Measured at the pin `7e91730`"
+tip	0.0.4.md:1830	TABLE	document	BUILD.md	SUPPORTS	meta/specs/BUILD.md:11	"the pin `7e91730` by cycle 0.0.0 (2026-10-15)"
+tip	0.0.4.md:1831	TABLE	rule	PA-113	SUPPORTS	meta/DECISIONS.md:1022; meta/DECISIONS.md:1034	"### PA-113"; "every -O0 module's call edges to the" -- PA-113's text at line 1034
+tip	0.0.4.md:1831	TABLE	rule	B-2a	SUPPORTS	meta/specs/BUILD.md:110; meta/specs/BUILD.md:115	"*(Re-read 2026-10-29, cycle 0.0.3 — PA-113"; "which is denied" -- B-2a's note of 0.0.3, line 115 naming the denied edge
+tip	0.0.4.md:1831	TABLE	document	DECISIONS.md	SUPPORTS	meta/DECISIONS.md:1022; meta/DECISIONS.md:1034	"### PA-113"; "every -O0 module's call edges to the" -- PA-113's text at line 1034
+tip	0.0.4.md:1831	TABLE	document	BUILD.md	SUPPORTS	meta/specs/BUILD.md:110; meta/specs/BUILD.md:115	"*(Re-read 2026-10-29, cycle 0.0.3 — PA-113"; "which is denied" -- B-2a's note of 0.0.3, line 115 naming the denied edge
+tip	0.0.4.md:1831	TABLE	document	harness/README.md	SUPPORTS	harness/README.md:49	"the floor program's own scan is exactly `run.py`'s two lists of it" -- the new clause at line 49
+tip	0.0.4.md:1856	PROSE	ruling	ruling	SUPPORTS	T18's brief, quoting management_10's ruling of 2026-10-31 04:24	"RULED** (management_10, 04:24 on 2026-10-31"
+tip	0.0.4.md:1856	PROSE	finding	finding 2	SUPPORTS	T16v2's report, as filed:179	"SAME POINT AS T16v's finding 2, by subject: the pattern is a word list"
+tip	0.0.4.md:1857	PROSE	section	§12	SUPPORTS	the workbench's PLAYBOOK.md at 55c96cb:2246	"Tightened 2026-10-31, by `management_10`'s standing rule of 04:34"
+tip	0.0.4.md:1864	PROSE	rule	PD-142	SUPPORTS	meta/roadmap/0.0/0.0.4_tools/claims_rows.tsv:8	"{PD-142}|{PD-191}|\bnparse\.EParse(State|Encode)\b" -- the row's carrying terms
+tip	0.0.4.md:1864	PROSE	rule	PD-191	SUPPORTS	meta/roadmap/0.0/0.0.4_tools/claims_rows.tsv:8	"{PD-142}|{PD-191}|\bnparse\.EParse(State|Encode)\b" -- the row's carrying terms
+tip	0.0.4.md:1868	PROSE	rule	PA-008	SUPPORTS	meta/DECISIONS.md:117	"### PA-008 — the error budget is TWO, and no input can produce either"
+tip	0.0.4.md:1868	PROSE	section	§8	SUPPORTS	meta/specs/SAFETY.md at 8f10cb9:315	"at most `EParseState` and `EParseEncode`"
+tip	0.0.4.md:1868	PROSE	item	item 2	SUPPORTS	meta/specs/SAFETY.md at 8f10cb9:315	"at most `EParseState` and `EParseEncode`"
+tip	0.0.4.md:1869	PROSE	rule	S-4	SUPPORTS	meta/specs/SAFETY.md:102	"A third identity is added only by a"
+tip	0.0.4.md:1869	PROSE	rule	G-7	SUPPORTS	meta/specs/PLUGIN_MODEL.md:112	"the only identity a format may raise"
+tip	0.0.4.md:1879	PROSE	document	CONTRIBUTING.md	SUPPORTS	CONTRIBUTING.md:35	"The library declares two `error:` names"
+tip	0.0.4.md:1879	PROSE	document	README.md	SUPPORTS	README.md:44	"The two error names the"
+tip	0.0.4.md:1880	PROSE	section	§3	SUPPORTS	meta/specs/SAFETY.md:62	"## 3. The error budget — two, and no input can produce either"
+tip	0.0.4.md:1880	PROSE	document	meta/specs/README.md	SUPPORTS	meta/specs/README.md:69	"no input can produce one of the two error names this library"
+tip	0.0.4.md:1880	PROSE	document	SAFETY.md	SUPPORTS	meta/specs/SAFETY.md:62	"## 3. The error budget — two, and no input can produce either"
+tip	0.0.4.md:1880	PROSE	document	WRITER_MODEL.md	SUPPORTS	meta/specs/WRITER_MODEL.md:158	"This is the second of the library's two error"
+tip	0.0.4.md:1881	PROSE	rule	S-4	SUPPORTS	meta/specs/SAFETY.md:102	"**Rule S-4 — three is a major version.** A third identity is added only by a"
+tip	0.0.4.md:1881	PROSE	rule	PD-191	SUPPORTS	meta/DECISIONS.md:1257; meta/roadmap/0.0/0.0.4.md:1646	"`EParseState` and `EParseEncode` are each declared once, in `src/nparse/nparse.npk`, which imports nothing"; "nparse.EParseState (src/nparse/nparse.npk:10), nparse.EParseEncode (src/nparse/nparse.npk:11)" -- PA-121's heading and block 5's `decls`, which measured it
+tip	0.0.4.md:1881	PROSE	document	src/nparse/README.md	SUPPORTS	src/nparse/README.md:1	"# `src/nparse/` — the two error identities"
+tip	0.0.4.md:1882	PROSE	document	CURRENCY.md	SUPPORTS	meta/research/CURRENCY.md:36	"(two independent primaries, stale after ninety days)"
+tip	0.0.4.md:1883	PROSE	rule	PA-109	SUPPORTS	meta/DECISIONS.md:904; meta/DECISIONS.md:914; meta/DECISIONS.md:916	"### PA-109"; "is false of every importer, and §8's"; "PA-008's budget — two declared identities, neither reachable from input" -- PA-109's own text, 914 and 916
+tip	0.0.4.md:1883	PROSE	section	§8	SUPPORTS	meta/DECISIONS.md:904; meta/DECISIONS.md:914; meta/DECISIONS.md:916	"### PA-109"; "is false of every importer, and §8's"; "PA-008's budget — two declared identities, neither reachable from input" -- PA-109's own text, 914 and 916
+tip	0.0.4.md:1883	PROSE	item	item 2	SUPPORTS	meta/DECISIONS.md:904; meta/DECISIONS.md:914; meta/DECISIONS.md:916	"### PA-109"; "is false of every importer, and §8's"; "PA-008's budget — two declared identities, neither reachable from input" -- PA-109's own text, 914 and 916
+tip	0.0.4.md:1883	PROSE	document	DECISIONS.md	SUPPORTS	meta/DECISIONS.md:904; meta/DECISIONS.md:914; meta/DECISIONS.md:916	"### PA-109"; "is false of every importer, and §8's"; "PA-008's budget — two declared identities, neither reachable from input" -- PA-109's own text, 914 and 916
+tip	0.0.4.md:1902	PROSE	cycle	cycle 0.0	SUPPORTS	meta/roadmap/0.0/0.0.4_tools/claims.py:28	"a cycle 0.0 plan is read"; "up to its `## Execution record`"
+tip	0.0.4.md:1906	TABLE	rule	B-2	SUPPORTS	meta/specs/BUILD.md:75	"**Rule B-2.** The undefined-symbol scan is a **build step, not a test**. Every" -- the library build, `harness/run.py` 157
+tip	0.0.4.md:1906	TABLE	rule	PA-115	SUPPORTS	meta/DECISIONS.md:1106; meta/DECISIONS.md:1110	"### PA-115"; "sweep — compiles every `.npk` in the tree as a root" -- PA-115's own text, line 1110
+tip	0.0.4.md:1906	TABLE	document	CLAUDE.md	SUPPORTS	CLAUDE.md at 8f10cb9:126	"sweeps every `.npk` in the tree"
+tip	0.0.4.md:1906	TABLE	document	DECISIONS.md	SUPPORTS	meta/DECISIONS.md:1106; meta/DECISIONS.md:1110	"### PA-115"; "sweep — compiles every `.npk` in the tree as a root" -- PA-115's own text, line 1110
+tip	0.0.4.md:1907	TABLE	rule	B-18	SUPPORTS	meta/specs/BUILD.md:347	"`format` may not import `doc`"
+tip	0.0.4.md:1907	TABLE	rule	PA-117	SUPPORTS	meta/DECISIONS.md:1156; meta/DECISIONS.md:1158	"The error budget is the identities the tree's `fail` sites raise"; "owes it as `<module>.<name>`" -- PA-117's own text at 1156 and 1158
+tip	0.0.4.md:1907	TABLE	document	TESTING.md	SUPPORTS	meta/specs/TESTING.md at 8f10cb9:59	"arrow (B-18) a cell of it"
+tip	0.0.4.md:1907	TABLE	document	DECISIONS.md	SUPPORTS	meta/DECISIONS.md:1156; meta/DECISIONS.md:1158	"The error budget is the identities the tree's `fail` sites raise"; "owes it as `<module>.<name>`" -- PA-117's own text at 1156 and 1158
+tip	0.0.4.md:1908	TABLE	document	TESTING.md	SUPPORTS	meta/specs/TESTING.md at 8f10cb9:54	"whose added term is not a literal"
+tip	0.0.4.md:1910	TABLE	section	§5	POINTER	meta/specs/TESTING.md:121	"## 5. Conformance corpora" -- a token the old twin check was keyed on
+tip	0.0.4.md:1910	TABLE	section	§5	SUPPORTS	meta/roadmap/0.0/0.0.4.md:1904	"| The claim, and its round's item | Its twin check before | Now |" -- §5's table
+tip	0.0.4.md:1910	TABLE	section	§7	POINTER	meta/specs/TESTING.md:170	"## 7. Fuzzing" -- a token the old twin check was keyed on
+tip	0.0.4.md:1912	TABLE	document	harness/README.md	SUPPORTS	harness/README.md:46	"the run asserts only that each names a file, their commit being the pin the" -- the board's pin, not checked by the run
+tip	0.0.4.md:1913	TABLE	cycle	cycle 0.0	SUPPORTS	meta/roadmap/0.0/0.0.4_tools/claims_rows.tsv:15	"the date file's readers"; "^meta/roadmap/(done/)?0\.0/0\.0\.[0-9]+[a-z]?\.md$" -- the row and its paths
+tip	0.0.4.md:1914	TABLE	finding	finding 2	SUPPORTS	T16v's report, as filed:235	"2. **Non-blocking, NEW.** The "public error count" pattern is a word list."
+tip	0.0.4.md:1915	TABLE	rule	S-6	SUPPORTS	T16v's report, as filed:228	"1. **Blocking, NEW.** The §8 sentence"; "as S-6 and B-18 make each do" is false as to B-18."
+tip	0.0.4.md:1915	TABLE	rule	B-18	SUPPORTS	T16v's report, as filed:228	"1. **Blocking, NEW.** The §8 sentence"; "as S-6 and B-18 make each do" is false as to B-18."
+tip	0.0.4.md:1915	TABLE	section	§8	SUPPORTS	T16v's report, as filed:228	"1. **Blocking, NEW.** The §8 sentence"; "as S-6 and B-18 make each do" is false as to B-18."
+tip	0.0.4.md:1915	TABLE	finding	finding 1	SUPPORTS	T16v's report, as filed:228	"1. **Blocking, NEW.** The §8 sentence"; "as S-6 and B-18 make each do" is false as to B-18."
+tip	0.0.4.md:1916	TABLE	finding	finding 5	SUPPORTS	T16v's report, as filed:240	"The author question omits PA-009's own accepted dated note"
+tip	0.0.4.md:1918	PROSE	finding	finding 3	SUPPORTS	T16v's report, as filed:238	"has no case or mutant of its own"
+tip	0.0.4.md:1952	PROSE	section	§5	SUPPORTS	meta/roadmap/0.0/0.0.4.md:1904	"| The claim, and its round's item | Its twin check before | Now |" -- §5's table
+tip	0.0.4.md:1974	PROSE	rule	PD-191	SUPPORTS	meta/roadmap/0.0/0.0.4.md:225	"through an umbrella that re-exports only the raisers, `(nparse.EParseState)` still compiles (`u_lib2_fs`)" -- item 12, what PD-191 measured
+tip	0.0.4.md:1974	PROSE	section	§1.12	SUPPORTS	meta/roadmap/0.0/0.0.4.md:225	"through an umbrella that re-exports only the raisers, `(nparse.EParseState)` still compiles (`u_lib2_fs`)"
+tip	0.0.4.md:1976	PROSE	section	§3	SUPPORTS	meta/specs/TESTING.md:46	"## 3. What the harness checks about the tree"
+tip	0.0.4.md:1978	PROSE	rule	S-4	SUPPORTS	meta/specs/SAFETY.md:108	"cycle 0.0.4 — PA-121, aligned to PA-009's dated note of cycle 0.0.3" -- S-4's note
+tip	0.0.4.md:1979	PROSE	rule	PA-009	SUPPORTS	meta/DECISIONS.md:158	"adding an identity a reachable `fail`"
+tip	0.0.4.md:1980	PROSE	section	§1.11	SUPPORTS	meta/roadmap/0.0/0.0.4.md:194	"A call through a trait is charged every implementation the program holds" -- §1's item 11
+tip	0.0.4.md:1981	PROSE	ruling	ruling	SUPPORTS	management_10's ruling (a), its message of 2026-10-31 05:24 as sent	"RULED (a): one identity per name for the whole library"
+tip	0.0.4.md:1982	PROSE	rule	PD-191	SUPPORTS	meta/DECISIONS.md:1257; meta/roadmap/0.0/0.0.4.md:1646	"`EParseState` and `EParseEncode` are each declared once, in `src/nparse/nparse.npk`, which imports nothing"; "nparse.EParseState (src/nparse/nparse.npk:10), nparse.EParseEncode (src/nparse/nparse.npk:11)" -- PA-121's heading and block 5's `decls`, which measured it
+tip	0.0.4.md:1982	PROSE	rule	PA-008	SUPPORTS	meta/DECISIONS.md:117	"the error budget is TWO"
+tip	0.0.4.md:1982	PROSE	section	§5	SUPPORTS	meta/roadmap/0.0/0.0.4.md:1824	"PA-008's own heading, "the error budget is TWO""
+tip	0.0.4.md:1983	PROSE	finding	finding 3	SUPPORTS	T16v2's report, as filed:185	"PA-008's heading is only listed"
+tip	0.0.4.md:2071	PROSE	finding	finding 1	SUPPORTS	T16v2's report, as filed:173	"Block 4n's masked free-memory line still reads 124"
+tip	0.0.4.md:2077	PROSE	section	§8	SUPPORTS	meta/roadmap/0.0/0.0.4.md at 405df34:1000	"To parse's next round, which opens with the REACH probe"
+tip	0.0.4.md:2079	PROSE	section	§1.11	SUPPORTS	meta/roadmap/0.0/0.0.4.md:194	"A call through a trait is charged every implementation the program holds" -- §1's item 11
+tip	0.0.4.md:2080	PROSE	item	items 1	SUPPORTS	meta/roadmap/0.0/0.0.4_tools/facts.sh:1	"re-derives `0.0.4.md` §1's items 1 ... 10, block 0b"
+tip	0.0.4.md:2080	PROSE	item	item 11	SUPPORTS	meta/roadmap/0.0/0.0.4_tools/facts.sh:1	"items 11 and 12 are"
+tip	0.0.4.md:2082	PROSE	ruling	ruling	SUPPORTS	management_10's ruling (a), its message of 2026-10-31 05:24 as sent	"RULED (a): one identity per name for the whole library"
+tip	0.0.4.md:2083	PROSE	rule	PD-191	SUPPORTS	meta/roadmap/0.0/0.0.4.md:216	"`EParseState` and `EParseEncode` declared once, in a module of their own" -- §1's item 12
+tip	0.0.4.md:2083	PROSE	rule	S-7	SUPPORTS	meta/roadmap/0.0/0.0.4.md:229	"**S-7's "no more":** a root holding the `EParseState` raiser alone owes 7"
+tip	0.0.4.md:2084	PROSE	section	§1.12	SUPPORTS	meta/roadmap/0.0/0.0.4.md:216	"`EParseState` and `EParseEncode` declared once, in a module of their own" -- §1's item 12
+tip	0.0.4.md:2084	PROSE	section	§1.11	SUPPORTS	meta/roadmap/0.0/0.0.4.md:194	"A call through a trait is charged every implementation the program holds" -- §1's item 11
+tip	0.0.4.md:2084	PROSE	plan	1.11's record	SUPPORTS	meta/roadmap/0.0/0.0.4.md:648	"**The ruled re-run** (the management seat's ruling (a) of 2026-10-31"
+tip	0.0.4.md:2085	PROSE	rule	B-17	SUPPORTS	meta/specs/BUILD.md:321; meta/specs/BUILD.md:343	"| `nparse` | nothing |"; "the table gains the `nparse` row" -- the row and its note
+tip	0.0.4.md:2085	PROSE	rule	PD-191	SUPPORTS	meta/DECISIONS.md:1257; meta/roadmap/0.0/0.0.4.md:1646	"`EParseState` and `EParseEncode` are each declared once, in `src/nparse/nparse.npk`, which imports nothing"; "nparse.EParseState (src/nparse/nparse.npk:10), nparse.EParseEncode (src/nparse/nparse.npk:11)" -- PA-121's heading and block 5's `decls`, which measured it
+tip	0.0.4.md:2085	PROSE	rule	PD-144	SUPPORTS	meta/DECISIONS.md:1232	"PA-121: `EParseState` is declared once"
+tip	0.0.4.md:2086	PROSE	rule	PD-145	SUPPORTS	meta/DECISIONS.md:1253	"PA-121: `EParseState` is declared once"
+tip	0.0.4.md:2088	PROSE	rule	PD-143	SUPPORTS	meta/DECISIONS.md:1170; meta/DECISIONS.md:1257	"### PA-118 — `limits.npk` holds `SAFETY.md` §7's eight bounds at cycle 0.0.4"; "### PA-121 — `EParseState` and `EParseEncode` are each declared once, in `src/nparse/nparse.npk`"
+tip	0.0.4.md:2088	PROSE	rule	PD-145	SUPPORTS	meta/DECISIONS.md:1236; meta/DECISIONS.md:1257	"### PA-120 — `SmallMap` waits for its first consumer"; "### PA-121 — `EParseState` and `EParseEncode` are each declared once, in `src/nparse/nparse.npk`"
+tip	0.0.4.md:2088	PROSE	rule	PD-191	SUPPORTS	meta/DECISIONS.md:1257	"### PA-121 — `EParseState` and `EParseEncode` are each declared once, in `src/nparse/nparse.npk`"
+tip	0.0.4.md:2088	PROSE	document	BUILD.md	SUPPORTS	meta/roadmap/0.0/0.0.4_tools/step3.patch at 405df34:1; meta/roadmap/0.0/0.0.4_tools/step3.patch at 405df34:2; meta/roadmap/0.0/0.0.4_tools/step3.patch:2	"diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md"; "index c14f539..a752532 100644"; "index 7d68e20..9bba005 100644" -- the one line `git diff 405df34` moves in step3.patch
+tip	0.0.4.md:2091	PROSE	ruling	ruling	SUPPORTS	management_10's ruling (a), its message of 2026-10-31 05:24 as sent	"RULED (a): one identity per name for the whole library"
+tip	0.0.4.md:2092	PROSE	rule	S-4	SUPPORTS	meta/specs/SAFETY.md:108	"cycle 0.0.4 — PA-121, aligned to PA-009's dated note of cycle 0.0.3" -- S-4's note
+tip	0.0.4.md:2092	PROSE	rule	S-6	SUPPORTS	meta/specs/SAFETY.md:140	"the two bullets above name the modules that raise the identities" -- S-6's note
+tip	0.0.4.md:2092	PROSE	rule	S-7	SUPPORTS	meta/specs/SAFETY.md:152	"cycle 0.0.4 — PA-121: measured at the pin `2e1cb4a`, what an import owes" -- S-7's note
+tip	0.0.4.md:2092	PROSE	rule	PA-008	SUPPORTS	meta/DECISIONS.md:143	"cycle 0.0.4 — PA-121: TWO counts identities" -- PA-008's note
+tip	0.0.4.md:2092	PROSE	rule	G-7	SUPPORTS	meta/specs/PLUGIN_MODEL.md:118	"`nparse`'s `EParseState` is the identity `src/nparse/nparse.npk` declares" -- G-7's note
+tip	0.0.4.md:2092	PROSE	section	§8	SUPPORTS	meta/specs/SAFETY.md:343	"at most two, `nparse.EParseState` and `nparse.EParseEncode`" -- §8's item 2, re-written
+tip	0.0.4.md:2092	PROSE	item	item 2	SUPPORTS	meta/specs/SAFETY.md:343	"at most two, `nparse.EParseState` and `nparse.EParseEncode`" -- §8's item 2, re-written
+tip	0.0.4.md:2093	PROSE	rule	PA-072	SUPPORTS	meta/DECISIONS.md:603	"plugin declares no `error:` of its own."
+tip	0.0.4.md:2093	PROSE	section	§1.11	SUPPORTS	meta/roadmap/0.0/0.0.4.md:194	"A call through a trait is charged every implementation the program holds" -- §1's item 11
+tip	0.0.4.md:2093	PROSE	section	§1.12	SUPPORTS	meta/roadmap/0.0/0.0.4.md:216	"`EParseState` and `EParseEncode` declared once, in a module of their own" -- §1's item 12
+tip	0.0.4.md:2095	PROSE	rule	B-17	SUPPORTS	meta/specs/BUILD.md:325	"| `doc` | `event`, `diag`, `scan`, `core`, `nparse` |"
+tip	0.0.4.md:2096	PROSE	rule	PD-191	SUPPORTS	meta/DECISIONS.md:1288	"G-7 each replaced by a decision" -- PA-121's first declined alternative
+tip	0.0.4.md:2096	PROSE	rule	PA-008	SUPPORTS	meta/DECISIONS.md:117	"### PA-008 — the error budget is TWO, and no input can produce either"
+tip	0.0.4.md:2096	PROSE	rule	PA-072	SUPPORTS	meta/DECISIONS.md:593	"### PA-072 — the plugin contract is enumerated and mechanically checked"
+tip	0.0.4.md:2096	PROSE	rule	G-7	SUPPORTS	meta/specs/PLUGIN_MODEL.md:111	"Rule G-7 — a plugin declares no `error:` of its own."
+tip	0.0.4.md:2102	PROSE	rule	PD-191	SUPPORTS	meta/roadmap/0.0/0.0.4.md:1011	"§1.6 placeholders in the patches:"; "@@PD-145@@ @@PD-191@@"
+tip	0.0.4.md:2102	PROSE	section	§1.5	SUPPORTS	meta/roadmap/0.0/0.0.4.md:168	"5. **The shapes, names and rulings**"; "**And the census (H)**"
+tip	0.0.4.md:2103	PROSE	section	§5	SUPPORTS	meta/roadmap/0.0/0.0.4.md:1816	"Block 5's sweep lists 51 candidate lines under 13 subjects over 75 files, every one read"
+tip	0.0.4.md:2104	PROSE	section	§1.5	SUPPORTS	meta/roadmap/0.0/0.0.4.md:171	"file sections, 2 371 added lines"
+tip	0.0.4.md:2111	PROSE	section	§5	SUPPORTS	meta/roadmap/0.0/0.0.4.md:1904	"| The claim, and its round's item | Its twin check before | Now |" -- §5's table
+tip	0.0.4.md:2117	PROSE	section	§5	SUPPORTS	meta/roadmap/0.0/0.0.4.md:1904	"| The claim, and its round's item | Its twin check before | Now |" -- §5's table
+tip	0.0.4.md:2127	PROSE	section	§7	SUPPORTS	meta/roadmap/0.0/0.0.4.md:1950	"Block 5 names lines of this file"
+tip	0.0.4.md:2129	PROSE	section	§9	SUPPORTS	meta/roadmap/0.0/0.0.4.md:2069	"block 4n, whose line kept a value no run of this round printed"
+tip	0.0.4.md:2130	PROSE	finding	finding 1	SUPPORTS	T16v2's report, as filed:173	"Block 4n's masked free-memory line still reads 124"
+tip	0.0.4.md:2131	PROSE	rule	PD-191	SUPPORTS	meta/roadmap/0.0/0.0.5.md:122	"decisions: the highest by value @@PD-191@@"
+tip	0.0.4.md:2135	PROSE	ruling	ruling	SUPPORTS	management_10's ruling (a), its message of 2026-10-31 07:54 as sent	"T18v's FAIL is RULED (a), NEW"
+tip	0.0.4.md:2136	PROSE	rule	PD-191	SUPPORTS	meta/roadmap/0.0/0.0.4_tools/step0g.patch at 46464ba:219	"`src/lib.npk`, which holds every module (`BUILD.md` B-16)" -- PD-191's *Why* at 46464ba, line 220
+tip	0.0.4.md:2136	PROSE	document	BUILD.md	SUPPORTS	meta/roadmap/0.0/0.0.4_tools/step0g.patch at 46464ba:219	"`src/lib.npk`, which holds every module (`BUILD.md` B-16)" -- PD-191's *Why* at 46464ba, line 220
+tip	0.0.4.md:2137	PROSE	rule	B-16	SUPPORTS	meta/roadmap/0.0/0.0.4_tools/step0g.patch at 46464ba:219	"`src/lib.npk`, which holds every module (`BUILD.md` B-16)" -- PD-191's *Why* at 46464ba, line 220
+tip	0.0.4.md:2137	PROSE	rule	B-16	SUPPORTS	meta/specs/BUILD.md:307	"`pub use`s the public surface"
+tip	0.0.4.md:2137	PROSE	rule	S-7	SUPPORTS	meta/roadmap/0.0/0.0.4_tools/step0g.patch at 46464ba:418	"so a consumer of `src/lib.npk`, which holds every module, owes the" -- S-7's note at 46464ba, line 419
+tip	0.0.4.md:2138	PROSE	rule	B-16	SUPPORTS	meta/specs/SAFETY.md:154	"(B-16's rule: it "`pub use`s the public surface")"
+tip	0.0.4.md:2139	PROSE	rule	PD-191	SUPPORTS	meta/DECISIONS.md:1288; meta/DECISIONS.md:1293	"every consumer that holds it"; "raiser it re-exports would import it back" -- the two declined alternatives
+tip	0.0.4.md:2139	PROSE	finding	finding 1	SUPPORTS	T18v's report, as filed:235	"`step0g.patch`:220 (PD-191's *Why*) and :419 (S-7's note) say"
+tip	0.0.4.md:2142	PROSE	rule	S-6	SUPPORTS	meta/specs/SAFETY.md:140	"the two bullets above name the modules that raise the identities" -- S-6's note
+tip	0.0.4.md:2142	PROSE	rule	S-6	SUPPORTS	meta/specs/SAFETY.md:140	"the two bullets above name the modules that raise the identities" -- S-6's note
+tip	0.0.4.md:2142	PROSE	section	§1	SUPPORTS	meta/roadmap/0.0/0.0.4.md:216	"`EParseState` and `EParseEncode` declared once, in a module of their own" -- §1's item 12
+tip	0.0.4.md:2142	PROSE	item	item 12	SUPPORTS	meta/roadmap/0.0/0.0.4.md:216	"`EParseState` and `EParseEncode` declared once, in a module of their own" -- §1's item 12
+tip	0.0.4.md:2142	PROSE	finding	finding 6	SUPPORTS	T18v's report, as filed:251	"6. **Non-blocking. NEW, wording.** PD-191 says the pair is refused"; "RESOLVE-010 compares derived FNV codes of two distinct declarations"
+tip	0.0.4.md:2143	PROSE	rule	PD-191	SUPPORTS	meta/roadmap/0.12/README.md:84; meta/roadmap/0.13/README.md:45	"each in `nparse`, by S-6's dated note (an identity is a module and a name, PA-117; PA-121)"; "as its dated note reads them (an identity is a module and a name, PA-117; PA-121)" -- the 0.12 and 0.13 boxes
+tip	0.0.4.md:2143	PROSE	rule	PD-142	SUPPORTS	meta/roadmap/0.12/README.md:84; meta/roadmap/0.13/README.md:45	"each in `nparse`, by S-6's dated note (an identity is a module and a name, PA-117; PA-121)"; "as its dated note reads them (an identity is a module and a name, PA-117; PA-121)" -- the 0.12 and 0.13 boxes
+tip	0.0.4.md:2143	PROSE	item	items 11	SUPPORTS	meta/roadmap/0.0/0.0.4_tools/facts.sh:1	"items 11 and 12 are"
+tip	0.0.4.md:2146	PROSE	ruling	ruling	SUPPORTS	meta/roadmap/0.0/0.0.4_tools/cites.py:30	"ruling \brulings?\b"; "a seat's ruling" -- the form
+tip	0.0.4.md:2150	PROSE	finding	finding 1	SUPPORTS	T18v's report, as filed:235	"`step0g.patch`:220 (PD-191's *Why*) and :419 (S-7's note)"
+tip	0.0.4.md:2151	PROSE	rule	B-17	SUPPORTS	meta/specs/BUILD.md:315; meta/specs/BUILD.md:320	"A module imports only the modules its"; "| `core` | nothing |"
+tip	0.0.4.md:2151	PROSE	pointer	step0g.patch:223	SUPPORTS	meta/roadmap/0.0/0.0.4_tools/step0g.patch at 46464ba:223	"so `core` declares no identity"
+tip	0.0.4.md:2152	PROSE	rule	G-8	SUPPORTS	meta/specs/PLUGIN_MODEL.md:158	"nothing in `doc`, `emit` or the harness knows the shipped formats"
+tip	0.0.4.md:2152	PROSE	rule	PA-072	SUPPORTS	meta/DECISIONS.md:600	"in `doc`, `emit` or the harness knows the shipped formats are special"
+tip	0.0.4.md:2152	PROSE	pointer	:245	SUPPORTS	meta/roadmap/0.0/0.0.4_tools/step0g.patch at 46464ba:245; meta/roadmap/0.0/0.0.4_tools/step0g.patch at 46464ba:246	"G-8's and PA-072's"; "shipped formats are special" -- the patch line T18fix fixed
+tip	0.0.4.md:2155	PROSE	rule	D-179	SUPPORTS	meta/roadmap/0.0/0.0.4_tools/step0g.patch:237	"("two error constants derive the same code (D-179, an FNV"
+tip	0.0.4.md:2157	PROSE	document	DECISIONS.md	SUPPORTS	meta/roadmap/0.0/0.0.4_tools/step1.patch at 46464ba:2; meta/roadmap/0.0/0.0.4_tools/step1.patch:2; meta/roadmap/0.0/0.0.4_tools/step2.patch:2; meta/roadmap/0.0/0.0.4_tools/step4.patch:15	"index 0a850bc..86ff144 100644"; "index 8a2ed47..7a97e09 100644"; "index 7a97e09..40defd9 100644"; "index 40defd9..748966d 100644" -- each a `DECISIONS.md` index line `git diff 46464ba` moves
+tip	0.0.4.md:2158	PROSE	document	SAFETY.md	SUPPORTS	meta/roadmap/0.0/0.0.4_tools/step1.patch at 46464ba:36; meta/roadmap/0.0/0.0.4_tools/step1.patch:35; meta/roadmap/0.0/0.0.4_tools/step1.patch:36	"index 71a172a..d2a0ecb 100644"; "diff --git a/meta/specs/SAFETY.md b/meta/specs/SAFETY.md"; "index 0d0b146..d3c0eed 100644" -- step 1's second moved line, `SAFETY.md`'s
+tip	0.0.4.md:2161	PROSE	rule	PD-191	SUPPORTS	meta/roadmap/0.0/0.0.4.md:1666	"carried meta/DECISIONS.md:1265"
+tip	0.0.4.md:2162	PROSE	section	§5	SUPPORTS	meta/roadmap/0.0/0.0.4.md:1878	"58 candidates in 18 files"
+tip	0.0.4.md:2166	PROSE	finding	finding 1	SUPPORTS	T18v2's report, as filed:180	"is wider or narrower than its stated reasons in four places"
+tip	0.0.4.md:2168	PROSE	section	§1	SUPPORTS	meta/roadmap/0.0/0.0.4.md:888	"NITPICK-RESOLVE-010 ../lib/src/nparse/nparse.npk:4:1: two error constants derive the same code"
+tip	0.0.4.md:2182	PROSE	rule	B-2a	SUPPORTS	meta/specs/BUILD.md:92	"Rule B-2a (PA-113) — the call-edge scan, and its controls" -- a rule with a letter suffix
+tip	0.0.4.md:2191	PROSE	rule	B-2a	SUPPORTS	meta/roadmap/0.0/0.0.4.md:138; meta/roadmap/0.0/0.0.4.md:1831	"`BUILD.md` B-2a and B-8"; "`BUILD.md` 115, B-2a's note of 0.0.3" -- the two the floor's `\b`-closed regex does not match
+tip	0.0.4.md:2197	PROSE	section	§8	SUPPORTS	meta/roadmap/0.0/0.0.4.md at 405df34:1000; meta/roadmap/0.0/0.0.4.md:1978	"To parse's next round, which opens with the REACH probe"; "**Nothing of the alignment is handed on.**" -- the last bullet then and now
+tip	0.0.4.md:2198	PROSE	document	DECISIONS.md	SUPPORTS	meta/roadmap/0.0/0.0.4.md at 0eeb890:2157	"in their `DECISIONS.md` `index`" -- the words as T18fix wrote them
+tip	0.0.4.md:2198	PROSE	document	SAFETY.md	SUPPORTS	meta/roadmap/0.0/0.0.4_tools/step1.patch at 46464ba:36; meta/roadmap/0.0/0.0.4_tools/step1.patch:35; meta/roadmap/0.0/0.0.4_tools/step1.patch:36	"index 71a172a..d2a0ecb 100644"; "diff --git a/meta/specs/SAFETY.md b/meta/specs/SAFETY.md"; "index 0d0b146..d3c0eed 100644" -- step 1's second moved line, `SAFETY.md`'s
+tip	0.0.5.md:369	PROSE	rule	PD-191	SUPPORTS	meta/DECISIONS.md:1257	"### PA-121 — `EParseState` and `EParseEncode` are each declared once, in `src/nparse/nparse.npk`"
+tip	0.0.5.md:374	PROSE	rule	PD-191	SUPPORTS	meta/roadmap/0.0/0.0.5.md:122; meta/roadmap/0.0/0.0.5.md at 405df34:122	"decisions: the highest by value @@PD-191@@"; "decisions: the highest by value @@PD-145@@"
+tip	0.0.5.md:374	PROSE	rule	PD-145	SUPPORTS	meta/roadmap/0.0/0.0.5.md:122; meta/roadmap/0.0/0.0.5.md at 405df34:122	"decisions: the highest by value @@PD-191@@"; "decisions: the highest by value @@PD-145@@"
+tip	0.0.5.md:374	PROSE	document	src/nparse/README.md	SUPPORTS	src/nparse/README.md:1	"# `src/nparse/` — the two error identities"
+tip	0.0.5.md:378	PROSE	rule	PD-191	SUPPORTS	meta/roadmap/0.0/0.0.4_tools/step0g.patch:220	"(`BUILD.md` B-16's rule: it" -- PD-191's corrected *Why*
+0eeb890	0.0.4.md:40	PROSE	rule	PA-009	=	=	=
+0eeb890	0.0.4.md:48	PROSE	section	§1.11	=	=	=
+0eeb890	0.0.4.md:50	PROSE	rule	B-17	=	=	=
+0eeb890	0.0.4.md:50	PROSE	rule	PD-191	=	=	=
+0eeb890	0.0.4.md:51	PROSE	rule	PD-144	=	=	=
+0eeb890	0.0.4.md:51	PROSE	rule	PD-145	=	=	=
+0eeb890	0.0.4.md:51	PROSE	section	§1.12	=	=	=
+0eeb890	0.0.4.md:52	PROSE	rule	S-4	=	=	=
+0eeb890	0.0.4.md:52	PROSE	rule	S-6	=	=	=
+0eeb890	0.0.4.md:52	PROSE	rule	S-7	=	=	=
+0eeb890	0.0.4.md:52	PROSE	rule	PA-008	=	=	=
+0eeb890	0.0.4.md:52	PROSE	ruling	ruling	=	=	=
+0eeb890	0.0.4.md:53	PROSE	rule	G-7	=	=	=
+0eeb890	0.0.4.md:53	PROSE	finding	finding 3	=	=	=
+0eeb890	0.0.4.md:54	PROSE	section	§8	=	=	=
+0eeb890	0.0.4.md:54	PROSE	item	item 2	=	=	=
+0eeb890	0.0.4.md:55	PROSE	ruling	rulings	=	=	=
+0eeb890	0.0.4.md:55	PROSE	finding	finding 2	=	=	=
+0eeb890	0.0.4.md:56	PROSE	rule	PD-191	=	=	=
+0eeb890	0.0.4.md:59	PROSE	section	§5	=	=	=
+0eeb890	0.0.4.md:94	PROSE	rule	PD-191	=	=	=
+0eeb890	0.0.4.md:138	TABLE	rule	B-2a	=	=	=
+0eeb890	0.0.4.md:138	TABLE	rule	B-8	=	=	=
+0eeb890	0.0.4.md:138	TABLE	rule	B-16	=	=	=
+0eeb890	0.0.4.md:138	TABLE	rule	B-18	=	=	=
+0eeb890	0.0.4.md:138	TABLE	rule	S-4	=	=	=
+0eeb890	0.0.4.md:138	TABLE	rule	S-7	=	=	=
+0eeb890	0.0.4.md:138	TABLE	rule	G-6	=	=	=
+0eeb890	0.0.4.md:138	TABLE	rule	G-9	=	=	=
+0eeb890	0.0.4.md:138	TABLE	section	§3	=	=	=
+0eeb890	0.0.4.md:138	TABLE	section	§4	=	=	=
+0eeb890	0.0.4.md:138	TABLE	section	§1.9	=	=	=
+0eeb890	0.0.4.md:138	TABLE	section	§5	=	=	=
+0eeb890	0.0.4.md:138	TABLE	section	§0	=	=	=
+0eeb890	0.0.4.md:138	TABLE	section	§3	=	=	=
+0eeb890	0.0.4.md:138	TABLE	section	§1.11	=	=	=
+0eeb890	0.0.4.md:138	TABLE	section	§1.12	=	=	=
+0eeb890	0.0.4.md:138	TABLE	section	§3	=	=	=
+0eeb890	0.0.4.md:138	TABLE	document	harness/README.md	=	=	=
+0eeb890	0.0.4.md:139	TABLE	rule	D-16	=	=	=
+0eeb890	0.0.4.md:139	TABLE	rule	PA-004	=	=	=
+0eeb890	0.0.4.md:139	TABLE	rule	PD-143	=	=	=
+0eeb890	0.0.4.md:139	TABLE	section	§3	=	=	=
+0eeb890	0.0.4.md:139	TABLE	section	§7	=	=	=
+0eeb890	0.0.4.md:140	TABLE	rule	B-12	=	=	=
+0eeb890	0.0.4.md:140	TABLE	rule	B-13	=	=	=
+0eeb890	0.0.4.md:140	TABLE	rule	PD-130	=	=	=
+0eeb890	0.0.4.md:140	TABLE	rule	PD-132	=	=	=
+0eeb890	0.0.4.md:140	TABLE	rule	PD-144	=	=	=
+0eeb890	0.0.4.md:140	TABLE	section	§3	=	=	=
+0eeb890	0.0.4.md:140	TABLE	section	§1.2	=	=	=
+0eeb890	0.0.4.md:140	TABLE	section	§1.5	=	=	=
+0eeb890	0.0.4.md:140	TABLE	section	§5	=	=	=
+0eeb890	0.0.4.md:140	TABLE	section	§3	=	=	=
+0eeb890	0.0.4.md:140	TABLE	section	§1	=	=	=
+0eeb890	0.0.4.md:140	TABLE	section	§2	=	=	=
+0eeb890	0.0.4.md:140	TABLE	section	§1.5	=	=	=
+0eeb890	0.0.4.md:142	TABLE	rule	PD-145	=	=	=
+0eeb890	0.0.4.md:142	TABLE	section	§3	=	=	=
+0eeb890	0.0.4.md:144	TABLE	section	§5	=	=	=
+0eeb890	0.0.4.md:144	TABLE	section	§7	=	=	=
+0eeb890	0.0.4.md:144	TABLE	section	§6	=	=	=
+0eeb890	0.0.4.md:144	TABLE	section	§5	=	=	=
+0eeb890	0.0.4.md:144	TABLE	section	§5	=	=	=
+0eeb890	0.0.4.md:144	TABLE	document	README.md	=	=	=
+0eeb890	0.0.4.md:156	PROSE	rule	PD-191	=	=	=
+0eeb890	0.0.4.md:156	PROSE	item	items 11	=	=	=
+0eeb890	0.0.4.md:157	PROSE	item	items 1	=	=	=
+0eeb890	0.0.4.md:157	PROSE	item	items 11	=	=	=
+0eeb890	0.0.4.md:158	PROSE	item	item 1	=	=	=
+0eeb890	0.0.4.md:171	PROSE	section	§2	=	=	=
+0eeb890	0.0.4.md:181	PROSE	rule	PD-140	=	=	=
+0eeb890	0.0.4.md:181	PROSE	rule	PD-145	=	=	=
+0eeb890	0.0.4.md:181	PROSE	rule	PD-191	=	=	=
+0eeb890	0.0.4.md:182	PROSE	section	§10	=	=	=
+0eeb890	0.0.4.md:205	PROSE	pointer	src/driver/pipeline.npk`:631	=	=	=
+0eeb890	0.0.4.md:207	PROSE	pointer	src/frontend/analysis/reach.npk`:183	=	=	=
+0eeb890	0.0.4.md:212	PROSE	section	§1.9	=	=	=
+0eeb890	0.0.4.md:213	PROSE	section	§5.2	=	=	=
+0eeb890	0.0.4.md:214	PROSE	document	meta/specs/TRAITS_REFERENCE.md	=	=	=
+0eeb890	0.0.4.md:215	PROSE	item	Item 11	=	=	=
+0eeb890	0.0.4.md:216	PROSE	rule	PD-191	=	=	=
+0eeb890	0.0.4.md:217	PROSE	ruling	ruling	=	=	=
+0eeb890	0.0.4.md:229	PROSE	rule	S-7	=	=	=
+0eeb890	0.0.4.md:231	PROSE	item	item 11	=	=	=
+0eeb890	0.0.4.md:232	PROSE	rule	PD-191	=	=	=
+0eeb890	0.0.4.md:233	PROSE	item	item 11	=	=	=
+0eeb890	0.0.4.md:233	PROSE	item	item 11	=	=	=
+0eeb890	0.0.4.md:234	PROSE	rule	B-17	=	=	=
+0eeb890	0.0.4.md:235	PROSE	rule	B-17	=	=	=
+0eeb890	0.0.4.md:236	PROSE	item	item 11	=	=	=
+0eeb890	0.0.4.md:236	PROSE	item	item 12	=	=	=
+0eeb890	0.0.4.md:243	PROSE	item	Item 11	=	=	=
+0eeb890	0.0.4.md:648	PROSE	rule	PD-191	=	=	=
+0eeb890	0.0.4.md:648	PROSE	item	item 11	=	=	=
+0eeb890	0.0.4.md:648	PROSE	item	item 12	=	=	=
+0eeb890	0.0.4.md:648	PROSE	ruling	ruling	=	=	=
+0eeb890	0.0.4.md:697	PROSE	item	Item 12	=	=	=
+0eeb890	0.0.4.md:736	PROSE	rule	B-16	=	=	=
+0eeb890	0.0.4.md:817	PROSE	rule	S-7	=	=	=
+0eeb890	0.0.4.md:904	TABLE	rule	PD-191	=	=	=
+0eeb890	0.0.4.md:904	TABLE	section	§1.12	=	=	=
+0eeb890	0.0.4.md:904	TABLE	ruling	ruling	=	=	=
+0eeb890	0.0.4.md:914	PROSE	rule	PA-116	=	=	=
+0eeb890	0.0.4.md:914	PROSE	rule	PA-117	=	=	=
+0eeb890	0.0.4.md:914	PROSE	rule	PD-191	=	=	=
+0eeb890	0.0.4.md:915	PROSE	rule	PD-191	=	=	=
+0eeb890	0.0.4.md:915	PROSE	rule	PD-200	=	=	=
+0eeb890	0.0.4.md:915	PROSE	section	§1.12	=	=	=
+0eeb890	0.0.4.md:915	PROSE	ruling	ruling	=	=	=
+0eeb890	0.0.4.md:916	PROSE	rule	PD-143	=	=	=
+0eeb890	0.0.4.md:916	PROSE	rule	PD-145	=	=	=
+0eeb890	0.0.4.md:917	PROSE	rule	PD-192	=	=	=
+0eeb890	0.0.4.md:917	PROSE	rule	PD-200	=	=	=
+0eeb890	0.0.4.md:1218	PROSE	section	§3	=	=	=
+0eeb890	0.0.4.md:1222	PROSE	section	§3	=	=	=
+0eeb890	0.0.4.md:1222	PROSE	section	§8	=	=	=
+0eeb890	0.0.4.md:1222	PROSE	item	item 2	=	=	=
+0eeb890	0.0.4.md:1224	PROSE	section	§1.9	=	=	=
+0eeb890	0.0.4.md:1224	PROSE	section	§1.12	=	=	=
+0eeb890	0.0.4.md:1224	PROSE	document	harness/README.md	=	=	=
+0eeb890	0.0.4.md:1228	PROSE	rule	PD-191	=	=	=
+0eeb890	0.0.4.md:1229	PROSE	rule	B-17	=	=	=
+0eeb890	0.0.4.md:1232	PROSE	rule	B-17	=	=	=
+0eeb890	0.0.4.md:1232	PROSE	rule	PD-191	=	=	=
+0eeb890	0.0.4.md:1233	PROSE	rule	S-4	=	=	=
+0eeb890	0.0.4.md:1233	PROSE	section	§1.11	=	=	=
+0eeb890	0.0.4.md:1233	PROSE	section	§1.12	=	=	=
+0eeb890	0.0.4.md:1233	PROSE	ruling	ruling	=	=	=
+0eeb890	0.0.4.md:1234	PROSE	rule	S-6	=	=	=
+0eeb890	0.0.4.md:1235	PROSE	rule	S-7	=	=	=
+0eeb890	0.0.4.md:1236	PROSE	rule	PA-008	=	=	=
+0eeb890	0.0.4.md:1236	PROSE	rule	G-7	=	=	=
+0eeb890	0.0.4.md:1237	PROSE	rule	G-6	=	=	=
+0eeb890	0.0.4.md:1237	PROSE	rule	G-9	=	=	=
+0eeb890	0.0.4.md:1237	PROSE	item	item 3	=	=	=
+0eeb890	0.0.4.md:1238	PROSE	rule	PA-072	=	=	=
+0eeb890	0.0.4.md:1240	PROSE	rule	PA-117	=	=	=
+0eeb890	0.0.4.md:1240	PROSE	cycle	cycle 0.0.4	=	=	=
+0eeb890	0.0.4.md:1302	PROSE	rule	B-12	=	=	=
+0eeb890	0.0.4.md:1302	PROSE	rule	PD-144	=	=	=
+0eeb890	0.0.4.md:1302	PROSE	rule	PD-191	=	=	=
+0eeb890	0.0.4.md:1302	PROSE	section	§1.10	=	=	=
+0eeb890	0.0.4.md:1425	PROSE	rule	B-12	=	=	=
+0eeb890	0.0.4.md:1425	PROSE	rule	PD-145	=	=	=
+0eeb890	0.0.4.md:1425	PROSE	rule	PD-191	=	=	=
+0eeb890	0.0.4.md:1512	PROSE	section	§3	=	=	=
+0eeb890	0.0.4.md:1514	PROSE	section	§5	=	=	=
+0eeb890	0.0.4.md:1817	PROSE	section	§7	=	=	=
+0eeb890	0.0.4.md:1822	TABLE	rule	D-16	=	=	=
+0eeb890	0.0.4.md:1822	TABLE	rule	PD-143	=	=	=
+0eeb890	0.0.4.md:1822	TABLE	section	§7	=	=	=
+0eeb890	0.0.4.md:1822	TABLE	document	VALUE_MODEL.md	=	=	=
+0eeb890	0.0.4.md:1822	TABLE	document	DECISIONS.md	=	=	=
+0eeb890	0.0.4.md:1822	TABLE	document	SAFETY.md	=	=	=
+0eeb890	0.0.4.md:1822	TABLE	document	TESTING.md	=	=	=
+0eeb890	0.0.4.md:1823	TABLE	rule	PA-004	=	=	=
+0eeb890	0.0.4.md:1823	TABLE	rule	PD-145	=	=	=
+0eeb890	0.0.4.md:1823	TABLE	document	DECISIONS.md	=	=	=
+0eeb890	0.0.4.md:1823	TABLE	document	README.md	=	=	=
+0eeb890	0.0.4.md:1823	TABLE	cycle	cycle 0.0	=	=	=
+0eeb890	0.0.4.md:1824	TABLE	rule	PA-117	=	=	=
+0eeb890	0.0.4.md:1824	TABLE	rule	PA-008	=	=	=
+0eeb890	0.0.4.md:1824	TABLE	rule	PD-191	=	=	=
+0eeb890	0.0.4.md:1824	TABLE	rule	S-6	=	=	=
+0eeb890	0.0.4.md:1824	TABLE	rule	B-17	=	=	=
+0eeb890	0.0.4.md:1824	TABLE	rule	PD-191	=	=	=
+0eeb890	0.0.4.md:1824	TABLE	section	§8	=	=	=
+0eeb890	0.0.4.md:1824	TABLE	document	SAFETY.md	=	=	=
+0eeb890	0.0.4.md:1824	TABLE	document	TESTING.md	=	=	=
+0eeb890	0.0.4.md:1824	TABLE	document	SAFETY.md	=	=	=
+0eeb890	0.0.4.md:1824	TABLE	document	DECISIONS.md	=	=	=
+0eeb890	0.0.4.md:1824	TABLE	document	SAFETY.md	=	=	=
+0eeb890	0.0.4.md:1824	TABLE	document	BUILD.md	=	=	=
+0eeb890	0.0.4.md:1824	TABLE	document	DECISIONS.md	=	=	=
+0eeb890	0.0.4.md:1824	TABLE	document	src/nparse/README.md	=	=	=
+0eeb890	0.0.4.md:1825	TABLE	rule	PA-115	=	=	=
+0eeb890	0.0.4.md:1825	TABLE	section	§3	=	=	=
+0eeb890	0.0.4.md:1825	TABLE	document	DECISIONS.md	=	=	=
+0eeb890	0.0.4.md:1825	TABLE	document	BUILD.md	=	=	=
+0eeb890	0.0.4.md:1826	TABLE	rule	B-17	=	=	=
+0eeb890	0.0.4.md:1826	TABLE	document	BUILD.md	=	=	=
+0eeb890	0.0.4.md:1826	TABLE	document	TESTING.md	=	=	=
+0eeb890	0.0.4.md:1828	TABLE	rule	B-8	=	=	=
+0eeb890	0.0.4.md:1828	TABLE	section	§7	=	=	=
+0eeb890	0.0.4.md:1828	TABLE	section	§5	=	=	=
+0eeb890	0.0.4.md:1828	TABLE	document	BUILD.md	=	=	=
+0eeb890	0.0.4.md:1828	TABLE	document	PLUGIN_MODEL.md	=	=	=
+0eeb890	0.0.4.md:1830	TABLE	rule	PD-144	=	=	=
+0eeb890	0.0.4.md:1830	TABLE	document	DECISIONS.md	=	=	=
+0eeb890	0.0.4.md:1830	TABLE	document	BUILD.md	=	=	=
+0eeb890	0.0.4.md:1831	TABLE	rule	PA-113	=	=	=
+0eeb890	0.0.4.md:1831	TABLE	rule	B-2a	=	=	=
+0eeb890	0.0.4.md:1831	TABLE	document	DECISIONS.md	=	=	=
+0eeb890	0.0.4.md:1831	TABLE	document	BUILD.md	=	=	=
+0eeb890	0.0.4.md:1831	TABLE	document	harness/README.md	=	=	=
+0eeb890	0.0.4.md:1856	PROSE	ruling	ruling	=	=	=
+0eeb890	0.0.4.md:1856	PROSE	finding	finding 2	=	=	=
+0eeb890	0.0.4.md:1857	PROSE	section	§12	=	=	=
+0eeb890	0.0.4.md:1864	PROSE	rule	PD-142	=	=	=
+0eeb890	0.0.4.md:1864	PROSE	rule	PD-191	=	=	=
+0eeb890	0.0.4.md:1868	PROSE	rule	PA-008	=	=	=
+0eeb890	0.0.4.md:1868	PROSE	section	§8	=	=	=
+0eeb890	0.0.4.md:1868	PROSE	item	item 2	=	=	=
+0eeb890	0.0.4.md:1869	PROSE	rule	S-4	=	=	=
+0eeb890	0.0.4.md:1869	PROSE	rule	G-7	=	=	=
+0eeb890	0.0.4.md:1879	PROSE	document	CONTRIBUTING.md	=	=	=
+0eeb890	0.0.4.md:1879	PROSE	document	README.md	=	=	=
+0eeb890	0.0.4.md:1880	PROSE	section	§3	=	=	=
+0eeb890	0.0.4.md:1880	PROSE	document	meta/specs/README.md	=	=	=
+0eeb890	0.0.4.md:1880	PROSE	document	SAFETY.md	=	=	=
+0eeb890	0.0.4.md:1880	PROSE	document	WRITER_MODEL.md	=	=	=
+0eeb890	0.0.4.md:1881	PROSE	rule	S-4	=	=	=
+0eeb890	0.0.4.md:1881	PROSE	rule	PD-191	=	=	=
+0eeb890	0.0.4.md:1881	PROSE	document	src/nparse/README.md	=	=	=
+0eeb890	0.0.4.md:1882	PROSE	document	CURRENCY.md	=	=	=
+0eeb890	0.0.4.md:1883	PROSE	rule	PA-109	=	=	=
+0eeb890	0.0.4.md:1883	PROSE	section	§8	=	=	=
+0eeb890	0.0.4.md:1883	PROSE	item	item 2	=	=	=
+0eeb890	0.0.4.md:1883	PROSE	document	DECISIONS.md	=	=	=
+0eeb890	0.0.4.md:1902	PROSE	cycle	cycle 0.0	=	=	=
+0eeb890	0.0.4.md:1906	TABLE	rule	B-2	=	=	=
+0eeb890	0.0.4.md:1906	TABLE	rule	PA-115	=	=	=
+0eeb890	0.0.4.md:1906	TABLE	document	CLAUDE.md	=	=	=
+0eeb890	0.0.4.md:1906	TABLE	document	DECISIONS.md	=	=	=
+0eeb890	0.0.4.md:1907	TABLE	rule	B-18	=	=	=
+0eeb890	0.0.4.md:1907	TABLE	rule	PA-117	=	=	=
+0eeb890	0.0.4.md:1907	TABLE	document	TESTING.md	=	=	=
+0eeb890	0.0.4.md:1907	TABLE	document	DECISIONS.md	=	=	=
+0eeb890	0.0.4.md:1908	TABLE	document	TESTING.md	=	=	=
+0eeb890	0.0.4.md:1910	TABLE	section	§5	=	=	=
+0eeb890	0.0.4.md:1910	TABLE	section	§7	=	=	=
+0eeb890	0.0.4.md:1910	TABLE	section	§5	=	=	=
+0eeb890	0.0.4.md:1912	TABLE	document	harness/README.md	=	=	=
+0eeb890	0.0.4.md:1913	TABLE	cycle	cycle 0.0	=	=	=
+0eeb890	0.0.4.md:1914	TABLE	finding	finding 2	=	=	=
+0eeb890	0.0.4.md:1915	TABLE	rule	S-6	=	=	=
+0eeb890	0.0.4.md:1915	TABLE	rule	B-18	=	=	=
+0eeb890	0.0.4.md:1915	TABLE	section	§8	=	=	=
+0eeb890	0.0.4.md:1915	TABLE	finding	finding 1	=	=	=
+0eeb890	0.0.4.md:1916	TABLE	finding	finding 5	=	=	=
+0eeb890	0.0.4.md:1918	PROSE	finding	finding 3	=	=	=
+0eeb890	0.0.4.md:1952	PROSE	section	§5	=	=	=
+0eeb890	0.0.4.md:1974	PROSE	rule	PD-191	=	=	=
+0eeb890	0.0.4.md:1974	PROSE	section	§1.12	=	=	=
+0eeb890	0.0.4.md:1976	PROSE	section	§3	=	=	=
+0eeb890	0.0.4.md:1978	PROSE	rule	S-4	=	=	=
+0eeb890	0.0.4.md:1979	PROSE	rule	PA-009	=	=	=
+0eeb890	0.0.4.md:1980	PROSE	section	§1.11	=	=	=
+0eeb890	0.0.4.md:1981	PROSE	ruling	ruling	=	=	=
+0eeb890	0.0.4.md:1982	PROSE	rule	PD-191	=	=	=
+0eeb890	0.0.4.md:1982	PROSE	rule	PA-008	=	=	=
+0eeb890	0.0.4.md:1982	PROSE	section	§5	=	=	=
+0eeb890	0.0.4.md:1983	PROSE	finding	finding 3	=	=	=
+0eeb890	0.0.4.md:2071	PROSE	finding	finding 1	=	=	=
+0eeb890	0.0.4.md:2077	PROSE	section	§8	OVER-REACHES	meta/roadmap/0.0/0.0.4.md at 0eeb890:1978; meta/roadmap/0.0/0.0.4.md at 405df34:1000	"**Nothing of the alignment is handed on.**"; "To parse's next round, which opens with the REACH probe" -- §8's last bullet names no REACH probe at 0eeb890; it did at 405df34: fixed at the tip, "(§8's last bullet at `405df34`)"
+0eeb890	0.0.4.md:2079	PROSE	section	§1.11	=	=	=
+0eeb890	0.0.4.md:2080	PROSE	item	items 1	=	=	=
+0eeb890	0.0.4.md:2080	PROSE	item	item 11	=	=	=
+0eeb890	0.0.4.md:2082	PROSE	ruling	ruling	=	=	=
+0eeb890	0.0.4.md:2083	PROSE	rule	PD-191	=	=	=
+0eeb890	0.0.4.md:2083	PROSE	rule	S-7	=	=	=
+0eeb890	0.0.4.md:2084	PROSE	section	§1.12	=	=	=
+0eeb890	0.0.4.md:2084	PROSE	section	§1.11	=	=	=
+0eeb890	0.0.4.md:2084	PROSE	plan	1.11's record	=	=	=
+0eeb890	0.0.4.md:2085	PROSE	rule	B-17	=	=	=
+0eeb890	0.0.4.md:2085	PROSE	rule	PD-191	=	=	=
+0eeb890	0.0.4.md:2085	PROSE	rule	PD-144	=	=	=
+0eeb890	0.0.4.md:2086	PROSE	rule	PD-145	=	=	=
+0eeb890	0.0.4.md:2088	PROSE	rule	PD-143	=	=	=
+0eeb890	0.0.4.md:2088	PROSE	rule	PD-145	=	=	=
+0eeb890	0.0.4.md:2088	PROSE	rule	PD-191	=	=	=
+0eeb890	0.0.4.md:2088	PROSE	document	BUILD.md	=	=	=
+0eeb890	0.0.4.md:2091	PROSE	ruling	ruling	=	=	=
+0eeb890	0.0.4.md:2092	PROSE	rule	S-4	=	=	=
+0eeb890	0.0.4.md:2092	PROSE	rule	S-6	=	=	=
+0eeb890	0.0.4.md:2092	PROSE	rule	S-7	=	=	=
+0eeb890	0.0.4.md:2092	PROSE	rule	PA-008	=	=	=
+0eeb890	0.0.4.md:2092	PROSE	rule	G-7	=	=	=
+0eeb890	0.0.4.md:2092	PROSE	section	§8	=	=	=
+0eeb890	0.0.4.md:2092	PROSE	item	item 2	=	=	=
+0eeb890	0.0.4.md:2093	PROSE	rule	PA-072	=	=	=
+0eeb890	0.0.4.md:2093	PROSE	section	§1.11	=	=	=
+0eeb890	0.0.4.md:2093	PROSE	section	§1.12	=	=	=
+0eeb890	0.0.4.md:2095	PROSE	rule	B-17	=	=	=
+0eeb890	0.0.4.md:2096	PROSE	rule	PD-191	=	=	=
+0eeb890	0.0.4.md:2096	PROSE	rule	PA-008	=	=	=
+0eeb890	0.0.4.md:2096	PROSE	rule	PA-072	=	=	=
+0eeb890	0.0.4.md:2096	PROSE	rule	G-7	=	=	=
+0eeb890	0.0.4.md:2102	PROSE	rule	PD-191	=	=	=
+0eeb890	0.0.4.md:2102	PROSE	section	§1.5	=	=	=
+0eeb890	0.0.4.md:2103	PROSE	section	§5	=	=	=
+0eeb890	0.0.4.md:2104	PROSE	section	§1.5	=	=	=
+0eeb890	0.0.4.md:2111	PROSE	section	§5	=	=	=
+0eeb890	0.0.4.md:2117	PROSE	section	§5	=	=	=
+0eeb890	0.0.4.md:2127	PROSE	section	§7	=	=	=
+0eeb890	0.0.4.md:2129	PROSE	section	§9	=	=	=
+0eeb890	0.0.4.md:2130	PROSE	finding	finding 1	=	=	=
+0eeb890	0.0.4.md:2131	PROSE	rule	PD-191	=	=	=
+0eeb890	0.0.4.md:2135	PROSE	ruling	ruling	=	=	=
+0eeb890	0.0.4.md:2136	PROSE	rule	PD-191	=	=	=
+0eeb890	0.0.4.md:2136	PROSE	document	BUILD.md	=	=	=
+0eeb890	0.0.4.md:2137	PROSE	rule	B-16	=	=	=
+0eeb890	0.0.4.md:2137	PROSE	rule	S-7	=	=	=
+0eeb890	0.0.4.md:2137	PROSE	rule	B-16	=	=	=
+0eeb890	0.0.4.md:2138	PROSE	rule	B-16	=	=	=
+0eeb890	0.0.4.md:2139	PROSE	rule	PD-191	=	=	=
+0eeb890	0.0.4.md:2139	PROSE	finding	finding 1	=	=	=
+0eeb890	0.0.4.md:2142	PROSE	rule	S-6	=	=	=
+0eeb890	0.0.4.md:2142	PROSE	rule	S-6	=	=	=
+0eeb890	0.0.4.md:2142	PROSE	section	§1	=	=	=
+0eeb890	0.0.4.md:2142	PROSE	item	item 12	=	=	=
+0eeb890	0.0.4.md:2142	PROSE	finding	finding 6	=	=	=
+0eeb890	0.0.4.md:2143	PROSE	rule	PD-191	=	=	=
+0eeb890	0.0.4.md:2143	PROSE	rule	PD-142	=	=	=
+0eeb890	0.0.4.md:2143	PROSE	item	items 11	=	=	=
+0eeb890	0.0.4.md:2146	PROSE	ruling	ruling	=	=	=
+0eeb890	0.0.4.md:2150	PROSE	finding	finding 1	=	=	=
+0eeb890	0.0.4.md:2151	PROSE	rule	B-17	=	=	=
+0eeb890	0.0.4.md:2151	PROSE	pointer	step0g.patch:223	=	=	=
+0eeb890	0.0.4.md:2152	PROSE	rule	G-8	=	=	=
+0eeb890	0.0.4.md:2152	PROSE	rule	PA-072	=	=	=
+0eeb890	0.0.4.md:2152	PROSE	pointer	:245	=	=	=
+0eeb890	0.0.4.md:2155	PROSE	rule	D-179	=	=	=
+0eeb890	0.0.4.md:2157	PROSE	document	DECISIONS.md	OVER-REACHES	meta/roadmap/0.0/0.0.4_tools/step1.patch at 46464ba:36; meta/roadmap/0.0/0.0.4_tools/step1.patch at 0eeb890:36	"index 71a172a..d2a0ecb 100644"; "index 0d0b146..d3c0eed 100644" -- step 1 moved its `SAFETY.md` index line too, which "in their `DECISIONS.md` `index` line" leaves out: fixed at the tip, "step 1 in `SAFETY.md`'s too"
+0eeb890	0.0.4.md:2161	PROSE	rule	PD-191	=	=	=
+0eeb890	0.0.4.md:2162	PROSE	section	§5	=	=	=
+0eeb890	0.0.5.md:369	PROSE	rule	PD-191	=	=	=
+0eeb890	0.0.5.md:374	PROSE	rule	PD-191	=	=	=
+0eeb890	0.0.5.md:374	PROSE	rule	PD-145	=	=	=
+0eeb890	0.0.5.md:374	PROSE	document	src/nparse/README.md	=	=	=
+0eeb890	0.0.5.md:378	PROSE	rule	PD-191	=	=	=

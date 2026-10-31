@@ -2,7 +2,9 @@
 # and a twin where each reason stops (T18v2's finding 1, (a) … (d), fixed in parse's next text round, T19's (CP)).
 # Columns: name; the patch line as planted; its place, PLACE:kind; what the census must count; what it must drop,
 # form:token:exclusion. A row and the rows after it whose names end `+cont` are one group, read as the lines one
-# `git diff -U0` hunk adds, by the census's own reader. Run: python3 -B cites.py plants cites_plants.tsv
+# `git diff -U0` hunk adds, by the census's own reader. A group whose first name begins `plans-` (T19's (CC2)) is a
+# plan's lines as planted, read whole by the plans' reader: its fences' regions (X4) and the extension's forms.
+# Run: python3 -B cites.py plants cites_plants.tsv
 x1-quoted-output	+refused, `NITPICK-RESOLVE-010` at the library's declaration ("two error constants derive the same code (	PATCH-ADDED:added	-	code:NITPICK-RESOLVE-010:X1
 x1-quoted-output+cont	+D-179, an FNV collision)"). So the pair is refused, by D-179's FNV code, never silently ambiguous (S-6).	PATCH-ADDED:added	rule:D-179 rule:S-6	rule:D-179:X1
 x1-closed-quote	+`(lib.EParseState)` is `NITPICK-RESOLVE-002` ("names no error constant of this program (D-275)"), so B-16 holds	PATCH-ADDED:added	rule:B-16	rule:D-275:X1 code:NITPICK-RESOLVE-002:X1
@@ -57,3 +59,27 @@ c-open-lower	+o-n1 stays open	PATCH-ADDED:added	open:o-n1	-
 c-plan-capital	+0.0.3's Plan says so	PATCH-ADDED:added	plan:0.0.3's Plan	-
 c-document-lower	+see `build.md` b-16	PATCH-ADDED:added	rule:b-16	document:build.md:X3
 c-code-lower	+`nitpick-resolve-010` ("two error constants derive the same code (D-179, an FNV collision)")	PATCH-ADDED:added	-	rule:D-179:X1 code:nitpick-resolve-010:X1
+plans-x4-text	Prose beside the fence cites B-16 and §3.	PROSE:prose	rule:B-16 section:§3	-
+plans-x4-text+cont	```text	FENCE:edge	-	-
+plans-x4-text+cont	NITPICK-REACH-003 r.npk:1:1: owes S-7 and PA-008	FENCE:output	-	rule:S-7:X4 rule:PA-008:X4 code:NITPICK-REACH-003:X4 pointer:r.npk:1:X4
+plans-x4-text+cont	```	FENCE:edge	-	-
+plans-x4-text+cont	The line after the fence cites S-4.	PROSE:prose	rule:S-4	-
+plans-x4-nolang	```	FENCE:edge	-	-
+plans-x4-nolang+cont	B-12 in an Expect	FENCE:output	-	rule:B-12:X4
+plans-x4-nolang+cont	```	FENCE:edge	-	-
+plans-x4-nolang+cont	| B-18 | a table row beside it |	TABLE:prose	rule:B-18	-
+plans-x4-bash	```bash	FENCE:edge	-	-
+plans-x4-bash+cont	# the plan's own comment cites B-17 and item 2	COMMENT:bash	rule:B-17 item:item 2	-
+plans-x4-bash+cont	grep -o '^### PA-[0-9]*' meta/DECISIONS.md  # PA-008	FENCE:command	-	rule:PA-008:X4 document:meta/DECISIONS.md:X4
+plans-x4-bash+cont	```	FENCE:edge	-	-
+plans-x4-nitpick	```nitpick	FENCE:edge	-	-
+plans-x4-nitpick+cont	x = item 3; // the program's comment cites S-4	COMMENT:nitpick	rule:S-4	item:item 3:X4
+plans-x4-nitpick+cont	fail EParseState; /* G-7 */	FENCE:code	-	rule:G-7:X4
+plans-x4-nitpick+cont	```	FENCE:edge	-	-
+plans-x4-other	```toml	FENCE:edge	-	-
+plans-x4-other+cont	unit = "S-6"	FENCE:toml	rule:S-6	-
+plans-x4-other+cont	```	FENCE:edge	-	-
+plans-forms	T18v's finding 6 and FINDING 2, Cycle 0.0.3, `harness/run.py`:157 and :245, BUILD.md B-2a, P-1a and C-15	PROSE:prose	rule:B-2a rule:P-1a rule:C-15 finding:finding 6 finding:FINDING 2 cycle:Cycle 0.0.3 pointer:harness/run.py`:157 pointer::245	document:BUILD.md:X3
+plans-forms+cont	UTF-8, SHA-256 and B-2ab are none of them	PROSE:prose	-	-
+plans-forms+cont	RESOLVE-010 ("two error constants derive the same code (D-179, an FNV collision)") and RESOLVE-002	PROSE:prose	-	rule:D-179:X1 code:RESOLVE-010:X1 code:RESOLVE-002:X1
+plans-forms+cont	RESOLVE-002 ("the plan's own words, S-6")	PROSE:prose	rule:S-6	code:RESOLVE-002:X1
