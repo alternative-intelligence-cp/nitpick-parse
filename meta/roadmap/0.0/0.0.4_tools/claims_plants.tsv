@@ -1,0 +1,21 @@
+# `claims.py control`'s plants: `row<TAB>name<TAB>expect<TAB>text`, `\n` a line break. Each is planted, in memory, as
+# `planted/<name>.md` beside the tree's files: a `bare` plant must be reported BARE and the check exit 1; a `carried`
+# one, the claim with its correction, must not be. T16v2's six, verbatim, stand in a paragraph that names the subject,
+# as the claim they reword does; then the base claim split across lines, and twins in other words.
+the public error count	t16v2-tally	bare	`check_error_budget` reads every `fail` site under `src/`. The tally is two.
+the public error count	t16v2-held-to-two-names	bare	`check_error_budget` reads every `fail` site under `src/`. The budget is held to two names.
+the public error count	t16v2-just-2-remain	bare	`check_error_budget` reads every `fail` site under `src/`. Just 2 identities remain.
+the public error count	t16v2-stays-unchanged	bare	`check_error_budget` reads every `fail` site under `src/`. The error count stays unchanged at two.
+the public error count	t16v2-reporting-a-count	bare	`check_error_budget` reads every `fail` site under `src/`. The check is still reporting a count of two.
+the public error count	t16v2-a-pair	bare	`check_error_budget` reads every `fail` site under `src/`. The library declares a pair of identities.
+the public error count	split-the-base-claim	bare	- [ ] `check_error_budget`\n      reporting exactly\n      two
+the public error count	split-a-pair	bare	The library declares a\npair of error\nidentities, and no input can produce either.
+the public error count	own-a-couple	bare	A consumer of `src/lib.npk` owes a couple of error identities of this library's own.
+the public error count	own-numeral	bare	Of the library's own, a `failsafe` names 2 identities and the floor's six.
+the public error count	own-both-names	bare	`EParseState` and `EParseEncode`: both are every identity the library raises.
+the public error count	own-only	bare	`EParseState` and `EParseEncode` are the only error identities a consumer owes for this library.
+the public error count	own-third	bare	No format may add a third identity; the budget stops at the names it has.
+the public error count	own-in-a-table	bare	| error identities | two | a consumer's arms |
+the public error count	carried-in-the-sentence	carried	`check_error_budget` reads every `fail` site under `src/`. It reports exactly two, `nparse.EParseState` and `nparse.EParseEncode`.
+the public error count	carried-by-a-dated-note	carried	`check_error_budget` reads every `fail` site under `src/`. The tally is two. *(2026-10-31 — an identity is its declaring module and its name.)*
+the public error count	carried-by-a-placeholder	carried	The library declares a pair of identities, each a module and a name (@@PD-142@@).

@@ -1,0 +1,3 @@
+# The `.npk` files that declare an `error:` on purpose -- a probe of the REACH or of G-7 -- each with its reason:
+# `path<TAB>reason`. `claims.py decls` prints each, and fails on a declarer outside PD-191's module not listed here,
+# and on a line here whose file is absent or declares nothing. None at cycle 0.0.4.

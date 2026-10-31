@@ -1,0 +1,6 @@
+# 0.0.4's subject-keyed claim checks (`claims.py claims`): `row<TAB>subject<TAB>claim<TAB>anchor<TAB>base`, each pattern
+# matched case-insensitively over a sentence as the sweep's transform leaves it. SUBJECT is what the claim is about,
+# CLAIM what it asserts, ANCHOR the correction's own terms, and BASE `<commit>:<path>:<fragment>` the claim as it stood
+# before the correction, which `claims.py control` must report BARE there. `{PD-n}` is the decision's number or its
+# placeholder.
+the public error count	\bEParse(State|Encode)\b|\berror:? (budget|identit(y|ies)|names?|count|constants?)\b|\bcheck_error_budget\b|\bidentit(y|ies)\b|\bfailsafe arms?\b	\b(two|both|pair|couple|second)\b|\bthird\b(?!-)|\bthe only\b|\bonly (one|two)\b|\bat most\b|(?<![\w.§^-])2(?![\w.%^-])	{PD-142}|{PD-191}|\bnparse\.EParse(State|Encode)\b|\bmodule and (its|a|the) name\b|\(module, name\)	8f10cb9:meta/roadmap/0.13/README.md:check_error_budget reporting exactly two
