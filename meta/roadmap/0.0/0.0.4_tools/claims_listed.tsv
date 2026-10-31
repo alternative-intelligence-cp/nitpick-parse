@@ -14,3 +14,11 @@ the public error count	meta/specs/SAFETY.md	The error budget — two, and no inp
 the public error count	meta/specs/WRITER_MODEL.md	This is the second of the library's two error names	accurate	a count of names
 the public error count	src/nparse/README.md	src/nparse/ — the two error identities	accurate	the declaring module's README heading, whose first paragraph names the module and PD-191
 the public error count	meta/DECISIONS.md	and §8's "at most EParseState and EParseEncode" is true only of this library's OWN identities	D	PA-109's own text, of 2026-10-15, quoting §8's item 2 as it stood then
+the sweep's files	harness/run.py	B-2 and B-2a over the library: EVERY module under src/, each compiled as a root	accurate, another subject	B-2's library build, which compiles every module under src/, not the parse sweep
+the sweep's files	meta/DECISIONS.md	The parse stage — the sweep — compiles every .npk in the tree as a root	D	PA-115's own text, of 2026-10-29, which BUILD.md §3's note reads as the files git tracks
+the layering's never	harness/treecheck.py	def check_layering(root):	accurate	the check's own code, which reads a name after never as forbidden (step 0d and its live case)
+the layering's never	meta/DECISIONS.md	Six checks run on every full run and print what each read: check_layering	D	PA-117's own text, of 2026-10-29
+the layering's never	meta/DECISIONS.md	The error budget is the identities the tree's fail sites raise, keyed by (module, name)	D	PA-117's own text; read because the sentence before names check_layering
+the floor's edges	harness/run.py	every unit's -O0 IR scanned for call edges the floor program lacks	accurate	the call-edge scan's own account, of edges beyond the floor's
+the floor's edges	harness/run.py	The floor program's own scan at the pin 2e1cb4a, held EXACTLY on every run	accurate	the floor's two lists, held exactly; the sentence after it names the denied edge
+the pin by its commit	harness/README.md	their commit being the pin the workbench's board names	accurate	the board's pin, which the run does not check, named as the board's

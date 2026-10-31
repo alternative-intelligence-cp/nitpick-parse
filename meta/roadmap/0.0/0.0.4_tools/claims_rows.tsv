@@ -1,6 +1,16 @@
-# 0.0.4's subject-keyed claim checks (`claims.py claims`): `row<TAB>subject<TAB>claim<TAB>anchor<TAB>base`, each pattern
-# matched case-insensitively over a sentence as the sweep's transform leaves it. SUBJECT is what the claim is about,
-# CLAIM what it asserts, ANCHOR the correction's own terms, and BASE `<commit>:<path>:<fragment>` the claim as it stood
-# before the correction, which `claims.py control` must report BARE there. `{PD-n}` is the decision's number or its
-# placeholder.
-the public error count	\bEParse(State|Encode)\b|\berror:? (budget|identit(y|ies)|names?|count|constants?)\b|\bcheck_error_budget\b|\bidentit(y|ies)\b|\bfailsafe arms?\b	\b(two|both|pair|couple|second)\b|\bthird\b(?!-)|\bthe only\b|\bonly (one|two)\b|\bat most\b|(?<![\w.§^-])2(?![\w.%^-])	{PD-142}|{PD-191}|\bnparse\.EParse(State|Encode)\b|\bmodule and (its|a|the) name\b|\(module, name\)	8f10cb9:meta/roadmap/0.13/README.md:check_error_budget reporting exactly two
+# 0.0.4's subject-keyed claim checks (`claims.py claims`): `row<TAB>paths<TAB>subject<TAB>claim<TAB>anchor<TAB>base`,
+# each pattern matched case-insensitively over a sentence as the sweep's transform leaves it. PATHS is `sweep`, the
+# files the stale-claim sweep reads, or a pattern a path must match; SUBJECT is what the claim is about, CLAIM what it
+# asserts, ANCHOR the correction's own terms, and BASE `<commit>:<path>:<fragment>` the claim as it stood before the
+# correction, which `claims.py control` must report BARE there. `{PD-n}` is the decision's number or its placeholder.
+# The first row is the public error count's (T16v2's finding 2); the others are T16's other corrected claims whose
+# twin check was a list of words alone, and T16fix1's (0.0.4.md §5).
+the public error count	sweep	\bEParse(State|Encode)\b|\berror:? (budget|identit(y|ies)|names?|count|constants?)\b|\bcheck_error_budget\b|\bidentit(y|ies)\b|\bfailsafe arms?\b	\b(two|both|pair|couple|second)\b|\bthird\b(?!-)|\bthe only\b|\bonly (one|two)\b|\bat most\b|(?<![\w.§^-])2(?![\w.%^-])	{PD-142}|{PD-191}|\bnparse\.EParse(State|Encode)\b|\bmodule and (its|a|the) name\b|\(module, name\)	8f10cb9:meta/roadmap/0.13/README.md:check_error_budget reporting exactly two
+the sweep's files	sweep	\bsweep(s|ing)?\b|\bSWEEP_SKIP\b|\bstage parse\b|\bcompiled as a root\b	\bevery \.npk\b|\.npk (files? )?(in|under) the (tree|root|path|entry|stage)\b|\bwalk(s|ed|ing)?\b|\bSWEEP_SKIP\b	\bgit ls-files\b|\btracked\b|\bgit tracks\b|\bgit lists\b	8f10cb9:CLAUDE.md:sweeps every .npk in the tree
+the layering's never	sweep	\bcheck_layering\b|\bB-17\b|\bMAY IMPORT\b|\blayering\b	\bnever\b|↛|\ba cell\b	after .?never|\bforbid(s|den)?\b|\bflag(s|ged)?\b	8f10cb9:meta/specs/TESTING.md:the format ↛ doc arrow (B-18) a cell of it
+the raw accumulation's operators	sweep	\bcheck_no_raw_accumulate\b|\baccumulat(e|es|ed|ion|ions|or|ors)\b	x = x \+	\+=|\bcompound\b	8f10cb9:meta/specs/TESTING.md:and any x = x + … whose added term is not a literal
+the harness's reading of source	sweep	\blexical\.py\b|\bshapes\.py\b|\bblank(ed|s|ing)?\b|\breading of (\.npk|source)\b|\bcomments and strings\b	\bread as shapes\.py reads\b|\bchecks share\b|\bsweep.s reader\b|\b(every|all|the) (tree )?checks? (read|use)s?\b	\bunblanked\b|\breads no source\b|\bfour\b	8f10cb9:harness/treecheck.py:Source is read as shapes.py reads it
+the floor's edges	sweep	\bfloor\b	\bgained\b|\bedges? to the (floor|runtime)\b|\bcall edges?\b	\bor lost\b|\bdenied\b|\bnpk_ofd_close\b|\btwo lists\b|\bexactly its lists\b	8f10cb9:harness/run.py:a floor that gained a
+the pin by its commit	^harness/	\bthe pin\b|\bpinned\b	\bthe pin\b	\b2e1cb4a\b	8f10cb9:harness/expect.py:as npkg/expect.npk reads it at the pin 7e91730
+the date file's readers	^meta/roadmap/(done/)?0\.0/0\.0\.[0-9]+[a-z]?\.md$	\bdate file\b|\.internal/w00/0\.0\.[0-9]+[a-z]?\.date\b|\bthe run's one date\b	\bsteps? [0-9][a-z]? (…|\.\.\.|to|and|through) [0-9][a-z]?\b[^.;]{0,60}\bread\b	\bholds? (the date's placeholder|it too|@@DATE@@)\b|\bdid not\b|\bwhose (text|patches) holds?\b	8f10cb9:meta/roadmap/0.0/0.0.2.md:step 1 applies and steps 2 … 4 read
+the question for the author	^meta/roadmap/0\.0/0\.0\.4\.md$	\bthe author\b	\ba question\b|\bquestions?\b|\bask(s|ed)?\b|\bleft open\b	\bwithdrawn\b|\bnone is left open\b|\bno question\b	50696a5:meta/roadmap/0.0/0.0.4.md:a question for the author

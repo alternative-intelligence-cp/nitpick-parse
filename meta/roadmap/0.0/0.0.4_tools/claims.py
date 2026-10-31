@@ -22,11 +22,13 @@ one. A file that declares one on purpose -- a probe of the REACH or of G-7 -- is
 this script, `path<TAB>reason`, and printed with its reason; a listed file that is absent or declares nothing is a
 finding too.
 
-CLAIMS reads what the stale-claim sweep reads (`../tools/sweep.py`: every file git lists, tracked or untracked, but
-the cycle 0.0 plans, the patches, the `.npk` sources, `LICENSE` and the research digests), each line through the
-sweep's transform. A file is cut into PARAGRAPHS -- a blank line, a heading, a list item and a table row each start
+CLAIMS reads every file git lists, tracked or untracked, but the patches, the `.npk` sources, `LICENSE` and the
+research digests, each line through the stale-claim sweep's transform (`../tools/sweep.py`); a row's PATHS, `sweep`,
+reads what the sweep reads, those files but the cycle 0.0 plans, and any other value is a pattern a path must match.
+A Markdown file's fenced blocks are not read, since a command or its output is no claim, and a cycle 0.0 plan is read
+up to its `## Execution record`, which its worker writes after. A file is cut into PARAGRAPHS -- a blank line, a heading, a list item and a table row each start
 one -- and a paragraph into SENTENCES, each joined across its line breaks. A row of `claims_rows.tsv`,
-`row<TAB>subject<TAB>claim<TAB>anchor<TAB>base`, names its subject by what the claim is about: a sentence is a
+`row<TAB>paths<TAB>subject<TAB>claim<TAB>anchor<TAB>base`, names its subject by what the claim is about: a sentence is a
 CANDIDATE when its claim pattern matches it and its subject pattern matches it or the sentence before it in the same
 paragraph, so a claim that does not repeat its subject is still read. A candidate is CARRIED when the anchor --
 the correction's own terms -- stands in the sentence, in a dated note in the same paragraph (a parenthesis opening
@@ -58,7 +60,10 @@ DECLARING, MODULE = "src/nparse/nparse.npk", "nparse"
 NOTE = re.compile(r"\((?:[^()]{0,40}?)\b\d{4}-\d{2}-\d{2}\b")
 SENTENCE_END = re.compile(r"(?<=[.;!?])\s+(?=[A-Z0-9(\"'])")
 STARTS = re.compile(r"^\s*(?:[-*+]\s|\d+[.)]\s|\||#+\s)")
+STARTS_CODE = re.compile(r"^\s*(?:#+\s*|//+\s*)?(?:[-*+]\s|\d+[.)]\s|\|)")
 HEADING3 = re.compile(r"^\s*#{3,}\s")
+PLANS = re.compile(r"(^|/)meta/roadmap/(done/)?0\.0/")
+SKIP = re.compile(r"\.patch$|\.npk$|^LICENSE$")
 DECL = re.compile(r"(?<![\w.])error\s*:\s*([A-Za-z_]\w*)")
 MOD = re.compile(r"\bmod\s*:\s*(\w+)")
 
@@ -205,10 +210,10 @@ def expand(rx, numbers):
 def rows(names=None):
     numbers = apply.numbers()
     out = []
-    for name, subj, claim, anchor, base in tsv("claims_rows.tsv", 5):
+    for name, paths, subj, claim, anchor, base in tsv("claims_rows.tsv", 6):
         if names and name not in names:
             continue
-        out.append({"row": name, "subject": re.compile(expand(subj, numbers), re.I),
+        out.append({"row": name, "paths": paths, "subject": re.compile(expand(subj, numbers), re.I),
                     "claim": re.compile(expand(claim, numbers), re.I),
                     "anchor": re.compile(expand(anchor, numbers), re.I), "base": base})
     if names and len(out) != len(set(names)):
@@ -216,20 +221,25 @@ def rows(names=None):
     return out
 
 
-def paragraphs(lines):
+def paragraphs(lines, md=True):
     """[(the paragraph's lines as (number, text), the `###` heading it stands under or '', its block)]: a BLOCK is a
-    run of lines between blank ones, and a paragraph one block's list item, table row, heading or prose run."""
+    run of lines between blank ones, and a paragraph one block's list item, table row, heading or prose run. Outside
+    Markdown a `#` opens a comment, not a heading: a comment's lines are one run, and so is a comment marker alone."""
     out, cur, head, block = [], [], "", 0
+    starts = STARTS if md else STARTS_CODE
     for n, line in enumerate(lines, 1):
-        if not line.strip() or STARTS.match(line):
+        blank_line = not line.strip() or (not md and re.fullmatch(r"\s*(#+|//+)\s*", line))
+        if blank_line or starts.match(line):
             if cur:
                 out.append((cur, head, block))
             cur = []
-            if not line.strip():
+            if blank_line:
                 block += 1
                 continue
-            if HEADING3.match(line):
+            if md and HEADING3.match(line):
                 head = line
+            elif md and re.match(r"^\s*#{1,2}\s", line):
+                head = ""
         cur.append((n, line))
     if cur:
         out.append((cur, head, block))
@@ -240,9 +250,29 @@ def carried_by_note(text, anchor):
     return any(anchor.search(text[m.start():]) for m in NOTE.finditer(text))
 
 
-def candidates(row, lines):
+def prose(path, text):
+    """A file's lines as CLAIMS reads them: in Markdown a fenced block's lines blank, since a command or its output is
+    no claim; and in a cycle 0.0 plan nothing from its `## Execution record` on, the worker's, written after."""
+    lines = text.split("\n")
+    if path.endswith(".md"):
+        fenced = False
+        for k, line in enumerate(lines):
+            if line.lstrip().startswith("```"):
+                fenced = not fenced
+                lines[k] = ""
+            elif fenced:
+                lines[k] = ""
+    if PLANS.search(path):
+        for k, line in enumerate(lines):
+            if line.startswith("## Execution record"):
+                lines = lines[:k]
+                break
+    return lines
+
+
+def candidates(row, lines, md=True):
     """[(line, sentence, state)] with state 'carried' or 'bare' -- before the listed lines are read"""
-    out, paras = [], paragraphs(lines)
+    out, paras = [], paragraphs(lines, md)
     joined = [sweep.joined([t for _, t in pl]) for pl, _, _ in paras]
     secs, beneath = {}, set()
     for k, (pl, head, block) in enumerate(paras):
@@ -274,14 +304,19 @@ def candidates(row, lines):
 
 
 def check_claims(texts, therows, listed):
-    """texts {path: raw}; listed [(row, path, fragment, class, reason)] -> (report, findings)"""
-    report, bad = [], []
+    """texts {path: raw}; listed [(row, path, fragment, class, reason)] -> (report, findings, every candidate as
+    (row, path, line, sentence, state))"""
+    report, bad, every = [], [], []
     for row in therows:
         mine = [x for x in listed if x[0] == row["row"]]
         used = set()
         found = []
-        for p in sorted(texts):
-            for line, s, state in candidates(row, texts[p].split("\n")):
+        if row["paths"] == "sweep":
+            read_ = [p for p in sorted(texts) if not PLANS.search(p)]
+        else:
+            read_ = [p for p in sorted(texts) if re.search(row["paths"], p)]
+        for p in read_:
+            for line, s, state in candidates(row, prose(p, texts[p]), p.endswith(".md")):
                 if state == "bare":
                     for k, (_, lp, frag, cls, _) in enumerate(mine):
                         if lp == p and frag in s:
@@ -290,24 +325,23 @@ def check_claims(texts, therows, listed):
                             break
                 found.append((p, line, s, state))
         n = {k: sum(1 for x in found if x[3].split()[0] == k) for k in ("carried", "classed", "bare")}
-        report.append("%s: %d candidate(s) in %d file(s) -- %d carried, %d classed, %d bare"
-                      % (row["row"], len(found), len({x[0] for x in found}), n["carried"], n["classed"], n["bare"]))
+        report.append("%s: %d candidate(s) in %d file(s) of %d read -- %d carried, %d classed, %d bare"
+                      % (row["row"], len(found), len({x[0] for x in found}), len(read_), n["carried"], n["classed"],
+                         n["bare"]))
         for p, line, s, state in found:
+            every.append((row["row"], p, line, s, state))
             report.append("  %s %s:%d" % (state, p, line))
             if state == "bare":
                 bad.append("%s: BARE %s:%d -- %s" % (row["row"], p, line, s[:160]))
         for k, (_, lp, frag, cls, _) in enumerate(mine):
             if k not in used:
                 bad.append("%s: STALE claims_listed.tsv: %s %r -- no bare candidate holds it" % (row["row"], lp, frag))
-    return report, bad
+    return report, bad, every
 
 
 def claim_texts(root):
     out = {}
-    try:
-        files = sweep.files(root)
-    except OSError as e:
-        raise Unreadable("git could not be run: %s" % e.strerror)
+    files = [f for f in git_files(root) if not SKIP.search(f) and os.path.isfile(os.path.join(root, f))]
     if not files:
         raise Unreadable("git lists no file")
     for f in files:
@@ -323,9 +357,9 @@ def claims(root, names):
     except Unreadable as e:
         print("claims: CANNOT READ the tree -- %s" % e)
         return 2
-    report, bad = check_claims(texts, rows(names), tsv("claims_listed.tsv", 5))
-    print("claims: %d file(s) read -- every tracked or added file but the cycle 0.0 plans, patches, sources, LICENSE "
-          "and the research digests" % len(texts))
+    report, bad, _ = check_claims(texts, rows(names), tsv("claims_listed.tsv", 5))
+    print("claims: %d file(s) read -- every tracked or added file but the patches, sources, LICENSE and the research "
+          "digests; a row of paths `sweep` reads them but the cycle 0.0 plans" % len(texts))
     print("\n".join(report))
     for b in bad:
         print("FAIL claims: " + b)
@@ -339,10 +373,9 @@ def texts_at(root, commit):
     r = subprocess.run(["git", "-C", root, "ls-tree", "-r", "--name-only", commit], capture_output=True, text=True)
     if r.returncode != 0:
         raise Unreadable("git ls-tree %s exited %d" % (commit, r.returncode))
-    skip = re.compile(r"(^|/)meta/roadmap/(done/)?0\.0/|\.patch$|\.npk$|^LICENSE$")
     out = {}
     for f in r.stdout.split("\n"):
-        if not f or skip.search(f):
+        if not f or SKIP.search(f):
             continue
         t = subprocess.run(["git", "-C", root, "show", "%s:%s" % (commit, f)], capture_output=True).stdout
         t = t.decode("utf-8", errors="replace")
@@ -427,20 +460,20 @@ def control(root, names):
         except Unreadable as e:
             print("control: CANNOT READ %s -- %s" % (commit, e))
             return 2
-        report, bad = check_claims(base_texts, [row], listed)
-        hit = [b for b in bad if (": BARE %s:" % path) in b and frag in b]
+        report, bad, every = check_claims(base_texts, [row], listed)
+        hit = [x for x in every if x[1] == path and frag in x[3] and x[4] == "bare"]
         verdict("%s: the base claim" % row["row"], bool(hit) and bool(bad),
-                "%s at %s: %s; the check's exit there %d (%s)" % (path, commit, hit[0].split(" -- ")[0].split(": ", 1)[1]
+                "%s at %s: %s; the check's exit there %d (%s)" % (path, commit, "BARE %s:%d" % (path, hit[0][2])
                                                                  if hit else "NOT REPORTED", 1 if bad else 0,
-                                                                 report[0].split(" -- ")[1]))
+                                                                 report[0].split(" -- ", 1)[1]))
         mine = [p for p in plants if p[0] == row["row"]]
         hits = {"bare": [0, 0], "carried": [0, 0]}
         for _, pname, expect, text in mine:
             planted = "planted/%s.md" % pname
             t = dict(texts)
             t[planted] = text.replace("\\n", "\n") + "\n"
-            report, bad = check_claims(t, [row], listed)
-            mine_bad = [b for b in bad if (": BARE %s:" % planted) in b]
+            report, bad, every = check_claims(t, [row], listed)
+            mine_bad = [x for x in every if x[1] == planted and x[4] == "bare"]
             good = bool(mine_bad) == (expect == "bare") and (expect != "bare" or bool(bad))
             hits[expect][1] += 1
             hits[expect][0] += good
