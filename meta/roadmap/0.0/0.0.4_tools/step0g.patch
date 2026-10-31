@@ -138,7 +138,7 @@ index 4119796..29787a4 100644
          failures.append("build step 1: the no-syscall instruments did not see the syscaller "
                          "exactly -- a blind scan passes everything")
 diff --git a/harness/selfcheck.py b/harness/selfcheck.py
-index 92cf2fa..7ccfb7f 100644
+index 92cf2fa..5058411 100644
 --- a/harness/selfcheck.py
 +++ b/harness/selfcheck.py
 @@ -1,6 +1,6 @@
@@ -160,6 +160,18 @@ index 92cf2fa..7ccfb7f 100644
  """
  import os
  import shutil
+@@ -179,9 +179,9 @@ def cases(ctx, root, floor_bin, floor_edges):
+         "src/core/a.npk": "mod:a;\n\n// MAY IMPORT: nothing (B-17)\nuse \"../scan/b.npk\".*;\n",
+         "src/scan/b.npk": "mod:b;\n\n// MAY IMPORT: `core` (B-17)\n"}, "does not allow"))
+     add("layering-format-imports-doc", tree("layering-format-imports-doc", treecheck.check_layering, {
+-        "src/format/a.npk": "mod:a;\n\n// MAY IMPORT: `event`, `diag`, `scan` and `core` — never `doc` (B-17)\n"
++        "src/format/a.npk": "mod:a;\n\n// MAY IMPORT: `event`, `diag`, `scan`, `core` and `nparse` — never `doc` (B-17)\n"
+                             "use \"../doc/b.npk\".*;\n",
+-        "src/doc/b.npk": "mod:b;\n\n// MAY IMPORT: `event`, `diag`, `scan` and `core` (B-17)\n"}, 'after "never"'))
++        "src/doc/b.npk": "mod:b;\n\n// MAY IMPORT: `event`, `diag`, `scan`, `core` and `nparse` (B-17)\n"}, 'after "never"'))
+     add("error-budget-private-identity", tree("error-budget-private-identity", treecheck.check_error_budget, {
+         "src/core/a.npk": "mod:a;\n\nerror:EPrivate;\n\nfunc:f = NIL() {\n    fail EPrivate;\n};\n"}, "`a.EPrivate`"))
+     add("constants-bound-literal", tree("constants-bound-literal", treecheck.check_constants_named, {
 diff --git a/harness/treecheck.py b/harness/treecheck.py
 index a60f012..2903dd2 100644
 --- a/harness/treecheck.py
@@ -178,10 +190,22 @@ index a60f012..2903dd2 100644
    check_layering           every `use` edge between `src/` layers, and every module header's `MAY IMPORT:` line,
                             against `BUILD.md` B-17's table; a name after "never" in a cell or a header is forbidden,
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index 6f6ef6d..349e9e7 100644
+index 6f6ef6d..0a850bc 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
-@@ -1161,3 +1161,50 @@ checks written now** — their inputs do not exist, and a check over nothing is
+@@ -140,6 +140,11 @@ rule does the work an error identity would only pretend to do.
+ consumer, and the language would enforce them); one identity `EParse` with the
+ detail in a field the caller reads out of band (the out-of-band read is exactly
+ what D-069 removed from `Result`, and a caller can still ignore it).
++*(@@DATE@@, cycle 0.0.4 — @@PD-191@@: TWO counts identities, and an identity is its declaring module and its name
++(@@PD-142@@). Measured at the pin `2e1cb4a`, a program owes every identity a `fail` in any module it holds raises, so
++two modules each declaring `EParseState` would be two identities. `EParseState` and `EParseEncode` are each declared
++once, in `src/nparse/nparse.npk`, and `doc`, every format and the emitters raise them, so a consumer owes at most these
++two of this library's own, `nparse.EParseState` and `nparse.EParseEncode`, however many formats it holds.)*
+ 
+ ### PA-009 — versioning, and adding an error identity or an enum variant is MAJOR
+ **2026-09-03.** `0.x` until the compiler reaches 1.0 and the API has survived
+@@ -1161,3 +1166,50 @@ checks written now** — their inputs do not exist, and a check over nothing is
  
  *Reversal, for the author:* none for the key; a layer S-6 does not list, or a third name, is a change to `SAFETY.md` §3
  by a decision, which the check then reads.
@@ -217,8 +241,8 @@ index 6f6ef6d..349e9e7 100644
 +module is written by the cycle that writes the first module raising either.
 +
 +*Alternatives declined:* **each declaring module its own identity, as S-6 reads** — every new format a new arm in
-+every consumer of `src/lib.npk`, and PA-008's "exactly" two, PA-072's last paragraph and G-7 superseded: the author's
-+call; **a hybrid, the shipped formats their own and plugins a shared one** — G-8's and PA-072's "nothing knows the
++every consumer of `src/lib.npk`, and PA-008's "exactly" two, PA-072's last paragraph and G-7 each replaced by a
++decision: the author's call; **a hybrid, the shipped formats their own and plugins a shared one** — G-8's and PA-072's "nothing knows the
 +shipped formats are special" amended, the same call; **`core` declares them** — `core` declares no identity, and is
 +the fallback only were a module of their own to break B-17, which it does not (`check_layering` green over the
 +module); **`doc` declares them** — a format may not import `doc` (B-18); **`src/lib.npk` declares them** — every
@@ -274,6 +298,25 @@ index 032010c..1b0f282 100644
  - [ ] `check_no_owning_fields` covering every value in a `Vec` or an arena
  - [ ] every tree check in `specs/TESTING.md` §3 live, with none reporting a pending row
  
+diff --git a/meta/roadmap/1.0/README.md b/meta/roadmap/1.0/README.md
+index ffdc9f7..bc008ec 100644
+--- a/meta/roadmap/1.0/README.md
++++ b/meta/roadmap/1.0/README.md
+@@ -70,6 +70,14 @@ decide it.
+ - [ ] the current counts published beside them (two error names; nine
+       `EventKind`s; nine `ScalarKind`s), so a consumer can see the budget rather
+       than infer it
++      *(@@DATE@@, cycle 0.0.4 — @@PD-191@@, aligned to PA-009's dated note of cycle 0.0.3: "a new `error:`
++      identity" is a new (module, name) pair a reachable `fail` raises, and measured at the pin `2e1cb4a` a
++      program owes every identity raised by every module it holds, called or not. The two are declared once, in
++      `src/nparse/nparse.npk`, so a new format, or a consumer's own `Format` plugin (1.0.2's page, 1.0.3's
++      example), that raises them adds no arm — a root holding two implementations that raise the one
++      `nparse.EParseState` owes it once, 7 identities with the floor's six — while a plugin that declared its own
++      would add one to every consumer that holds it, which `specs/PLUGIN_MODEL.md` G-7 forbids. "Two error names"
++      stays the count: `nparse.EParseState` and `nparse.EParseEncode`.)*
+ 
+ ## Gate
+ 
 diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md
 index fb56826..eabc1e0 100644
 --- a/meta/specs/BUILD.md
@@ -319,30 +362,88 @@ index fb56826..eabc1e0 100644
  **Rule B-18 — `format` may not import `doc`.** Stated separately because it is
  the arrow most likely to be drawn by accident, and drawing it would make every
  streaming consumer link the arena and the tree.
+diff --git a/meta/specs/PLUGIN_MODEL.md b/meta/specs/PLUGIN_MODEL.md
+index 653a57f..4a2999a 100644
+--- a/meta/specs/PLUGIN_MODEL.md
++++ b/meta/specs/PLUGIN_MODEL.md
+@@ -115,6 +115,13 @@ new one would be adding a `failsafe` arm to every consuming program
+ condition is a `ParseError` code (`DIAGNOSTIC_MODEL.md` §3), and the code enum
+ has a reserved range for third-party formats.
+ 
++*(@@DATE@@, cycle 0.0.4 — @@PD-191@@: `nparse`'s `EParseState` is the identity `src/nparse/nparse.npk` declares,
++`nparse.EParseState` in a consumer's `failsafe`; a format, shipped or not, imports it from there and raises it, and
++G-6's item 3 and G-9's row "never fails but `EParseState`" mean this identity. Measured at the pin `2e1cb4a`: a second
++implementation of a trait that raises it adds no identity to a program that holds the first (7 identities either
++way), and one that declared an `EParseState` of its own would add an arm to every consumer that holds it, since an
++identity is its declaring module and its name (@@PD-142@@).)*
++
+ ---
+ 
+ ## 4. Writing one
 diff --git a/meta/specs/SAFETY.md b/meta/specs/SAFETY.md
-index b475d32..d5db5bf 100644
+index b475d32..71a172a 100644
 --- a/meta/specs/SAFETY.md
 +++ b/meta/specs/SAFETY.md
-@@ -313,10 +313,18 @@ Stated once, here, and repeated in the public documentation:
-    handling it by discarding is still a decision — a malformed document that
+@@ -105,6 +105,14 @@ differently from the two, and it is a **major** version change under PA-009
+ because it is a new mandatory arm in every consumer — a compiler-enforced
+ source break. If the trigger is something a byte stream can cause, a third
+ identity is the wrong answer and the design is what needs changing.
++*(@@DATE@@, cycle 0.0.4 — @@PD-191@@, aligned to PA-009's dated note of cycle 0.0.3: an identity is its declaring
++module and its name (@@PD-142@@), and measured at the pin `2e1cb4a` a program owes every identity raised by every
++module it holds, called or not — a root holding two implementations of one trait, each declaring and raising its own
++`EParseState`, owes both, through the trait's bound, as the trait as a value, or with no call at all. So a third
++identity is any (module, name) pair a reachable `fail` raises beyond the two, major under PA-009 as that note reads
++it. The two are `nparse.EParseState` and `nparse.EParseEncode`, each declared once (S-6's dated note), so a format or
++a plugin that raises them adds none: the same root, its two implementations raising the one `nparse.EParseState`,
++owes 7 identities, that one and the floor's six, as a root holding one implementation does.)*
+ 
+ **Rule S-5 — forwarded codes cost no arm.** Where a prelude error reaches a
+ caller — a stale arena handle is `StaleHandle` (−4106), a writer's sink returns
+@@ -129,11 +137,24 @@ import-scoped:
+   only.
+ - `nparse/emit/*.npk` additionally declares **`EParseEncode`**.
+ 
++*(@@DATE@@, cycle 0.0.4 — @@PD-191@@: the two bullets above name the modules that raise the identities, and none of
++them declares one. `EParseState` and `EParseEncode` are each declared once, in `nparse/nparse.npk`, which imports
++nothing (`BUILD.md` B-17); `doc` and every format import it and raise `EParseState`, and the emitters raise
++`EParseEncode` as well. Under @@PD-142@@ an identity is its declaring module and its name, and measured at the pin
++`2e1cb4a` a root holding two modules that each declare and raise `EParseState` owes two identities, so a format that
++declared its own would add an arm to every consumer that holds it.)*
++
+ **Rule S-7.** The exact arm set a consuming program owes, per import, is
+ generated into the documentation and checked by a conformance test that builds
+ a program importing each public module and asserts its `failsafe` compiles with
+ exactly the documented arms and no more. An out-of-date arm list is the kind of
+ document that goes stale silently, so it is derived, not written.
++*(@@DATE@@, cycle 0.0.4 — @@PD-191@@: measured at the pin `2e1cb4a`, what an import owes is every identity raised by
++every module that import holds, called or not, so a consumer of `src/lib.npk`, which holds every module, owes the
++union of the lists, at most `nparse.EParseState` and `nparse.EParseEncode` of this library's own. And a `failsafe`
++naming an identity that cannot reach it compiles clean — a root holding a module that raises `nparse.EParseState`
++alone, its `failsafe` naming `nparse.EParseEncode` as well — so the test's "no more" is read against
++`NITPICK-REACH-003`'s list for the same root without its `failsafe`, not from the compile.)*
+ 
+ ---
+ 
+@@ -314,9 +335,19 @@ Stated once, here, and repeated in the public documentation:
     silently becomes an empty one is the vulnerability this library's shape was
     chosen to prevent.
--2. **Carry the `failsafe` arms your imports require** — of this library's own
+ 2. **Carry the `failsafe` arms your imports require** — of this library's own
 -   identities at most `EParseState` and `EParseEncode`, plus the system
 -   identities its modules' machinery reaches (§3, S-6), and S-7's generated list
 -   says exactly which per module.
-+2. **Carry the `failsafe` arms your imports require** — of this library's own,
-+   one per module declaring `EParseState` or `EParseEncode` whose error a `fail`
-+   your imports reach can raise, as `<module>.<name>` (an identity is the
-+   declaring module and the name, @@PD-142@@), plus the system identities its
-+   modules' machinery reaches (§3, S-6), and S-7's generated list says exactly
-+   which per module.
-+   *(Corrected @@DATE@@, cycle 0.0.4 — @@PD-142@@: this said "of this library's own
-+   identities at most `EParseState` and `EParseEncode`", a count of names.
-+   Measured at the pin `2e1cb4a`: a root importing two modules that each declare
-+   and raise `EParseState` owes `pa.EParseState` and `pb.EParseState`, and one
-+   importing a module that raises an `EParseState` it imports owes the declaring
-+   module's, `pc.EParseState`.)*
++   at most two, `nparse.EParseState` and `nparse.EParseEncode` (an identity is
++   the declaring module and the name, @@PD-142@@, and `nparse/nparse.npk`
++   declares both, @@PD-191@@), plus the system identities its modules'
++   machinery reaches (§3, S-6), and S-7's generated list says exactly which per
++   module.
++   *(Corrected @@DATE@@, cycle 0.0.4 — @@PD-142@@ and @@PD-191@@: this said "of
++   this library's own identities at most `EParseState` and `EParseEncode`",
++   naming no module. Measured at the pin `2e1cb4a`: a root importing two modules
++   that each declare and raise `EParseState` owes `pa.EParseState` and
++   `pb.EParseState`, so the two are two because one module declares them; a
++   consumer of an umbrella that re-exports `nparse/nparse.npk` and two modules
++   raising its identities owes `nparse.EParseState` and `nparse.EParseEncode`,
++   with the floor's six.)*
  3. **Keep the input alive while the events are alive.** A `TextRef` points into
     the caller's bytes. The borrow rules enforce it within a call; across calls
     it is the caller's discipline and it is stated in `EVENT_MODEL.md` §5.

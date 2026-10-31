@@ -12,10 +12,10 @@ index 5bedfed..cea15ed 100644
    event/      #   the event vocabulary, the Format trait, the depth stack
    doc/        #   the Document tree and the query API
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index 5359fcb..27a9d88 100644
+index 2739d6b..bd3cde4 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
-@@ -1228,6 +1228,27 @@ renderings (`0.0.4.md` §1).)*
+@@ -1233,6 +1233,27 @@ renderings (`0.0.4.md` §1).)*
  format, which raise it; `core` may not import that module either (`BUILD.md` B-17's `core` row, "nothing"), so
  the declined alternative's reason stands.)*
  

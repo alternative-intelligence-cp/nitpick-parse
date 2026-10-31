@@ -1,8 +1,8 @@
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index 349e9e7..10cae1d 100644
+index 0a850bc..86ff144 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
-@@ -1162,6 +1162,29 @@ checks written now** — their inputs do not exist, and a check over nothing is
+@@ -1167,6 +1167,29 @@ checks written now** — their inputs do not exist, and a check over nothing is
  *Reversal, for the author:* none for the key; a layer S-6 does not list, or a third name, is a change to `SAFETY.md` §3
  by a decision, which the check then reads.
  
@@ -33,10 +33,10 @@ index 349e9e7..10cae1d 100644
  **@@DATE@@, cycle 0.0.4.** The management seat's ruling of 2026-10-31, (a): one identity per name for the whole
  library. An identity is its declaring module and its name (@@PD-142@@), and measured at the pin `2e1cb4a` a program
 diff --git a/meta/specs/SAFETY.md b/meta/specs/SAFETY.md
-index d5db5bf..02ff9a2 100644
+index 71a172a..d2a0ecb 100644
 --- a/meta/specs/SAFETY.md
 +++ b/meta/specs/SAFETY.md
-@@ -300,6 +300,11 @@ is a loop over attacker-controlled length without one.
+@@ -321,6 +321,11 @@ is a loop over attacker-controlled length without one.
  | `NPARSE_MAX_ERRORS` | 64 | faults collected in recovery mode before parsing stops | parsing stops; the collected set is returned |
  | `NPARSE_MAX_INPUT` | 2^47 | the input length the cursor's arithmetic is proven over | `EParseState` (a caller mistake, not an input) |
  

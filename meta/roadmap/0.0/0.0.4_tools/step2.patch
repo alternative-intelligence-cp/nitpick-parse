@@ -1,8 +1,8 @@
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index 10cae1d..5359fcb 100644
+index 86ff144..2739d6b 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
-@@ -1185,6 +1185,49 @@ Expects and no other block of 0.0.4 or 0.0.5: block 0b, whose §1.5 counts one m
+@@ -1190,6 +1190,49 @@ Expects and no other block of 0.0.4 or 0.0.5: block 0b, whose §1.5 counts one m
  `fixed` binding, and block 5's sweep, whose ninth-limit subject gains the new row. Every text that says the ninth
  waits for cycle 0.4 is rewritten with them, and what the new words move is retaken too.
  
