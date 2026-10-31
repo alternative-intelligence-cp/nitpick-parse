@@ -5,7 +5,7 @@ SmallMap's overflow | EParseState on overflow|SmallMap[^.]{0,80}EParseState
 a view of Bytes | view\(\)[^.]{0,30}borrowed|Bytes view|hands a borrowed .?uint8
 the ninth limit | DUP_SCAN|no specification defines|has no specification
 SmallMap built in cycle 0.0 | (Vec|Bytes)[^.]{0,40}SmallMap|SmallMap[^.]{0,60}\b(built|0\.0\.4|cycle 0\.0)\b|primitives[^.]{0,60}SmallMap
-the public error count | every public .?error|public error identit|count and names of public|two public error|exactly two identities|two .?error:?.? identit|two identities|two the library declares|reporting exactly two|still reporting two|identities at most eparsestate
+the public error count | every public .?error|public error identit|count and names of public|two public error|exactly two identities|two .?error:?.? identit|two identities|two the library declares|reporting exactly two|still reporting two|identities at most eparsestate|\b(report|count|remain|stay)(s|ing|ed)?\s+((only|exactly|still|just|at most|at)\s+)?(two|2)\b|\b(errors?|identit(y|ies)|budget|arms?|names?|count)\s+(is|are|was|were|stays?|remains?|stood|stands?)\s+((only|exactly|still|just|at most|at)\s+)?(two|2)\b
 the sweep's files | \.npk in the tree|every \.npk under|sweep_skip
 the layering's never | arrow \(b-18\) a cell|never doc
 the raw accumulation's operators | x = x \+|or \+ applied to
