@@ -1,5 +1,5 @@
-# meta/roadmap/0.0/0.0.4_tools/facts.sh -- re-derives `0.0.4.md` §1's items 1 ... 10, block 0b; item 11 is a record,
-# which no block re-derives. Sourced after `../tools/env.sh`.
+# meta/roadmap/0.0/0.0.4_tools/facts.sh -- re-derives `0.0.4.md` §1's items 1 ... 10, block 0b; items 11 and 12 are
+# records, which no block re-derives. Sourced after `../tools/env.sh`.
 # Writes under `$A/facts`, and removes it; `run4` and `bill` (`../tools/env.sh`) write `$A/run4` and `$A/reach`, the
 # second removed. Reads the compiler's tree with `git show` alone. Prints no path above the repository.
 F=$A/facts

@@ -190,7 +190,7 @@ index a60f012..2903dd2 100644
    check_layering           every `use` edge between `src/` layers, and every module header's `MAY IMPORT:` line,
                             against `BUILD.md` B-17's table; a name after "never" in a cell or a header is forbidden,
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index 6f6ef6d..0a850bc 100644
+index 6f6ef6d..ad86881 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
 @@ -140,6 +140,11 @@ rule does the work an error identity would only pretend to do.
@@ -216,14 +216,14 @@ index 6f6ef6d..0a850bc 100644
 +owes every identity raised by every module it holds, called or not, through a trait's bound or the trait as a value
 +alike: a root holding two implementations of one trait, each declaring and raising its own `EParseState`, owes both,
 +`pa.EParseState` and `pb.EParseState`. Read so, `SAFETY.md` S-6's "every `nparse/format/*.npk` declare
-+**`EParseState`**" gives each format an identity of its own, and adding a format is a new arm for every consumer of
-+`src/lib.npk`, which holds every module (`BUILD.md` B-16) — against PA-008's "exactly" two, PA-072's last paragraph
-+and `PLUGIN_MODEL.md` G-7 and G-8. So the two are declared once, in a module of their own, `mod:nparse` at
-+`src/nparse/nparse.npk`, which declares exactly them and imports nothing; `doc`, every format and the emitters import
-+it and raise them, and declare none (S-6's dated note). B-17's table gains its row, "nothing", and `doc`, `format` and
-+`emit` add it to theirs; `core`'s row stays "nothing", so `core` declares no identity, and B-18 is unchanged.
-+Measured, with that pair of implementations raising the one shared identity, the root owes 7 identities,
-+`nparse.EParseState` and the floor's six, as a root holding one implementation does.
++**`EParseState`**" gives each format an identity of its own, and each format `src/lib.npk` re-exports is a new arm
++for every consumer of that file (`BUILD.md` B-16's rule: it "`pub use`s the public surface") — against PA-008's
++"exactly" two, PA-072's last paragraph and `PLUGIN_MODEL.md` G-7 and G-8. So the two are declared once, in a module
++of their own, `mod:nparse` at `src/nparse/nparse.npk`, which declares exactly them and imports nothing; `doc`, every
++format and the emitters import it and raise them, and declare none (S-6's dated note). B-17's table gains its row,
++"nothing", and `doc`, `format` and `emit` add it to theirs; `core`'s row stays "nothing", so `core` declares no
++identity, and B-18 is unchanged. Measured, with that pair of implementations raising the one shared identity, the
++root owes 7 identities, `nparse.EParseState` and the floor's six, as a root holding one implementation does.
 +
 +**The name is public surface**, since a consumer's `failsafe` arm names the file that declares the identity (the
 +compiler's D-275). Measured at the pin: a consumer importing an umbrella shaped as `src/lib.npk` will be, which
@@ -235,21 +235,21 @@ index 6f6ef6d..0a850bc 100644
 +still compiles. **The name probe:** a consumer holding the umbrella and a module of its own also named `nparse`
 +builds, and its `(nparse.EParseState)` arm compiles clean; one whose own `nparse` declares an `EParseState` too is
 +refused, `NITPICK-RESOLVE-010` at the library's declaration ("two error constants derive the same code (D-179, an FNV
-+collision)"). So the pair is refused, never silently ambiguous, and only where a consumer's module takes both the
-+library's module name and one of its two error names: the name is the library's own (PA-001), which a consumer's
-+module is unlikely to take, and G-7's "`EParseState` is `nparse`'s" is its spelling. `src/lib.npk`'s `pub use` of the
-+module is written by the cycle that writes the first module raising either.
++collision)"). So the pair is refused, never silently ambiguous. A consumer's module makes it by taking both the
++library's module name and its `EParseState`: the name is the library's own (PA-001), which a consumer's module is
++unlikely to take, and G-7's "`EParseState` is `nparse`'s" is its spelling. `src/lib.npk`'s `pub use` of the module is
++written by the cycle that writes the first module raising either.
 +
 +*Alternatives declined:* **each declaring module its own identity, as S-6 reads** — every new format a new arm in
-+every consumer of `src/lib.npk`, and PA-008's "exactly" two, PA-072's last paragraph and G-7 each replaced by a
++every consumer that holds it, and PA-008's "exactly" two, PA-072's last paragraph and G-7 each replaced by a
 +decision: the author's call; **a hybrid, the shipped formats their own and plugins a shared one** — G-8's and PA-072's "nothing knows the
 +shipped formats are special" amended, the same call; **`core` declares them** — `core` declares no identity, and is
 +the fallback only were a module of their own to break B-17, which it does not (`check_layering` green over the
 +module); **`doc` declares them** — a format may not import `doc` (B-18); **`src/lib.npk` declares them** — every
-+raiser would import the umbrella, which imports every raiser, a `use` cycle (B-19), and `check_layering` reads no row
-+for it; **the name `error`** — a keyword, refused as a module's basename (the workbench `PLAYBOOK.md` §10); **a
-+generic name, `errors` or `ident`** — every consumer writes it, it says nothing of whose the identities are, and a
-+consumer's own module of that name declaring an `EParseState` is the refused pair above, likelier for a common name.
++raiser it re-exports would import it back, a `use` cycle (B-19), and `check_layering` reads no row for it; **the name
++`error`** — a keyword, refused as a module's basename (the workbench `PLAYBOOK.md` §10); **a generic name, `errors`
++or `ident`** — every consumer writes it, it says nothing of whose the identities are, and a consumer's own module of
++that name declaring an `EParseState` is the refused pair above, likelier for a common name.
 +
 +*Reversal, for the author:* renaming the module, or splitting the identities by format, is a decision superseding this
 +one and PA-008, since it changes every consumer's arm (no umbrella can keep the old spelling, measured above): a major
@@ -271,7 +271,7 @@ index 76affe2..f9a64d1 100644
  
  | Step | Inputs — the commit it starts from, and what it reads | Outputs | Check | Stop | Expected size |
 diff --git a/meta/roadmap/0.12/README.md b/meta/roadmap/0.12/README.md
-index 59a45c4..2ba5b40 100644
+index 59a45c4..ae232df 100644
 --- a/meta/roadmap/0.12/README.md
 +++ b/meta/roadmap/0.12/README.md
 @@ -81,7 +81,8 @@ gets an answer with evidence behind it.
@@ -279,13 +279,13 @@ index 59a45c4..2ba5b40 100644
  - [ ] the scheduled gaps closed
  - [ ] goldens re-recorded **only** where a change was intended, and a re-record reviewed as a diff
 -- [ ] `check_error_budget` still reporting two — a consumer's convenience is not a reason for a third identity
-+- [ ] `check_error_budget` still reporting only `SAFETY.md` §3's two names, each in a layer S-6 allows (an identity is a
-+  module and a name, @@PD-142@@) — a consumer's convenience is not a reason for a third name
++- [ ] `check_error_budget` still reporting only `SAFETY.md` §3's two names, each in `nparse`, by S-6's dated note (an
++  identity is a module and a name, @@PD-142@@; @@PD-191@@) — a consumer's convenience is not a reason for a third name
  
  ## Gate
  
 diff --git a/meta/roadmap/0.13/README.md b/meta/roadmap/0.13/README.md
-index 032010c..1b0f282 100644
+index 032010c..33346e3 100644
 --- a/meta/roadmap/0.13/README.md
 +++ b/meta/roadmap/0.13/README.md
 @@ -42,7 +42,8 @@ PA-083, and `specs/VERIFICATION.md` in full.
@@ -293,8 +293,8 @@ index 032010c..1b0f282 100644
  - [ ] `check_no_recursion`'s exceptions table **empty**, and the check green over the whole tree (0.0.3's P-20)
  - [ ] `check_no_raw_accumulate` green with no exceptions
 -- [ ] `check_error_budget` reporting exactly two
-+- [ ] `check_error_budget` green, every identity it reports one of `SAFETY.md` §3's two names, raised in a layer S-6
-+  allows it (an identity is a module and a name, @@PD-142@@)
++- [ ] `check_error_budget` green, every identity it reports one of `SAFETY.md` §3's two names, raised in a layer S-6's
++  bullets name, as its dated note reads them (an identity is a module and a name, @@PD-142@@; @@PD-191@@)
  - [ ] `check_no_owning_fields` covering every value in a `Vec` or an arena
  - [ ] every tree check in `specs/TESTING.md` §3 live, with none reporting a pending row
  
@@ -381,7 +381,7 @@ index 653a57f..4a2999a 100644
  
  ## 4. Writing one
 diff --git a/meta/specs/SAFETY.md b/meta/specs/SAFETY.md
-index b475d32..71a172a 100644
+index b475d32..0d0b146 100644
 --- a/meta/specs/SAFETY.md
 +++ b/meta/specs/SAFETY.md
 @@ -105,6 +105,14 @@ differently from the two, and it is a **major** version change under PA-009
@@ -416,11 +416,11 @@ index b475d32..71a172a 100644
  exactly the documented arms and no more. An out-of-date arm list is the kind of
  document that goes stale silently, so it is derived, not written.
 +*(@@DATE@@, cycle 0.0.4 — @@PD-191@@: measured at the pin `2e1cb4a`, what an import owes is every identity raised by
-+every module that import holds, called or not, so a consumer of `src/lib.npk`, which holds every module, owes the
-+union of the lists, at most `nparse.EParseState` and `nparse.EParseEncode` of this library's own. And a `failsafe`
-+naming an identity that cannot reach it compiles clean — a root holding a module that raises `nparse.EParseState`
-+alone, its `failsafe` naming `nparse.EParseEncode` as well — so the test's "no more" is read against
-+`NITPICK-REACH-003`'s list for the same root without its `failsafe`, not from the compile.)*
++every module that import holds, called or not, so a consumer of `src/lib.npk` owes the union of its modules' lists
++(B-16's rule: it "`pub use`s the public surface"), at most `nparse.EParseState` and `nparse.EParseEncode` of this
++library's own. And a `failsafe` naming an identity that cannot reach it compiles clean — a root holding a module
++that raises `nparse.EParseState` alone, its `failsafe` naming `nparse.EParseEncode` as well — so the test's "no
++more" is read against `NITPICK-REACH-003`'s list for the same root without its `failsafe`, not from the compile.)*
  
  ---
  
