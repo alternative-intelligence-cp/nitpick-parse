@@ -1,5 +1,5 @@
 diff --git a/harness/selfcheck.py b/harness/selfcheck.py
-index c8b85a9..701632f 100644
+index 590a09d..92cf2fa 100644
 --- a/harness/selfcheck.py
 +++ b/harness/selfcheck.py
 @@ -6,6 +6,10 @@ RED there: a suite that only ever agrees with what it is handed reports green wh
@@ -79,7 +79,7 @@ index c8b85a9..701632f 100644
      add("check-code-not-reported", chk("check-code-not-reported", "// expect-error: NITPICK-TYPE-007\n",
                                         "int64:COUNTER = 0i64;\n\n" + MAIN0, want="expected and not reported: NITPICK-TYPE-007"))
      add("check-code-unasserted", chk("check-code-unasserted", "// expect-error: NITPICK-TYPE-055\n", TWO_CODES,
-@@ -169,6 +195,9 @@ def cases(ctx, root, floor_bin, floor_edges):
+@@ -180,6 +206,9 @@ def cases(ctx, root, floor_bin, floor_edges):
      other = {("pending_other_failure.npk", "DEF-1", "undefined-value @x"): "a self-check case"}
      add("pending-other-failure", prog("pending-other-failure", marker.replace("expect-exit: 0", "expect-exit: 3"),
                                        MAIN0, other, want="PENDING ON A DIFFERENT FAILURE"))

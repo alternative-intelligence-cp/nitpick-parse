@@ -36,7 +36,7 @@ index 4df8c9d..4119796 100644
      if man.need("build", "opt-level") != 0:
          stop("[build] opt-level is not 0 -- raising it is its own decision, and this runner "
 diff --git a/harness/selfcheck.py b/harness/selfcheck.py
-index b7d1f81..47ff0f1 100644
+index b7d1f81..9d113c6 100644
 --- a/harness/selfcheck.py
 +++ b/harness/selfcheck.py
 @@ -5,12 +5,14 @@ RED there: a suite that only ever agrees with what it is handed reports green wh
@@ -76,7 +76,7 @@ index b7d1f81..47ff0f1 100644
  class _Quiet(stages.Stage):
      def _say(self, verdict, suite, rel, detail):
          self.verdicts.append((verdict, suite, rel, detail))
-@@ -106,11 +116,28 @@ def cases(ctx, root, floor_bin, floor_edges):
+@@ -106,11 +116,39 @@ def cases(ctx, root, floor_bin, floor_edges):
      add("check-site-wrong", chk("check-site-wrong", "// expect-error: NITPICK-TYPE-055\n// expect-error-at: 4:1\n",
                                  "int64:COUNTER = 0i64;\n\n" + MAIN0, want="expected at 4:1"))
      add("check-accepted", chk("check-accepted", "// expect-error: NITPICK-TYPE-007\n", MAIN0, want="ACCEPTED"))
@@ -85,12 +85,22 @@ index b7d1f81..47ff0f1 100644
 -    st = _stage(ctx, d, floor_bin, floor_edges)
 -    stages.parse_sweep(st, {"name": "selfcheck", "path": "."})
 -    add("parse-not-parsing", _red(st, "NITPICK-PARSE-"))
-+    def sweep(case, body, plant, want):
++    def sweep(case, body, plant, want, no_git=False):
 +        d = os.path.join(w, case)
 +        _program(d, case.replace("-", "_"), "", body)
 +        plant(d)
 +        st = _stage(ctx, d, floor_bin, floor_edges)
-+        stages.parse_sweep(st, {"name": "selfcheck", "path": "."})
++        path = os.environ.get("PATH")
++        if no_git:  # PATH an empty directory of the case's own, for this sweep alone: git cannot be run
++            os.makedirs(os.path.join(d, "no-git"), exist_ok=True)
++            os.environ["PATH"] = os.path.join(d, "no-git")
++        try:
++            stages.parse_sweep(st, {"name": "selfcheck", "path": "."})
++        finally:
++            if no_git and path is None:
++                os.environ.pop("PATH", None)
++            elif no_git:
++                os.environ["PATH"] = path
 +        return _red(st, want)
 +
 +    def unreadable(d):
@@ -107,6 +117,7 @@ index b7d1f81..47ff0f1 100644
 +                                          "1 tracked file(s) swept; sweep_untracked_checkout.npk: NITPICK-PARSE-"))
 +    add("sweep-list-unreadable", sweep("sweep-list-unreadable", MAIN0, unreadable, "the sweep's list cannot be read"))
 +    add("sweep-list-empty", sweep("sweep-list-empty", MAIN0, lambda d: _checkout(d, False), "the sweep's list is empty"))
++    add("sweep-list-git-missing", sweep("sweep-list-git-missing", MAIN0, _checkout, "git could not be run", no_git=True))
      add("layering-core-imports-scan", tree("layering-core-imports-scan", treecheck.check_layering, {
          "src/core/a.npk": "mod:a;\n\n// MAY IMPORT: nothing (B-17)\nuse \"../scan/b.npk\".*;\n",
          "src/scan/b.npk": "mod:b;\n\n// MAY IMPORT: `core` (B-17)\n"}, "does not allow"))

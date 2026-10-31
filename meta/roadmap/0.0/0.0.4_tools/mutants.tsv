@@ -7,6 +7,7 @@ sweep-nested-checkout	.nitpick/stray.npk	<checkout>	mod:stray;\n\nfunc:main = in
 sweep-walks-the-directory	harness/stages.py	    return sorted(x for x in r.stdout.decode("utf-8", errors="replace").split("\0") if x), None	    return sorted(os.path.relpath(os.path.join(d, f), root) for d, _, fs in os.walk(root) for f in fs if f.endswith(".npk")), None
 sweep-unreadable-passes	harness/stages.py	        return stage._say("FAIL", entry["name"], rel, f"the sweep's list cannot be read	        return stage._say("PASS", entry["name"], rel, f"the sweep's list cannot be read
 sweep-empty-passes	harness/stages.py	        return stage._say("FAIL", entry["name"], rel, "the sweep's list is empty	        return stage._say("PASS", entry["name"], rel, "the sweep's list is empty
+sweep-git-missing-passes	harness/stages.py	        return None, f"git could not be run: {e.strerror}"	        return sorted(os.path.relpath(os.path.join(d, f), root) for d, _, fs in os.walk(root) for f in fs if f.endswith(".npk")), None
 layering-never-allowed	harness/treecheck.py	    parts = re.split(r"\bnever\b", text, maxsplit=1)	    parts = [text]
 accumulate-mul-assign-passed	harness/treecheck.py	            star = re.search(r"(?<![-*/])\*(=?)(?![*/])", code)	            star = re.search(r"(?<![-*/])\*()(?![*/=])", code)
 accumulate-add-assign-passed	harness/treecheck.py	            m = re.search(r"\b(\w+)\s*\+=\s*([^;]+);", line)	            m = re.search(r"\b(\w+)\s*\+=\s*([^;]+);", "")

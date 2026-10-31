@@ -1,8 +1,8 @@
 diff --git a/harness/selfcheck.py b/harness/selfcheck.py
-index 47ff0f1..03e3e0d 100644
+index 9d113c6..478b606 100644
 --- a/harness/selfcheck.py
 +++ b/harness/selfcheck.py
-@@ -141,6 +141,10 @@ def cases(ctx, root, floor_bin, floor_edges):
+@@ -152,6 +152,10 @@ def cases(ctx, root, floor_bin, floor_edges):
      add("layering-core-imports-scan", tree("layering-core-imports-scan", treecheck.check_layering, {
          "src/core/a.npk": "mod:a;\n\n// MAY IMPORT: nothing (B-17)\nuse \"../scan/b.npk\".*;\n",
          "src/scan/b.npk": "mod:b;\n\n// MAY IMPORT: `core` (B-17)\n"}, "does not allow"))

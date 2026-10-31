@@ -1,8 +1,8 @@
 diff --git a/harness/selfcheck.py b/harness/selfcheck.py
-index 03e3e0d..c8b85a9 100644
+index 478b606..590a09d 100644
 --- a/harness/selfcheck.py
 +++ b/harness/selfcheck.py
-@@ -151,6 +151,15 @@ def cases(ctx, root, floor_bin, floor_edges):
+@@ -162,6 +162,15 @@ def cases(ctx, root, floor_bin, floor_edges):
          "src/scan/a.npk": "mod:a;\n\nfunc:f = int64() never fails {\n    pass 4096i64;\n};\n"}, "the literal 4096"))
      add("raw-accumulate", tree("raw-accumulate", treecheck.check_no_raw_accumulate, {
          "src/scan/a.npk": "mod:a;\n\nfunc:f = int64(int64:acc, int64:d) never fails {\n    pass acc * 10i64 + d;\n};\n"}, "a `*`"))
