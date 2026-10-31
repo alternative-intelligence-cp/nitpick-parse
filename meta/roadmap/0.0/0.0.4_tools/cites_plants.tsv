@@ -1,15 +1,59 @@
-# cites_plants.tsv -- each exclusion of cites.py's census beside a real rule citation, its twin counted (PLAYBOOK.md
-# §12): name; the patch line as planted; what the census must count; what it must drop, form:token:exclusion. A name
-# ending `+cont` is read with the quotation the line before it left open. Run: python3 -B cites.py plants cites_plants.tsv
-x1-quoted-output	+refused, `NITPICK-RESOLVE-010` at the library's declaration ("two error constants derive the same code (D-179, an FNV	-	rule:D-179:X1 code:NITPICK-RESOLVE-010:X1
-x1-quoted-output+cont	+collision under D-179)"). So the pair is refused, by D-179's FNV code, never silently ambiguous (S-6).	rule:D-179 rule:S-6	rule:D-179:X1
-x1-closed-quote	+`(lib.EParseState)` is `NITPICK-RESOLVE-002` ("an identity is `file.Name`, by D-275"), so B-16 holds	rule:B-16	rule:D-275:X1 code:NITPICK-RESOLVE-002:X1
-x1-code-named	+more" is read against `NITPICK-REACH-003`'s list for the same root, beside D-179 and S-7.	rule:D-179 rule:S-7	code:NITPICK-REACH-003:X1
-x1-quote-not-the-code's	+`NITPICK-RESOLVE-002` at the use, as the record says (item 11) ("B-16 is its rule")	rule:B-16 item:item 11	code:NITPICK-RESOLVE-002:X1
-x2-header	diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md	-	document:a/meta/specs/BUILD.md:X2 document:b/meta/specs/BUILD.md:X2
-x2-header-plus	+++ b/meta/specs/SAFETY.md	-	document:b/meta/specs/SAFETY.md:X2
-x2-same-path-cited	+// see `meta/specs/BUILD.md`, whole, and B-17's table	rule:B-17 document:meta/specs/BUILD.md	-
-x3-rule	+`SAFETY.md` S-6's "every `nparse/format/*.npk` declare **`EParseState`**"	rule:S-6	document:SAFETY.md:X3
-x3-section	+the table in `PLAYBOOK.md` §10, beside PA-001	rule:PA-001 section:§10	document:PLAYBOOK.md:X3
-x3-open	+// (B-16) until the workbench's dependency roots exist (`meta/OPEN_QUESTIONS.md` O-N1).	rule:B-16 open:O-N1	document:meta/OPEN_QUESTIONS.md:X3
-x3-not-followed	+as `SAFETY.md` says of it, S-6 holds	rule:S-6 document:SAFETY.md	-
+# cites_plants.tsv -- cites.py's planted twins (PLAYBOOK.md §12): each exclusion's branches beside a real citation,
+# and a twin where each reason stops (T18v2's finding 1, (a) … (d), fixed in parse's next text round, T19's (CP)).
+# Columns: name; the patch line as planted; its place, PLACE:kind; what the census must count; what it must drop,
+# form:token:exclusion. A row and the rows after it whose names end `+cont` are one group, read as the lines one
+# `git diff -U0` hunk adds, by the census's own reader. Run: python3 -B cites.py plants cites_plants.tsv
+x1-quoted-output	+refused, `NITPICK-RESOLVE-010` at the library's declaration ("two error constants derive the same code (	PATCH-ADDED:added	-	code:NITPICK-RESOLVE-010:X1
+x1-quoted-output+cont	+D-179, an FNV collision)"). So the pair is refused, by D-179's FNV code, never silently ambiguous (S-6).	PATCH-ADDED:added	rule:D-179 rule:S-6	rule:D-179:X1
+x1-closed-quote	+`(lib.EParseState)` is `NITPICK-RESOLVE-002` ("names no error constant of this program (D-275)"), so B-16 holds	PATCH-ADDED:added	rule:B-16	rule:D-275:X1 code:NITPICK-RESOLVE-002:X1
+x1-code-named	+more" is read against `NITPICK-REACH-003`'s list for the same root, beside D-179 and S-7.	PATCH-ADDED:added	rule:D-179 rule:S-7	code:NITPICK-REACH-003:X1
+x1-quote-not-the-code's	+`NITPICK-RESOLVE-002` at the use, as the record says (item 11) ("B-16 is its rule")	PATCH-ADDED:added	rule:B-16 item:item 11	code:NITPICK-RESOLVE-002:X1
+x1a-t18v2-own-words	+`NITPICK-REACH-003` and, in its own words ("a quotation of S-6"), the rule S-6's line	PATCH-ADDED:added	rule:S-6 rule:S-6	code:NITPICK-REACH-003:X1
+x1a-own-words-at-once	+is `NITPICK-RESOLVE-002` ("B-16 is the rule it breaks") at the use	PATCH-ADDED:added	rule:B-16	code:NITPICK-RESOLVE-002:X1
+x1a-not-the-message	+`(lib.EParseState)` is `NITPICK-RESOLVE-002` ("an identity is `file.Name`, by D-275"), so B-16 holds	PATCH-ADDED:added	rule:D-275 rule:B-16	code:NITPICK-RESOLVE-002:X1
+x1a-another-code's-message	+`NITPICK-REACH-002` ("two error constants derive the same code (D-179, an FNV collision)")	PATCH-ADDED:added	rule:D-179	code:NITPICK-REACH-002:X1
+x1a-comma-quoted-message	+is `NITPICK-RESOLVE-010`, "two error constants derive the same code (D-179, an FNV collision)", at the	PATCH-ADDED:added	-	rule:D-179:X1 code:NITPICK-RESOLVE-010:X1
+x1a-elided-message	+(`NITPICK-RESOLVE-002` ("names no error constant … (D-275): an identity is `file.Name`"))	PATCH-ADDED:added	-	rule:D-275:X1 code:NITPICK-RESOLVE-002:X1
+x1a-run-on-not-message	+`NITPICK-RESOLVE-010` ("two error constants derive	PATCH-ADDED:added	-	code:NITPICK-RESOLVE-010:X1
+x1a-run-on-not-message+cont	+the same code, B-16 says")	PATCH-ADDED:added	rule:B-16	-
+x1a-past-the-window	+`NITPICK-RESOLVE-010` is the code a reader of this plan will meet later ("D-179")	PATCH-ADDED:added	rule:D-179	code:NITPICK-RESOLVE-010:X1
+x2-header	diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md	CONTEXT:header	-	document:a/meta/specs/BUILD.md:X2 document:b/meta/specs/BUILD.md:X2
+x2-header-group	diff --git a/meta/specs/SAFETY.md b/meta/specs/SAFETY.md	CONTEXT:header	-	document:a/meta/specs/SAFETY.md:X2 document:b/meta/specs/SAFETY.md:X2
+x2-header-group+cont	index 1111111..2222222 100644	CONTEXT:header	-	-
+x2-header-group+cont	--- a/meta/specs/SAFETY.md	CONTEXT:header	-	document:a/meta/specs/SAFETY.md:X2
+x2-header-group+cont	+++ b/meta/specs/SAFETY.md	CONTEXT:header	-	document:b/meta/specs/SAFETY.md:X2
+x2-header-group+cont	@@ -1,2 +1,3 @@ the hunk	CONTEXT:hunk	-	-
+x2d-removed-text-after-hunk+cont	--- see `BUILD.md`, whole	CONTEXT:removed	document:BUILD.md	-
+x2d-added-text-after-hunk+cont	+++ see `SAFETY.md` S-6	PATCH-ADDED:added	rule:S-6	document:SAFETY.md:X3
+x2d-new-file	diff --git a/src/NEW.md b/src/NEW.md	CONTEXT:header	-	document:a/src/NEW.md:X2 document:b/src/NEW.md:X2
+x2d-new-file+cont	new file mode 100644	CONTEXT:header	-	-
+x2d-new-file+cont	index 0000000..1111111	CONTEXT:header	-	-
+x2d-new-file+cont	--- /dev/null	CONTEXT:header	-	-
+x2d-new-file+cont	+++ b/src/NEW.md	CONTEXT:header	-	document:b/src/NEW.md:X2
+x2d-new-file+cont	@@ -0,0 +1 @@	CONTEXT:hunk	-	-
+x2d-new-file+cont	+a new `NEW.md` line	PATCH-ADDED:added	document:NEW.md	-
+x2d-t18v2-removed-text	--- see `BUILD.md`, whole	CONTEXT:removed	document:BUILD.md	-
+x2d-added-text-alone	+++ see `SAFETY.md`, whole	PATCH-ADDED:added	document:SAFETY.md	-
+x2d-reader-plus-space	++ see `FORMATS.md`, whole	PATCH-ADDED:added	document:FORMATS.md	-
+x2-same-path-cited	+// see `meta/specs/BUILD.md`, whole, and B-17's table	PATCH-ADDED:added	rule:B-17 document:meta/specs/BUILD.md	-
+x3-rule	+`SAFETY.md` S-6's "every `nparse/format/*.npk` declare **`EParseState`**"	PATCH-ADDED:added	rule:S-6	document:SAFETY.md:X3
+x3-section	+the table in `PLAYBOOK.md` §10, beside PA-001	PATCH-ADDED:added	rule:PA-001 section:§10	document:PLAYBOOK.md:X3
+x3-open	+// (B-16) until the workbench's dependency roots exist (`meta/OPEN_QUESTIONS.md` O-N1).	PATCH-ADDED:added	rule:B-16 open:O-N1	document:meta/OPEN_QUESTIONS.md:X3
+x3-not-followed	+as `SAFETY.md` says of it, S-6 holds	PATCH-ADDED:added	rule:S-6 document:SAFETY.md	-
+x3b-t18v2-another-doc's-rule	+`BUILD.md` S-6 says so	PATCH-ADDED:added	rule:S-6 document:BUILD.md	-
+x3b-safety-b16	+`SAFETY.md` B-16's line	PATCH-ADDED:added	rule:B-16 document:SAFETY.md	-
+x3b-plugin-model's-s7	+`PLUGIN_MODEL.md`'s S-7	PATCH-ADDED:added	rule:S-7 document:PLUGIN_MODEL.md	-
+x3b-open-beside-build	+`BUILD.md` O-N1	PATCH-ADDED:added	open:O-N1 document:BUILD.md	-
+x3b-decisions-pd	+`meta/DECISIONS.md` PD-191	PATCH-ADDED:added	rule:PD-191	document:meta/DECISIONS.md:X3
+x3b-compiler-decisions-d	+the compiler's `DECISIONS.md` D-179	PATCH-ADDED:added	rule:D-179	document:DECISIONS.md:X3
+x3b-value-model-d	+`VALUE_MODEL.md` D-16	PATCH-ADDED:added	rule:D-16	document:VALUE_MODEL.md:X3
+x3b-workstreams-w	+`WORKSTREAMS.md` W-16	PATCH-ADDED:added	rule:W-16	document:WORKSTREAMS.md:X3
+x3b-section-any	+`BUILD.md` §3	PATCH-ADDED:added	section:§3	document:BUILD.md:X3
+c-t18v2-item	+as Item 11 records	PATCH-ADDED:added	item:Item 11	-
+c-items-upper	+ITEMS 11 and 12	PATCH-ADDED:added	item:ITEMS 11	-
+c-rules-lower	+pd-191 and s-6 say	PATCH-ADDED:added	rule:pd-191 rule:s-6	-
+c-ruling-capital	+the Ruling of 05:24	PATCH-ADDED:added	ruling:Ruling	-
+c-open-lower	+o-n1 stays open	PATCH-ADDED:added	open:o-n1	-
+c-plan-capital	+0.0.3's Plan says so	PATCH-ADDED:added	plan:0.0.3's Plan	-
+c-document-lower	+see `build.md` b-16	PATCH-ADDED:added	rule:b-16	document:build.md:X3
+c-code-lower	+`nitpick-resolve-010` ("two error constants derive the same code (D-179, an FNV collision)")	PATCH-ADDED:added	-	rule:D-179:X1 code:nitpick-resolve-010:X1
