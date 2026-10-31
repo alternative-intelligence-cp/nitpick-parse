@@ -177,6 +177,61 @@ index a60f012..2903dd2 100644
  
    check_layering           every `use` edge between `src/` layers, and every module header's `MAY IMPORT:` line,
                             against `BUILD.md` B-17's table; a name after "never" in a cell or a header is forbidden,
+diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
+index 6f6ef6d..349e9e7 100644
+--- a/meta/DECISIONS.md
++++ b/meta/DECISIONS.md
+@@ -1161,3 +1161,50 @@ checks written now** — their inputs do not exist, and a check over nothing is
+ 
+ *Reversal, for the author:* none for the key; a layer S-6 does not list, or a third name, is a change to `SAFETY.md` §3
+ by a decision, which the check then reads.
++
++### @@PD-191@@ — `EParseState` and `EParseEncode` are each declared once, in `src/nparse/nparse.npk`, which imports nothing; `doc`, every format and the emitters raise them
++**@@DATE@@, cycle 0.0.4.** The management seat's ruling of 2026-10-31, (a): one identity per name for the whole
++library. An identity is its declaring module and its name (@@PD-142@@), and measured at the pin `2e1cb4a` a program
++owes every identity raised by every module it holds, called or not, through a trait's bound or the trait as a value
++alike: a root holding two implementations of one trait, each declaring and raising its own `EParseState`, owes both,
++`pa.EParseState` and `pb.EParseState`. Read so, `SAFETY.md` S-6's "every `nparse/format/*.npk` declare
++**`EParseState`**" gives each format an identity of its own, and adding a format is a new arm for every consumer of
++`src/lib.npk`, which holds every module (`BUILD.md` B-16) — against PA-008's "exactly" two, PA-072's last paragraph
++and `PLUGIN_MODEL.md` G-7 and G-8. So the two are declared once, in a module of their own, `mod:nparse` at
++`src/nparse/nparse.npk`, which declares exactly them and imports nothing; `doc`, every format and the emitters import
++it and raise them, and declare none (S-6's dated note). B-17's table gains its row, "nothing", and `doc`, `format` and
++`emit` add it to theirs; `core`'s row stays "nothing", so `core` declares no identity, and B-18 is unchanged.
++Measured, with that pair of implementations raising the one shared identity, the root owes 7 identities,
++`nparse.EParseState` and the floor's six, as a root holding one implementation does.
++
++**The name is public surface**, since a consumer's `failsafe` arm names the file that declares the identity (the
++compiler's D-275). Measured at the pin: a consumer importing an umbrella shaped as `src/lib.npk` will be, which
++`pub use`s the module and two modules raising the two identities, owes 8 identities, `nparse.EParseEncode`,
++`nparse.EParseState` and the floor's six; its `failsafe` naming `(nparse.EParseState)` and `(nparse.EParseEncode)`
++compiles clean, and so does one naming the bare `(EParseState)` and `(EParseEncode)`, which the umbrella's re-export
++binds; `(lib.EParseState)` is `NITPICK-RESOLVE-002` ("an identity is `file.Name`, qualified by the FILE that declares
++it"), so no umbrella renames it; and through an umbrella that does not re-export the module, `(nparse.EParseState)`
++still compiles. **The name probe:** a consumer holding the umbrella and a module of its own also named `nparse`
++builds, and its `(nparse.EParseState)` arm compiles clean; one whose own `nparse` declares an `EParseState` too is
++refused, `NITPICK-RESOLVE-010` at the library's declaration ("two error constants derive the same code (D-179, an FNV
++collision)"). So the pair is refused, never silently ambiguous, and only where a consumer's module takes both the
++library's module name and one of its two error names: the name is the library's own (PA-001), which a consumer's
++module is unlikely to take, and G-7's "`EParseState` is `nparse`'s" is its spelling. `src/lib.npk`'s `pub use` of the
++module is written by the cycle that writes the first module raising either.
++
++*Alternatives declined:* **each declaring module its own identity, as S-6 reads** — every new format a new arm in
++every consumer of `src/lib.npk`, and PA-008's "exactly" two, PA-072's last paragraph and G-7 superseded: the author's
++call; **a hybrid, the shipped formats their own and plugins a shared one** — G-8's and PA-072's "nothing knows the
++shipped formats are special" amended, the same call; **`core` declares them** — `core` declares no identity, and is
++the fallback only were a module of their own to break B-17, which it does not (`check_layering` green over the
++module); **`doc` declares them** — a format may not import `doc` (B-18); **`src/lib.npk` declares them** — every
++raiser would import the umbrella, which imports every raiser, a `use` cycle (B-19), and `check_layering` reads no row
++for it; **the name `error`** — a keyword, refused as a module's basename (the workbench `PLAYBOOK.md` §10); **a
++generic name, `errors` or `ident`** — every consumer writes it, it says nothing of whose the identities are, and a
++consumer's own module of that name declaring an `EParseState` is the refused pair above, likelier for a common name.
++
++*Reversal, for the author:* renaming the module, or splitting the identities by format, is a decision superseding this
++one and PA-008, since it changes every consumer's arm (no umbrella can keep the old spelling, measured above): a major
++version under PA-009 once 1.0 ships. A re-pin that qualifies an identity by anything but its declaring file, or that
++stops charging a program for the modules it holds and does not call, re-runs this probe and the name probe before the
++re-pin is adopted.
 diff --git a/meta/roadmap/0.0/0.0.2.md b/meta/roadmap/0.0/0.0.2.md
 index 76affe2..f9a64d1 100644
 --- a/meta/roadmap/0.0/0.0.2.md
@@ -220,7 +275,7 @@ index 032010c..1b0f282 100644
  - [ ] every tree check in `specs/TESTING.md` §3 live, with none reporting a pending row
  
 diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md
-index fb56826..8685d25 100644
+index fb56826..eabc1e0 100644
 --- a/meta/specs/BUILD.md
 +++ b/meta/specs/BUILD.md
 @@ -203,9 +203,11 @@ expectations name.
@@ -236,6 +291,34 @@ index fb56826..8685d25 100644
  
  **Rule B-9 — a corpus count is exact.** A `corpus` entry names how many cases
  must pass, and both a regression and an *unexpected improvement* fail the run.
+@@ -300,12 +302,13 @@ row names:
+ | Module | May import |
+ |---|---|
+ | `core` | nothing |
++| `nparse` | nothing |
+ | `scan` | `core` |
+ | `diag` | `scan`, `core` |
+ | `event` | `diag`, `scan`, `core` |
+-| `doc` | `event`, `diag`, `scan`, `core` |
+-| `format` | `event`, `diag`, `scan`, `core` — **never `doc`** (B-18) |
+-| `emit` | `doc`, `event`, `diag`, `scan`, `core` |
++| `doc` | `event`, `diag`, `scan`, `core`, `nparse` |
++| `format` | `event`, `diag`, `scan`, `core`, `nparse` — **never `doc`** (B-18) |
++| `emit` | `doc`, `event`, `diag`, `scan`, `core`, `nparse` |
+ 
+ `core` depends on nothing. `scan` depends on `core`. `diag` depends on `scan`
+ (for `Span`) and `core`. `event` depends on `diag`, `scan`, `core`. `doc`
+@@ -321,6 +324,10 @@ the drawing pointed right, at what the module imports: the reverse of what it me
+ and of `src/README.md`'s "to its left". A table states each module's imports once,
+ and it is what the harness's `check_layering` reads.)*
+ 
++*(@@DATE@@, cycle 0.0.4 — @@PD-191@@: the table gains the `nparse` row, and `doc`, `format` and `emit` gain `nparse`
++in theirs. `nparse/nparse.npk` declares the library's two error identities and imports nothing, and the three layers
++that raise them import it. `core`'s row is unchanged, and so is B-18.)*
++
+ **Rule B-18 — `format` may not import `doc`.** Stated separately because it is
+ the arrow most likely to be drawn by accident, and drawing it would make every
+ streaming consumer link the arena and the tree.
 diff --git a/meta/specs/SAFETY.md b/meta/specs/SAFETY.md
 index b475d32..d5db5bf 100644
 --- a/meta/specs/SAFETY.md
@@ -263,3 +346,65 @@ index b475d32..d5db5bf 100644
  3. **Keep the input alive while the events are alive.** A `TextRef` points into
     the caller's bytes. The borrow rules enforce it within a call; across calls
     it is the caller's discipline and it is stated in `EVENT_MODEL.md` §5.
+diff --git a/src/doc/doc.npk b/src/doc/doc.npk
+index 1af498f..3e19ffd 100644
+--- a/src/doc/doc.npk
++++ b/src/doc/doc.npk
+@@ -4,5 +4,5 @@ mod:doc;
+ // Specified by `meta/specs/VALUE_MODEL.md`; built from cycle 0.4. A placeholder until then, by cycle 0.0.1's plan:
+ // it compiles, so the parse sweep has this directory to sweep, and it is replaced, not deleted.
+ //
+-// MAY IMPORT: `event`, `diag`, `scan` and `core` (`meta/specs/BUILD.md` B-17's table). Every import is a relative path
++// MAY IMPORT: `event`, `diag`, `scan`, `core` and `nparse` (`meta/specs/BUILD.md` B-17's table). Every import is a relative path
+ // (B-16) until the workbench's dependency roots exist (`meta/OPEN_QUESTIONS.md` O-N1).
+diff --git a/src/emit/emit.npk b/src/emit/emit.npk
+index 80b15d6..804691d 100644
+--- a/src/emit/emit.npk
++++ b/src/emit/emit.npk
+@@ -4,5 +4,5 @@ mod:emit;
+ // Specified by `meta/specs/WRITER_MODEL.md`; built from cycle 0.5, 0.6, 0.7, 0.8. A placeholder until then, by cycle 0.0.1's plan:
+ // it compiles, so the parse sweep has this directory to sweep, and it is replaced, not deleted.
+ //
+-// MAY IMPORT: `doc`, `event`, `diag`, `scan` and `core` (`meta/specs/BUILD.md` B-17's table). Every import is a relative path
++// MAY IMPORT: `doc`, `event`, `diag`, `scan`, `core` and `nparse` (`meta/specs/BUILD.md` B-17's table). Every import is a relative path
+ // (B-16) until the workbench's dependency roots exist (`meta/OPEN_QUESTIONS.md` O-N1).
+diff --git a/src/format/format.npk b/src/format/format.npk
+index b17cc0d..ffbfc4c 100644
+--- a/src/format/format.npk
++++ b/src/format/format.npk
+@@ -4,5 +4,5 @@ mod:format;
+ // Specified by `meta/specs/FORMATS.md` and `PLUGIN_MODEL.md`; built from cycle 0.3, 0.6, 0.7, 0.8. A placeholder until then, by cycle 0.0.1's plan:
+ // it compiles, so the parse sweep has this directory to sweep, and it is replaced, not deleted.
+ //
+-// MAY IMPORT: `event`, `diag`, `scan` and `core` — **never `doc`** (B-18) (`meta/specs/BUILD.md` B-17's table). Every import is a relative path
++// MAY IMPORT: `event`, `diag`, `scan`, `core` and `nparse` — **never `doc`** (B-18) (`meta/specs/BUILD.md` B-17's table). Every import is a relative path
+ // (B-16) until the workbench's dependency roots exist (`meta/OPEN_QUESTIONS.md` O-N1).
+diff --git a/src/nparse/README.md b/src/nparse/README.md
+new file mode 100644
+index 0000000..105dd73
+--- /dev/null
++++ b/src/nparse/README.md
+@@ -0,0 +1,6 @@
++# `src/nparse/` — the two error identities
++
++`nparse.npk` declares `EParseState` and `EParseEncode`, the only error identities the library declares, once each,
++and imports nothing (`meta/specs/SAFETY.md` §3 and S-6, `meta/specs/BUILD.md` B-17). `doc`, every format and the
++emitters import it and raise them, so a consumer's `failsafe` names them `nparse.EParseState` and
++`nparse.EParseEncode`.
+diff --git a/src/nparse/nparse.npk b/src/nparse/nparse.npk
+new file mode 100644
+index 0000000..bb795c9
+--- /dev/null
++++ b/src/nparse/nparse.npk
+@@ -0,0 +1,11 @@
++mod:nparse;
++
++// `src/nparse/` — the library's two error identities, `EParseState` and `EParseEncode`, each declared once, here
++// (`meta/specs/SAFETY.md` §3 and S-6, @@PD-191@@). An identity is its declaring module and its name (@@PD-142@@), so a
++// consumer's `failsafe` names them `nparse.EParseState` and `nparse.EParseEncode`; `doc`, every format and the
++// emitters import this module and raise them, and declare none of their own. No input can cause either (S-1).
++//
++// MAY IMPORT: nothing (`meta/specs/BUILD.md` B-17's table).
++
++pub error:EParseState;
++pub error:EParseEncode;

@@ -1,12 +1,11 @@
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index 6f6ef6d..ef3656b 100644
+index 349e9e7..10cae1d 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
-@@ -1161,3 +1161,26 @@ checks written now** — their inputs do not exist, and a check over nothing is
- 
+@@ -1162,6 +1162,29 @@ checks written now** — their inputs do not exist, and a check over nothing is
  *Reversal, for the author:* none for the key; a layer S-6 does not list, or a third name, is a change to `SAFETY.md` §3
  by a decision, which the check then reads.
-+
+ 
 +### @@PD-143@@ — `limits.npk` holds `SAFETY.md` §7's eight bounds at cycle 0.0.4, and the ninth joins them with its consumer
 +**@@DATE@@, cycle 0.0.4.** `src/core/limits.npk` declares each bound of `SAFETY.md` §7's table as a `pub fixed int64`
 +with its row — `NPARSE_MAX_DEPTH`, `_SCALAR`, `_KEY`, `_MEMBERS`, `_DIGITS`, `_EXPONENT`, `_ERRORS` and `_INPUT` — and
@@ -29,6 +28,10 @@ index 6f6ef6d..ef3656b 100644
 +Expects and no other block of 0.0.4 or 0.0.5: block 0b, whose §1.5 counts one more `exit` operand, declared name and
 +`fixed` binding, and block 5's sweep, whose ninth-limit subject gains the new row. Every text that says the ninth
 +waits for cycle 0.4 is rewritten with them, and what the new words move is retaken too.
++
+ ### @@PD-191@@ — `EParseState` and `EParseEncode` are each declared once, in `src/nparse/nparse.npk`, which imports nothing; `doc`, every format and the emitters raise them
+ **@@DATE@@, cycle 0.0.4.** The management seat's ruling of 2026-10-31, (a): one identity per name for the whole
+ library. An identity is its declaring module and its name (@@PD-142@@), and measured at the pin `2e1cb4a` a program
 diff --git a/meta/specs/SAFETY.md b/meta/specs/SAFETY.md
 index d5db5bf..02ff9a2 100644
 --- a/meta/specs/SAFETY.md

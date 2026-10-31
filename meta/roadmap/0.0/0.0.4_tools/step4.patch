@@ -12,14 +12,13 @@ index 5bedfed..cea15ed 100644
    event/      #   the event vocabulary, the Format trait, the depth stack
    doc/        #   the Document tree and the query API
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index d26568b..2099c7e 100644
+index 5359fcb..27a9d88 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
-@@ -1224,3 +1224,21 @@ checks its own; and the reversal's "when D-341 lands" is met, so a frozen view f
- which none takes at 0.0.4. The rest stands as measured again at the pin: the live clauses' arms, the consumers' eight,
- ten and six identities, and `put_uint`, which allocates nothing — one allocation, the sink's, for a thousand
- renderings (`0.0.4.md` §1).)*
-+
+@@ -1228,6 +1228,27 @@ renderings (`0.0.4.md` §1).)*
+ format, which raise it; `core` may not import that module either (`BUILD.md` B-17's `core` row, "nothing"), so
+ the declined alternative's reason stands.)*
+ 
 +### @@PD-145@@ — `SmallMap` waits for its first consumer
 +**@@DATE@@, cycle 0.0.4.** `BUILD.md` B-12 names `SmallMap<K, V>`, a fixed-capacity ordered association list, and no
 +specification or roadmap names a use for it: the `Document` scans its own nodes for a key (`VALUE_MODEL.md` D-10) and
@@ -37,6 +36,13 @@ index d26568b..2099c7e 100644
 +*Reversal, for the author:* to have the primitive set whole at cycle 0.0, a step of 0.0.4 builds
 +`SmallMap<K: Copy, V: Copy>` over a by-value key comparison, its insert answering `false` when full; that step's suite
 +joins the gate, and the checklist and the cycle README move with it.
++*(@@DATE@@, cycle 0.0.4 — @@PD-191@@: `EParseState` is declared once, in `src/nparse/nparse.npk`, not by `doc` and
++the formats, which raise it; `core` may not import that module either (B-17's `core` row, "nothing"), so the
++overflow answer is still not reachable from `core`.)*
++
+ ### @@PD-191@@ — `EParseState` and `EParseEncode` are each declared once, in `src/nparse/nparse.npk`, which imports nothing; `doc`, every format and the emitters raise them
+ **@@DATE@@, cycle 0.0.4.** The management seat's ruling of 2026-10-31, (a): one identity per name for the whole
+ library. An identity is its declaring module and its name (@@PD-142@@), and measured at the pin `2e1cb4a` a program
 diff --git a/meta/roadmap/ROADMAP.md b/meta/roadmap/ROADMAP.md
 index 97bf821..f9115d5 100644
 --- a/meta/roadmap/ROADMAP.md
@@ -53,7 +59,7 @@ index 97bf821..f9115d5 100644
  ### 0.1 — Scan
  `src/scan/`: the total cursor, `Span`, the generated 256-byte class table, the
 diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md
-index a752532..5487018 100644
+index 9bba005..7847c03 100644
 --- a/meta/specs/BUILD.md
 +++ b/meta/specs/BUILD.md
 @@ -280,6 +280,10 @@ accessors, because an index through a `wild` block does not trap, and a misuse t
