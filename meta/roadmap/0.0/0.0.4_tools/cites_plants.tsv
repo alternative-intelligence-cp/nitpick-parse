@@ -1,0 +1,15 @@
+# cites_plants.tsv -- each exclusion of cites.py's census beside a real rule citation, its twin counted (PLAYBOOK.md
+# §12): name; the patch line as planted; what the census must count; what it must drop, form:token:exclusion. A name
+# ending `+cont` is read with the quotation the line before it left open. Run: python3 -B cites.py plants cites_plants.tsv
+x1-quoted-output	+refused, `NITPICK-RESOLVE-010` at the library's declaration ("two error constants derive the same code (D-179, an FNV	-	rule:D-179:X1 code:NITPICK-RESOLVE-010:X1
+x1-quoted-output+cont	+collision under D-179)"). So the pair is refused, by D-179's FNV code, never silently ambiguous (S-6).	rule:D-179 rule:S-6	rule:D-179:X1
+x1-closed-quote	+`(lib.EParseState)` is `NITPICK-RESOLVE-002` ("an identity is `file.Name`, by D-275"), so B-16 holds	rule:B-16	rule:D-275:X1 code:NITPICK-RESOLVE-002:X1
+x1-code-named	+more" is read against `NITPICK-REACH-003`'s list for the same root, beside D-179 and S-7.	rule:D-179 rule:S-7	code:NITPICK-REACH-003:X1
+x1-quote-not-the-code's	+`NITPICK-RESOLVE-002` at the use, as the record says (item 11) ("B-16 is its rule")	rule:B-16 item:item 11	code:NITPICK-RESOLVE-002:X1
+x2-header	diff --git a/meta/specs/BUILD.md b/meta/specs/BUILD.md	-	document:a/meta/specs/BUILD.md:X2 document:b/meta/specs/BUILD.md:X2
+x2-header-plus	+++ b/meta/specs/SAFETY.md	-	document:b/meta/specs/SAFETY.md:X2
+x2-same-path-cited	+// see `meta/specs/BUILD.md`, whole, and B-17's table	rule:B-17 document:meta/specs/BUILD.md	-
+x3-rule	+`SAFETY.md` S-6's "every `nparse/format/*.npk` declare **`EParseState`**"	rule:S-6	document:SAFETY.md:X3
+x3-section	+the table in `PLAYBOOK.md` §10, beside PA-001	rule:PA-001 section:§10	document:PLAYBOOK.md:X3
+x3-open	+// (B-16) until the workbench's dependency roots exist (`meta/OPEN_QUESTIONS.md` O-N1).	rule:B-16 open:O-N1	document:meta/OPEN_QUESTIONS.md:X3
+x3-not-followed	+as `SAFETY.md` says of it, S-6 holds	rule:S-6 document:SAFETY.md	-

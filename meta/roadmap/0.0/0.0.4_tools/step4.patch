@@ -12,7 +12,7 @@ index 5bedfed..cea15ed 100644
    event/      #   the event vocabulary, the Format trait, the depth stack
    doc/        #   the Document tree and the query API
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index ab8d982..565cfdc 100644
+index 40defd9..748966d 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
 @@ -1233,6 +1233,27 @@ renderings (`0.0.4.md` §1).)*

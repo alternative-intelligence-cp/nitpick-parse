@@ -1,0 +1,282 @@
+# cites.tsv -- the record of the citation census (T18fix, item (CC): management_10's ruling of 2026-10-31 07:54, with
+# nitpick-libs_35's C1 and C2 of 07:55 and E2 and N1 of 08:01). `cites.py` beside this file finds every token of its
+# forms on the lines `git diff -U0 405df34 <at>` adds to 0.0.4's nine `step*.patch`; each row is one hit, read by hand
+# against the line it cites, the whole citing sentence read and the hit classed by every clause the sentence rests on
+# it (E2's (a)). A PD supports a clause only by what it measured (0.0.4.md §1's items 11 and 12, the ruled re-run,
+# block 5's `decls`) or by a rule's own line it quotes, never by its own unmeasured words (E2's (b)).
+#
+#   python3 -B meta/roadmap/0.0/0.0.4_tools/cites.py run 405df34 <at>
+#   python3 -B meta/roadmap/0.0/0.0.4_tools/cites.py record 405df34 <tip> meta/roadmap/0.0/0.0.4_tools/cites.tsv tip
+#   python3 -B meta/roadmap/0.0/0.0.4_tools/cites.py record 405df34 46464ba meta/roadmap/0.0/0.0.4_tools/cites.tsv 46464ba
+#   python3 -B meta/roadmap/0.0/0.0.4_tools/cites.py plants meta/roadmap/0.0/0.0.4_tools/cites_plants.tsv
+#
+# <tip> is the commit that wrote this file, or any later one whose nine patches are byte-equal to it. Its record exits
+# 0: 130 hits on 96 lines (PATCH-ADDED 86 on 61), every one SUPPORTS. The record at 46464ba, the tip T18v verified,
+# exits 1 by design -- the positive control (E2's (c)): 121 hits on 91 lines (PATCH-ADDED 77 on 56), five rows
+# OVER-REACHES, T18v's finding 1 at step0g.patch:220 (B-16) and :418 (@@PD-191@@, for :419's clause) and the three the
+# census found beside it (B-17 at :223; G-8 and PA-072 at :245), each fixed at the tip. A `46464ba` row whose class,
+# reading and quote read `=` is read as the `tip` row of the same site and token, whose line says the same there.
+#
+# The floor, management_10's `\b(B|PA|PD|S|G|D|SK|W)-[0-9]{1,4}\b` over the same lines (`git diff -U0 405df34 <at> --
+# 'meta/roadmap/0.0/0.0.4_tools/step*.patch'`, its `+` lines less the `+++` headers, `grep -oE`): 79 lines and 96 hits
+# at 46464ba, 84 and 103 at the tip; cites.py's rule form gives one less at each, `D-179` in RESOLVE-010's quoted
+# message (X1). Its other forms add, at 46464ba, `O-N1` three times, eight § citations, `item 3`, four rulings, five
+# plans or pages and five documents cited whole. Its exclusions are in its docstring, each with a planted twin in
+# `cites_plants.tsv`.
+#
+# Columns: at; site, the patch and its line at that commit; place (C1): PATCH-ADDED on a patch line beginning `+`, the
+# text the merge freezes and the only new claims, or CONTEXT, existing tree text re-shown; form; token; class: SUPPORTS,
+# OVER-REACHES or POINTER; read against, each file and line as 0.0.4's nine patches leave the tree, unless the label
+# says otherwise; the cited words in quotation marks, then the reading.
+at	site	place	form	token	class	read against	quoted words -- the reading
+tip	step0g.patch:164	CONTEXT	rule	B-17	SUPPORTS	meta/specs/BUILD.md:320	"| `core` | nothing |" -- a fixture header
+tip	step0g.patch:165	CONTEXT	rule	B-17	SUPPORTS	meta/specs/BUILD.md:322	"| `scan` | `core` |" -- a fixture header
+tip	step0g.patch:167	CONTEXT	rule	B-17	SUPPORTS	meta/specs/BUILD.md, before the patches:303	"| `format` | `event`, `diag`, `scan`, `core` — **never `doc`** (B-18) |" -- a removed fixture header, read against the table it was cut from
+tip	step0g.patch:168	PATCH-ADDED	rule	B-17	SUPPORTS	meta/specs/BUILD.md:326	"| `format` | `event`, `diag`, `scan`, `core`, `nparse` — **never `doc`** (B-18) |" -- a fixture header
+tip	step0g.patch:170	CONTEXT	rule	B-17	SUPPORTS	meta/specs/BUILD.md, before the patches:302	"| `doc` | `event`, `diag`, `scan`, `core` |" -- a removed fixture header, read against the table it was cut from
+tip	step0g.patch:171	PATCH-ADDED	rule	B-17	SUPPORTS	meta/specs/BUILD.md:325	"| `doc` | `event`, `diag`, `scan`, `core`, `nparse` |" -- a fixture header
+tip	step0g.patch:199	CONTEXT	rule	D-069	SUPPORTS	the compiler's meta/specs/DECISIONS.md at 2e1cb4a:5005; the compiler's meta/specs/DECISIONS.md at 2e1cb4a:5079	"`Result` stores the error once; `is_error` becomes derived"; "the fact is computed rather than stored" -- PA-008's settled text: a detail field read beside the error is the second stored field D-069 removed
+tip	step0g.patch:200	PATCH-ADDED	rule	PD-191	SUPPORTS	meta/roadmap/0.0/0.0.4.md:608; meta/roadmap/0.0/0.0.4.md:232; meta/roadmap/0.0/0.0.4.md:860	"8 identities: pb.EParseState, pa.EParseState"; "each owes 7 identities, `nparse.EParseState` with the floor's six, where item 11's owed 8"; "8 identities: nparse.EParseEncode, nparse.EParseState" -- PA-008's note: two declaring modules are two identities (item 11); raisers of one module's pair owe it once (the re-run, u_lib)
+tip	step0g.patch:201	PATCH-ADDED	rule	PD-142	SUPPORTS	meta/DECISIONS.md:1158; meta/roadmap/0.0/0.0.4.md:189	"owes it as `<module>.<name>`"; "owes the declaring module's, `pc.EParseState`" -- an identity is its declaring module and its name
+tip	step0g.patch:206	CONTEXT	rule	PA-009	SUPPORTS	meta/DECISIONS.md:149	"### PA-009 — versioning, and adding an error identity or an enum variant is MAJOR" -- the decision's own heading, re-shown
+tip	step0g.patch:210	CONTEXT	rule	S-6	SUPPORTS	meta/specs/SAFETY.md:136	"`nparse/doc.npk` and every `nparse/format/*.npk` declare **`EParseState`**" -- PA-117's reversal: S-6 lists the layers
+tip	step0g.patch:210	CONTEXT	section	§3	SUPPORTS	meta/specs/SAFETY.md:70	"`nparse` declares exactly two error names, each raised only in the layers S-6 lists" -- PA-117's reversal: §3 holds the names
+tip	step0g.patch:213	PATCH-ADDED	rule	PD-191	SUPPORTS	meta/DECISIONS.md:1257; meta/roadmap/0.0/0.0.4.md:218; meta/roadmap/0.0/0.0.4.md:1646	"### @@PD-191@@ — `EParseState` and `EParseEncode` are each declared once, in `src/nparse/nparse.npk`, which imports nothing; `doc`, every format and the emitters raise them"; "`nparse.npk`, `mod:nparse`, declaring the two and importing nothing, compiles"; "decls: declared, keyed by (module, name): nparse.EParseState (src/nparse/nparse.npk:10), nparse.EParseEncode (src/nparse/nparse.npk:11)" -- PD-191's own heading; its module measured
+tip	step0g.patch:214	PATCH-ADDED	ruling	ruling	SUPPORTS	management_10's ruling (a), its message of 2026-10-31 05:24 as sent	"RULED (a): one identity per name for the whole library" -- one identity per name for the whole library
+tip	step0g.patch:215	PATCH-ADDED	rule	PD-142	SUPPORTS	meta/DECISIONS.md:1158; meta/roadmap/0.0/0.0.4.md:189	"owes it as `<module>.<name>`"; "owes the declaring module's, `pc.EParseState`" -- an identity is its declaring module and its name
+tip	step0g.patch:218	PATCH-ADDED	rule	S-6	SUPPORTS	meta/specs/SAFETY.md:136	"every `nparse/format/*.npk` declare **`EParseState`**" -- the quotation, verbatim
+tip	step0g.patch:220	PATCH-ADDED	rule	B-16	SUPPORTS	meta/specs/BUILD.md:307; src/lib.npk:6	"which `pub use`s the public surface"; "IT RE-EXPORTS NOTHING YET" -- attributed to B-16's rule, and stated as no fact of today's file; 'each format src/lib.npk re-exports is a new arm' rests on items 11 and 12
+tip	step0g.patch:220	PATCH-ADDED	rule	PA-008	SUPPORTS	meta/DECISIONS.md:118	"`nparse` declares exactly `EParseState`" -- "exactly" two
+tip	step0g.patch:221	PATCH-ADDED	rule	PA-072	SUPPORTS	meta/DECISIONS.md:603	"*A plugin declares no `error:` of its own.*" -- a format its own identity, against its last paragraph
+tip	step0g.patch:221	PATCH-ADDED	rule	G-7	SUPPORTS	meta/specs/PLUGIN_MODEL.md:111	"**Rule G-7 — a plugin declares no `error:` of its own.**" -- a format its own identity, against G-7
+tip	step0g.patch:221	PATCH-ADDED	rule	G-8	SUPPORTS	meta/specs/PLUGIN_MODEL.md:158; meta/specs/PLUGIN_MODEL.md:160	"nothing in `doc`, `emit` or the harness knows the shipped formats are special"; "use no privileged entry point" -- a shipped format its own identity, which G-7 denies a plugin, is a privilege G-8 rules out
+tip	step0g.patch:223	PATCH-ADDED	rule	S-6	SUPPORTS	meta/specs/SAFETY.md:140	"and none of them declares one" -- the raisers declare none, by S-6's dated note
+tip	step0g.patch:223	PATCH-ADDED	rule	B-17	SUPPORTS	meta/specs/BUILD.md:321; meta/specs/BUILD.md:325; meta/specs/BUILD.md:320	"| `nparse` | nothing |"; "| `doc` | `event`, `diag`, `scan`, `core`, `nparse` |"; "| `core` | nothing |" -- B-17's rows only; 'core declares no identity' rests on block 5's decls (0.0.4.md:1646), not on B-17
+tip	step0g.patch:225	PATCH-ADDED	rule	B-18	SUPPORTS	meta/specs/BUILD.md:347	"**Rule B-18 — `format` may not import `doc`.**" -- B-18 unchanged by every patch
+tip	step0g.patch:229	PATCH-ADDED	rule	D-275	SUPPORTS	the compiler's meta/specs/DECISIONS.md at 2e1cb4a:13025	"qualifier is the declaring FILE's basename" -- a consumer's arm names the declaring file
+tip	step0g.patch:239	PATCH-ADDED	rule	PA-001	SUPPORTS	meta/DECISIONS.md:26	"### PA-001 — the library is `nparse`" -- the name is the library's own
+tip	step0g.patch:240	PATCH-ADDED	rule	G-7	SUPPORTS	meta/specs/PLUGIN_MODEL.md:111	"`EParseState` is `nparse`'s and is the only identity a format may raise" -- the quotation, verbatim
+tip	step0g.patch:243	PATCH-ADDED	rule	S-6	SUPPORTS	meta/specs/SAFETY.md:136	"every `nparse/format/*.npk` declare **`EParseState`**" -- as S-6 reads
+tip	step0g.patch:244	PATCH-ADDED	rule	PA-008	SUPPORTS	meta/DECISIONS.md:118	"`nparse` declares exactly `EParseState`" -- "exactly" two, replaced by a decision
+tip	step0g.patch:244	PATCH-ADDED	rule	PA-072	SUPPORTS	meta/DECISIONS.md:603	"*A plugin declares no `error:` of its own.*" -- its last paragraph, replaced by a decision
+tip	step0g.patch:244	PATCH-ADDED	rule	G-7	SUPPORTS	meta/specs/PLUGIN_MODEL.md:111	"**Rule G-7 — a plugin declares no `error:` of its own.**" -- replaced by a decision
+tip	step0g.patch:245	PATCH-ADDED	rule	G-8	SUPPORTS	meta/specs/PLUGIN_MODEL.md:158	"nothing in `doc`, `emit` or the harness knows the shipped formats are special" -- the quotation, its elision marked
+tip	step0g.patch:245	PATCH-ADDED	rule	PA-072	SUPPORTS	meta/DECISIONS.md:599	"nothing in `doc`, `emit` or the harness knows the shipped formats are special" -- the quotation, its elision marked
+tip	step0g.patch:247	PATCH-ADDED	rule	B-17	SUPPORTS	meta/roadmap/0.0/0.0.4.md:234; meta/specs/BUILD.md:321	"`check_layering` is green with B-17's new row (9 modules, 8 rows)"; "| `nparse` | nothing |" -- a module of their own breaks no row
+tip	step0g.patch:248	PATCH-ADDED	rule	B-18	SUPPORTS	meta/specs/BUILD.md:347	"**Rule B-18 — `format` may not import `doc`.**" -- a format may not import doc
+tip	step0g.patch:249	PATCH-ADDED	rule	B-19	SUPPORTS	meta/specs/BUILD.md:351	"is still a decomposition mistake" -- a use cycle, declined as B-19 calls it
+tip	step0g.patch:250	PATCH-ADDED	section	§10	SUPPORTS	the workbench's PLAYBOOK.md at df8803d:1800; the workbench's PLAYBOOK.md at df8803d:1786	"A FILE'S BASENAME CANNOT BE A KEYWORD EITHER"; "`error` `never` `fails`" -- `error` a keyword, refused as a basename
+tip	step0g.patch:255	PATCH-ADDED	rule	PA-008	SUPPORTS	meta/DECISIONS.md:118; meta/DECISIONS.md:146	"`nparse` declares exactly `EParseState`"; "so a consumer owes at most these two of this library's own, `nparse.EParseState` and" -- renaming or splitting changes PA-008's two
+tip	step0g.patch:256	PATCH-ADDED	rule	PA-009	SUPPORTS	meta/DECISIONS.md:155; meta/DECISIONS.md:150	"**adding a public `error:` identity** — REACH-002 makes it a new mandatory `failsafe` arm in every consumer, a compiler-enforced source break"; "`0.x` until the compiler reaches 1.0 and the API has survived cycle 0.12's application; semantic versioning thereafter" -- a source break, major once versioning is semantic
+tip	step0g.patch:282	PATCH-ADDED	rule	S-6	SUPPORTS	meta/specs/SAFETY.md:141	"`EParseState` and `EParseEncode` are each declared once, in `nparse/nparse.npk`" -- each in `nparse`, by S-6's dated note
+tip	step0g.patch:282	PATCH-ADDED	section	§3	SUPPORTS	meta/specs/SAFETY.md:70	"`nparse` declares exactly two error names, each raised only in the layers S-6 lists" -- §3's two names
+tip	step0g.patch:283	PATCH-ADDED	rule	PD-142	SUPPORTS	meta/DECISIONS.md:1156	"keyed by (module, name), private ones included" -- an identity is a module and a name
+tip	step0g.patch:283	PATCH-ADDED	rule	PD-191	SUPPORTS	meta/DECISIONS.md:1257; meta/roadmap/0.0/0.0.4.md:1646	"### @@PD-191@@ — `EParseState` and `EParseEncode` are each declared once, in `src/nparse/nparse.npk`, which imports nothing; `doc`, every format and the emitters raise them"; "decls: declared, keyed by (module, name): nparse.EParseState (src/nparse/nparse.npk:10), nparse.EParseEncode (src/nparse/nparse.npk:11)" -- the module that declares both
+tip	step0g.patch:296	PATCH-ADDED	rule	S-6	SUPPORTS	meta/specs/SAFETY.md:140	"the two bullets above name the modules that raise the identities" -- the layers S-6's bullets name, as its dated note reads them
+tip	step0g.patch:296	PATCH-ADDED	section	§3	SUPPORTS	meta/specs/SAFETY.md:70	"`nparse` declares exactly two error names, each raised only in the layers S-6 lists" -- §3's two names
+tip	step0g.patch:297	PATCH-ADDED	rule	PD-142	SUPPORTS	meta/DECISIONS.md:1156	"keyed by (module, name), private ones included" -- an identity is a module and a name
+tip	step0g.patch:297	PATCH-ADDED	rule	PD-191	SUPPORTS	meta/DECISIONS.md:1257	"### @@PD-191@@ — `EParseState` and `EParseEncode` are each declared once, in `src/nparse/nparse.npk`, which imports nothing; `doc`, every format and the emitters raise them" -- doc, every format and the emitters raise them
+tip	step0g.patch:309	PATCH-ADDED	rule	PD-191	SUPPORTS	meta/roadmap/0.0/0.0.4.md:200; meta/roadmap/0.0/0.0.4.md:608	"and one that calls nothing (`c_import`)"; "8 identities: pb.EParseState, pa.EParseState" -- a program owes every identity raised by every module it holds, called or not
+tip	step0g.patch:309	PATCH-ADDED	rule	PA-009	SUPPORTS	meta/DECISIONS.md:158	"so this reads "adding an identity a reachable `fail` raises"" -- aligned to PA-009's dated note
+tip	step0g.patch:312	PATCH-ADDED	plan	1.0.2's page	SUPPORTS	meta/roadmap/1.0/README.md:50	"writing a plugin: the `Format` trait" -- the guide's plugin page
+tip	step0g.patch:312	PATCH-ADDED	plan	1.0.3's	SUPPORTS	meta/roadmap/1.0/README.md:60	"a custom `Format` plugin" -- 1.0.3's example, its noun on the next line
+tip	step0g.patch:315	PATCH-ADDED	rule	G-7	SUPPORTS	meta/specs/PLUGIN_MODEL.md:111	"**Rule G-7 — a plugin declares no `error:` of its own.**" -- a plugin declaring its own, which G-7 forbids
+tip	step0g.patch:346	CONTEXT	rule	B-18	SUPPORTS	meta/specs/BUILD.md:347	"**Rule B-18 — `format` may not import `doc`.**" -- a removed table row
+tip	step0g.patch:349	PATCH-ADDED	rule	B-18	SUPPORTS	meta/specs/BUILD.md:347	"**Rule B-18 — `format` may not import `doc`.**" -- the format row
+tip	step0g.patch:355	CONTEXT	document	src/README.md	SUPPORTS	src/README.md:4	"a module may not import one to its left" -- B-17's dated note of 0.0.3, re-shown
+tip	step0g.patch:358	PATCH-ADDED	rule	PD-191	SUPPORTS	meta/DECISIONS.md:1257; meta/roadmap/0.0/0.0.4.md:234	"### @@PD-191@@ — `EParseState` and `EParseEncode` are each declared once, in `src/nparse/nparse.npk`, which imports nothing; `doc`, every format and the emitters raise them"; "`check_layering` is green with B-17's new row (9 modules, 8 rows)" -- B-17's note: the row and the layers that raise
+tip	step0g.patch:360	PATCH-ADDED	rule	B-18	SUPPORTS	meta/specs/BUILD.md:347	"**Rule B-18 — `format` may not import `doc`.**" -- B-18 unchanged by every patch
+tip	step0g.patch:362	CONTEXT	rule	B-18	SUPPORTS	meta/specs/BUILD.md:347	"**Rule B-18 — `format` may not import `doc`.**" -- the rule's own heading, re-shown
+tip	step0g.patch:370	CONTEXT	section	§3	SUPPORTS	meta/specs/DIAGNOSTIC_MODEL.md:50	"## 3. The code enum" -- G-7's settled text: a ParseError code
+tip	step0g.patch:373	PATCH-ADDED	rule	PD-191	SUPPORTS	meta/DECISIONS.md:1257; meta/roadmap/0.0/0.0.4.md:1646	"### @@PD-191@@ — `EParseState` and `EParseEncode` are each declared once, in `src/nparse/nparse.npk`, which imports nothing; `doc`, every format and the emitters raise them"; "decls: declared, keyed by (module, name): nparse.EParseState (src/nparse/nparse.npk:10), nparse.EParseEncode (src/nparse/nparse.npk:11)" -- G-7's note: the identity src/nparse/nparse.npk declares
+tip	step0g.patch:375	PATCH-ADDED	rule	G-6	SUPPORTS	meta/specs/PLUGIN_MODEL.md:99	"**never fails except with `EParseState`**" -- G-6's item 3
+tip	step0g.patch:375	PATCH-ADDED	rule	G-9	SUPPORTS	meta/specs/PLUGIN_MODEL.md:177	"| never fails but `EParseState` | any other `Result.err` fails the case |" -- G-9's row, verbatim
+tip	step0g.patch:375	PATCH-ADDED	item	item 3	SUPPORTS	meta/specs/PLUGIN_MODEL.md:99	"**never fails except with `EParseState`**" -- G-6's item 3
+tip	step0g.patch:378	PATCH-ADDED	rule	PD-142	SUPPORTS	meta/DECISIONS.md:1158; meta/roadmap/0.0/0.0.4.md:189	"owes it as `<module>.<name>`"; "owes the declaring module's, `pc.EParseState`" -- an identity is its declaring module and its name
+tip	step0g.patch:387	CONTEXT	rule	PA-009	SUPPORTS	meta/DECISIONS.md:155	"**adding a public `error:` identity** — REACH-002 makes it a new mandatory `failsafe` arm in every consumer, a compiler-enforced source break" -- S-4's settled text: major under PA-009
+tip	step0g.patch:391	PATCH-ADDED	rule	PD-191	SUPPORTS	meta/roadmap/0.0/0.0.4.md:198; meta/roadmap/0.0/0.0.4.md:200	"owes `pa.EParseState` and `pb.EParseState`, and so does one holding `pa`'s value as `dyn Src`"; "and one that calls nothing (`c_import`)" -- S-4's note: through the bound, as a value, or no call
+tip	step0g.patch:391	PATCH-ADDED	rule	PA-009	SUPPORTS	meta/DECISIONS.md:158	"so this reads "adding an identity a reachable `fail` raises"" -- aligned to PA-009's dated note
+tip	step0g.patch:392	PATCH-ADDED	rule	PD-142	SUPPORTS	meta/DECISIONS.md:1158; meta/roadmap/0.0/0.0.4.md:189	"owes it as `<module>.<name>`"; "owes the declaring module's, `pc.EParseState`" -- an identity is its declaring module and its name
+tip	step0g.patch:395	PATCH-ADDED	rule	PA-009	SUPPORTS	meta/DECISIONS.md:158	"so this reads "adding an identity a reachable `fail` raises"" -- major under PA-009 as that note reads it
+tip	step0g.patch:396	PATCH-ADDED	rule	S-6	SUPPORTS	meta/specs/SAFETY.md:141	"`EParseState` and `EParseEncode` are each declared once, in `nparse/nparse.npk`" -- each declared once (S-6's dated note)
+tip	step0g.patch:400	CONTEXT	rule	S-5	SUPPORTS	meta/specs/SAFETY.md:117	"**Rule S-5 — forwarded codes cost no arm.**" -- the rule's own heading, re-shown
+tip	step0g.patch:406	PATCH-ADDED	rule	PD-191	SUPPORTS	meta/DECISIONS.md:1257; meta/roadmap/0.0/0.0.4.md:1646	"### @@PD-191@@ — `EParseState` and `EParseEncode` are each declared once, in `src/nparse/nparse.npk`, which imports nothing; `doc`, every format and the emitters raise them"; "decls: declared, keyed by (module, name): nparse.EParseState (src/nparse/nparse.npk:10), nparse.EParseEncode (src/nparse/nparse.npk:11)" -- S-6's note: the raisers declare none; one module declares
+tip	step0g.patch:408	PATCH-ADDED	rule	B-17	SUPPORTS	meta/specs/BUILD.md:321	"| `nparse` | nothing |" -- imports nothing
+tip	step0g.patch:409	PATCH-ADDED	rule	PD-142	SUPPORTS	meta/DECISIONS.md:1158; meta/roadmap/0.0/0.0.4.md:189	"owes it as `<module>.<name>`"; "owes the declaring module's, `pc.EParseState`" -- an identity is its declaring module and its name
+tip	step0g.patch:413	CONTEXT	rule	S-7	SUPPORTS	meta/specs/SAFETY.md:147	"The exact arm set a consuming program owes, per import, is generated into the documentation" -- the rule's own text, re-shown
+tip	step0g.patch:418	PATCH-ADDED	rule	PD-191	SUPPORTS	meta/roadmap/0.0/0.0.4.md:200; meta/roadmap/0.0/0.0.4.md:860	"and one that calls nothing (`c_import`)"; "8 identities: nparse.EParseEncode, nparse.EParseState" -- S-7's note: an import owes every identity its modules raise, called or not (c_import), and an umbrella's consumer the union (u_lib); no clause says what src/lib.npk holds
+tip	step0g.patch:420	PATCH-ADDED	rule	B-16	SUPPORTS	meta/specs/BUILD.md:307; src/lib.npk:6	"which `pub use`s the public surface"; "IT RE-EXPORTS NOTHING YET" -- attributed to B-16's rule, and stated as no fact of today's file
+tip	step0g.patch:435	PATCH-ADDED	rule	PD-142	SUPPORTS	meta/DECISIONS.md:1156	"keyed by (module, name), private ones included" -- the declaring module and the name
+tip	step0g.patch:436	PATCH-ADDED	rule	PD-191	SUPPORTS	meta/DECISIONS.md:1257; meta/roadmap/0.0/0.0.4.md:1646	"### @@PD-191@@ — `EParseState` and `EParseEncode` are each declared once, in `src/nparse/nparse.npk`, which imports nothing; `doc`, every format and the emitters raise them"; "decls: declared, keyed by (module, name): nparse.EParseState (src/nparse/nparse.npk:10), nparse.EParseEncode (src/nparse/nparse.npk:11)" -- nparse/nparse.npk declares both
+tip	step0g.patch:437	PATCH-ADDED	rule	S-6	SUPPORTS	meta/specs/SAFETY.md:130	"it owes what the scanner's machinery can reach, which the compiler names" -- the system identities the machinery reaches
+tip	step0g.patch:437	PATCH-ADDED	rule	S-7	SUPPORTS	meta/specs/SAFETY.md:147	"The exact arm set a consuming program owes, per import, is generated into the documentation" -- S-7's generated list
+tip	step0g.patch:437	PATCH-ADDED	section	§3	SUPPORTS	meta/specs/SAFETY.md:121	"owes `StaleHandle` whether or not it forwards one" -- the system identities §3 counts beside the two (S-5's arena)
+tip	step0g.patch:439	PATCH-ADDED	rule	PD-142	SUPPORTS	meta/DECISIONS.md:1158	"owes it as `<module>.<name>`" -- §8's correction note
+tip	step0g.patch:439	PATCH-ADDED	rule	PD-191	SUPPORTS	meta/roadmap/0.0/0.0.4.md:608; meta/roadmap/0.0/0.0.4.md:860	"8 identities: pb.EParseState, pa.EParseState"; "8 identities: nparse.EParseEncode, nparse.EParseState" -- §8's correction note: pa/pb two; the umbrella's consumer the pair
+tip	step0g.patch:455	CONTEXT	plan	0.0.1's plan	SUPPORTS	meta/roadmap/0.0/0.0.1.md:150; meta/roadmap/0.0/0.0.1_tools/step1.patch:83	"one placeholder module per directory, and it compiles (P-6)"; "it compiles, so the parse sweep has this directory to sweep, and it is replaced, not deleted." -- the placeholder's header, which 0.0.1's patch wrote
+tip	step0g.patch:455	CONTEXT	document	meta/specs/VALUE_MODEL.md	SUPPORTS	meta/specs/VALUE_MODEL.md:3	"`Document` — what a caller gets when they want a tree rather than a stream" -- the specification of `doc`
+tip	step0g.patch:458	CONTEXT	rule	B-17	SUPPORTS	meta/specs/BUILD.md, before the patches:302	"| `doc` | `event`, `diag`, `scan`, `core` |" -- a removed header, read against the table it was cut from
+tip	step0g.patch:459	PATCH-ADDED	rule	B-17	SUPPORTS	meta/specs/BUILD.md:325	"| `doc` | `event`, `diag`, `scan`, `core`, `nparse` |" -- doc's header
+tip	step0g.patch:460	CONTEXT	rule	B-16	SUPPORTS	meta/specs/BUILD.md:304	"Until dependency roots are populated (§1), every internal import is" -- every import relative until the roots exist
+tip	step0g.patch:460	CONTEXT	open	O-N1	SUPPORTS	meta/OPEN_QUESTIONS.md:48	"### O-N1 — `npkg` cannot build a library, and `[dependencies]` resolves to nothing" -- the dependency roots
+tip	step0g.patch:466	CONTEXT	plan	0.0.1's plan	SUPPORTS	meta/roadmap/0.0/0.0.1.md:150; meta/roadmap/0.0/0.0.1_tools/step1.patch:83	"one placeholder module per directory, and it compiles (P-6)"; "it compiles, so the parse sweep has this directory to sweep, and it is replaced, not deleted." -- the placeholder's header, which 0.0.1's patch wrote
+tip	step0g.patch:466	CONTEXT	document	meta/specs/WRITER_MODEL.md	SUPPORTS	meta/specs/WRITER_MODEL.md:3	"Every format that reads also writes." -- the specification of `emit`
+tip	step0g.patch:469	CONTEXT	rule	B-17	SUPPORTS	meta/specs/BUILD.md, before the patches:304	"| `emit` | `doc`, `event`, `diag`, `scan`, `core` |" -- a removed header, read against the table it was cut from
+tip	step0g.patch:470	PATCH-ADDED	rule	B-17	SUPPORTS	meta/specs/BUILD.md:327	"| `emit` | `doc`, `event`, `diag`, `scan`, `core`, `nparse` |" -- emit's header
+tip	step0g.patch:471	CONTEXT	rule	B-16	SUPPORTS	meta/specs/BUILD.md:304	"Until dependency roots are populated (§1), every internal import is" -- every import relative until the roots exist
+tip	step0g.patch:471	CONTEXT	open	O-N1	SUPPORTS	meta/OPEN_QUESTIONS.md:48	"### O-N1 — `npkg` cannot build a library, and `[dependencies]` resolves to nothing" -- the dependency roots
+tip	step0g.patch:477	CONTEXT	plan	0.0.1's plan	SUPPORTS	meta/roadmap/0.0/0.0.1.md:150; meta/roadmap/0.0/0.0.1_tools/step1.patch:83	"one placeholder module per directory, and it compiles (P-6)"; "it compiles, so the parse sweep has this directory to sweep, and it is replaced, not deleted." -- the placeholder's header, which 0.0.1's patch wrote
+tip	step0g.patch:477	CONTEXT	document	meta/specs/FORMATS.md	SUPPORTS	meta/specs/FORMATS.md:3	"Which formats ship at 1.0, which version of each, which subset" -- the specification of the formats
+tip	step0g.patch:477	CONTEXT	document	PLUGIN_MODEL.md	SUPPORTS	meta/specs/PLUGIN_MODEL.md:10	"**Rule G-1 (PA-070) — a plugin is a `Format` trait implementation." -- the specification of a `Format`
+tip	step0g.patch:480	CONTEXT	rule	B-18	SUPPORTS	meta/specs/BUILD.md:347	"**Rule B-18 — `format` may not import `doc`.**" -- a removed header
+tip	step0g.patch:480	CONTEXT	rule	B-17	SUPPORTS	meta/specs/BUILD.md, before the patches:303	"| `format` | `event`, `diag`, `scan`, `core` — **never `doc`** (B-18) |" -- a removed header, read against the table it was cut from
+tip	step0g.patch:481	PATCH-ADDED	rule	B-18	SUPPORTS	meta/specs/BUILD.md:347	"**Rule B-18 — `format` may not import `doc`.**" -- format's header
+tip	step0g.patch:481	PATCH-ADDED	rule	B-17	SUPPORTS	meta/specs/BUILD.md:326	"| `format` | `event`, `diag`, `scan`, `core`, `nparse` — **never `doc`** (B-18) |" -- format's header
+tip	step0g.patch:482	CONTEXT	rule	B-16	SUPPORTS	meta/specs/BUILD.md:304	"Until dependency roots are populated (§1), every internal import is" -- every import relative until the roots exist
+tip	step0g.patch:482	CONTEXT	open	O-N1	SUPPORTS	meta/OPEN_QUESTIONS.md:48	"### O-N1 — `npkg` cannot build a library, and `[dependencies]` resolves to nothing" -- the dependency roots
+tip	step0g.patch:492	PATCH-ADDED	rule	S-6	SUPPORTS	meta/specs/SAFETY.md:141	"`EParseState` and `EParseEncode` are each declared once, in `nparse/nparse.npk`" -- declared once each
+tip	step0g.patch:492	PATCH-ADDED	rule	B-17	SUPPORTS	meta/specs/BUILD.md:321	"| `nparse` | nothing |" -- imports nothing
+tip	step0g.patch:492	PATCH-ADDED	section	§3	SUPPORTS	meta/specs/SAFETY.md:70	"`nparse` declares exactly two error names, each raised only in the layers S-6 lists" -- the only error names the library declares
+tip	step0g.patch:504	PATCH-ADDED	rule	S-6	SUPPORTS	meta/specs/SAFETY.md:141	"`EParseState` and `EParseEncode` are each declared once, in `nparse/nparse.npk`" -- each declared once, here
+tip	step0g.patch:504	PATCH-ADDED	rule	PD-191	SUPPORTS	meta/DECISIONS.md:1257; meta/roadmap/0.0/0.0.4.md:1646	"### @@PD-191@@ — `EParseState` and `EParseEncode` are each declared once, in `src/nparse/nparse.npk`, which imports nothing; `doc`, every format and the emitters raise them"; "decls: declared, keyed by (module, name): nparse.EParseState (src/nparse/nparse.npk:10), nparse.EParseEncode (src/nparse/nparse.npk:11)" -- each declared once, here
+tip	step0g.patch:504	PATCH-ADDED	rule	PD-142	SUPPORTS	meta/DECISIONS.md:1158; meta/roadmap/0.0/0.0.4.md:189	"owes it as `<module>.<name>`"; "owes the declaring module's, `pc.EParseState`" -- an identity is its declaring module and its name
+tip	step0g.patch:504	PATCH-ADDED	section	§3	SUPPORTS	meta/specs/SAFETY.md:70	"`nparse` declares exactly two error names, each raised only in the layers S-6 lists" -- the library's two error identities
+tip	step0g.patch:506	PATCH-ADDED	rule	S-1	SUPPORTS	meta/specs/SAFETY.md:67	"would mean a bad byte can stop a program.** So it does not." -- no input can cause either
+tip	step0g.patch:508	PATCH-ADDED	rule	B-17	SUPPORTS	meta/specs/BUILD.md:321	"| `nparse` | nothing |" -- MAY IMPORT: nothing
+tip	step1.patch:32	CONTEXT	rule	PD-191	SUPPORTS	meta/DECISIONS.md:1257; meta/roadmap/0.0/0.0.4.md:218	"### @@PD-191@@ — `EParseState` and `EParseEncode` are each declared once, in `src/nparse/nparse.npk`, which imports nothing; `doc`, every format and the emitters raise them"; "`nparse.npk`, `mod:nparse`, declaring the two and importing nothing, compiles" -- PD-191's heading, re-shown
+tip	step1.patch:33	CONTEXT	ruling	ruling	SUPPORTS	management_10's ruling (a), its message of 2026-10-31 05:24 as sent	"RULED (a): one identity per name for the whole library" -- PD-191's first line, re-shown
+tip	step1.patch:34	CONTEXT	rule	PD-142	SUPPORTS	meta/DECISIONS.md:1158; meta/roadmap/0.0/0.0.4.md:189	"owes it as `<module>.<name>`"; "owes the declaring module's, `pc.EParseState`" -- PD-191's second line, re-shown
+tip	step2.patch:5	CONTEXT	section	§1.5	SUPPORTS	meta/roadmap/0.0/0.0.4.md:168	"**The shapes, names and rulings** over what the patches add" -- a hunk line: PD-144's settled text
+tip	step2.patch:48	PATCH-ADDED	rule	PD-191	SUPPORTS	meta/DECISIONS.md:1257; meta/roadmap/0.0/0.0.4.md:1646	"### @@PD-191@@ — `EParseState` and `EParseEncode` are each declared once, in `src/nparse/nparse.npk`, which imports nothing; `doc`, every format and the emitters raise them"; "decls: declared, keyed by (module, name): nparse.EParseState (src/nparse/nparse.npk:10), nparse.EParseEncode (src/nparse/nparse.npk:11)" -- PD-144's note: declared once, not by doc or a format
+tip	step2.patch:49	PATCH-ADDED	rule	B-17	SUPPORTS	meta/specs/BUILD.md:320; meta/specs/BUILD.md:315	"| `core` | nothing |"; "A module imports only the modules its row names" -- core may not import the module
+tip	step2.patch:52	CONTEXT	rule	PD-191	SUPPORTS	meta/DECISIONS.md:1257; meta/roadmap/0.0/0.0.4.md:218	"### @@PD-191@@ — `EParseState` and `EParseEncode` are each declared once, in `src/nparse/nparse.npk`, which imports nothing; `doc`, every format and the emitters raise them"; "`nparse.npk`, `mod:nparse`, declaring the two and importing nothing, compiles" -- PD-191's heading, re-shown
+tip	step2.patch:53	CONTEXT	ruling	ruling	SUPPORTS	management_10's ruling (a), its message of 2026-10-31 05:24 as sent	"RULED (a): one identity per name for the whole library" -- PD-191's first line, re-shown
+tip	step2.patch:54	CONTEXT	rule	PD-142	SUPPORTS	meta/DECISIONS.md:1158; meta/roadmap/0.0/0.0.4.md:189	"owes it as `<module>.<name>`"; "owes the declaring module's, `pc.EParseState`" -- PD-191's second line, re-shown
+tip	step4.patch:18	CONTEXT	section	§1	SUPPORTS	meta/roadmap/0.0/0.0.4.md:240	"— one, the sink, for a thousand renderings" -- a hunk line: PD-144's note
+tip	step4.patch:19	CONTEXT	rule	B-17	SUPPORTS	meta/specs/BUILD.md:320; meta/specs/BUILD.md:315	"| `core` | nothing |"; "A module imports only the modules its row names" -- PD-144's note, re-shown
+tip	step4.patch:39	PATCH-ADDED	rule	PD-191	SUPPORTS	meta/DECISIONS.md:1257; meta/roadmap/0.0/0.0.4.md:1646	"### @@PD-191@@ — `EParseState` and `EParseEncode` are each declared once, in `src/nparse/nparse.npk`, which imports nothing; `doc`, every format and the emitters raise them"; "decls: declared, keyed by (module, name): nparse.EParseState (src/nparse/nparse.npk:10), nparse.EParseEncode (src/nparse/nparse.npk:11)" -- PD-145's note: declared once, not by doc and the formats
+tip	step4.patch:40	PATCH-ADDED	rule	B-17	SUPPORTS	meta/specs/BUILD.md:320; meta/specs/BUILD.md:315	"| `core` | nothing |"; "A module imports only the modules its row names" -- core may not import the module
+tip	step4.patch:43	CONTEXT	rule	PD-191	SUPPORTS	meta/DECISIONS.md:1257; meta/roadmap/0.0/0.0.4.md:218	"### @@PD-191@@ — `EParseState` and `EParseEncode` are each declared once, in `src/nparse/nparse.npk`, which imports nothing; `doc`, every format and the emitters raise them"; "`nparse.npk`, `mod:nparse`, declaring the two and importing nothing, compiles" -- PD-191's heading, re-shown
+tip	step4.patch:44	CONTEXT	ruling	ruling	SUPPORTS	management_10's ruling (a), its message of 2026-10-31 05:24 as sent	"RULED (a): one identity per name for the whole library" -- PD-191's first line, re-shown
+tip	step4.patch:45	CONTEXT	rule	PD-142	SUPPORTS	meta/DECISIONS.md:1158; meta/roadmap/0.0/0.0.4.md:189	"owes it as `<module>.<name>`"; "owes the declaring module's, `pc.EParseState`" -- PD-191's second line, re-shown
+46464ba	step0g.patch:164	CONTEXT	rule	B-17	=	=	=
+46464ba	step0g.patch:165	CONTEXT	rule	B-17	=	=	=
+46464ba	step0g.patch:167	CONTEXT	rule	B-17	=	=	=
+46464ba	step0g.patch:168	PATCH-ADDED	rule	B-17	=	=	=
+46464ba	step0g.patch:170	CONTEXT	rule	B-17	=	=	=
+46464ba	step0g.patch:171	PATCH-ADDED	rule	B-17	=	=	=
+46464ba	step0g.patch:199	CONTEXT	rule	D-069	=	=	=
+46464ba	step0g.patch:200	PATCH-ADDED	rule	PD-191	=	=	=
+46464ba	step0g.patch:201	PATCH-ADDED	rule	PD-142	=	=	=
+46464ba	step0g.patch:206	CONTEXT	rule	PA-009	=	=	=
+46464ba	step0g.patch:210	CONTEXT	rule	S-6	=	=	=
+46464ba	step0g.patch:210	CONTEXT	section	§3	=	=	=
+46464ba	step0g.patch:213	PATCH-ADDED	rule	PD-191	=	=	=
+46464ba	step0g.patch:214	PATCH-ADDED	ruling	ruling	=	=	=
+46464ba	step0g.patch:215	PATCH-ADDED	rule	PD-142	=	=	=
+46464ba	step0g.patch:218	PATCH-ADDED	rule	S-6	=	=	=
+46464ba	step0g.patch:220	PATCH-ADDED	rule	B-16	OVER-REACHES	meta/specs/BUILD.md:307; src/lib.npk:6	"which `pub use`s the public surface"; "IT RE-EXPORTS NOTHING YET" -- T18v's finding 1: "`src/lib.npk`, which holds every module (`BUILD.md` B-16)"; fixed at d1b3f3e
+46464ba	step0g.patch:220	PATCH-ADDED	rule	PA-008	=	=	=
+46464ba	step0g.patch:220	PATCH-ADDED	rule	PA-072	SUPPORTS	meta/DECISIONS.md:603	"*A plugin declares no `error:` of its own.*" -- a format its own identity, against its last paragraph
+46464ba	step0g.patch:221	PATCH-ADDED	rule	G-7	=	=	=
+46464ba	step0g.patch:221	PATCH-ADDED	rule	G-8	=	=	=
+46464ba	step0g.patch:223	PATCH-ADDED	rule	S-6	=	=	=
+46464ba	step0g.patch:223	PATCH-ADDED	rule	B-17	OVER-REACHES	meta/specs/BUILD.md:320	"| `core` | nothing |" -- "`core`'s row stays "nothing", so `core` declares no identity": the row is what core imports, not what it declares; fixed in the commit that wrote this file
+46464ba	step0g.patch:224	PATCH-ADDED	rule	B-18	SUPPORTS	meta/specs/BUILD.md:347	"**Rule B-18 — `format` may not import `doc`.**" -- B-18 unchanged by every patch
+46464ba	step0g.patch:229	PATCH-ADDED	rule	D-275	=	=	=
+46464ba	step0g.patch:239	PATCH-ADDED	rule	PA-001	SUPPORTS	meta/DECISIONS.md:26	"### PA-001 — the library is `nparse`" -- the name is the library's own; the sentence's "and only where" (T18v's finding 6) rests on RESOLVE-010's output (X1), not on this; fixed at d1b3f3e
+46464ba	step0g.patch:240	PATCH-ADDED	rule	G-7	SUPPORTS	meta/specs/PLUGIN_MODEL.md:111	"`EParseState` is `nparse`'s and is the only identity a format may raise" -- the quotation, verbatim; "and only where" (finding 6) is not G-7's
+46464ba	step0g.patch:243	PATCH-ADDED	rule	S-6	SUPPORTS	meta/specs/SAFETY.md:136	"every `nparse/format/*.npk` declare **`EParseState`**" -- as S-6 reads; its uncited "every new format a new arm in every consumer of `src/lib.npk`" was finding 1's twin by subject, fixed at d1b3f3e
+46464ba	step0g.patch:244	PATCH-ADDED	rule	PA-008	=	=	=
+46464ba	step0g.patch:244	PATCH-ADDED	rule	PA-072	=	=	=
+46464ba	step0g.patch:244	PATCH-ADDED	rule	G-7	=	=	=
+46464ba	step0g.patch:245	PATCH-ADDED	rule	G-8	OVER-REACHES	meta/specs/PLUGIN_MODEL.md:158	"nothing in `doc`, `emit` or the harness knows the shipped formats are special" -- the quotation "nothing knows the shipped formats are special" drops G-8's "in `doc`, `emit` or the harness" unmarked; fixed in the commit that wrote this file
+46464ba	step0g.patch:245	PATCH-ADDED	rule	PA-072	OVER-REACHES	meta/DECISIONS.md:599	"nothing in `doc`, `emit` or the harness knows the shipped formats are special" -- the same quotation drops PA-072's "in `doc`, `emit` or the harness" unmarked; fixed in the commit that wrote this file
+46464ba	step0g.patch:247	PATCH-ADDED	rule	B-17	=	=	=
+46464ba	step0g.patch:248	PATCH-ADDED	rule	B-18	=	=	=
+46464ba	step0g.patch:249	PATCH-ADDED	rule	B-19	SUPPORTS	meta/specs/BUILD.md:351	"is still a decomposition mistake" -- a use cycle; its premise "the umbrella, which imports every raiser" was finding 1's twin by subject, fixed at d1b3f3e
+46464ba	step0g.patch:250	PATCH-ADDED	section	§10	=	=	=
+46464ba	step0g.patch:255	PATCH-ADDED	rule	PA-008	=	=	=
+46464ba	step0g.patch:256	PATCH-ADDED	rule	PA-009	=	=	=
+46464ba	step0g.patch:309	PATCH-ADDED	rule	PD-191	=	=	=
+46464ba	step0g.patch:309	PATCH-ADDED	rule	PA-009	=	=	=
+46464ba	step0g.patch:312	PATCH-ADDED	plan	1.0.2's page	=	=	=
+46464ba	step0g.patch:312	PATCH-ADDED	plan	1.0.3's	=	=	=
+46464ba	step0g.patch:315	PATCH-ADDED	rule	G-7	=	=	=
+46464ba	step0g.patch:346	CONTEXT	rule	B-18	=	=	=
+46464ba	step0g.patch:349	PATCH-ADDED	rule	B-18	=	=	=
+46464ba	step0g.patch:355	CONTEXT	document	src/README.md	=	=	=
+46464ba	step0g.patch:358	PATCH-ADDED	rule	PD-191	=	=	=
+46464ba	step0g.patch:360	PATCH-ADDED	rule	B-18	=	=	=
+46464ba	step0g.patch:362	CONTEXT	rule	B-18	=	=	=
+46464ba	step0g.patch:370	CONTEXT	section	§3	=	=	=
+46464ba	step0g.patch:373	PATCH-ADDED	rule	PD-191	=	=	=
+46464ba	step0g.patch:375	PATCH-ADDED	rule	G-6	=	=	=
+46464ba	step0g.patch:375	PATCH-ADDED	rule	G-9	=	=	=
+46464ba	step0g.patch:375	PATCH-ADDED	item	item 3	=	=	=
+46464ba	step0g.patch:378	PATCH-ADDED	rule	PD-142	=	=	=
+46464ba	step0g.patch:387	CONTEXT	rule	PA-009	=	=	=
+46464ba	step0g.patch:391	PATCH-ADDED	rule	PD-191	=	=	=
+46464ba	step0g.patch:391	PATCH-ADDED	rule	PA-009	=	=	=
+46464ba	step0g.patch:392	PATCH-ADDED	rule	PD-142	=	=	=
+46464ba	step0g.patch:395	PATCH-ADDED	rule	PA-009	=	=	=
+46464ba	step0g.patch:396	PATCH-ADDED	rule	S-6	=	=	=
+46464ba	step0g.patch:400	CONTEXT	rule	S-5	=	=	=
+46464ba	step0g.patch:406	PATCH-ADDED	rule	PD-191	=	=	=
+46464ba	step0g.patch:408	PATCH-ADDED	rule	B-17	=	=	=
+46464ba	step0g.patch:409	PATCH-ADDED	rule	PD-142	=	=	=
+46464ba	step0g.patch:413	CONTEXT	rule	S-7	=	=	=
+46464ba	step0g.patch:418	PATCH-ADDED	rule	PD-191	OVER-REACHES	meta/roadmap/0.0/0.0.4.md:200; meta/roadmap/0.0/0.0.4.md:860; src/lib.npk:6	"and one that calls nothing (`c_import`)"; "8 identities: nparse.EParseEncode, nparse.EParseState"; "IT RE-EXPORTS NOTHING YET" -- E2's (b): "a consumer of `src/lib.npk`, which holds every module, owes the union of the lists" (:419) -- no program of PD-191's record measures what src/lib.npk holds; fixed at d1b3f3e
+46464ba	step0g.patch:435	PATCH-ADDED	rule	PD-142	=	=	=
+46464ba	step0g.patch:436	PATCH-ADDED	rule	PD-191	=	=	=
+46464ba	step0g.patch:437	PATCH-ADDED	rule	S-6	=	=	=
+46464ba	step0g.patch:437	PATCH-ADDED	rule	S-7	=	=	=
+46464ba	step0g.patch:437	PATCH-ADDED	section	§3	=	=	=
+46464ba	step0g.patch:439	PATCH-ADDED	rule	PD-142	=	=	=
+46464ba	step0g.patch:439	PATCH-ADDED	rule	PD-191	=	=	=
+46464ba	step0g.patch:455	CONTEXT	plan	0.0.1's plan	=	=	=
+46464ba	step0g.patch:455	CONTEXT	document	meta/specs/VALUE_MODEL.md	=	=	=
+46464ba	step0g.patch:458	CONTEXT	rule	B-17	=	=	=
+46464ba	step0g.patch:459	PATCH-ADDED	rule	B-17	=	=	=
+46464ba	step0g.patch:460	CONTEXT	rule	B-16	=	=	=
+46464ba	step0g.patch:460	CONTEXT	open	O-N1	=	=	=
+46464ba	step0g.patch:466	CONTEXT	plan	0.0.1's plan	=	=	=
+46464ba	step0g.patch:466	CONTEXT	document	meta/specs/WRITER_MODEL.md	=	=	=
+46464ba	step0g.patch:469	CONTEXT	rule	B-17	=	=	=
+46464ba	step0g.patch:470	PATCH-ADDED	rule	B-17	=	=	=
+46464ba	step0g.patch:471	CONTEXT	rule	B-16	=	=	=
+46464ba	step0g.patch:471	CONTEXT	open	O-N1	=	=	=
+46464ba	step0g.patch:477	CONTEXT	plan	0.0.1's plan	=	=	=
+46464ba	step0g.patch:477	CONTEXT	document	meta/specs/FORMATS.md	=	=	=
+46464ba	step0g.patch:477	CONTEXT	document	PLUGIN_MODEL.md	=	=	=
+46464ba	step0g.patch:480	CONTEXT	rule	B-18	=	=	=
+46464ba	step0g.patch:480	CONTEXT	rule	B-17	=	=	=
+46464ba	step0g.patch:481	PATCH-ADDED	rule	B-18	=	=	=
+46464ba	step0g.patch:481	PATCH-ADDED	rule	B-17	=	=	=
+46464ba	step0g.patch:482	CONTEXT	rule	B-16	=	=	=
+46464ba	step0g.patch:482	CONTEXT	open	O-N1	=	=	=
+46464ba	step0g.patch:492	PATCH-ADDED	rule	S-6	=	=	=
+46464ba	step0g.patch:492	PATCH-ADDED	rule	B-17	=	=	=
+46464ba	step0g.patch:492	PATCH-ADDED	section	§3	=	=	=
+46464ba	step0g.patch:504	PATCH-ADDED	rule	S-6	=	=	=
+46464ba	step0g.patch:504	PATCH-ADDED	rule	PD-191	=	=	=
+46464ba	step0g.patch:504	PATCH-ADDED	rule	PD-142	=	=	=
+46464ba	step0g.patch:504	PATCH-ADDED	section	§3	=	=	=
+46464ba	step0g.patch:506	PATCH-ADDED	rule	S-1	=	=	=
+46464ba	step0g.patch:508	PATCH-ADDED	rule	B-17	=	=	=
+46464ba	step1.patch:32	CONTEXT	rule	PD-191	=	=	=
+46464ba	step1.patch:33	CONTEXT	ruling	ruling	=	=	=
+46464ba	step1.patch:34	CONTEXT	rule	PD-142	=	=	=
+46464ba	step2.patch:5	CONTEXT	section	§1.5	=	=	=
+46464ba	step2.patch:48	PATCH-ADDED	rule	PD-191	=	=	=
+46464ba	step2.patch:49	PATCH-ADDED	rule	B-17	=	=	=
+46464ba	step2.patch:52	CONTEXT	rule	PD-191	=	=	=
+46464ba	step2.patch:53	CONTEXT	ruling	ruling	=	=	=
+46464ba	step2.patch:54	CONTEXT	rule	PD-142	=	=	=
+46464ba	step4.patch:18	CONTEXT	section	§1	=	=	=
+46464ba	step4.patch:19	CONTEXT	rule	B-17	=	=	=
+46464ba	step4.patch:39	PATCH-ADDED	rule	PD-191	=	=	=
+46464ba	step4.patch:40	PATCH-ADDED	rule	B-17	=	=	=
+46464ba	step4.patch:43	CONTEXT	rule	PD-191	=	=	=
+46464ba	step4.patch:44	CONTEXT	ruling	ruling	=	=	=
+46464ba	step4.patch:45	CONTEXT	rule	PD-142	=	=	=

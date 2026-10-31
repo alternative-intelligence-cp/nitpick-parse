@@ -190,7 +190,7 @@ index a60f012..2903dd2 100644
    check_layering           every `use` edge between `src/` layers, and every module header's `MAY IMPORT:` line,
                             against `BUILD.md` B-17's table; a name after "never" in a cell or a header is forbidden,
 diff --git a/meta/DECISIONS.md b/meta/DECISIONS.md
-index 6f6ef6d..ad86881 100644
+index 6f6ef6d..8a2ed47 100644
 --- a/meta/DECISIONS.md
 +++ b/meta/DECISIONS.md
 @@ -140,6 +140,11 @@ rule does the work an error identity would only pretend to do.
@@ -221,7 +221,7 @@ index 6f6ef6d..ad86881 100644
 +"exactly" two, PA-072's last paragraph and `PLUGIN_MODEL.md` G-7 and G-8. So the two are declared once, in a module
 +of their own, `mod:nparse` at `src/nparse/nparse.npk`, which declares exactly them and imports nothing; `doc`, every
 +format and the emitters import it and raise them, and declare none (S-6's dated note). B-17's table gains its row,
-+"nothing", and `doc`, `format` and `emit` add it to theirs; `core`'s row stays "nothing", so `core` declares no
++"nothing", and `doc`, `format` and `emit` add it to theirs; `core`'s row stays "nothing", `core` declares no
 +identity, and B-18 is unchanged. Measured, with that pair of implementations raising the one shared identity, the
 +root owes 7 identities, `nparse.EParseState` and the floor's six, as a root holding one implementation does.
 +
@@ -242,7 +242,7 @@ index 6f6ef6d..ad86881 100644
 +
 +*Alternatives declined:* **each declaring module its own identity, as S-6 reads** — every new format a new arm in
 +every consumer that holds it, and PA-008's "exactly" two, PA-072's last paragraph and G-7 each replaced by a
-+decision: the author's call; **a hybrid, the shipped formats their own and plugins a shared one** — G-8's and PA-072's "nothing knows the
++decision: the author's call; **a hybrid, the shipped formats their own and plugins a shared one** — G-8's and PA-072's "nothing … knows the
 +shipped formats are special" amended, the same call; **`core` declares them** — `core` declares no identity, and is
 +the fallback only were a module of their own to break B-17, which it does not (`check_layering` green over the
 +module); **`doc` declares them** — a format may not import `doc` (B-18); **`src/lib.npk` declares them** — every
